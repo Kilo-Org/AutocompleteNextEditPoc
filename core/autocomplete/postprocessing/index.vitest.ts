@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { postprocessCompletion } from "./index";
 
 describe("postprocessCompletion - removeBackticks", () => {
