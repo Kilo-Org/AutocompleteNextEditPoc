@@ -23,8 +23,6 @@ import {
   StatusBarStatus,
 } from "../autocomplete/statusBar";
 import { registerAllCommands } from "../commands";
-import { ContinueConsoleWebviewViewProvider } from "../ContinueConsoleWebviewViewProvider";
-import { ContinueGUIWebviewViewProvider } from "../ContinueGUIWebviewViewProvider";
 import { VerticalDiffManager } from "../diff/vertical/manager";
 import { registerAllCodeLensProviders } from "../lang-server/codeLens";
 import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
@@ -71,8 +69,6 @@ export class VsCodeExtension {
   private extensionContext: vscode.ExtensionContext;
   private ide: VsCodeIde;
   private ideUtils: VsCodeIdeUtils;
-  private consoleView: ContinueConsoleWebviewViewProvider;
-  private sidebar: ContinueGUIWebviewViewProvider;
   private windowId: string;
   private editDecorationManager: EditDecorationManager;
   private verticalDiffManager: VerticalDiffManager;
@@ -245,6 +241,14 @@ export class VsCodeExtension {
       HandlerPriority.NORMAL,
     );
 
+    // Create a minimal stub webviewProtocol for autocomplete (not actually used)
+    const stubWebviewProtocol = {
+      send: () => {},
+      on: () => {},
+      request: () => Promise.resolve(undefined),
+    } as any;
+    resolveWebviewProtocol(stubWebviewProtocol);
+
     // Dependencies of core
     let resolveVerticalDiffManager: any = undefined;
     const verticalDiffManagerPromise = new Promise<VerticalDiffManager>(
@@ -256,22 +260,6 @@ export class VsCodeExtension {
     const configHandlerPromise = new Promise<ConfigHandler>((resolve) => {
       resolveConfigHandler = resolve;
     });
-    this.sidebar = new ContinueGUIWebviewViewProvider(
-      this.windowId,
-      this.extensionContext,
-    );
-
-    // Sidebar
-    context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        "continue.continueGUIView",
-        this.sidebar,
-        {
-          webviewOptions: { retainContextWhenHidden: true },
-        },
-      ),
-    );
-    resolveWebviewProtocol(this.sidebar.webviewProtocol);
 
     const inProcessMessenger = new InProcessMessenger<
       ToCoreProtocol,
@@ -280,7 +268,7 @@ export class VsCodeExtension {
 
     new VsCodeMessenger(
       inProcessMessenger,
-      this.sidebar.webviewProtocol,
+      stubWebviewProtocol,
       this.ide,
       verticalDiffManagerPromise,
       configHandlerPromise,
@@ -297,7 +285,7 @@ export class VsCodeExtension {
     void this.configHandler.loadConfig();
 
     this.verticalDiffManager = new VerticalDiffManager(
-      this.sidebar.webviewProtocol,
+      stubWebviewProtocol,
       this.editDecorationManager,
       this.ide,
     );
@@ -358,7 +346,7 @@ export class VsCodeExtension {
     this.completionProvider = new ContinueCompletionProvider(
       this.configHandler,
       this.ide,
-      this.sidebar.webviewProtocol,
+      stubWebviewProtocol,
       usingFullFileDiff,
     );
     context.subscriptions.push(
@@ -398,33 +386,18 @@ export class VsCodeExtension {
     const quickEdit = new QuickEdit(
       this.verticalDiffManager,
       this.configHandler,
-      this.sidebar.webviewProtocol,
+      stubWebviewProtocol,
       this.ide,
       context,
       this.fileSearch,
     );
 
-    // LLM Log view
-    this.consoleView = new ContinueConsoleWebviewViewProvider(
-      this.windowId,
-      this.extensionContext,
-      this.core.llmLogger,
-    );
-
-    context.subscriptions.push(
-      vscode.window.registerWebviewViewProvider(
-        "continue.continueConsoleView",
-        this.consoleView,
-      ),
-    );
-
-    // Commands
+    // Commands (autocomplete and NextEdit only)
     registerAllCommands(
       context,
       this.ide,
       context,
-      this.sidebar,
-      this.consoleView,
+      stubWebviewProtocol,
       this.configHandler,
       this.verticalDiffManager,
       this.battery,

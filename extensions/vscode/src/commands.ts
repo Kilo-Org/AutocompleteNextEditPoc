@@ -30,8 +30,6 @@ import {
   setupStatusBar,
   StatusBarStatus,
 } from "./autocomplete/statusBar";
-import { ContinueConsoleWebviewViewProvider } from "./ContinueConsoleWebviewViewProvider";
-import { ContinueGUIWebviewViewProvider } from "./ContinueGUIWebviewViewProvider";
 import { processDiff } from "./diff/processDiff";
 import { VerticalDiffManager } from "./diff/vertical/manager";
 import EditDecorationManager from "./quickEdit/EditDecorationManager";
@@ -46,15 +44,6 @@ import { getMetaKeyLabel } from "./util/util";
 import { openEditorAndRevealRange } from "./util/vscode";
 import { VsCodeIde } from "./VsCodeIde";
 
-let fullScreenPanel: vscode.WebviewPanel | undefined;
-
-function getFullScreenTab() {
-  const tabs = vscode.window.tabGroups.all.flatMap((tabGroup) => tabGroup.tabs);
-  return tabs.find((tab) =>
-    (tab.input as any)?.viewType?.endsWith("continue.continueGUIView"),
-  );
-}
-
 type TelemetryCaptureParams = Parameters<typeof Telemetry.capture>;
 
 /**
@@ -65,52 +54,6 @@ function captureCommandTelemetry(
   properties: TelemetryCaptureParams[1] = {},
 ) {
   Telemetry.capture(commandName, { isCommandEvent: true, ...properties });
-}
-
-function focusGUI() {
-  const fullScreenTab = getFullScreenTab();
-  if (fullScreenTab) {
-    // focus fullscreen
-    fullScreenPanel?.reveal();
-  } else {
-    // focus sidebar
-    vscode.commands.executeCommand("continue.continueGUIView.focus");
-    // vscode.commands.executeCommand("workbench.action.focusAuxiliaryBar");
-  }
-}
-
-function hideGUI() {
-  const fullScreenTab = getFullScreenTab();
-  if (fullScreenTab) {
-    // focus fullscreen
-    fullScreenPanel?.dispose();
-  } else {
-    // focus sidebar
-    vscode.commands.executeCommand("workbench.action.closeAuxiliaryBar");
-    // vscode.commands.executeCommand("workbench.action.toggleAuxiliaryBar");
-  }
-}
-
-function waitForSidebarReady(
-  sidebar: ContinueGUIWebviewViewProvider,
-  timeout: number,
-  interval: number,
-): Promise<boolean> {
-  return new Promise((resolve) => {
-    const startTime = Date.now();
-
-    const checkReadyState = () => {
-      if (sidebar.isReady) {
-        resolve(true);
-      } else if (Date.now() - startTime >= timeout) {
-        resolve(false); // Timed out
-      } else {
-        setTimeout(checkReadyState, interval);
-      }
-    };
-
-    checkReadyState();
-  });
 }
 
 // Copy everything over from extension.ts
@@ -924,8 +867,7 @@ export function registerAllCommands(
   context: vscode.ExtensionContext,
   ide: VsCodeIde,
   extensionContext: vscode.ExtensionContext,
-  sidebar: ContinueGUIWebviewViewProvider,
-  consoleView: ContinueConsoleWebviewViewProvider,
+  webviewProtocol: any,
   configHandler: ConfigHandler,
   verticalDiffManager: VerticalDiffManager,
   battery: Battery,
@@ -933,22 +875,35 @@ export function registerAllCommands(
   core: Core,
   editDecorationManager: EditDecorationManager,
 ) {
-  for (const [command, callback] of Object.entries(
-    getCommandsMap(
-      ide,
-      extensionContext,
-      sidebar,
-      consoleView,
-      configHandler,
-      verticalDiffManager,
-      battery,
-      quickEdit,
-      core,
-      editDecorationManager,
-    ),
-  )) {
-    context.subscriptions.push(
-      vscode.commands.registerCommand(command, callback),
-    );
+  const allCommands = getCommandsMap(
+    ide,
+    extensionContext,
+    webviewProtocol,
+    configHandler,
+    verticalDiffManager,
+    battery,
+    quickEdit,
+    core,
+    editDecorationManager,
+  );
+
+  // Keep only autocomplete and NextEdit related commands
+  const autocompleteCommands = [
+    "continue.toggleTabAutocompleteEnabled",
+    "continue.forceAutocomplete",
+    "continue.openTabAutocompleteConfigMenu",
+    "continue.toggleNextEditEnabled",
+    "continue.forceNextEdit",
+    "continue.logAutocompleteOutcome",
+    "continue.logNextEditOutcomeAccept",
+    "continue.logNextEditOutcomeReject",
+  ];
+
+  for (const [command, callback] of Object.entries(allCommands)) {
+    if (autocompleteCommands.includes(command)) {
+      context.subscriptions.push(
+        vscode.commands.registerCommand(command, callback),
+      );
+    }
   }
 }
