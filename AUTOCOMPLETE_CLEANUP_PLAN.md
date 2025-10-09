@@ -30,7 +30,7 @@ For steps requiring analysis or decision-making:
 
 1. **"Review" steps**: Use `search_files` or `grep` commands to analyze dependencies and imports before making decisions
 2. **Manual edits**: Break into smaller substeps when possible, testing after each change
-3. **Uncertain removals**: When unsure if code is needed, search for imports/references before deletion, or try deleting it and running the tests to check whether it's needed.
+3. **Uncertain removals**: When unsure if code is needed, search for imports/references before deletion, or try deleting it and running the tests to check whether it's needed. When an experiment fails, don't forget to revert uncommitted changes and deleted untracked files so the next attempt truly starts from a blank slate.
 4. **Decision criteria**: Each ambiguous step now includes specific commands and decision trees
 5. **Ask for guidance**: If analysis reveals unexpected complexity, try to make an educated choice keeping in mind the goal of retaining only autocomplete+nextedit and all their dependencies. Only create a subtask for human review if you are truly unsure how to proceed.
 
