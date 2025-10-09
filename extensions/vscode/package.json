@@ -51,9 +51,8 @@
     "ai"
   ],
   "activationEvents": [
-    "onUri",
-    "onStartupFinished",
-    "onView:continueGUIView"
+    "onLanguage:*",
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -150,74 +149,6 @@
     },
     "commands": [
       {
-        "command": "continue.applyCodeFromChat",
-        "category": "Continue",
-        "title": "Apply code from chat",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.acceptDiff",
-        "category": "Continue",
-        "title": "Accept Diff",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.rejectDiff",
-        "category": "Continue",
-        "title": "Reject Diff",
-        "group": "Continue",
-        "icon": "$(stop)"
-      },
-      {
-        "command": "continue.acceptVerticalDiffBlock",
-        "category": "Continue",
-        "title": "Accept Vertical Diff Block",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.rejectVerticalDiffBlock",
-        "category": "Continue",
-        "title": "Reject Vertical Diff Block",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.focusEdit",
-        "category": "Continue",
-        "title": "Add to Edit",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.focusContinueInput",
-        "category": "Continue",
-        "title": "Add Highlighted Code to Context and Clear Chat",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.focusContinueInputWithoutClear",
-        "category": "Continue",
-        "title": "Add to Chat",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.debugTerminal",
-        "category": "Continue",
-        "title": "Debug Terminal",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.exitEditMode",
-        "category": "Continue",
-        "title": "Exit Edit Mode",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.openConfigPage",
-        "category": "Continue",
-        "title": "Open Settings",
-        "icon": "$(gear)",
-        "group": "Continue"
-      },
-      {
         "command": "continue.toggleTabAutocompleteEnabled",
         "category": "Continue",
         "title": "Toggle Autocomplete Enabled",
@@ -227,117 +158,6 @@
         "command": "continue.forceAutocomplete",
         "title": "Continue: Force Autocomplete",
         "category": "Continue"
-      },
-      {
-        "command": "continue.selectFilesAsContext",
-        "category": "Continue",
-        "title": "Select Files as Context",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.newSession",
-        "category": "Continue",
-        "title": "New Session",
-        "icon": "$(add)",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.shareSession",
-        "category": "Continue",
-        "title": "Share Current Chat Session as Markdown",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.viewHistory",
-        "category": "Continue",
-        "title": "View History",
-        "icon": "$(history)",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.viewLogs",
-        "category": "Continue",
-        "title": "View History",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.clearConsole",
-        "category": "Continue",
-        "title": "Clear Console",
-        "icon": "$(clear-all)",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.navigateTo",
-        "category": "Continue",
-        "title": "Navigate to a path",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.writeCommentsForCode",
-        "category": "Continue",
-        "title": "Write Comments for this Code",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.writeDocstringForCode",
-        "category": "Continue",
-        "title": "Write a Docstring for this Code",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.fixCode",
-        "category": "Continue",
-        "title": "Fix this Code",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.optimizeCode",
-        "category": "Continue",
-        "title": "Optimize this Code",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.fixGrammar",
-        "category": "Continue",
-        "title": "Fix Grammar / Spelling",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.codebaseForceReIndex",
-        "category": "Continue",
-        "title": "Codebase Force Re-Index",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.rebuildCodebaseIndex",
-        "category": "Continue",
-        "title": "Rebuild codebase index",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.docsIndex",
-        "category": "Continue",
-        "title": "Docs Index",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.docsReIndex",
-        "category": "Continue",
-        "title": "Docs Force Re-Index",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.focusContinueInput",
-        "category": "Continue",
-        "title": "Focus Continue Chat",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.enterEnterpriseLicenseKey",
-        "category": "Continue",
-        "title": "Enter Enterprise License Key",
-        "group": "Continue"
       },
       {
         "command": "continue.toggleNextEditEnabled",
@@ -367,94 +187,9 @@
         "command": "continue.rejectJump",
         "category": "Continue",
         "title": "Continue: Reject Jump Suggestion"
-      },
-      {
-        "command": "continue.generateRule",
-        "category": "Continue",
-        "title": "Generate Rule",
-        "group": "Continue"
-      },
-      {
-        "command": "continue.openInNewWindow",
-        "category": "Continue",
-        "title": "Open in new window",
-        "group": "Continue"
       }
     ],
     "keybindings": [
-      {
-        "command": "continue.focusContinueInput",
-        "mac": "cmd+l",
-        "key": "ctrl+l"
-      },
-      {
-        "command": "continue.focusContinueInputWithoutClear",
-        "mac": "cmd+shift+l",
-        "key": "ctrl+shift+l"
-      },
-      {
-        "command": "continue.acceptDiff",
-        "mac": "shift+cmd+enter",
-        "key": "shift+ctrl+enter",
-        "when": "continue.diffVisible"
-      },
-      {
-        "command": "continue.rejectDiff",
-        "mac": "shift+cmd+backspace",
-        "key": "shift+ctrl+backspace",
-        "when": "continue.diffVisible"
-      },
-      {
-        "command": "continue.rejectDiff",
-        "mac": "cmd+z",
-        "key": "ctrl+z",
-        "when": "continue.diffVisible"
-      },
-      {
-        "command": "continue.quickEditHistoryUp",
-        "mac": "up",
-        "key": "up",
-        "when": "false && continue.quickEditHistoryFocused"
-      },
-      {
-        "command": "continue.quickEditHistoryDown",
-        "mac": "down",
-        "key": "down",
-        "when": "false && continue.quickEditHistoryFocused"
-      },
-      {
-        "command": "continue.acceptVerticalDiffBlock",
-        "mac": "alt+cmd+y",
-        "key": "alt+ctrl+y"
-      },
-      {
-        "command": "continue.rejectVerticalDiffBlock",
-        "mac": "alt+cmd+n",
-        "key": "alt+ctrl+n"
-      },
-      {
-        "command": "continue.focusEdit",
-        "title": "Edit code with natural language",
-        "mac": "cmd+i",
-        "key": "ctrl+i"
-      },
-      {
-        "command": "continue.exitEditMode",
-        "mac": "escape",
-        "key": "escape",
-        "when": "continue.inEditMode && editorFocus"
-      },
-      {
-        "command": "continue.debugTerminal",
-        "mac": "cmd+shift+r",
-        "key": "ctrl+shift+r"
-      },
-      {
-        "command": "continue.openInNewWindow",
-        "mac": "cmd+k cmd+m",
-        "key": "ctrl+k ctrl+m",
-        "when": "!terminalFocus"
-      },
       {
         "command": "continue.toggleTabAutocompleteEnabled",
         "mac": "cmd+k cmd+a",
@@ -466,11 +201,6 @@
         "key": "ctrl+alt+space",
         "mac": "cmd+alt+space",
         "when": "editorTextFocus && !editorHasSelection && !editorReadOnly && !inSnippetMode"
-      },
-      {
-        "command": "continue.applyCodeFromChat",
-        "mac": "alt+a",
-        "key": "alt+a"
       },
       {
         "command": "continue.toggleNextEditEnabled",
@@ -499,144 +229,6 @@
         "when": "editorTextFocus && continue.jumpDecorationVisible"
       }
     ],
-    "submenus": [
-      {
-        "id": "continue.continueSubMenu",
-        "label": "Continue"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "continue.focusContinueInput"
-        },
-        {
-          "command": "continue.focusContinueInputWithoutClear"
-        },
-        {
-          "command": "continue.debugTerminal"
-        },
-        {
-          "command": "continue.newSession"
-        },
-        {
-          "command": "continue.enterEnterpriseLicenseKey"
-        },
-        {
-          "command": "continue.generateRule"
-        },
-        {
-          "command": "continue.openInNewWindow"
-        }
-      ],
-      "editor/context": [
-        {
-          "submenu": "continue.continueSubMenu",
-          "group": "0_acontinue"
-        }
-      ],
-      "editor/title/run": [
-        {
-          "command": "continue.rejectDiff",
-          "group": "Continue",
-          "when": "continue.streamingDiff"
-        }
-      ],
-      "continue.continueSubMenu": [
-        {
-          "command": "continue.focusContinueInputWithoutClear",
-          "group": "Continue"
-        },
-        {
-          "command": "continue.focusEdit",
-          "group": "Continue",
-          "when": "!editorReadonly"
-        }
-      ],
-      "explorer/context": [
-        {
-          "command": "continue.selectFilesAsContext",
-          "group": "1_debug@1"
-        }
-      ],
-      "view/title": [
-        {
-          "command": "continue.newSession",
-          "group": "navigation@1",
-          "when": "view == continue.continueGUIView"
-        },
-        {
-          "command": "continue.viewHistory",
-          "group": "navigation@2",
-          "when": "view == continue.continueGUIView"
-        },
-        {
-          "command": "continue.openConfigPage",
-          "group": "navigation@4",
-          "when": "view == continue.continueGUIView"
-        },
-        {
-          "command": "continue.clearConsole",
-          "group": "navigation@1",
-          "when": "view == continue.continueConsoleView"
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "continue.newSession",
-          "group": "navigation@1",
-          "when": "activeWebviewPanelId == continue.continueGUIView"
-        },
-        {
-          "command": "continue.viewHistory",
-          "group": "navigation@2",
-          "when": "activeWebviewPanelId == continue.continueGUIView"
-        }
-      ],
-      "terminal/context": [
-        {
-          "command": "continue.debugTerminal",
-          "group": "navigation@top"
-        }
-      ]
-    },
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "continue",
-          "title": "Continue",
-          "icon": "media/sidebar-icon.png"
-        }
-      ],
-      "panel": [
-        {
-          "id": "continueConsole",
-          "title": "Continue Console",
-          "icon": "$(window)"
-        }
-      ]
-    },
-    "views": {
-      "continue": [
-        {
-          "type": "webview",
-          "id": "continue.continueGUIView",
-          "name": "Continue",
-          "icon": "media/sidebar-icon.png",
-          "visibility": "visible"
-        }
-      ],
-      "continueConsole": [
-        {
-          "type": "webview",
-          "id": "continue.continueConsoleView",
-          "name": "Continue Console",
-          "icon": "$(window)",
-          "visibility": "visible",
-          "when": "config.continue.enableConsole"
-        }
-      ]
-    },
     "jsonValidation": [
       {
         "fileMatch": "**/.continue*/config.json",
