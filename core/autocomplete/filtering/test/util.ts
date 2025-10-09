@@ -68,6 +68,7 @@ export async function testAutocompleteFiltering(
   const result = await completionProvider.provideInlineCompletionItems(
     autocompleteInput,
     undefined,
+    true, // force=true to skip debounce in tests
   );
 
   // Ensure that we return the text that is wanted to be displayed

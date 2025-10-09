@@ -30,10 +30,6 @@ describe("Autocomplete filtering tests", () => {
     tearDownTestDir();
   });
 
-  beforeEach(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  });
-
   describe("Should return unmodified LLM output", () => {
     it.each(filterTestCases(TEST_CASES_WITHOUT_DIFF))(
       "$description",
