@@ -1,5 +1,5 @@
 import { fetchwithRequestOptions } from "@continuedev/fetch";
-import * as URI from "uri-js";
+import { equal as URI_equal } from "uri-js";
 import { v4 as uuidv4 } from "uuid";
 
 import { CompletionProvider } from "./autocomplete/CompletionProvider";
@@ -1286,7 +1286,7 @@ export class Core {
       const currentProfileUri =
         this.configHandler.currentProfile?.profileDescription.uri ?? "";
       for (const uri of data.uris) {
-        if (URI.equal(uri, currentProfileUri)) {
+        if (URI_equal(uri, currentProfileUri)) {
           // Trigger a toast notification to provide UI feedback that config has been updated
           const showToast =
             this.globalContext.get("showConfigUpdateToast") ?? true;

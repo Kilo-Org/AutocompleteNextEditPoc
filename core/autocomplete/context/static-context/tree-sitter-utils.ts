@@ -3,7 +3,7 @@ import Parser from "web-tree-sitter";
 import { getFullLanguageName, getQueryForFile } from "../../../util/treeSitter";
 import { getAst } from "../../util/ast";
 
-export interface TypeDeclarationResult {
+interface TypeDeclarationResult {
   name: string;
   fullText: string;
   startLine: number;
