@@ -63,7 +63,7 @@ import { localPathToUri } from "../util/pathToUri";
 
 // Chat feature imports - removed for autocomplete-only build
 // import { loadJsonMcpConfigs } from "../context/mcp/json/loadJsonMcpConfigs";
-import CustomContextProviderClass from "../context/providers/CustomContextProvider";
+import CustomContextProviderClass from "./CustomContextProvider";
 import { PolicySingleton } from "../control-plane/PolicySingleton";
 // Chat feature imports - removed for autocomplete-only build
 // import { getBaseToolDefinitions, serializeTool } from "../tools";
