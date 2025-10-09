@@ -16,6 +16,7 @@ export const MODEL_WINDOW_SIZES: Record<
 };
 
 export const UNIQUE_TOKEN = "<|!@#IS_NEXT_EDIT!@#|>";
+export const APPLY_UNIQUE_TOKEN = "<|!@#IS_APPLY!@#|>";
 
 // Model 1-specific tokens.
 export const INSTINCT_USER_CURSOR_IS_HERE_TOKEN = "<|user_cursor_is_here|>";

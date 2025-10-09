@@ -5,7 +5,7 @@ import type {
   CustomContextProvider,
   IContextProvider,
   LoadSubmenuItemsArgs,
-} from "../../";
+} from "../";
 
 class CustomContextProviderClass implements IContextProvider {
   constructor(private custom: CustomContextProvider) {}
