@@ -23,11 +23,8 @@ import {
   StatusBarStatus,
 } from "../autocomplete/statusBar";
 import { registerAllCommands } from "../commands";
-import { VerticalDiffManager } from "../diff/vertical/manager";
 import { registerAllCodeLensProviders } from "../lang-server/codeLens";
 import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
-import EditDecorationManager from "../quickEdit/EditDecorationManager";
-import { QuickEdit } from "../quickEdit/QuickEditQuickPick";
 import { setupRemoteConfigSync } from "../stubs/activation";
 import { UriEventHandler } from "../stubs/uriHandler";
 import {
@@ -70,8 +67,6 @@ export class VsCodeExtension {
   private ide: VsCodeIde;
   private ideUtils: VsCodeIdeUtils;
   private windowId: string;
-  private editDecorationManager: EditDecorationManager;
-  private verticalDiffManager: VerticalDiffManager;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
   private battery: Battery;
@@ -177,8 +172,6 @@ export class VsCodeExtension {
     void this.workOsAuthProvider.refreshSessions();
     context.subscriptions.push(this.workOsAuthProvider);
 
-    this.editDecorationManager = new EditDecorationManager(context);
-
     let resolveWebviewProtocol: any = undefined;
     this.webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>(
       (resolve) => {
@@ -250,12 +243,6 @@ export class VsCodeExtension {
     resolveWebviewProtocol(stubWebviewProtocol);
 
     // Dependencies of core
-    let resolveVerticalDiffManager: any = undefined;
-    const verticalDiffManagerPromise = new Promise<VerticalDiffManager>(
-      (resolve) => {
-        resolveVerticalDiffManager = resolve;
-      },
-    );
     let resolveConfigHandler: any = undefined;
     const configHandlerPromise = new Promise<ConfigHandler>((resolve) => {
       resolveConfigHandler = resolve;
@@ -270,10 +257,8 @@ export class VsCodeExtension {
       inProcessMessenger,
       stubWebviewProtocol,
       this.ide,
-      verticalDiffManagerPromise,
       configHandlerPromise,
       this.workOsAuthProvider,
-      this.editDecorationManager,
       context,
       this,
     );
@@ -283,13 +268,6 @@ export class VsCodeExtension {
     resolveConfigHandler?.(this.configHandler);
 
     void this.configHandler.loadConfig();
-
-    this.verticalDiffManager = new VerticalDiffManager(
-      stubWebviewProtocol,
-      this.editDecorationManager,
-      this.ide,
-    );
-    resolveVerticalDiffManager?.(this.verticalDiffManager);
 
     void setupRemoteConfigSync(() =>
       this.configHandler.reloadConfig.bind(this.configHandler)(
@@ -302,14 +280,7 @@ export class VsCodeExtension {
       this.completionProvider.updateUsingFullFileDiff(shouldUseFullFileDiff);
       selectionManager.updateUsingFullFileDiff(shouldUseFullFileDiff);
 
-      const { verticalDiffCodeLens } = registerAllCodeLensProviders(
-        context,
-        this.verticalDiffManager.fileUriToCodeLens,
-        config,
-      );
-
-      this.verticalDiffManager.refreshCodeLens =
-        verticalDiffCodeLens.refresh.bind(verticalDiffCodeLens);
+      registerAllCodeLensProviders(context, config);
     });
 
     this.configHandler.onConfigUpdate(
@@ -326,11 +297,7 @@ export class VsCodeExtension {
         } else if (newConfig) {
           setupStatusBar(undefined, undefined, false);
 
-          registerAllCodeLensProviders(
-            context,
-            this.verticalDiffManager.fileUriToCodeLens,
-            newConfig,
-          );
+          registerAllCodeLensProviders(context, newConfig);
         }
       },
     );
@@ -383,15 +350,6 @@ export class VsCodeExtension {
       this.ide,
     );
 
-    const quickEdit = new QuickEdit(
-      this.verticalDiffManager,
-      this.configHandler,
-      stubWebviewProtocol,
-      this.ide,
-      context,
-      this.fileSearch,
-    );
-
     // Commands (autocomplete and NextEdit only)
     registerAllCommands(
       context,
@@ -399,11 +357,8 @@ export class VsCodeExtension {
       context,
       stubWebviewProtocol,
       this.configHandler,
-      this.verticalDiffManager,
       this.battery,
-      quickEdit,
       this.core,
-      this.editDecorationManager,
     );
 
     // Disabled due to performance issues
