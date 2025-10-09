@@ -3,7 +3,10 @@ import {
   markdownToRule,
 } from "@continuedev/config-yaml";
 import { IDE, RuleWithSource } from "../..";
-import { PROMPTS_DIR_NAME, RULES_DIR_NAME } from "../../promptFiles";
+// Chat feature import removed - constants defined locally
+// import { PROMPTS_DIR_NAME, RULES_DIR_NAME } from "../../promptFiles";
+const PROMPTS_DIR_NAME = "prompts";
+const RULES_DIR_NAME = "rules";
 import { joinPathsToUri } from "../../util/uri";
 import { getAllDotContinueDefinitionFiles } from "../loadLocalAssistants";
 

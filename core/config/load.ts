@@ -33,17 +33,19 @@ import {
   SerializedContinueConfig,
   SlashCommandWithSource,
 } from "..";
-import { getLegacyBuiltInSlashCommandFromDescription } from "../commands/slash/built-in-legacy";
-import { convertCustomCommandToSlashCommand } from "../commands/slash/customSlashCommand";
-import { slashCommandFromPromptFile } from "../commands/slash/promptFileSlashCommand";
-import { MCPManagerSingleton } from "../context/mcp/MCPManagerSingleton";
+// Chat feature imports - removed for autocomplete-only build
+// import { getLegacyBuiltInSlashCommandFromDescription } from "../commands/slash/built-in-legacy";
+// import { convertCustomCommandToSlashCommand } from "../commands/slash/customSlashCommand";
+// import { slashCommandFromPromptFile } from "../commands/slash/promptFileSlashCommand";
+// import { MCPManagerSingleton } from "../context/mcp/MCPManagerSingleton";
 import { useHub } from "../control-plane/env";
 import { BaseLLM } from "../llm";
 import { LLMClasses, llmFromDescription } from "../llm/llms";
 import CustomLLMClass from "../llm/llms/CustomLLM";
 import { LLMReranker } from "../llm/llms/llm";
 import TransformersJsEmbeddingsProvider from "../llm/llms/TransformersJsEmbeddingsProvider";
-import { getAllPromptFiles } from "../promptFiles/getPromptFiles";
+// Chat feature imports - removed for autocomplete-only build
+// import { getAllPromptFiles } from "../promptFiles/getPromptFiles";
 import { copyOf } from "../util";
 import { GlobalContext } from "../util/GlobalContext";
 import mergeJson from "../util/merge";
@@ -59,10 +61,12 @@ import {
 } from "../util/paths";
 import { localPathToUri } from "../util/pathToUri";
 
-import { loadJsonMcpConfigs } from "../context/mcp/json/loadJsonMcpConfigs";
+// Chat feature imports - removed for autocomplete-only build
+// import { loadJsonMcpConfigs } from "../context/mcp/json/loadJsonMcpConfigs";
 import CustomContextProviderClass from "../context/providers/CustomContextProvider";
 import { PolicySingleton } from "../control-plane/PolicySingleton";
-import { getBaseToolDefinitions, serializeTool } from "../tools";
+// Chat feature imports - removed for autocomplete-only build
+// import { getBaseToolDefinitions, serializeTool } from "../tools";
 import { resolveRelativePathInDir } from "../util/ideUtils";
 import { getWorkspaceRcConfigs } from "./json/loadRcConfigs";
 import { loadConfigContextProviders } from "./loadContextProviders";
@@ -173,32 +177,33 @@ async function serializedToIntermediateConfig(
   initial: SerializedContinueConfig,
   ide: IDE,
 ): Promise<Config> {
+  // Chat-only features - skipped for autocomplete-only build
   // DEPRECATED - load custom slash commands
   const slashCommands: SlashCommandWithSource[] = [];
-  for (const command of initial.slashCommands || []) {
-    const newCommand = getLegacyBuiltInSlashCommandFromDescription(command);
-    if (newCommand) {
-      slashCommands.push(newCommand);
-    }
-  }
-  for (const command of initial.customCommands || []) {
-    slashCommands.push(convertCustomCommandToSlashCommand(command));
-  }
+  // for (const command of initial.slashCommands || []) {
+  //   const newCommand = getLegacyBuiltInSlashCommandFromDescription(command);
+  //   if (newCommand) {
+  //     slashCommands.push(newCommand);
+  //   }
+  // }
+  // for (const command of initial.customCommands || []) {
+  //   slashCommands.push(convertCustomCommandToSlashCommand(command));
+  // }
 
   // DEPRECATED - load slash commands from v1 prompt files
   // NOTE: still checking the v1 default .prompts folder for slash commands
-  const promptFiles = await getAllPromptFiles(
-    ide,
-    initial.experimental?.promptPath,
-    true,
-  );
+  // const promptFiles = await getAllPromptFiles(
+  //   ide,
+  //   initial.experimental?.promptPath,
+  //   true,
+  // );
 
-  for (const file of promptFiles) {
-    const slashCommand = slashCommandFromPromptFile(file.path, file.content);
-    if (slashCommand) {
-      slashCommands.push(slashCommand);
-    }
-  }
+  // for (const file of promptFiles) {
+  //   const slashCommand = slashCommandFromPromptFile(file.path, file.content);
+  //   if (slashCommand) {
+  //     slashCommands.push(slashCommand);
+  //   }
+  // }
 
   const config: Config = {
     ...initial,
@@ -504,7 +509,7 @@ async function intermediateToFinalConfig({
   const continueConfig: ContinueConfig = {
     ...config,
     contextProviders,
-    tools: getBaseToolDefinitions(),
+    tools: [], // Chat-only feature - empty for autocomplete
     mcpServerStatuses: [],
     slashCommands: [],
     modelsByRole: {
@@ -672,7 +677,7 @@ async function finalToBrowserConfig(
     experimental: final.experimental,
     rules: final.rules,
     docs: final.docs,
-    tools: final.tools.map(serializeTool),
+    tools: [], // Chat-only feature - empty for autocomplete
     mcpServerStatuses: final.mcpServerStatuses,
     tabAutocompleteOptions: final.tabAutocompleteOptions,
     usePlatform: await useHub(ide.getIdeSettings()),
