@@ -24,6 +24,16 @@ IMPORTANT(2): After each step in which tests pass, perform a git commit with a c
 
 Use many small steps; where it's reasonable, use multiple steps (i.e. subtasks) per phase. If something goes wrong, it's much easier to recover a small failing step than understand what's problematic in a larger failing step.
 
+### 📝 Orchestrator Execution Guidance
+
+For steps requiring analysis or decision-making:
+
+1. **"Review" steps**: Use `search_files` or `grep` commands to analyze dependencies and imports before making decisions
+2. **Manual edits**: Break into smaller substeps when possible, testing after each change
+3. **Uncertain removals**: When unsure if code is needed, search for imports/references before deletion, or try deleting it and running the tests to check whether it's needed.
+4. **Decision criteria**: Each ambiguous step now includes specific commands and decision trees
+5. **Ask for guidance**: If analysis reveals unexpected complexity, try to make an educated choice keeping in mind the goal of retaining only autocomplete+nextedit and all their dependencies. Only create a subtask for human review if you are truly unsure how to proceed.
+
 ---
 
 ## Phase 1: Remove Top-Level Non-Autocomplete Directories
@@ -82,9 +92,7 @@ rm -rf media_backup
 
 **Goal**: Remove non-autocomplete features from core/ while keeping dependencies
 
-### Step 2.1: Identify Core Dependencies
-
-Autocomplete (`core/autocomplete/`) and NextEdit (`core/nextEdit/`) import from:
+**Known Dependencies**: Autocomplete and NextEdit import from:
 
 - `core/config/` - ConfigHandler (KEEP)
 - `core/llm/` - LLM interfaces and implementations (KEEP)
@@ -96,7 +104,7 @@ Autocomplete (`core/autocomplete/`) and NextEdit (`core/nextEdit/`) import from:
 - `core/test/` - test fixtures (KEEP)
 - `core/nextEdit/` - NextEdit feature (KEEP - has test coverage)
 
-### Step 2.2: Remove Core Feature Directories
+### Step 2.1: Remove Core Feature Directories
 
 ```bash
 git rm -rf core/commands/
@@ -112,22 +120,24 @@ git rm -rf core/tools/
 
 **Commit**: "Remove non-autocomplete core features (keeping NextEdit)"
 
-### Step 2.3: Clean Up Core Protocol
+### Step 2.2: Analyze and Clean Up Core Protocol
 
-Review `core/protocol/` to see if any types are needed by autocomplete.
-If only `core/protocol/core.ts` types are needed for autocomplete, keep it.
-Otherwise, extract needed types to autocomplete and remove.
-
-**Action**: Review imports, extract if needed, then:
+**Action**: Search for protocol imports in autocomplete code:
 
 ```bash
-# If not needed:
-git rm -rf core/protocol/
+grep -r "from.*protocol" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
 ```
 
-**Commit**: "Remove protocol definitions (or extract needed types)"
+**Decision**:
 
-### Step 2.4: Clean Up Core Root Files
+- If NO imports found → Remove directory: `git rm -rf core/protocol/`
+- If imports found → Document what's needed, then either:
+  - Keep only required files, or
+  - Extract types to `core/autocomplete/types.ts` and remove directory
+
+**Commit**: "Remove or consolidate protocol definitions"
+
+### Step 2.3: Remove Core Root Orchestrator
 
 Remove `core/core.ts` - this is the main orchestrator that autocomplete doesn't need directly.
 Autocomplete uses `CompletionProvider` directly.
@@ -138,16 +148,40 @@ git rm core/core.ts
 
 **Commit**: "Remove core orchestrator (not needed for autocomplete)"
 
-### Step 2.5: Update core/package.json Dependencies
+### Step 2.4: Clean Up core/package.json Dependencies
 
-Remove dependencies not needed by autocomplete:
+**Action**: Review and remove unused dependencies in substeps:
 
-- Remove MCP-related packages
-- Remove browser/GUI packages (puppeteer, jsdom, etc.)
-- Remove Sentry if not used in autocomplete
-- Keep: LLM providers, tree-sitter, core utilities
+#### 2.4a: Remove MCP-related packages
 
-**Action**: Manual edit of `core/package.json`
+Search for MCP usage:
+
+```bash
+grep -r "@modelcontextprotocol" core/autocomplete/ core/nextEdit/
+```
+
+If not found, remove from `core/package.json`: `@modelcontextprotocol/*` packages
+
+#### 2.4b: Remove browser/GUI packages
+
+Remove if present: `puppeteer`, `jsdom`, `playwright`, `electron-*`
+
+#### 2.4c: Remove Sentry and analytics
+
+Search for usage:
+
+```bash
+grep -r "@sentry" core/autocomplete/ core/nextEdit/
+```
+
+If not found, remove: `@sentry/*` packages
+
+#### 2.4d: Keep essential packages
+
+- LLM providers (openai, anthropic, etc.)
+- tree-sitter packages
+- Core utilities (handlebars, zod, etc.)
+
 **Commit**: "Clean up core dependencies for autocomplete+nextEdit-only"
 
 **Verification**: Run `./test-autocomplete.sh` after each commit
@@ -158,16 +192,14 @@ Remove dependencies not needed by autocomplete:
 
 **Goal**: Keep only autocomplete features in the VSCode extension
 
-### Step 3.1: Identify Extension Dependencies
-
-VSCode autocomplete needs:
+**Known Dependencies**: VSCode autocomplete needs:
 
 - `extensions/vscode/src/autocomplete/` - autocomplete implementation (KEEP)
 - `extensions/vscode/src/extension.ts` - entry point (MODIFY)
 - `extensions/vscode/src/VsCodeIde.ts` - IDE interface (KEEP parts)
-- Some utilities in `extensions/vscode/src/util/` (REVIEW)
+- Some utilities in `extensions/vscode/src/util/` (REVIEW later)
 
-### Step 3.2: Remove Non-Autocomplete Extension Features
+### Step 3.1: Remove Non-Autocomplete Extension Features
 
 ```bash
 git rm -rf extensions/vscode/src/apply/
@@ -184,52 +216,83 @@ git rm extensions/vscode/src/ContinueConsoleWebviewViewProvider.ts
 
 **Commit**: "Remove non-autocomplete VSCode extension features"
 
-### Step 3.3: Update extension.ts
+### Step 3.2: Update extension.ts Entry Point
 
-Modify `extensions/vscode/src/extension.ts` to:
+**Action**: Edit `extensions/vscode/src/extension.ts` in substeps:
 
-- Remove GUI webview initialization
-- Remove command registrations except autocomplete-related
-- Keep only autocomplete activation
-- Remove console webview
+#### 3.2a: Remove GUI webview initialization
 
-**Action**: Manual edit
+Search for and remove: `ContinueGUIWebviewViewProvider` initialization
+
+#### 3.2b: Remove non-autocomplete command registrations
+
+Keep only: autocomplete/NextEdit commands
+Remove: GUI, chat, and other command registrations
+
+#### 3.2c: Remove console webview
+
+Search for and remove: `ContinueConsoleWebviewViewProvider` initialization
+
 **Commit**: "Update extension.ts for autocomplete+nextEdit-only"
 
-### Step 3.4: Update package.json Commands
+### Step 3.3: Update package.json Commands
 
-Edit `extensions/vscode/package.json`:
+**Action**: Edit `extensions/vscode/package.json` in substeps:
 
-- Remove non-autocomplete commands
-- Keep autocomplete and NextEdit commands:
-  - `continue.toggleTabAutocompleteEnabled`
-  - `continue.forceAutocomplete`
-  - `continue.toggleNextEditEnabled`
-  - `continue.forceNextEdit`
-  - `continue.nextEditWindow.*` commands
-- Remove GUI views
-- Remove keybindings for removed commands (except autocomplete/NextEdit)
-- Clean up activation events
+#### 3.3a: Remove non-autocomplete commands
 
-**Action**: Manual edit
+Keep ONLY these commands:
+
+- `continue.toggleTabAutocompleteEnabled`
+- `continue.forceAutocomplete`
+- `continue.toggleNextEditEnabled`
+- `continue.forceNextEdit`
+- `continue.nextEditWindow.*` commands
+
+Remove all other `continue.*` commands
+
+#### 3.3b: Remove GUI views
+
+Remove `contributes.views` and `contributes.viewsContainers` sections
+
+#### 3.3c: Remove non-autocomplete keybindings
+
+Keep only keybindings for commands listed in 3.3a
+
+#### 3.3d: Clean up activation events
+
+Keep only: `onLanguage:*` and autocomplete-related events
+
 **Commit**: "Update VSCode package.json for autocomplete+nextEdit-only"
 
-### Step 3.5: Update extension/VsCodeExtension.ts
+### Step 3.4: Check and Update VsCodeExtension.ts (if exists)
 
-If this file exists and orchestrates features, update it to only handle autocomplete.
+**Action**: Check if file exists:
 
-**Action**: Review and modify
-**Commit**: "Update VsCodeExtension for autocomplete+nextEdit-only"
+```bash
+ls -la extensions/vscode/src/VsCodeExtension.ts
+```
 
-### Step 3.6: Clean Extension Scripts
+If exists: Review and remove non-autocomplete feature orchestration
+If not exists: Skip this step
 
-Review `extensions/vscode/scripts/`:
+**Commit** (if modified): "Update VsCodeExtension for autocomplete+nextEdit-only"
 
-- Keep build scripts (esbuild.js, prepackage.js, package.js)
-- Remove e2e test scripts if they test non-autocomplete features
+### Step 3.5: Review Extension Scripts
 
-**Action**: Manual review and removal
-**Commit**: "Clean up extension scripts"
+**Action**: List and analyze scripts:
+
+```bash
+ls -la extensions/vscode/scripts/
+```
+
+**Decision**:
+
+- Keep: Build scripts (`esbuild.js`, `prepackage.js`, `package.js`)
+- Review: Test scripts - remove if they test non-autocomplete features
+- Check each file's imports and purpose before removal
+
+**Commit** (if changes made): "Clean up extension scripts"
 
 **Verification**: Run `./test-autocomplete.sh`
 
@@ -239,34 +302,56 @@ Review `extensions/vscode/scripts/`:
 
 **Goal**: Keep only packages needed by autocomplete
 
-### Step 4.1: Identify Required Packages
-
-Review `packages/` and dependencies:
+**Package Analysis**:
 
 - `packages/llm-info/` - LIKELY KEEP (LLM information)
-- `packages/config-yaml/` - REVIEW (config parsing)
-- `packages/fetch/` - REVIEW (HTTP utilities)
-- `packages/openai-adapters/` - REVIEW (OpenAI adapters)
+- `packages/config-yaml/` - LIKELY KEEP (config parsing)
+- `packages/fetch/` - LIKELY KEEP (HTTP utilities)
+- `packages/openai-adapters/` - LIKELY KEEP (OpenAI adapters)
 - `packages/terminal-security/` - REMOVE (terminal only)
 - `packages/continue-sdk/` - REVIEW (SDK)
 - `packages/hub/` - REMOVE (hub integration)
 
-### Step 4.2: Remove Unnecessary Packages
+### Step 4.1: Analyze Package Dependencies
+
+**Action**: For each REVIEW package, search for imports:
 
 ```bash
+# Check terminal-security usage
+grep -r "terminal-security" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
+
+# Check continue-sdk usage
+grep -r "continue-sdk" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
+
+# Check hub usage
+grep -r "@continuedev/hub" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
+```
+
+**Decision**: Document which packages are actually imported
+
+### Step 4.2: Remove Confirmed Unnecessary Packages
+
+Based on Step 4.1 analysis, remove packages with no autocomplete/NextEdit imports:
+
+```bash
+# Confirmed removals:
 git rm -rf packages/terminal-security/
 git rm -rf packages/hub/
-# Add others as identified
+
+# Add others based on grep results:
+# git rm -rf packages/continue-sdk/  # if no imports found
 ```
 
 **Commit**: "Remove non-autocomplete packages"
 
 ### Step 4.3: Update Package References
 
-Update `core/package.json` to remove references to deleted packages.
+**Action**: Remove deleted package references from `core/package.json` and root `package.json`:
 
-**Action**: Manual edit
-**Commit**: "Update package references"
+- Remove from `dependencies` or `devDependencies`
+- Remove from workspace references if using npm workspaces
+
+**Commit**: "Update package references after removal"
 
 **Verification**: Run `./test-autocomplete.sh`
 
@@ -290,22 +375,36 @@ Edit `package.json`:
 
 ### Step 5.2: Update VSCode Build Scripts
 
-Review `extensions/vscode/scripts/esbuild.js`:
+**Action**: Search for GUI references in build scripts:
 
-- Ensure it doesn't reference GUI
-- Remove GUI bundling
+```bash
+grep -i "gui" extensions/vscode/scripts/esbuild.js
+grep -i "webview" extensions/vscode/scripts/esbuild.js
+```
 
-**Action**: Manual review and edit
-**Commit**: "Update VSCode build scripts"
+**Decision**:
 
-### Step 5.3: Clean Up Git Hooks
+- If GUI references found → Remove those build steps
+- If no references → Skip this step
 
-Review `.husky/` pre-commit hooks:
+**Commit** (if modified): "Update VSCode build scripts"
 
-- Ensure they still work with reduced codebase
+### Step 5.3: Review Git Hooks
 
-**Action**: Review
-**Commit**: "Update git hooks if needed"
+**Action**: List and check hooks:
+
+```bash
+ls -la .husky/
+cat .husky/pre-commit
+```
+
+**Decision**:
+
+- If hooks reference removed directories (gui/, docs/) → Update paths
+- If hooks run linting/tests on all packages → Verify still works
+- Test hook by running: `.husky/pre-commit`
+
+**Commit** (if modified): "Update git hooks for reduced codebase"
 
 **Verification**: Run `./test-autocomplete.sh`
 
@@ -315,39 +414,67 @@ Review `.husky/` pre-commit hooks:
 
 **Goal**: Remove remaining cruft and verify everything works
 
-### Step 6.1: Remove Unused Utilities
+### Step 6.1: Analyze and Remove Unused Utilities
 
-Scan `core/util/` and `core/utils/` for files not imported by autocomplete:
+**Action**: Search for utility file imports:
 
 ```bash
-# This requires careful analysis of imports
-# Create a script or manually check
+# List all utility files
+find core/util/ core/utils/ -type f -name "*.ts" -o -name "*.js"
+
+# For each file, check if it's imported by autocomplete/NextEdit
+# Example for a specific file:
+grep -r "from.*util/filename" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
 ```
 
-**Action**: Analyze imports, remove unused
-**Commit**: "Remove unused utilities"
+**Decision**:
 
-### Step 6.2: Clean Up Indexing Code
+- Use `ts-prune` for automated analysis: `cd core && npx ts-prune | grep util`
+- Remove files with no imports from autocomplete/NextEdit
+- Keep commonly-used utilities (treeSitter, etc.)
 
-Review `core/indexing/` - keep only what's needed:
+**Commit**: "Remove unused utility files"
 
-- Keep: `ignore.js` (isSecurityConcern)
-- Keep: `refreshIndex.js` (for autocomplete cache)
-- Remove: Other indexing features if not used
+### Step 6.2: Analyze and Clean Up Indexing Code
 
-**Action**: Review and remove
+**Action**: Search for indexing imports:
+
+```bash
+grep -r "from.*indexing" core/autocomplete/ core/nextEdit/ extensions/vscode/src/autocomplete/
+```
+
+**Known needed**:
+
+- `ignore.js` (isSecurityConcern)
+- Files imported by grep results
+
+**Decision**:
+
+- Keep files found in grep
+- Remove other indexing files not used
+
 **Commit**: "Clean up indexing code"
 
-### Step 6.3: Clean Up LLM Directory
+### Step 6.3: Analyze and Clean Up LLM Directory
 
-Review `core/llm/`:
+**Action**: This directory is critical - be conservative:
 
-- Keep: LLM interfaces, provider implementations
-- Keep: Token counting utilities
-- Remove: Test mocks not used by autocomplete tests
+```bash
+# List all LLM files
+find core/llm/ -type f -name "*.ts"
 
-**Action**: Review carefully
-**Commit**: "Clean up LLM directory"
+# Search for test mocks
+find core/llm/ -name "*mock*" -o -name "*test*"
+```
+
+**Decision**:
+
+- Keep ALL provider implementations
+- Keep ALL interfaces and base classes
+- Remove ONLY test mocks not used by `./test-autocomplete.sh`
+- When in doubt, KEEP the file
+
+**Commit**: "Remove unused LLM test mocks"
 
 ### Step 6.4: Update .gitignore and .continueignore
 
@@ -364,17 +491,23 @@ Update ignore files to reflect new structure.
 
 If passing, proceed. If failing, debug and fix.
 
-### Step 6.6: Check for Dead Code
+### Step 6.6: Automated Dead Code Detection
 
-Use TypeScript compiler or a tool to find unused exports:
+**Action**: Run ts-prune to find unused exports:
 
 ```bash
-cd core && npx ts-prune
+cd core && npx ts-prune > ../dead-code-report.txt
+cat ../dead-code-report.txt
 ```
 
-Remove any dead code found.
+**Decision**:
 
-**Commit**: "Remove dead code"
+- Review report for obvious unused exports
+- Focus on files in directories already cleaned
+- Be conservative - don't remove if unsure
+- Skip files in: `autocomplete/`, `nextEdit/`, `llm/`, `config/`
+
+**Commit** (if removals made): "Remove detected dead code"
 
 **Verification**: Run `./test-autocomplete.sh` one final time
 
