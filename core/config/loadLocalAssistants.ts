@@ -1,6 +1,6 @@
 import { BLOCK_TYPES } from "@continuedev/config-yaml";
 import ignore from "ignore";
-import * as URI from "uri-js";
+import { normalize } from "uri-js";
 import { IDE } from "..";
 import {
   DEFAULT_IGNORE_DIRS,
@@ -35,7 +35,7 @@ export function isContinueAgentConfigFile(uri: string): boolean {
     return false;
   }
 
-  const normalizedUri = URI.normalize(uri);
+  const normalizedUri = normalize(uri);
   return (
     normalizedUri.includes(`/.continue/agents/`) ||
     normalizedUri.includes(`/.continue/assistants/`)
