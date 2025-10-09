@@ -8,16 +8,6 @@ import { ProfileDescription } from "../ProfileLifecycleManager.js";
 import doLoadConfig from "./doLoadConfig.js";
 import { IProfileLoader } from "./IProfileLoader.js";
 
-/**
- * Metadata about the package that is currently being loaded
- * If this is `undefined`, it's not a config from the platform,
- * could be local for example.
- */
-export interface PlatformConfigMetadata {
-  ownerSlug: string;
-  packageSlug: string;
-}
-
 export default class PlatformProfileLoader implements IProfileLoader {
   static RELOAD_INTERVAL = 1000 * 5; // 5 seconds
 

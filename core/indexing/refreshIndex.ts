@@ -392,7 +392,7 @@ function mapIndexResultTypeToAddRemoveResultType(
   }
 }
 
-export async function getComputeDeleteAddRemove(
+async function getComputeDeleteAddRemove(
   tag: IndexTag,
   currentFiles: FileStatsMap,
   readFile: (path: string) => Promise<string>,
