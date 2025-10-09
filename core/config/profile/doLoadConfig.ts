@@ -17,21 +17,23 @@ import {
   SlashCommandDescWithSource,
   Tool,
 } from "../../";
-import { stringifyMcpPrompt } from "../../commands/slash/mcpSlashCommand";
-import { convertRuleBlockToSlashCommand } from "../../commands/slash/ruleBlockSlashCommand";
-import { MCPManagerSingleton } from "../../context/mcp/MCPManagerSingleton";
-import ContinueProxyContextProvider from "../../context/providers/ContinueProxyContextProvider";
-import MCPContextProvider from "../../context/providers/MCPContextProvider";
+// Chat feature imports - removed for autocomplete-only build
+// import { stringifyMcpPrompt } from "../../commands/slash/mcpSlashCommand";
+// import { convertRuleBlockToSlashCommand } from "../../commands/slash/ruleBlockSlashCommand";
+// import { MCPManagerSingleton } from "../../context/mcp/MCPManagerSingleton";
+// import ContinueProxyContextProvider from "../../context/providers/ContinueProxyContextProvider";
+// import MCPContextProvider from "../../context/providers/MCPContextProvider";
 import { ControlPlaneProxyInfo } from "../../control-plane/analytics/IAnalyticsProvider.js";
 import { ControlPlaneClient } from "../../control-plane/client.js";
 import { getControlPlaneEnv } from "../../control-plane/env.js";
 import { PolicySingleton } from "../../control-plane/PolicySingleton";
 import { TeamAnalytics } from "../../control-plane/TeamAnalytics.js";
 import ContinueProxy from "../../llm/llms/stubs/ContinueProxy";
-import { initSlashCommand } from "../../promptFiles/initPrompt";
-import { getConfigDependentToolDefinitions } from "../../tools";
-import { encodeMCPToolUri } from "../../tools/callTool";
-import { getMCPToolName } from "../../tools/mcpToolName";
+// Chat feature imports - removed for autocomplete-only build
+// import { initSlashCommand } from "../../promptFiles/initPrompt";
+// import { getConfigDependentToolDefinitions } from "../../tools";
+// import { encodeMCPToolUri } from "../../tools/callTool";
+// import { getMCPToolName } from "../../tools/mcpToolName";
 import { GlobalContext } from "../../util/GlobalContext";
 import { getConfigJsonPath, getConfigYamlPath } from "../../util/paths";
 import { localPathOrUriToPath } from "../../util/pathToUri";
@@ -157,30 +159,31 @@ export default async function doLoadConfig(options: {
   errors.push(...rulesErrors);
   newConfig.rules.unshift(...rules);
 
+  // Chat-only features - skipped for autocomplete-only build
   // Convert invokable rules to slash commands
-  for (const rule of newConfig.rules) {
-    if (rule.invokable) {
-      try {
-        const slashCommand = convertRuleBlockToSlashCommand(rule);
-        (newConfig.slashCommands ??= []).push(slashCommand);
-      } catch (e) {
-        errors.push({
-          message: `Error converting invokable rule ${rule.name} to slash command: ${e instanceof Error ? e.message : e}`,
-          fatal: false,
-        });
-      }
-    }
-  }
+  // for (const rule of newConfig.rules) {
+  //   if (rule.invokable) {
+  //     try {
+  //       const slashCommand = convertRuleBlockToSlashCommand(rule);
+  //       (newConfig.slashCommands ??= []).push(slashCommand);
+  //     } catch (e) {
+  //       errors.push({
+  //         message: `Error converting invokable rule ${rule.name} to slash command: ${e instanceof Error ? e.message : e}`,
+  //         fatal: false,
+  //       });
+  //     }
+  //   }
+  // }
 
-  newConfig.slashCommands.push(initSlashCommand);
+  // newConfig.slashCommands.push(initSlashCommand);
 
-  const proxyContextProvider = newConfig.contextProviders?.find(
-    (cp) => cp.description.title === "continue-proxy",
-  );
-  if (proxyContextProvider) {
-    (proxyContextProvider as ContinueProxyContextProvider).workOsAccessToken =
-      workOsAccessToken;
-  }
+  // const proxyContextProvider = newConfig.contextProviders?.find(
+  //   (cp) => cp.description.title === "continue-proxy",
+  // );
+  // if (proxyContextProvider) {
+  //   (proxyContextProvider as ContinueProxyContextProvider).workOsAccessToken =
+  //     workOsAccessToken;
+  // }
 
   // Show deprecation warnings for providers
   const globalContext = new GlobalContext();
@@ -202,131 +205,9 @@ export default async function doLoadConfig(options: {
   // Rectify model selections for each role
   newConfig = rectifySelectedModelsFromGlobalContext(newConfig, profileId);
 
-  // Add things from MCP servers
-  const mcpManager = MCPManagerSingleton.getInstance();
-  const mcpServerStatuses = mcpManager.getStatuses();
-
-  const serializableStatuses = mcpServerStatuses.map((server) => {
-    const { client, ...rest } = server;
-    return rest;
-  });
-  newConfig.mcpServerStatuses = serializableStatuses;
-
-  for (const server of mcpServerStatuses) {
-    server.errors.forEach((error) => {
-      // MCP errors will also show as config loading errors
-      errors.push({
-        fatal: false,
-        message: error,
-      });
-    });
-    if (server.status === "connected") {
-      const serverTools: Tool[] = server.tools.map((tool) => ({
-        displayTitle: server.name + " " + tool.name,
-        function: {
-          description: tool.description,
-          name: getMCPToolName(server, tool),
-          parameters: tool.inputSchema,
-        },
-        faviconUrl: server.faviconUrl,
-        readonly: false,
-        type: "function" as const,
-        uri: encodeMCPToolUri(server.id, tool.name),
-        group: server.name,
-        originalFunctionName: tool.name,
-      }));
-      newConfig.tools.push(...serverTools);
-
-      // Fetch MCP prompt content during config load
-      const serverSlashCommands: SlashCommandDescWithSource[] =
-        await Promise.all(
-          server.prompts.map(async (prompt) => {
-            let promptContent: string | undefined;
-
-            try {
-              // Fetch the actual prompt content from the MCP server
-              const mcpPromptResponse = await mcpManager.getPrompt(
-                server.name,
-                prompt.name,
-                {}, // Empty args for now - TODO: handle prompt arguments
-              );
-              promptContent = stringifyMcpPrompt(mcpPromptResponse);
-            } catch (error) {
-              console.warn(
-                `Failed to fetch MCP prompt content for ${prompt.name} from server ${server.name}:`,
-                error,
-              );
-              // Keep promptContent as undefined so the UI can show a fallback
-            }
-
-            return {
-              name: prompt.name,
-              description: prompt.description ?? "MCP Prompt",
-              source: "mcp-prompt",
-              isLegacy: false,
-              prompt: promptContent, // Store the actual prompt content
-              mcpServerName: server.name, // Used in client to retrieve prompt
-              mcpArgs: prompt.arguments,
-            };
-          }),
-        );
-      newConfig.slashCommands.push(...serverSlashCommands);
-
-      const submenuItems = server.resources
-        .map((resource) => ({
-          title: resource.name,
-          description: resource.description ?? resource.name,
-          id: resource.uri,
-          icon: server.faviconUrl,
-        }))
-        .concat(
-          server.resourceTemplates.map((template) => ({
-            title: template.name,
-            description: template.description ?? template.name,
-            id: template.uriTemplate,
-            icon: server.faviconUrl,
-          })),
-        );
-      if (submenuItems.length > 0) {
-        const serverContextProvider = new MCPContextProvider({
-          submenuItems,
-          mcpId: server.id,
-          serverName: server.name,
-        });
-        newConfig.contextProviders.push(serverContextProvider);
-      }
-    }
-  }
-
-  newConfig.tools.push(
-    ...getConfigDependentToolDefinitions({
-      rules: newConfig.rules,
-      enableExperimentalTools:
-        newConfig.experimental?.enableExperimentalTools ?? false,
-      isSignedIn,
-      isRemote: await ide.isWorkspaceRemote(),
-      modelName: newConfig.selectedModelByRole.chat?.model,
-    }),
-  );
-
-  // Detect duplicate tool names
-  const counts: Record<string, number> = {};
-  newConfig.tools.forEach((tool) => {
-    if (counts[tool.function.name]) {
-      counts[tool.function.name] = counts[tool.function.name] + 1;
-    } else {
-      counts[tool.function.name] = 1;
-    }
-  });
-
-  Object.entries(counts).forEach(([toolName, count]) => {
-    if (count > 1) {
-      errors!.push({
-        fatal: false,
-        message: `Duplicate (${count}) tools named "${toolName}" detected. Permissions will conflict and usage may be unpredictable`,
-      });
-    }
-  });
+  // Chat-only features - skipped for autocomplete-only build
+  // MCP servers, tools, context providers not needed for autocomplete
+  newConfig.mcpServerStatuses = [];
 
   const ruleCounts: Record<string, number> = {};
   newConfig.rules.forEach((rule) => {
