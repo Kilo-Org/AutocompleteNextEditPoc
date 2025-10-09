@@ -2,10 +2,8 @@
 set -e  # Exit on first error
 
 pushd core 
-echo "🧪 Running Core Vitest tests..."
-npm run vitest -- autocomplete
-echo "🧪 Running NextEdit Vitest tests..."
-npm run vitest -- nextEdit
+echo "🧪 Running Core Vitest tests (autocomplete & nextEdit)..."
+npm run vitest -- autocomplete nextEdit
 popd
 
 echo "🧪 Running VSCode unit tests..."
