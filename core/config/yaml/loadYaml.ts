@@ -23,19 +23,23 @@ import {
   ILLMLogger,
   InternalMcpOptions,
 } from "../..";
-import { MCPManagerSingleton } from "../../context/mcp/MCPManagerSingleton";
+// Chat feature imports - removed for autocomplete-only build
+// import { MCPManagerSingleton } from "../../context/mcp/MCPManagerSingleton";
 import { ControlPlaneClient } from "../../control-plane/client";
 import TransformersJsEmbeddingsProvider from "../../llm/llms/TransformersJsEmbeddingsProvider";
-import { getAllPromptFiles } from "../../promptFiles/getPromptFiles";
+// Chat feature imports - removed for autocomplete-only build
+// import { getAllPromptFiles } from "../../promptFiles/getPromptFiles";
 import { GlobalContext } from "../../util/GlobalContext";
 import { modifyAnyConfigWithSharedConfig } from "../sharedConfig";
 
-import { convertPromptBlockToSlashCommand } from "../../commands/slash/promptBlockSlashCommand";
-import { slashCommandFromPromptFile } from "../../commands/slash/promptFileSlashCommand";
-import { loadJsonMcpConfigs } from "../../context/mcp/json/loadJsonMcpConfigs";
+// Chat feature imports - removed for autocomplete-only build
+// import { convertPromptBlockToSlashCommand } from "../../commands/slash/promptBlockSlashCommand";
+// import { slashCommandFromPromptFile } from "../../commands/slash/promptFileSlashCommand";
+// import { loadJsonMcpConfigs } from "../../context/mcp/json/loadJsonMcpConfigs";
 import { getControlPlaneEnvSync } from "../../control-plane/env";
 import { PolicySingleton } from "../../control-plane/PolicySingleton";
-import { getBaseToolDefinitions } from "../../tools";
+// Chat feature imports - removed for autocomplete-only build
+// import { getBaseToolDefinitions } from "../../tools";
 import { getCleanUriPath } from "../../util/uri";
 import { loadConfigContextProviders } from "../loadContextProviders";
 import { getAllDotContinueDefinitionFiles } from "../loadLocalAssistants";
@@ -177,7 +181,7 @@ export async function configYamlToContinueConfig(options: {
 
   const continueConfig: ContinueConfig = {
     slashCommands: [],
-    tools: getBaseToolDefinitions(),
+    tools: [], // Chat-only feature - empty for autocomplete
     mcpServerStatuses: [],
     contextProviders: [],
     modelsByRole: {
@@ -253,44 +257,45 @@ export async function configYamlToContinueConfig(options: {
     }
   });
 
-  // Prompt files -
-  try {
-    const promptFiles = await getAllPromptFiles(ide, undefined, true);
+  // Chat-only features - skipped for autocomplete-only build
+  // Prompt files and slash commands not needed for autocomplete
+  // try {
+  //   const promptFiles = await getAllPromptFiles(ide, undefined, true);
+  //
+  //   promptFiles.forEach((file) => {
+  //     try {
+  //       const slashCommand = slashCommandFromPromptFile(
+  //         file.path,
+  //         file.content,
+  //       );
+  //       if (slashCommand) {
+  //         continueConfig.slashCommands?.push(slashCommand);
+  //       }
+  //     } catch (e) {
+  //       localErrors.push({
+  //         fatal: false,
+  //         message: `Failed to convert prompt file ${file.path} to slash command: ${e instanceof Error ? e.message : e}`,
+  //       });
+  //     }
+  //   });
+  // } catch (e) {
+  //   localErrors.push({
+  //     fatal: false,
+  //     message: `Error loading local prompt files: ${e instanceof Error ? e.message : e}`,
+  //   });
+  // }
 
-    promptFiles.forEach((file) => {
-      try {
-        const slashCommand = slashCommandFromPromptFile(
-          file.path,
-          file.content,
-        );
-        if (slashCommand) {
-          continueConfig.slashCommands?.push(slashCommand);
-        }
-      } catch (e) {
-        localErrors.push({
-          fatal: false,
-          message: `Failed to convert prompt file ${file.path} to slash command: ${e instanceof Error ? e.message : e}`,
-        });
-      }
-    });
-  } catch (e) {
-    localErrors.push({
-      fatal: false,
-      message: `Error loading local prompt files: ${e instanceof Error ? e.message : e}`,
-    });
-  }
-
-  config.prompts?.forEach((prompt) => {
-    try {
-      const slashCommand = convertPromptBlockToSlashCommand(prompt);
-      continueConfig.slashCommands?.push(slashCommand);
-    } catch (e) {
-      localErrors.push({
-        message: `Error loading prompt ${prompt.name}: ${e instanceof Error ? e.message : e}`,
-        fatal: false,
-      });
-    }
-  });
+  // config.prompts?.forEach((prompt) => {
+  //   try {
+  //     const slashCommand = convertPromptBlockToSlashCommand(prompt);
+  //     continueConfig.slashCommands?.push(slashCommand);
+  //   } catch (e) {
+  //     localErrors.push({
+  //       message: `Error loading prompt ${prompt.name}: ${e instanceof Error ? e.message : e}`,
+  //       fatal: false,
+  //     });
+  //   }
+  // });
 
   // Models
   let warnAboutFreeTrial = false;
@@ -387,26 +392,27 @@ export async function configYamlToContinueConfig(options: {
   continueConfig.contextProviders = providers;
   localErrors.push(...contextErrors);
 
-  // Trigger MCP server refreshes (Config is reloaded again once connected!)
-  const mcpManager = MCPManagerSingleton.getInstance();
-
-  const orgPolicy = PolicySingleton.getInstance().policy;
-  if (orgPolicy?.policy?.allowMcpServers === false) {
-    await mcpManager.shutdown();
-  } else {
-    const mcpOptions: InternalMcpOptions[] = (config.mcpServers ?? []).map(
-      (server) =>
-        convertYamlMcpConfigToInternalMcpOptions(server, config.requestOptions),
-    );
-    const { errors: jsonMcpErrors, mcpServers } = await loadJsonMcpConfigs(
-      ide,
-      true,
-      config.requestOptions,
-    );
-    localErrors.push(...jsonMcpErrors);
-    mcpOptions.push(...mcpServers);
-    mcpManager.setConnections(mcpOptions, false, { ide });
-  }
+  // Chat-only features - skipped for autocomplete-only build
+  // MCP servers not needed for autocomplete
+  // const mcpManager = MCPManagerSingleton.getInstance();
+  //
+  // const orgPolicy = PolicySingleton.getInstance().policy;
+  // if (orgPolicy?.policy?.allowMcpServers === false) {
+  //   await mcpManager.shutdown();
+  // } else {
+  //   const mcpOptions: InternalMcpOptions[] = (config.mcpServers ?? []).map(
+  //     (server) =>
+  //       convertYamlMcpConfigToInternalMcpOptions(server, config.requestOptions),
+  //   );
+  //   const { errors: jsonMcpErrors, mcpServers } = await loadJsonMcpConfigs(
+  //     ide,
+  //     true,
+  //     config.requestOptions,
+  //   );
+  //   localErrors.push(...jsonMcpErrors);
+  //   mcpOptions.push(...mcpServers);
+  //   mcpManager.setConnections(mcpOptions, false, { ide });
+  // }
 
   return { config: continueConfig, errors: localErrors };
 }
