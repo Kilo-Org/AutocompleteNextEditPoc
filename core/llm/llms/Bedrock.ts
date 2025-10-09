@@ -19,7 +19,7 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 
 import type { CompletionOptions } from "../../index.js";
 import { ChatMessage, Chunk, LLMOptions, MessageContent } from "../../index.js";
-import { safeParseToolCallArgs } from "../../tools/parseArgs.js";
+import { safeParseToolCallArgs } from "../utils/parseArgs.js";
 import { renderChatMessage, stripImages } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";
 import { PROVIDER_TOOL_SUPPORT } from "../toolSupport.js";

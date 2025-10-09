@@ -9,7 +9,7 @@ import {
   TextMessagePart,
   ToolCallDelta,
 } from "../../index.js";
-import { safeParseToolCallArgs } from "../../tools/parseArgs.js";
+import { safeParseToolCallArgs } from "../utils/parseArgs.js";
 import { renderChatMessage, stripImages } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";
 import {
