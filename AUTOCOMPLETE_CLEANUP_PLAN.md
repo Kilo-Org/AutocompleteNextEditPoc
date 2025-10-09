@@ -1,10 +1,10 @@
-# Autocomplete-Only Repository Cleanup Plan
+# Autocomplete+nextEdit-Only Repository Cleanup Plan
 
 This plan outlines the incremental removal of non-autocomplete code from the Continue repository, keeping only tab autocomplete and NextEdit functionality covered by tests.
 
 ## 🎯 Goal
 
-Transform this repo into an autocomplete-only codebase that:
+Transform this repo into an autocomplete+nextEdit-only codebase that:
 
 - Retains all tab autocomplete functionality tested by `test-autocomplete.sh`
 - Retains NextEdit feature (has test coverage)
@@ -12,22 +12,17 @@ Transform this repo into an autocomplete-only codebase that:
 - Removes features without test coverage
 - Works with VSCode extension only
 
-## 📋 Test Command
+## 📋 Procedure
 
-After each phase, verify with:
+IMPORTANT(1): After each step, verify with:
 
 ```bash
 ./test-autocomplete.sh
 ```
 
-**Note**: The test script needs to be updated to include NextEdit tests. Add this line after the autocomplete tests:
+IMPORTANT(2): After each step in which tests pass, perform a git commit with a clear message.
 
-```bash
-# In test-autocomplete.sh, add:
-npm run vitest -- nextEdit
-```
-
-Then commit the changes if tests pass.
+Use many small steps; where it's reasonable, use multiple steps (i.e. subtasks) per phase. If something goes wrong, it's much easier to recover a small failing step than understand what's problematic in a larger failing step.
 
 ---
 
@@ -153,7 +148,7 @@ Remove dependencies not needed by autocomplete:
 - Keep: LLM providers, tree-sitter, core utilities
 
 **Action**: Manual edit of `core/package.json`
-**Commit**: "Clean up core dependencies for autocomplete-only"
+**Commit**: "Clean up core dependencies for autocomplete+nextEdit-only"
 
 **Verification**: Run `./test-autocomplete.sh` after each commit
 
@@ -199,7 +194,7 @@ Modify `extensions/vscode/src/extension.ts` to:
 - Remove console webview
 
 **Action**: Manual edit
-**Commit**: "Update extension.ts for autocomplete-only"
+**Commit**: "Update extension.ts for autocomplete+nextEdit-only"
 
 ### Step 3.4: Update package.json Commands
 
@@ -217,14 +212,14 @@ Edit `extensions/vscode/package.json`:
 - Clean up activation events
 
 **Action**: Manual edit
-**Commit**: "Update VSCode package.json for autocomplete-only"
+**Commit**: "Update VSCode package.json for autocomplete+nextEdit-only"
 
 ### Step 3.5: Update extension/VsCodeExtension.ts
 
 If this file exists and orchestrates features, update it to only handle autocomplete.
 
 **Action**: Review and modify
-**Commit**: "Update VsCodeExtension for autocomplete-only"
+**Commit**: "Update VsCodeExtension for autocomplete+nextEdit-only"
 
 ### Step 3.6: Clean Extension Scripts
 
@@ -279,7 +274,7 @@ Update `core/package.json` to remove references to deleted packages.
 
 ## Phase 5: Update Build Configuration
 
-**Goal**: Clean up build scripts and configs for autocomplete-only repo
+**Goal**: Clean up build scripts and configs for autocomplete+nextEdit-only repo
 
 ### Step 5.1: Update Root package.json
 
@@ -291,7 +286,7 @@ Edit `package.json`:
 - Update repository description
 
 **Action**: Manual edit
-**Commit**: "Update root package.json for autocomplete-only"
+**Commit**: "Update root package.json for autocomplete+nextEdit-only"
 
 ### Step 5.2: Update VSCode Build Scripts
 
@@ -387,7 +382,7 @@ Remove any dead code found.
 
 ## Phase 7: Documentation
 
-**Goal**: Document the new autocomplete-only repository
+**Goal**: Document the new autocomplete+nextEdit-only repository
 
 ### Step 7.1: Create New README.md
 
@@ -399,7 +394,7 @@ Replace README.md with autocomplete-focused documentation:
 - Contributing guidelines
 
 **Action**: Write new README
-**Commit**: "Add autocomplete-only README"
+**Commit**: "Add autocomplete+nextEdit-only README"
 
 ### Step 7.2: Add Architecture Documentation
 
@@ -415,7 +410,7 @@ Create `ARCHITECTURE.md` explaining:
 
 ### Step 7.3: Update CONTRIBUTING.md
 
-Update contribution guidelines for autocomplete-only focus.
+Update contribution guidelines for autocomplete+nextEdit-only focus.
 
 **Action**: Update or create new file
 **Commit**: "Update contributing guidelines"
@@ -448,30 +443,8 @@ After all phases, the repository should:
 ## ⚠️ Important Notes
 
 1. **Never remove** `core/autocomplete/`, `core/nextEdit/`, or `extensions/vscode/src/autocomplete/`
-2. **Update test script** first to include NextEdit tests before starting cleanup
-3. **Always run tests** after each commit to catch breakage early
-4. **Git commits** are your safety net - commit frequently
-5. **Review imports** before deleting shared utilities (both autocomplete and NextEdit depend on them)
-6. **Keep backup branch** before starting (create from current state)
+2. **Always run tests** after each commit to catch breakage early
+3. **Git commits** are your safety net - commit frequently
+4. **Review imports** before deleting shared utilities (both autocomplete and NextEdit depend on them)
 
----
-
-## 🚀 Getting Started
-
-Before starting:
-
-```bash
-# Create backup branch
-git checkout -b autocomplete-only-cleanup
-
-# First, update test-autocomplete.sh to include NextEdit tests
-# Add after the autocomplete tests line:
-#   npm run vitest -- nextEdit
-
-# Ensure all tests pass
-./test-autocomplete.sh
-
-# Start with Phase 1
-```
-
-After each phase, verify and commit. If tests fail, investigate before proceeding.
+After each step, verify and commit. If tests fail, investigate before proceeding.
