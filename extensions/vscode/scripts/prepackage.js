@@ -22,10 +22,6 @@ rimrafSync(path.join(__dirname, "..", "out"));
 fs.mkdirSync(path.join(__dirname, "..", "out", "node_modules"), {
   recursive: true,
 });
-const guiDist = path.join(__dirname, "..", "..", "..", "gui", "dist");
-if (!fs.existsSync(guiDist)) {
-  fs.mkdirSync(guiDist, { recursive: true });
-}
 
 const skipInstalls = process.env.SKIP_INSTALLS === "true";
 
@@ -82,84 +78,8 @@ void (async () => {
     );
   }
 
-  process.chdir(path.join(continueDir, "gui"));
-
-  // Copy over the dist folder to the JetBrains extension //
-  const intellijExtensionWebviewPath = path.join(
-    "..",
-    "extensions",
-    "intellij",
-    "src",
-    "main",
-    "resources",
-    "webview",
-  );
-
-  const indexHtmlPath = path.join(intellijExtensionWebviewPath, "index.html");
-  fs.copyFileSync(indexHtmlPath, "tmp_index.html");
-  rimrafSync(intellijExtensionWebviewPath);
-  fs.mkdirSync(intellijExtensionWebviewPath, { recursive: true });
-
-  const jetbrainsCopyStart = Date.now();
-  console.log(`[timer] Starting JetBrains copy at ${new Date().toISOString()}`);
-  await new Promise((resolve, reject) => {
-    ncp("dist", intellijExtensionWebviewPath, (error) => {
-      if (error) {
-        console.warn(
-          "[error] Error copying React app build to JetBrains extension: ",
-          error,
-        );
-        reject(error);
-      }
-      resolve();
-    });
-  });
-  console.log(
-    `[timer] JetBrains copy completed in ${Date.now() - jetbrainsCopyStart}ms`,
-  );
-
-  // Put back index.html
-  if (fs.existsSync(indexHtmlPath)) {
-    rimrafSync(indexHtmlPath);
-  }
-  fs.copyFileSync("tmp_index.html", indexHtmlPath);
-  fs.unlinkSync("tmp_index.html");
-
-  console.log("[info] Copied gui build to JetBrains extension");
-
-  // Then copy over the dist folder to the VSCode extension //
-  const vscodeGuiPath = path.join("../extensions/vscode/gui");
-  rimrafSync(vscodeGuiPath);
-  fs.mkdirSync(vscodeGuiPath, { recursive: true });
-  const vscodeCopyStart = Date.now();
-  console.log(`[timer] Starting VSCode copy at ${new Date().toISOString()}`);
-  await new Promise((resolve, reject) => {
-    ncp("dist", vscodeGuiPath, (error) => {
-      if (error) {
-        console.log(
-          "Error copying React app build to VSCode extension: ",
-          error,
-        );
-        reject(error);
-      } else {
-        console.log("Copied gui build to VSCode extension");
-        resolve();
-      }
-    });
-  });
-  console.log(
-    `[timer] VSCode copy completed in ${Date.now() - vscodeCopyStart}ms`,
-  );
-
-  if (!fs.existsSync(path.join("dist", "assets", "index.js"))) {
-    throw new Error("gui build did not produce index.js");
-  }
-  if (!fs.existsSync(path.join("dist", "assets", "index.css"))) {
-    throw new Error("gui build did not produce index.css");
-  }
-
   // Copy over native / wasm modules //
-  process.chdir("../extensions/vscode");
+  process.chdir(path.join(continueDir, "extensions", "vscode"));
 
   fs.mkdirSync("bin", { recursive: true });
 
@@ -271,22 +191,6 @@ void (async () => {
   //       console.warn("Error copying code-highlighter tag-qry files", error);
   //   },
   // );
-
-  // textmate-syntaxes
-  await new Promise((resolve, reject) => {
-    ncp(
-      path.join(__dirname, "../textmate-syntaxes"),
-      path.join(__dirname, "../gui/textmate-syntaxes"),
-      (error) => {
-        if (error) {
-          console.warn("[error] Error copying textmate-syntaxes", error);
-          reject(error);
-        } else {
-          resolve();
-        }
-      },
-    );
-  });
 
   if (!skipInstalls) {
     // GitHub Actions doesn't support ARM, so we need to download pre-saved binaries
@@ -410,10 +314,6 @@ void (async () => {
           ? "libonnxruntime.so.1.14.0"
           : "onnxruntime.dll"
     }`,
-
-    // Code/styling for the sidebar
-    "gui/assets/index.js",
-    "gui/assets/index.css",
 
     // Tutorial
     "media/move-chat-panel-right.md",

@@ -62,7 +62,6 @@
     "@continuedev/fetch": "file:../packages/fetch",
     "@continuedev/llm-info": "file:../packages/llm-info",
     "@continuedev/openai-adapters": "file:../packages/openai-adapters",
-    "@continuedev/terminal-security": "file:../packages/terminal-security",
     "@mozilla/readability": "^0.5.0",
     "@octokit/rest": "^20.1.1",
     "@typescript/native-preview": "^7.0.0-dev.20251009.1",

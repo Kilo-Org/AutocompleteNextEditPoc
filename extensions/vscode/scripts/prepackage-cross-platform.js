@@ -17,7 +17,6 @@ const {
 const { generateAndCopyConfigYamlSchema } = require("./generate-copy-config");
 const { npmInstall } = require("./npm-install");
 const {
-  buildGui,
   copyOnnxRuntimeFromNodeModules,
   copyTreeSitterWasms,
   copyTreeSitterTagQryFiles,
@@ -37,10 +36,6 @@ rimrafSync(path.join(__dirname, "..", "out"));
 fs.mkdirSync(path.join(__dirname, "..", "out", "node_modules"), {
   recursive: true,
 });
-const guiDist = path.join(__dirname, "..", "..", "..", "gui", "dist");
-if (!fs.existsSync(guiDist)) {
-  fs.mkdirSync(guiDist, { recursive: true });
-}
 
 // Get the target to package for
 let target = undefined;
@@ -82,9 +77,6 @@ async function package(target, os, arch, exe) {
 
   // Install node_modules
   await npmInstall();
-
-  // Build gui and copy to extensions
-  await buildGui(ghAction());
 
   // Assets
   // Copy tree-sitter-wasm files
@@ -155,10 +147,6 @@ async function package(target, os, arch, exe) {
           ? "libonnxruntime.so.1.14.0"
           : "onnxruntime.dll"
     }`,
-
-    // Code/styling for the sidebar
-    "gui/assets/index.js",
-    "gui/assets/index.css",
 
     // Tutorial
     "media/move-chat-panel-right.md",
