@@ -1,13 +1,6 @@
 import { RuleWithSource } from "../..";
 import { getLastNPathParts } from "../../util/uri";
 
-export function getRuleDisplayName(rule: RuleWithSource): string {
-  if (rule.name) {
-    return rule.name;
-  }
-  return getRuleSourceDisplayName(rule);
-}
-
 export function getRuleSourceDisplayName(rule: RuleWithSource): string {
   switch (rule.source) {
     case ".continuerules":

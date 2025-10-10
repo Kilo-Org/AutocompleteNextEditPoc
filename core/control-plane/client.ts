@@ -31,14 +31,6 @@ export interface PolicyResponse {
   policy?: Policy;
 }
 
-export interface ControlPlaneWorkspace {
-  id: string;
-  name: string;
-  settings: ConfigJson;
-}
-
-export interface ControlPlaneModelDescription extends ModelDescription {}
-
 export interface FreeTrialStatus {
   optedInToFreeTrial: boolean;
   chatCount?: number;
@@ -46,9 +38,6 @@ export interface FreeTrialStatus {
   chatLimit: number;
   autocompleteLimit: number;
 }
-
-export const TRIAL_PROXY_URL =
-  "https://proxy-server-blue-l6vsfbzhba-uw.a.run.app";
 
 export interface RemoteSessionMetadata extends BaseSessionMetadata {
   isRemote: true;

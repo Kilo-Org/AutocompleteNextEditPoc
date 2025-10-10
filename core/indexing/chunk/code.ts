@@ -243,7 +243,7 @@ async function* getSmartCollapsedChunks(
   }
 }
 
-export async function* codeChunker(
+async function* codeChunker(
   filepath: string,
   contents: string,
   maxChunkSize: number,

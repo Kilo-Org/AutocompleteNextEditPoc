@@ -332,39 +332,3 @@ function writeMdmKeysLinux(licenseKey: string): boolean {
     return false;
   }
 }
-
-/**
- * Store the license key in the appropriate OS-specific location.
- * For now, we'll use a default API URL since it's not provided in the command.
- */
-export function setMdmLicenseKey(licenseKey: string): boolean {
-  try {
-    // Validate the license key first
-    const { isValid } = validateLicenseKey(licenseKey);
-    if (!isValid) {
-      return false;
-    }
-
-    const platform = os.platform();
-
-    switch (platform) {
-      case "darwin":
-        return writeMdmKeysMacOS(licenseKey);
-
-      case "win32":
-        return writeMdmKeysWindows(licenseKey);
-
-      case "linux":
-        return writeMdmKeysLinux(licenseKey);
-
-      default:
-        console.error(
-          `Setting MDM keys not supported on platform: ${platform}`,
-        );
-        return false;
-    }
-  } catch (error) {
-    console.error("Error setting MDM license key:", error);
-    return false;
-  }
-}

@@ -1,9 +1,5 @@
 import { AnalyticsConfig } from "../..";
 
-export interface AnalyticsMetadata {
-  extensionVersion: string;
-}
-
 export interface ControlPlaneProxyInfo {
   workspaceId?: string;
   controlPlaneProxyUrl: string;
