@@ -1,15 +1,16 @@
 /**
  * Minimal configuration for autocomplete and NextEdit features.
  * This replaces the complex ConfigHandler system with simple hardcoded defaults.
- * 
+ *
  * Analysis of ConfigHandler usage:
  * - CompletionProvider needs: config.tabAutocompleteOptions, config.experimental.enableStaticContextualization, currentProfile.profileType
  * - NextEditProvider needs: config.tabAutocompleteOptions, currentProfile.profileType
- * 
+ * - NextEdit context fetching needs: config.modelsByRole, config.selectedModelByRole
+ *
  * The profileType is only used for logging/telemetry, so we can set it to undefined for a minimal extraction.
  */
 
-import { TabAutocompleteOptions } from "../index.js";
+import { ILLM, TabAutocompleteOptions } from "../index.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
 
 export interface MinimalConfig {
@@ -17,11 +18,18 @@ export interface MinimalConfig {
   experimental?: {
     enableStaticContextualization?: boolean;
   };
+  // Minimal model selection support for NextEdit context fetching
+  modelsByRole?: {
+    autocomplete?: ILLM[];
+  };
+  selectedModelByRole?: {
+    autocomplete?: ILLM;
+  };
 }
 
 export interface MinimalProfile {
   profileDescription: {
-    profileType?: string;
+    profileType?: "control-plane" | "local" | "platform";
   };
 }
 
@@ -35,6 +43,12 @@ export const DEFAULT_MINIMAL_CONFIG: MinimalConfig = {
   },
   experimental: {
     enableStaticContextualization: false,
+  },
+  modelsByRole: {
+    autocomplete: [],
+  },
+  selectedModelByRole: {
+    autocomplete: undefined,
   },
 };
 

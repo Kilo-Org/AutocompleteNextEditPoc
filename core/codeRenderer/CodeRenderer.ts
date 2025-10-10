@@ -275,7 +275,7 @@ export class CodeRenderer {
     const dom = new JSDOM(shikiHtml);
     const document = dom.window.document;
 
-    const lines = Array.from(document.querySelectorAll(".line"));
+    const lines = Array.from(document.querySelectorAll(".line")) as HTMLElement[];
 
     const additionSegmentsByLine = new Map<
       number,
@@ -322,7 +322,7 @@ export class CodeRenderer {
     });
     const svgLines = lines.map((line, index) => {
       const spans = Array.from(line.childNodes)
-        .map((node) => {
+        .map((node: ChildNode) => {
           if (node.nodeType === 3) {
             return `<tspan xml:space="preserve">${escapeForSVG(node.textContent ?? "")}</tspan>`;
           }

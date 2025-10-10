@@ -31,6 +31,7 @@ describe("aggregateEdits", () => {
     fileContents,
     beforeCursorPos: { line, character: 0 },
     afterCursorPos: { line, character: editText.length },
+    workspaceDir: "/test/workspace",
   });
 
   describe("EditAggregator", () => {

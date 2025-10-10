@@ -551,35 +551,36 @@ async function intermediateToFinalConfig({
     });
   }
 
+  // MCP feature - removed for autocomplete-only build
   // Trigger MCP server refreshes (Config is reloaded again once connected!)
-  const mcpManager = MCPManagerSingleton.getInstance();
-
-  const orgPolicy = PolicySingleton.getInstance().policy;
-  if (orgPolicy?.policy?.allowMcpServers === false) {
-    await mcpManager.shutdown();
-  } else {
-    const mcpOptions: InternalMcpOptions[] = (
-      config.experimental?.modelContextProtocolServers ?? []
-    ).map((server, index) => ({
-      id: `continue-mcp-server-${index + 1}`,
-      name: `MCP Server`,
-      requestOptions: mergeConfigYamlRequestOptions(
-        server.transport.type !== "stdio"
-          ? server.transport.requestOptions
-          : undefined,
-        config.requestOptions,
-      ),
-      ...server.transport,
-    }));
-    const { errors: jsonMcpErrors, mcpServers } = await loadJsonMcpConfigs(
-      ide,
-      true,
-      config.requestOptions,
-    );
-    errors.push(...jsonMcpErrors);
-    mcpOptions.push(...mcpServers);
-    mcpManager.setConnections(mcpOptions, false);
-  }
+  // const mcpManager = MCPManagerSingleton.getInstance();
+  //
+  // const orgPolicy = PolicySingleton.getInstance().policy;
+  // if (orgPolicy?.policy?.allowMcpServers === false) {
+  //   await mcpManager.shutdown();
+  // } else {
+  //   const mcpOptions: InternalMcpOptions[] = (
+  //     config.experimental?.modelContextProtocolServers ?? []
+  //   ).map((server, index) => ({
+  //     id: `continue-mcp-server-${index + 1}`,
+  //     name: `MCP Server`,
+  //     requestOptions: mergeConfigYamlRequestOptions(
+  //       server.transport.type !== "stdio"
+  //         ? server.transport.requestOptions
+  //         : undefined,
+  //       config.requestOptions,
+  //     ),
+  //     ...server.transport,
+  //   }));
+  //   const { errors: jsonMcpErrors, mcpServers } = await loadJsonMcpConfigs(
+  //     ide,
+  //     true,
+  //     config.requestOptions,
+  //   );
+  //   errors.push(...jsonMcpErrors);
+  //   mcpOptions.push(...mcpServers);
+  //   mcpManager.setConnections(mcpOptions, false);
+  // }
 
   // Handle experimental modelRole config values for apply and edit
   const inlineEditModel = getModelByRole(continueConfig, "inlineEdit")?.title;
