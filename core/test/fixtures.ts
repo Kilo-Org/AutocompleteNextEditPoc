@@ -1,5 +1,5 @@
 import { ConfigHandler } from "../config/ConfigHandler";
-import { MinimalConfigProvider } from "../autocomplete/MinimalConfig";
+import { MinimalConfigProvider } from "../config/MinimalConfig";
 import { ControlPlaneClient } from "../control-plane/client";
 import Mock from "../llm/llms/Mock";
 import { LLMLogger } from "../llm/logger";
