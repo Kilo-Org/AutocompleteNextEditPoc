@@ -1,1 +1,1 @@
-import { AssistantUnrolled } from "@continuedev/config-yaml";
+import { AssistantUnrolled } from "../yaml-package";

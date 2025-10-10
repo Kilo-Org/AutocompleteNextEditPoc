@@ -1,4 +1,4 @@
-import { BLOCK_TYPES } from "@continuedev/config-yaml";
+import { BLOCK_TYPES } from "./yaml-package";
 import ignore from "ignore";
 import { normalize } from "uri-js";
 import { IDE } from "..";

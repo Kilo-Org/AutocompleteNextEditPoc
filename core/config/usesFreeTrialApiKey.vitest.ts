@@ -5,7 +5,7 @@ import { BrowserSerializedContinueConfig } from "..";
 const mockDecodeSecretLocation = vi.fn();
 
 // Mock the module
-vi.mock("@continuedev/config-yaml", () => ({
+vi.mock("../../config/yaml-package", () => ({
   SecretType: {
     User: "user",
     Organization: "organization",
@@ -16,13 +16,13 @@ vi.mock("@continuedev/config-yaml", () => ({
 
 describe("usesFreeTrialApiKey", () => {
   let usesFreeTrialApiKey: typeof import("./usesFreeTrialApiKey").usesFreeTrialApiKey;
-  let SecretType: typeof import("@continuedev/config-yaml").SecretType;
+  let SecretType: typeof import("./yaml-package").SecretType;
 
   beforeEach(async () => {
     mockDecodeSecretLocation.mockReset();
     usesFreeTrialApiKey = (await import("./usesFreeTrialApiKey"))
       .usesFreeTrialApiKey;
-    SecretType = (await import("@continuedev/config-yaml")).SecretType;
+    SecretType = (await import("./yaml-package")).SecretType;
   });
 
   test("usesFreeTrialApiKey should return false when config is null", () => {

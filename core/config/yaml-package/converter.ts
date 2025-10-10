@@ -1,4 +1,4 @@
-import { ConfigJson } from "@continuedev/config-types";
+import { ConfigJson } from "../config-types";
 import { ConfigYaml } from "./schemas/index.js";
 import { ModelRole } from "./schemas/models.js";
 

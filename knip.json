@@ -8,12 +8,6 @@
     "core/**/*.vitest.ts"
   ],
   "project": ["core/**/*.ts", "extensions/vscode/src/**/*.ts"],
-  "ignore": [
-    "**/*.d.ts",
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/.next/**",
-    "packages/**"
-  ],
-  "ignoreDependencies": ["@types/*", "@continuedev/*"]
+  "ignore": ["**/*.d.ts", "**/node_modules/**", "**/dist/**", "**/.next/**"],
+  "ignoreDependencies": ["@types/*"]
 }

@@ -4,7 +4,7 @@ import {
   createRuleMarkdown,
   createPromptMarkdown,
   RULE_FILE_EXTENSION,
-} from "@continuedev/config-yaml";
+} from "./yaml-package";
 import * as YAML from "yaml";
 import { IDE } from "../..";
 import { getContinueGlobalPath } from "../../util/paths";

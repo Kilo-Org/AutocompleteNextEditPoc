@@ -7,7 +7,7 @@ import {
   Policy,
   SecretResult,
   SecretType,
-} from "@continuedev/config-yaml";
+} from "../config/yaml-package";
 import fetch, { RequestInit, Response } from "node-fetch";
 
 import { OrganizationDescription } from "../config/ProfileLifecycleManager.js";

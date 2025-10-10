@@ -1,4 +1,4 @@
-import { ConfigYaml } from "@continuedev/config-yaml";
+import { ConfigYaml } from "./yaml-package";
 
 export const defaultConfig: ConfigYaml = {
   name: "Local Agent",

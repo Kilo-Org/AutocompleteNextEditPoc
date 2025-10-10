@@ -1,4 +1,4 @@
-import { ConfigResult, ConfigValidationError } from "@continuedev/config-yaml";
+import { ConfigResult, ConfigValidationError } from "./yaml-package";
 
 import { ControlPlaneClient } from "../control-plane/client.js";
 import {

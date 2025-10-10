@@ -3,7 +3,7 @@ import {
   ConfigValidationError,
   FullSlug,
   Policy,
-} from "@continuedev/config-yaml";
+} from "./yaml-package";
 
 import {
   BrowserSerializedContinueConfig,

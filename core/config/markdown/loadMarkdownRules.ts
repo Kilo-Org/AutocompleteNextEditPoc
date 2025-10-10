@@ -1,7 +1,4 @@
-import {
-  ConfigValidationError,
-  markdownToRule,
-} from "@continuedev/config-yaml";
+import { ConfigValidationError, markdownToRule } from "../yaml-package";
 import { IDE, RuleWithSource } from "../..";
 // Chat feature import removed - constants defined locally
 // import { PROMPTS_DIR_NAME, RULES_DIR_NAME } from "../../promptFiles";

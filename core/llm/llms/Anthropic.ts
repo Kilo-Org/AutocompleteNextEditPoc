@@ -16,7 +16,7 @@ import {
   getAnthropicErrorMessage,
   getAnthropicHeaders,
   getAnthropicMediaTypeFromDataUrl,
-} from "@continuedev/openai-adapters";
+} from "../openai-adapters";
 import {
   ChatMessage,
   CompletionOptions,

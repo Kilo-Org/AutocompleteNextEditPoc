@@ -1,4 +1,4 @@
-import { DevDataLogEvent } from "@continuedev/config-yaml";
+import { DevDataLogEvent } from "../config/yaml-package";
 import fs from "fs";
 import path from "path";
 import {

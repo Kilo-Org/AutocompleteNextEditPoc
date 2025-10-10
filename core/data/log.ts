@@ -6,7 +6,7 @@ import {
   DataLogLevel,
   DevDataLogEvent,
   devDataVersionedSchemas,
-} from "@continuedev/config-yaml";
+} from "../config/yaml-package";
 import { fetchwithRequestOptions } from "../fetch";
 import * as URI from "uri-js";
 import { fileURLToPath } from "url";

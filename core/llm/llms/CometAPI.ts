@@ -1,5 +1,5 @@
 import { LLMOptions } from "../../index.js";
-import { allModelProviders } from "@continuedev/llm-info";
+import { allModelProviders } from "../../llm-info";
 import OpenAI from "./OpenAI.js";
 
 /**
