@@ -7,7 +7,7 @@ import {
   DevDataLogEvent,
   devDataVersionedSchemas,
 } from "@continuedev/config-yaml";
-import { fetchwithRequestOptions } from "@continuedev/fetch";
+import { fetchwithRequestOptions } from "../fetch";
 import * as URI from "uri-js";
 import { fileURLToPath } from "url";
 import { z } from "zod";

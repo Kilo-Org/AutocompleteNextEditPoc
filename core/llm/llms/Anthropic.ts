@@ -10,7 +10,7 @@ import {
   RawMessageStreamEvent,
   ToolUseBlock,
 } from "@anthropic-ai/sdk/resources/messages.mjs";
-import { streamSse } from "@continuedev/fetch";
+import { streamSse } from "../../fetch";
 import {
   addCacheControlToLastTwoUserMessages,
   getAnthropicErrorMessage,

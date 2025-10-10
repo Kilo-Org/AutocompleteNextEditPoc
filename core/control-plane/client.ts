@@ -1,4 +1,4 @@
-import { ConfigJson } from "@continuedev/config-types";
+import { ConfigJson } from "../config-types";
 import {
   AssistantUnrolled,
   ConfigResult,

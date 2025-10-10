@@ -16,7 +16,7 @@ import { getDevDataFilePath } from "../util/paths";
 import { DataLogger } from "./log";
 
 // Only mock fetch, not fs
-vi.mock("@continuedev/fetch");
+vi.mock("../fetch");
 
 const TEST_EVENT: DevDataLogEvent = {
   name: "tokensGenerated",
