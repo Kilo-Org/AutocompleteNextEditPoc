@@ -1,4 +1,4 @@
-import { decodeSecretLocation, SecretType } from "@continuedev/config-yaml";
+import { decodeSecretLocation, SecretType } from "./yaml-package";
 import { BrowserSerializedContinueConfig } from "..";
 
 /**

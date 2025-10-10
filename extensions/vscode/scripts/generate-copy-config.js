@@ -11,15 +11,12 @@ const { execCmdSync } = require("../../../scripts/util");
 const { continueDir } = require("./utils");
 
 async function generateConfigYamlSchema() {
-  process.chdir(path.join(continueDir, "packages", "config-yaml"));
-  execCmdSync("npm install");
-  execCmdSync("npm run build");
-  execCmdSync("npm run generate-schema");
+  process.chdir(path.join(continueDir, "core", "config", "yaml-package"));
   fs.copyFileSync(
     path.join("schema", "config-yaml-schema.json"),
     path.join(continueDir, "extensions", "vscode", "config-yaml-schema.json"),
   );
-  console.log("[info] Generated config.yaml schema");
+  console.log("[info] Copied config.yaml schema from core/config/yaml-package");
 }
 
 async function copyConfigSchema() {

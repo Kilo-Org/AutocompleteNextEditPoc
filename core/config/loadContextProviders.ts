@@ -1,7 +1,7 @@
 import {
   AssistantUnrolledNonNullable,
   ConfigValidationError,
-} from "@continuedev/config-yaml";
+} from "./yaml-package";
 import { IContextProvider, IdeType } from "..";
 
 // Context providers removed for autocomplete-only build

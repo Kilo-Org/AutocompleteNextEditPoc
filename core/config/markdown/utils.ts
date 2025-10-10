@@ -1,7 +1,4 @@
-import {
-  RULE_FILE_EXTENSION,
-  sanitizeRuleName,
-} from "@continuedev/config-yaml";
+import { RULE_FILE_EXTENSION, sanitizeRuleName } from "../yaml-package";
 import { joinPathsToUri } from "../../util/uri";
 
 function createRelativeRuleFilePathParts(ruleName: string): string[] {

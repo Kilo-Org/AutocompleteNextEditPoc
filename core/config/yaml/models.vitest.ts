@@ -1,4 +1,4 @@
-import { ModelConfig } from "@continuedev/config-yaml";
+import { ModelConfig } from "../yaml-package";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ContinueConfig, ILLMLogger } from "../..";

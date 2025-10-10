@@ -12,7 +12,7 @@ import {
   TEMPLATE_VAR_REGEX,
   unrollAssistant,
   validateConfigYaml,
-} from "@continuedev/config-yaml";
+} from "../yaml-package";
 import { dirname } from "node:path";
 
 import {

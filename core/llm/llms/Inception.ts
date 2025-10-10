@@ -1,7 +1,7 @@
-import { streamSse } from "@continuedev/fetch";
+import { streamSse } from "../../fetch";
 import { ChatMessage, CompletionOptions, LLMOptions } from "../../index.js";
 
-import { ChatCompletionCreateParams } from "@continuedev/openai-adapters";
+import { ChatCompletionCreateParams } from "../openai-adapters";
 import { APPLY_UNIQUE_TOKEN, UNIQUE_TOKEN } from "../../nextEdit/constants.js";
 import OpenAI from "./OpenAI.js";
 

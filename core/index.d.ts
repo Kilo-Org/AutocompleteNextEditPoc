@@ -2,7 +2,7 @@ import {
   DataDestination,
   ModelRole,
   PromptTemplates,
-} from "@continuedev/config-yaml";
+} from "../config/yaml-package";
 import Parser from "web-tree-sitter";
 import { CodebaseIndexer } from "./indexing/CodebaseIndexer";
 import { LLMConfigurationStatuses } from "./llm/constants";

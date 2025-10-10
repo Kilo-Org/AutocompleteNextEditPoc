@@ -1,4 +1,4 @@
-import { ConfigValidationError } from "@continuedev/config-yaml";
+import { ConfigValidationError } from "./yaml-package";
 
 import { ModelDescription, SerializedContinueConfig } from "../";
 import { Telemetry } from "../util/posthog";

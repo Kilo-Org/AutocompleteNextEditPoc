@@ -8,7 +8,7 @@ import {
   ConfigValidationError,
   mergeConfigYamlRequestOptions,
   ModelRole,
-} from "@continuedev/config-yaml";
+} from "./yaml-package";
 import * as JSONC from "comment-json";
 import * as tar from "tar";
 
