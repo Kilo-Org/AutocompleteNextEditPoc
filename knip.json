@@ -4,14 +4,15 @@
     "core/autocomplete/CompletionProvider.ts",
     "core/nextEdit/NextEditProvider.ts",
     "core/**/*.test.ts",
-    "core/**/*.vitest.ts"
+    "core/**/*.vitest.ts",
+    "core/vscode-test-harness/test/**/*.vitest.ts",
+    "core/vscode-test-harness/src/**/*.ts"
   ],
   "project": ["core/**/*.ts"],
   "ignore": [
     "**/*.d.ts",
     "**/node_modules/**",
-    "**/dist/**",
-    "core/vscode-test-harness/**"
+    "**/dist/**"
   ],
   "ignoreDependencies": ["@types/*"]
 }
