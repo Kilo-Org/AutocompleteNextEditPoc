@@ -1,6 +1,6 @@
 import { ModelRole } from "../../config/yaml-package";
 import { fetchwithRequestOptions } from "../fetch";
-import { findLlmInfo } from "../llm-info";
+import { findLlmInfo } from "./model-info";
 import {
   BaseLlmApi,
   ChatCompletionCreateParams,
