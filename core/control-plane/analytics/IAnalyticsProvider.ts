@@ -1,17 +1,10 @@
-import { AnalyticsConfig } from "../..";
-
+// Minimal stub for removed control-plane functionality
 export interface ControlPlaneProxyInfo {
-  workspaceId?: string;
-  controlPlaneProxyUrl: string;
   workOsAccessToken?: string;
+  controlPlaneProxyUrl?: string;
+  controlPlaneSessionInfo?: any;
 }
 
 export interface IAnalyticsProvider {
-  capture(event: string, properties: { [key: string]: any }): Promise<void>;
-  setup(
-    config: AnalyticsConfig,
-    uniqueId: string,
-    controlPlaneProxyInfo?: ControlPlaneProxyInfo,
-  ): Promise<void>;
-  shutdown(): Promise<void>;
+  capture(event: string, properties: any): Promise<void>;
 }
