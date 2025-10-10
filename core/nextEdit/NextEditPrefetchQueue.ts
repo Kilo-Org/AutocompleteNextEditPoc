@@ -150,3 +150,8 @@ export class PrefetchQueue {
     this.prefetchLimit = limit;
   }
 }
+
+// Test helper to allow mocking in tests
+export function __setMockPrefetchQueueInstance(mockInstance: any) {
+  (PrefetchQueue as any)._instance = mockInstance;
+}

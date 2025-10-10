@@ -249,3 +249,8 @@ export class NextEditLoggingService {
     } catch (error) {}
   }
 }
+
+// Test helper to allow mocking in tests
+export function __setMockNextEditLoggingServiceInstance(mockInstance: any) {
+  (NextEditLoggingService as any)._instance = mockInstance;
+}

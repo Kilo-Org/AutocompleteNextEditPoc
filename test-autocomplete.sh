@@ -7,7 +7,12 @@ npm run vitest -- autocomplete nextEdit
 popd
 
 echo "🧪 Running VSCode unit tests..."
-pushd extensions/vscode 
+pushd extensions/vscode
+npm test
+popd
+
+echo "🧪 Running VSCode Integration tests (new location)..."
+pushd core/vscode-test-harness
 npm test
 popd
 

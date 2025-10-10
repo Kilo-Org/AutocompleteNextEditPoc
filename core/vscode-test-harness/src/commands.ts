@@ -1,0 +1,2 @@
+// Stub for testing - not used in actual tests
+export function registerAllCommands(_context: any, _ide: any, _extensionContext: any, _sidebar: any, _configHandler: any, _diffManager: any, _verticalDiffCodeLens: any) {}

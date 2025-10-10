@@ -618,3 +618,8 @@ export class NextEditProvider {
     return input;
   }
 }
+
+// Test helper to allow mocking in tests
+export function __setMockNextEditProviderInstance(mockInstance: any) {
+  (NextEditProvider as any)._instance = mockInstance;
+}

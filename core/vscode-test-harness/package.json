@@ -1,0 +1,20 @@
+{
+  "name": "@continuedev/vscode-test-harness",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Test harness demonstrating VSCode integration for autocomplete and NextEdit",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "vitest": "^3.1.4"
+  },
+  "dependencies": {
+    "core": "file:../",
+    "svg-builder": "^2.0.0",
+    "monaco-vscode-textmate-theme-converter": "^0.1.7",
+    "uri-js": "^4.4.1"
+  }
+}
