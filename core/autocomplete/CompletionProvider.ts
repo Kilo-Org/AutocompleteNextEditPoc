@@ -1,4 +1,4 @@
-import { ConfigHandler } from "../config/ConfigHandler.js";
+import { MinimalConfigProvider } from "./MinimalConfig.js";
 import { IDE, ILLM } from "../index.js";
 import OpenAI from "../llm/llms/OpenAI.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
@@ -40,7 +40,7 @@ export class CompletionProvider {
   private contextRetrievalService: ContextRetrievalService;
 
   constructor(
-    private readonly configHandler: ConfigHandler,
+    private readonly configHandler: MinimalConfigProvider,
     private readonly ide: IDE,
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: any) => void,

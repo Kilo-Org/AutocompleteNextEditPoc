@@ -1,0 +1,89 @@
+/**
+ * Minimal configuration for autocomplete and NextEdit features.
+ * This replaces the complex ConfigHandler system with simple hardcoded defaults.
+ * 
+ * Analysis of ConfigHandler usage:
+ * - CompletionProvider needs: config.tabAutocompleteOptions, config.experimental.enableStaticContextualization, currentProfile.profileType
+ * - NextEditProvider needs: config.tabAutocompleteOptions, currentProfile.profileType
+ * 
+ * The profileType is only used for logging/telemetry, so we can set it to undefined for a minimal extraction.
+ */
+
+import { TabAutocompleteOptions } from "../index.js";
+import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
+
+export interface MinimalConfig {
+  tabAutocompleteOptions?: TabAutocompleteOptions;
+  experimental?: {
+    enableStaticContextualization?: boolean;
+  };
+}
+
+export interface MinimalProfile {
+  profileDescription: {
+    profileType?: string;
+  };
+}
+
+/**
+ * Default configuration with hardcoded values suitable for autocomplete/NextEdit.
+ * Uses the same defaults from DEFAULT_AUTOCOMPLETE_OPTS.
+ */
+export const DEFAULT_MINIMAL_CONFIG: MinimalConfig = {
+  tabAutocompleteOptions: {
+    ...DEFAULT_AUTOCOMPLETE_OPTS,
+  },
+  experimental: {
+    enableStaticContextualization: false,
+  },
+};
+
+/**
+ * Simple config provider that replaces ConfigHandler for autocomplete/NextEdit.
+ * Returns hardcoded configuration without dependencies on control-plane.
+ */
+export class MinimalConfigProvider {
+  private config: MinimalConfig;
+  public currentProfile: MinimalProfile | undefined;
+
+  constructor(config?: Partial<MinimalConfig>) {
+    this.config = {
+      ...DEFAULT_MINIMAL_CONFIG,
+      ...config,
+      tabAutocompleteOptions: {
+        ...DEFAULT_AUTOCOMPLETE_OPTS,
+        ...config?.tabAutocompleteOptions,
+      } as TabAutocompleteOptions,
+      experimental: {
+        ...DEFAULT_MINIMAL_CONFIG.experimental,
+        ...config?.experimental,
+      },
+    };
+    
+    // Set a minimal profile for logging purposes
+    // In a minimal extraction, we don't have a control-plane profile
+    this.currentProfile = undefined;
+  }
+
+  /**
+   * Returns the config in the same shape as ConfigHandler.loadConfig()
+   * This maintains API compatibility with existing code.
+   */
+  async loadConfig(): Promise<{ config: MinimalConfig }> {
+    return { config: this.config };
+  }
+
+  /**
+   * Get autocomplete options directly
+   */
+  getAutocompleteOptions(): TabAutocompleteOptions {
+    return this.config.tabAutocompleteOptions || DEFAULT_AUTOCOMPLETE_OPTS;
+  }
+
+  /**
+   * Check if static contextualization is enabled
+   */
+  isStaticContextualizationEnabled(): boolean {
+    return this.config.experimental?.enableStaticContextualization ?? false;
+  }
+}
