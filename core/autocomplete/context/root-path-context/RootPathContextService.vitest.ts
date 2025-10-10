@@ -1,5 +1,5 @@
 import { describe, test } from "vitest";
-import { PYTHON_TEST_CASES, TYPESCRIPT_TEST_CASES } from "./testCases";
+import { PYTHON_TEST_CASES, TYPESCRIPT_TEST_CASES } from "./__test-cases__";
 import { testRootPathContext } from "./testUtils";
 
 const TEST_CASES = [
