@@ -15,6 +15,6 @@ export const openedFilesLruCache = new QuickLRU<
 });
 
 // used in core/core.ts to handle removals from the cache
-export const prevFilepaths = {
+const prevFilepaths = {
   filepaths: [] as string[],
 };

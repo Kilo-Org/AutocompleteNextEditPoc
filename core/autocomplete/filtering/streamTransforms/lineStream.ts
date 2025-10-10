@@ -150,7 +150,7 @@ export function hasNestedMarkdownBlocks(
 }
 
 // Wrapper for processBlockNesting with local shouldRemoveLineBeforeStart function
-export function processBlockNesting(
+function processBlockNesting(
   line: string,
   seenFirstFence: boolean,
 ): { newSeenFirstFence: boolean; shouldSkip: boolean } {
@@ -163,8 +163,8 @@ export function processBlockNesting(
 
 export const USELESS_LINES = [""];
 export const CODE_KEYWORDS_ENDING_IN_SEMICOLON = ["def"];
-export const CODE_STOP_BLOCK = "[/CODE]";
-export const BRACKET_ENDING_CHARS = [")", "]", "}", ";"];
+const CODE_STOP_BLOCK = "[/CODE]";
+const BRACKET_ENDING_CHARS = [")", "]", "}", ";"];
 export const PREFIXES_TO_SKIP = ["<COMPLETION>"];
 export const LINES_TO_STOP_AT = [
   "# End of file.",
@@ -173,7 +173,7 @@ export const LINES_TO_STOP_AT = [
   "```",
 ];
 export const LINES_TO_SKIP = ["</START EDITING HERE>", "<|updated_code|>"];
-export const LINES_TO_REMOVE_BEFORE_START = [
+const LINES_TO_REMOVE_BEFORE_START = [
   "<COMPLETION>",
   "[CODE]",
   "<START EDITING HERE>",
@@ -199,7 +199,7 @@ export const ENGLISH_POST_PHRASES = [
   "the above",
 ];
 
-export async function* noTopLevelKeywordsMidline(
+async function* noTopLevelKeywordsMidline(
   lines: LineStream,
   topLevelKeywords: string[],
   fullStop: () => void,
@@ -449,7 +449,7 @@ export async function* skipLines(stream: LineStream): LineStream {
  * @param {LineStream} stream - The input stream of lines.
  * @yields {string} Filtered lines that are stripped of trailing whitespace
  */
-export async function* removeTrailingWhitespace(
+async function* removeTrailingWhitespace(
   stream: LineStream,
 ): LineStream {
   for await (const line of stream) {
@@ -512,7 +512,7 @@ export async function* filterEnglishLinesAtEnd(lines: LineStream) {
   }
 }
 
-export async function* filterLeadingNewline(lines: LineStream): LineStream {
+async function* filterLeadingNewline(lines: LineStream): LineStream {
   let firstLine = true;
   for await (const line of lines) {
     if (firstLine && line.trim() === "") {
@@ -628,7 +628,7 @@ export async function* stopAtRepeatingLines(
  * Pass-through, except logs the total output at the end
  * @param lines a `LineStream`
  */
-export async function* logLines(
+async function* logLines(
   lines: LineStream,
   prefix: string = "STREAMED LINES",
 ): LineStream {

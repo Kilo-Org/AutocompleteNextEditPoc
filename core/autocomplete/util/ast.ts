@@ -46,7 +46,7 @@ export async function getTreePathAtCursor(
   return path;
 }
 
-export async function getScopeAroundRange(
+async function getScopeAroundRange(
   range: RangeInFileWithContents,
 ): Promise<RangeInFileWithContents | undefined> {
   const ast = await getAst(range.filepath, range.contents);

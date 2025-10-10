@@ -37,7 +37,7 @@ export interface MinimalProfile {
  * Default configuration with hardcoded values suitable for autocomplete/NextEdit.
  * Uses the same defaults from DEFAULT_AUTOCOMPLETE_OPTS.
  */
-export const DEFAULT_MINIMAL_CONFIG: MinimalConfig = {
+const DEFAULT_MINIMAL_CONFIG: MinimalConfig = {
   tabAutocompleteOptions: {
     ...DEFAULT_AUTOCOMPLETE_OPTS,
   },
