@@ -1,13 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": [
-    "extensions/vscode/src/extension.ts",
     "core/autocomplete/CompletionProvider.ts",
     "core/nextEdit/NextEditProvider.ts",
     "core/**/*.test.ts",
     "core/**/*.vitest.ts"
   ],
-  "project": ["core/**/*.ts", "extensions/vscode/src/**/*.ts"],
-  "ignore": ["**/*.d.ts", "**/node_modules/**", "**/dist/**", "**/.next/**"],
+  "project": ["core/**/*.ts"],
+  "ignore": [
+    "**/*.d.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "core/vscode-test-harness/**"
+  ],
   "ignoreDependencies": ["@types/*"]
 }
