@@ -2,7 +2,7 @@ import { IDE, Position } from "../..";
 import { AutocompleteCodeSnippet } from "../../autocomplete/snippets/types";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
 import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
-import { DataLogger } from "../../data/log";
+import { DataLogger } from "../../util/log";
 import { NextEditProvider } from "../NextEditProvider";
 import { RecentlyEditedRange } from "../types";
 import { getAutocompleteContext } from "./autocompleteContextFetching";

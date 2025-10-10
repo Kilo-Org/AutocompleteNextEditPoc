@@ -1,4 +1,4 @@
-import { DataLogger } from "../../data/log";
+import { DataLogger } from "../../util/log";
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../../util/parameters";
 import { Telemetry } from "../../util/posthog";
 import { getUriFileExtension } from "../../util/uri";

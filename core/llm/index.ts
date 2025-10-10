@@ -8,8 +8,8 @@ import {
 } from "./openai-adapters";
 import Handlebars from "handlebars";
 
-import { DevDataSqliteDb } from "../data/devdataSqlite.js";
-import { DataLogger } from "../data/log.js";
+import { DevDataSqliteDb } from "../util/devdataSqlite.js";
+import { DataLogger } from "../util/log.js";
 import {
   CacheBehavior,
   ChatMessage,
