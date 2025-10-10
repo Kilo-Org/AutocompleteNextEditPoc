@@ -4,7 +4,7 @@ import { EXTENSION_NAME } from "core/control-plane/env";
 import * as vscode from "vscode";
 
 import { DiffChar, DiffLine } from "core";
-import { CodeRenderer } from "core/codeRenderer/CodeRenderer";
+import { CodeRenderer } from "core/util/CodeRenderer";
 import { myersCharDiff } from "core/diff/myers";
 import { getOffsetPositionAtLastNewLine } from "core/nextEdit/diff/diff";
 import { NextEditLoggingService } from "core/nextEdit/NextEditLoggingService";

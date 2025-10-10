@@ -86,7 +86,7 @@ vi.mock("../src/util/getTheme", () => ({
   getThemeString: vi.fn(() => "dark"),
 }));
 
-vi.mock("core/codeRenderer/CodeRenderer", () => ({
+vi.mock("core/util/CodeRenderer", () => ({
   CodeRenderer: {
     getInstance: vi.fn(() => ({
       setTheme: vi.fn(),
