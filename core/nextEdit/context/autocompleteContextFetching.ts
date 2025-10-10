@@ -73,15 +73,15 @@ export const getAutocompleteContext = async (
   if (autocompleteModel) {
     if (typeof autocompleteModel === "string") {
       // Try to find the model in config first
-      const foundModel = config.modelsByRole.autocomplete.find(
-        (m) => m.title === autocompleteModel,
+      const foundModel = config.modelsByRole?.autocomplete?.find(
+        (m: ILLM) => m.title === autocompleteModel,
       );
       if (foundModel) {
         finalModel = foundModel;
         modelNameForTemplating = foundModel.model;
       } else {
         // Model not found in config, but we can still use it for template selection
-        const configuredModel = config.selectedModelByRole.autocomplete;
+        const configuredModel = config.selectedModelByRole?.autocomplete;
         if (!configuredModel) {
           throw new Error(
             "No autocomplete model configured and provided model not found in config",
@@ -95,7 +95,7 @@ export const getAutocompleteContext = async (
       modelNameForTemplating = autocompleteModel.model;
     }
   } else {
-    const configuredModel = config.selectedModelByRole.autocomplete;
+    const configuredModel = config.selectedModelByRole?.autocomplete;
     if (!configuredModel) {
       throw new Error("No autocomplete model configured and no model provided");
     }
