@@ -8,7 +8,7 @@ import { getAst, getTreePathAtCursor } from "core/autocomplete/util/ast";
 import {
   FUNCTION_BLOCK_NODE_TYPES,
   FUNCTION_DECLARATION_NODE_TYPEs,
-} from "core/indexing/chunk/code";
+} from "core/indexing/codeChunker";
 import { intersection } from "core/util/ranges";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
