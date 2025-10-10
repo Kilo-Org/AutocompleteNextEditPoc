@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { ConfigHandler } from "../config/ConfigHandler.js";
+import { MinimalConfigProvider } from "../autocomplete/MinimalConfig.js";
 import { ChatMessage, IDE, ILLM, Range, RangeInFile } from "../index.js";
 import OpenAI from "../llm/llms/OpenAI.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
@@ -75,7 +75,7 @@ export class NextEditProvider {
   private modelProvider: BaseNextEditModelProvider | null = null;
 
   private constructor(
-    private readonly configHandler: ConfigHandler,
+    private readonly configHandler: MinimalConfigProvider,
     private readonly ide: IDE,
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: any) => void,
@@ -89,7 +89,7 @@ export class NextEditProvider {
   }
 
   public static initialize(
-    configHandler: ConfigHandler,
+    configHandler: MinimalConfigProvider,
     ide: IDE,
     injectedGetLlm: () => Promise<ILLM | undefined>,
     onError: (e: any) => void,
