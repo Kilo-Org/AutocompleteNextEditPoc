@@ -1,15 +1,6 @@
-import { PolicyResponse } from "./client.js";
-
+// Minimal stub for removed control-plane functionality
 export class PolicySingleton {
-  private static instance: PolicySingleton;
-  public policy: PolicyResponse | null = null;
-
-  private constructor() {}
-
-  public static getInstance(): PolicySingleton {
-    if (!PolicySingleton.instance) {
-      PolicySingleton.instance = new PolicySingleton();
-    }
-    return PolicySingleton.instance;
+  static getInstance() {
+    return new PolicySingleton();
   }
 }

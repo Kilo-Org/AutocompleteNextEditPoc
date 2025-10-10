@@ -1,10 +1,6 @@
 import { ChatMessage, LLMOptions } from "..";
 
-import { allModelProviders } from "../llm-info";
-import { LlmInfo } from "../llm-info/types";
 import { BaseLLM } from ".";
-import { DEFAULT_CONTEXT_LENGTH } from "./constants";
-import { LLMClasses } from "./llms";
 import { LLMLogger } from "./logger";
 
 class DummyLLM extends BaseLLM {
@@ -164,32 +160,5 @@ describe("BaseLLM", () => {
   });
   describe("*streamChat", () => {
     // TODO: Implement tests for *streamChat method
-  });
-
-  describe("default context length", () => {
-    allModelProviders.map((modelProvider) => {
-      const LLMClass = LLMClasses.find(
-        (llm) => llm.providerName === modelProvider.id,
-      );
-      if (!LLMClass) {
-        throw new Error(`did not find LLM provider for ${modelProvider.id}`);
-      }
-      const testContextLength = (llmInfo: LlmInfo) => () => {
-        const llm = new LLMClass({ model: llmInfo.model });
-        if (llmInfo.contextLength) {
-          expect(llm.contextLength).toEqual(llmInfo.contextLength);
-        } else {
-          expect(llm.contextLength).toEqual(DEFAULT_CONTEXT_LENGTH);
-        }
-      };
-      describe(`${modelProvider.id}`, () => {
-        modelProvider.models.forEach((llmInfo) => {
-          test(
-            `should have correct context length for ${llmInfo.model}`,
-            testContextLength(llmInfo),
-          );
-        });
-      });
-    });
   });
 });

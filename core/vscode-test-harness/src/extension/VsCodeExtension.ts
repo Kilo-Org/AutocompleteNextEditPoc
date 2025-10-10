@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { IContextProvider } from "core";
-import { ConfigHandler } from "core/config/ConfigHandler";
+import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { EXTENSION_NAME, getControlPlaneEnv } from "core/control-plane/env";
 import { Core } from "core";
 import { FromCoreProtocol, ToCoreProtocol } from "core/protocol";
@@ -62,7 +62,7 @@ import type { VsCodeWebviewProtocol } from "../webviewProtocol";
 export class VsCodeExtension {
   // Currently some of these are public so they can be used in testing (test/test-suites)
 
-  private configHandler: ConfigHandler;
+  private configHandler: MinimalConfigProvider;
   private extensionContext: vscode.ExtensionContext;
   private ide: VsCodeIde;
   private ideUtils: VsCodeIdeUtils;
@@ -244,7 +244,7 @@ export class VsCodeExtension {
 
     // Dependencies of core
     let resolveConfigHandler: any = undefined;
-    const configHandlerPromise = new Promise<ConfigHandler>((resolve) => {
+    const configHandlerPromise = new Promise<MinimalConfigProvider>((resolve) => {
       resolveConfigHandler = resolve;
     });
 

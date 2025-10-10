@@ -2,10 +2,6 @@ import * as dotenv from "dotenv";
 
 import { AssistantChatMessage, CompletionOptions } from "..";
 
-import Anthropic from "./llms/Anthropic";
-import Azure from "./llms/Azure";
-import Gemini from "./llms/Gemini";
-import Mistral from "./llms/Mistral";
 import OpenAI from "./llms/OpenAI";
 
 import { BaseLLM } from ".";
@@ -183,15 +179,6 @@ function testLLM(
             }
           }
 
-          // For Mistral, if no tool calls were received, skip the test
-          // as it may not support forced tool use
-          if (args === "" && llm.constructor.name === "Mistral") {
-            console.log(
-              "Mistral did not return tool calls, skipping assertion",
-            );
-            return;
-          }
-
           const parsedArgs = JSON.parse(args);
           expect(parsedArgs.name).toBe("Nate");
         }),
@@ -211,13 +198,6 @@ describe("LLM", () => {
     return;
   }
 
-  testLLM(
-    new Anthropic({
-      model: "claude-sonnet-4-0",
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    }),
-    { skip: false, testToolCall: true },
-  );
   testLLM(new OpenAI({ apiKey: process.env.OPENAI_API_KEY, model: "gpt-4o" }), {
     skip: false,
     testToolCall: true,
@@ -230,38 +210,4 @@ describe("LLM", () => {
     skip: false,
     timeout: 60000,
   });
-  testLLM(
-    new Gemini({
-      model: "gemini-2.0-flash-exp",
-      apiKey: process.env.GEMINI_API_KEY,
-    }),
-    { skip: false },
-  );
-  testLLM(
-    new Mistral({
-      apiKey: process.env.MISTRAL_API_KEY,
-      model: "codestral-latest",
-    }),
-    { testFim: true, skip: false, testToolCall: true, timeout: 60000 },
-  );
-  testLLM(
-    new Azure({
-      apiKey: process.env.AZURE_OPENAI_API_KEY,
-      model: "gpt-4o",
-      apiVersion: "2024-05-01-preview",
-      apiBase: "https://continue-azure-openai-instance.openai.azure.com",
-      deployment: "azure-openai-deployment",
-      apiType: "azure-openai",
-    }),
-    { testFim: false, skip: false, timeout: 20000 },
-  );
-  testLLM(
-    new Azure({
-      apiKey: process.env.AZURE_FOUNDRY_CODESTRAL_API_KEY,
-      model: "Codestral-2501",
-      apiBase: "https://continue-foundry-resource.services.ai.azure.com",
-      env: { apiType: "azure-foundry", apiVersion: "2024-05-01-preview" },
-    }),
-    { testFim: false, skip: false, timeout: 20000 },
-  );
 });

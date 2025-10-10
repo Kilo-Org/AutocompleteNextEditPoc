@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getAutocompleteContext } from "./autocompleteContextFetching";
 import { Position } from "../..";
 import { IDE, ILLM } from "../../index";
-import { MinimalConfigProvider } from "../../config/MinimalConfig";
+import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
 
 // Mock dependencies
 vi.mock("../../indexing/ignore", () => ({

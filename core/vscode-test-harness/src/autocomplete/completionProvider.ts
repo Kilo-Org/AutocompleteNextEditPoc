@@ -4,7 +4,7 @@ import {
   type AutocompleteInput,
   type AutocompleteOutcome,
 } from "core/autocomplete/util/types";
-import { ConfigHandler } from "core/config/ConfigHandler";
+import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import * as URI from "uri-js";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
@@ -80,7 +80,7 @@ export class ContinueCompletionProvider
   }
 
   constructor(
-    private readonly configHandler: ConfigHandler,
+    private readonly configHandler: MinimalConfigProvider,
     private readonly ide: VsCodeIde,
     private readonly webviewProtocol: VsCodeWebviewProtocol,
     usingFullFileDiff: boolean,
