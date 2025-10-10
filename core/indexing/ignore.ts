@@ -95,7 +95,7 @@ export const DEFAULT_SECURITY_IGNORE_DIRS = [
 ];
 
 // Additional non-security patterns for general indexing exclusion
-export const ADDITIONAL_INDEXING_IGNORE_FILETYPES = [
+const ADDITIONAL_INDEXING_IGNORE_FILETYPES = [
   "*.DS_Store",
   "*-lock.json",
   "*.lock",
@@ -165,7 +165,7 @@ export const ADDITIONAL_INDEXING_IGNORE_FILETYPES = [
   ".continue/",
 ];
 
-export const ADDITIONAL_INDEXING_IGNORE_DIRS = [
+const ADDITIONAL_INDEXING_IGNORE_DIRS = [
   ".git/",
   ".svn/",
   "node_modules/",
@@ -194,17 +194,17 @@ export const ADDITIONAL_INDEXING_IGNORE_DIRS = [
 ];
 
 // Combined patterns: security + additional
-export const DEFAULT_IGNORE_FILETYPES = [
+const DEFAULT_IGNORE_FILETYPES = [
   ...DEFAULT_SECURITY_IGNORE_FILETYPES,
   ...ADDITIONAL_INDEXING_IGNORE_FILETYPES,
 ];
 
-export const DEFAULT_IGNORE_DIRS = [
+const DEFAULT_IGNORE_DIRS = [
   ...DEFAULT_SECURITY_IGNORE_DIRS,
   ...ADDITIONAL_INDEXING_IGNORE_DIRS,
 ];
 
-export const DEFAULT_IGNORES = [
+const DEFAULT_IGNORES = [
   ...DEFAULT_IGNORE_FILETYPES,
   ...DEFAULT_IGNORE_DIRS,
 ];
@@ -212,22 +212,22 @@ export const DEFAULT_IGNORES = [
 export const defaultIgnoresGlob = `!{${DEFAULT_IGNORES.join(",")}}`;
 
 // Create ignore instances
-export const defaultSecurityIgnoreFile = ignore().add(
+const defaultSecurityIgnoreFile = ignore().add(
   DEFAULT_SECURITY_IGNORE_FILETYPES,
 );
-export const defaultSecurityIgnoreDir = ignore().add(
+const defaultSecurityIgnoreDir = ignore().add(
   DEFAULT_SECURITY_IGNORE_DIRS,
 );
-export const defaultIgnoreFile = ignore().add(DEFAULT_IGNORE_FILETYPES);
-export const defaultIgnoreDir = ignore().add(DEFAULT_IGNORE_DIRS);
+const defaultIgnoreFile = ignore().add(DEFAULT_IGNORE_FILETYPES);
+const defaultIgnoreDir = ignore().add(DEFAULT_IGNORE_DIRS);
 
 // String representations
-export const DEFAULT_SECURITY_IGNORE =
+const DEFAULT_SECURITY_IGNORE =
   DEFAULT_SECURITY_IGNORE_FILETYPES.join("\n") +
   "\n" +
   DEFAULT_SECURITY_IGNORE_DIRS.join("\n");
 
-export const DEFAULT_IGNORE =
+const DEFAULT_IGNORE =
   DEFAULT_IGNORE_FILETYPES.join("\n") + "\n" + DEFAULT_IGNORE_DIRS.join("\n");
 
 // Combined ignore instances

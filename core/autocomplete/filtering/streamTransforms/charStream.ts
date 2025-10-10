@@ -8,7 +8,7 @@
  * @yields {string} Characters from the input stream.
  * @returns {AsyncGenerator<string>} An async generator that yields characters.
  */
-export async function* onlyWhitespaceAfterEndOfLine(
+async function* onlyWhitespaceAfterEndOfLine(
   stream: AsyncGenerator<string>,
   endOfLine: string[],
   fullStop: () => void,
@@ -45,7 +45,7 @@ export async function* onlyWhitespaceAfterEndOfLine(
  * @param {AsyncGenerator<string>} stream - The input character stream.
  * @yields {string} Characters from the stream.
  */
-export async function* noFirstCharNewline(stream: AsyncGenerator<string>) {
+async function* noFirstCharNewline(stream: AsyncGenerator<string>) {
   let first = true;
   for await (const char of stream) {
     if (first) {

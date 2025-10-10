@@ -32,15 +32,15 @@ const CONTINUE_GLOBAL_DIR = (() => {
 //   return config;
 // }`;
 
-export const DEFAULT_CONFIG_TS_CONTENTS = `export function modifyConfig(config: Config): Config {
+const DEFAULT_CONFIG_TS_CONTENTS = `export function modifyConfig(config: Config): Config {
   return config;
 }`;
 
-export function getChromiumPath(): string {
+function getChromiumPath(): string {
   return path.join(getContinueUtilsPath(), ".chromium-browser-snapshots");
 }
 
-export function getContinueUtilsPath(): string {
+function getContinueUtilsPath(): string {
   const utilsPath = path.join(getContinueGlobalPath(), ".utils");
   if (!fs.existsSync(utilsPath)) {
     fs.mkdirSync(utilsPath);
@@ -76,7 +76,7 @@ export function getSessionsFolderPath(): string {
   return sessionsPath;
 }
 
-export function getIndexFolderPath(): string {
+function getIndexFolderPath(): string {
   const indexPath = path.join(getContinueGlobalPath(), "index");
   if (!fs.existsSync(indexPath)) {
     fs.mkdirSync(indexPath);
@@ -88,7 +88,7 @@ export function getGlobalContextFilePath(): string {
   return path.join(getIndexFolderPath(), "globalContext.json");
 }
 
-export function getSharedConfigFilePath(): string {
+function getSharedConfigFilePath(): string {
   return path.join(getContinueGlobalPath(), "sharedConfig.json");
 }
 
@@ -124,7 +124,7 @@ export function getConfigYamlPath(ideType?: IdeType): string {
   return p;
 }
 
-export function getPrimaryConfigFilePath(): string {
+function getPrimaryConfigFilePath(): string {
   const configYamlPath = getConfigYamlPath();
   if (fs.existsSync(configYamlPath)) {
     return configYamlPath;
@@ -163,12 +163,12 @@ export function getConfigTsPath(): string {
   return p;
 }
 
-export function getConfigJsPath(): string {
+function getConfigJsPath(): string {
   // Do not create automatically
   return path.join(getContinueGlobalPath(), "out", "config.js");
 }
 
-export function getTsConfigPath(): string {
+function getTsConfigPath(): string {
   const tsConfigPath = path.join(getContinueGlobalPath(), "tsconfig.json");
   if (!fs.existsSync(tsConfigPath)) {
     fs.writeFileSync(
@@ -202,7 +202,7 @@ export function getTsConfigPath(): string {
   return tsConfigPath;
 }
 
-export function getContinueRcPath(): string {
+function getContinueRcPath(): string {
   // Disable indexing of the config folder to prevent infinite loops
   const continuercPath = path.join(getContinueGlobalPath(), ".continuerc.json");
   if (!fs.existsSync(continuercPath)) {
@@ -269,7 +269,7 @@ function editConfigYaml(callback: (config: ConfigYaml) => ConfigYaml): void {
   }
 }
 
-export function editConfigFile(
+function editConfigFile(
   configJsonCallback: (
     config: SerializedContinueConfig,
   ) => SerializedContinueConfig,
@@ -290,7 +290,7 @@ function getMigrationsFolderPath(): string {
   return migrationsPath;
 }
 
-export async function migrate(
+async function migrate(
   id: string,
   callback: () => void | Promise<void>,
   onAlreadyComplete?: () => void,
@@ -320,7 +320,7 @@ export function getIndexSqlitePath(): string {
   return path.join(getIndexFolderPath(), "index.sqlite");
 }
 
-export function getLanceDbPath(): string {
+function getLanceDbPath(): string {
   return path.join(getIndexFolderPath(), "lancedb");
 }
 
@@ -328,11 +328,11 @@ export function getTabAutocompleteCacheSqlitePath(): string {
   return path.join(getIndexFolderPath(), "autocompleteCache.sqlite");
 }
 
-export function getDocsSqlitePath(): string {
+function getDocsSqlitePath(): string {
   return path.join(getIndexFolderPath(), "docs.sqlite");
 }
 
-export function getRemoteConfigsFolderPath(): string {
+function getRemoteConfigsFolderPath(): string {
   const dir = path.join(getContinueGlobalPath(), ".configs");
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
@@ -340,7 +340,7 @@ export function getRemoteConfigsFolderPath(): string {
   return dir;
 }
 
-export function getPathToRemoteConfig(remoteConfigServerUrl: string): string {
+function getPathToRemoteConfig(remoteConfigServerUrl: string): string {
   let url: URL | undefined = undefined;
   try {
     url =
@@ -355,19 +355,19 @@ export function getPathToRemoteConfig(remoteConfigServerUrl: string): string {
   return dir;
 }
 
-export function getConfigJsonPathForRemote(
+function getConfigJsonPathForRemote(
   remoteConfigServerUrl: string,
 ): string {
   return path.join(getPathToRemoteConfig(remoteConfigServerUrl), "config.json");
 }
 
-export function getConfigJsPathForRemote(
+function getConfigJsPathForRemote(
   remoteConfigServerUrl: string,
 ): string {
   return path.join(getPathToRemoteConfig(remoteConfigServerUrl), "config.js");
 }
 
-export function getContinueDotEnv(): { [key: string]: string } {
+function getContinueDotEnv(): { [key: string]: string } {
   const filepath = path.join(getContinueGlobalPath(), ".env");
   if (fs.existsSync(filepath)) {
     return dotenv.parse(fs.readFileSync(filepath));
@@ -375,7 +375,7 @@ export function getContinueDotEnv(): { [key: string]: string } {
   return {};
 }
 
-export function getLogsDirPath(): string {
+function getLogsDirPath(): string {
   const logsPath = path.join(getContinueGlobalPath(), "logs");
   if (!fs.existsSync(logsPath)) {
     fs.mkdirSync(logsPath);
@@ -383,23 +383,23 @@ export function getLogsDirPath(): string {
   return logsPath;
 }
 
-export function getCoreLogsPath(): string {
+function getCoreLogsPath(): string {
   return path.join(getLogsDirPath(), "core.log");
 }
 
-export function getPromptLogsPath(): string {
+function getPromptLogsPath(): string {
   return path.join(getLogsDirPath(), "prompt.log");
 }
 
-export function getGlobalFolderWithName(name: string): string {
+function getGlobalFolderWithName(name: string): string {
   return path.join(getContinueGlobalPath(), name);
 }
 
-export function getGlobalPromptsPath(): string {
+function getGlobalPromptsPath(): string {
   return getGlobalFolderWithName("prompts");
 }
 
-export function readAllGlobalPromptFiles(
+function readAllGlobalPromptFiles(
   folderPath: string = getGlobalPromptsPath(),
 ): { path: string; content: string }[] {
   if (!fs.existsSync(folderPath)) {
@@ -427,11 +427,11 @@ export function getRepoMapFilePath(): string {
   return path.join(getContinueUtilsPath(), "repo_map.txt");
 }
 
-export function getEsbuildBinaryPath(): string {
+function getEsbuildBinaryPath(): string {
   return path.join(getContinueUtilsPath(), "esbuild");
 }
 
-export function migrateV1DevDataFiles() {
+function migrateV1DevDataFiles() {
   const devDataPath = getDevDataPath();
   function moveToV1FolderIfExists(
     oldFileName: string,
@@ -452,15 +452,15 @@ export function migrateV1DevDataFiles() {
   moveToV1FolderIfExists("autocomplete", "autocomplete");
 }
 
-export function getLocalEnvironmentDotFilePath(): string {
+function getLocalEnvironmentDotFilePath(): string {
   return path.join(getContinueGlobalPath(), ".local");
 }
 
-export function getStagingEnvironmentDotFilePath(): string {
+function getStagingEnvironmentDotFilePath(): string {
   return path.join(getContinueGlobalPath(), ".staging");
 }
 
-export function getDiffsDirectoryPath(): string {
+function getDiffsDirectoryPath(): string {
   const diffsPath = path.join(getContinueGlobalPath(), ".diffs"); // .replace(/^C:/, "c:"); ??
   if (!fs.existsSync(diffsPath)) {
     fs.mkdirSync(diffsPath, {
@@ -470,7 +470,7 @@ export function getDiffsDirectoryPath(): string {
   return diffsPath;
 }
 
-export const isFileWithinFolder = (
+const isFileWithinFolder = (
   fileUri: string,
   folderPath: string,
 ): boolean => {

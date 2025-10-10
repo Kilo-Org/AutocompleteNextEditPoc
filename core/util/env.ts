@@ -9,6 +9,6 @@ export function getControlPlaneEnvSync() {
   return undefined;
 }
 
-export function useHub() {
+function useHub() {
   return false;
 }
