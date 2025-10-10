@@ -1,4 +1,4 @@
-import { ConfigHandler } from "core/config/ConfigHandler";
+import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { DataLogger } from "core/data/log";
 import { EDIT_MODE_STREAM_ID } from "core/edit/constants";
 import {
@@ -81,7 +81,7 @@ export class VsCodeMessenger {
     private readonly webviewProtocol: VsCodeWebviewProtocol,
     private readonly ide: VsCodeIde,
     private readonly verticalDiffManagerPromise: Promise<VerticalDiffManager>,
-    private readonly configHandlerPromise: Promise<ConfigHandler>,
+    private readonly configHandlerPromise: Promise<MinimalConfigProvider>,
     private readonly workOsAuthProvider: WorkOsAuthProvider,
     private readonly editDecorationManager: EditDecorationManager,
     private readonly context: vscode.ExtensionContext,

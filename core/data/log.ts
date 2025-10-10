@@ -1,12 +1,11 @@
 import fs from "fs";
 import path from "path";
 
-import {
-  allDevEventNames,
-  DataLogLevel,
-  DevDataLogEvent,
-  devDataVersionedSchemas,
-} from "../config/yaml-package";
+// Stub types that were in yaml-package (no longer needed for minimal autocomplete)
+type DataLogLevel = "all" | "off";
+type DevDataLogEvent = any;
+const allDevEventNames: string[] = [];
+const devDataVersionedSchemas: any = {};
 import { fetchwithRequestOptions } from "../fetch";
 import * as URI from "uri-js";
 import { fileURLToPath } from "url";

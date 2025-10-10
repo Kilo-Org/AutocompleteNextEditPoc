@@ -9,7 +9,7 @@ import {
   AutocompleteInput,
   RecentlyEditedRange,
 } from "../../autocomplete/util/types";
-import { MinimalConfigProvider } from "../../config/MinimalConfig";
+import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
 import { IDE, ILLM } from "../../index";
 import { isSecurityConcern } from "../../indexing/ignore";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../../util/parameters";

@@ -1,6 +1,6 @@
 import { IDE, Position } from "../..";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
-import { MinimalConfigProvider } from "../../config/MinimalConfig";
+import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
 import { NextEditProvider } from "../NextEditProvider";
 import { EditAggregator } from "./aggregateEdits";
 import { BeforeAfterDiff, createDiff, DiffFormatType } from "./diffFormatting";

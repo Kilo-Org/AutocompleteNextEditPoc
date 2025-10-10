@@ -4,13 +4,16 @@ import * as path from "path";
 import * as URI from "uri-js";
 import * as YAML from "yaml";
 
-import { ConfigYaml, DevEventName } from "../config/yaml-package";
 import * as JSONC from "comment-json";
 import dotenv from "dotenv";
 
 import { IdeType, SerializedContinueConfig } from "../";
-import { defaultConfig } from "../config/default";
-import Types from "../config/types";
+// Minimal config for autocomplete - no longer using complex config system
+const defaultConfig = {};
+
+// Stub types that were in yaml-package (no longer needed for autocomplete)
+type ConfigYaml = any;
+type DevEventName = string;
 
 dotenv.config();
 
