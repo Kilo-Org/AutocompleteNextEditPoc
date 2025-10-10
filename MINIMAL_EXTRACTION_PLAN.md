@@ -4,9 +4,15 @@
 
 **Knip-Driven**: Use Knip at each phase to validate no dead code remains
 
-**Test Validation**: All changes must pass `./test-autocomplete.sh` (532 tests)
+**Test Validation**: IMPORTANT: after EVERY CHANGE run `./test-autocomplete.sh` and make sure all tests pass. (532 tests).
 
-**Commit regularly**: After each step, after you've done what you want and ensure the tests still pass, make a commit with a GOOD commit message.
+**Ignored files** If you delete a directory, don't forget to also delete the ignored files therein; otherwise we might accidentally commit temporary files.
+
+**Moving files** When moving files or rearranging code, don't forget to update references to those files, including in things like package.json
+
+**Package updates** When updating package.json, call npm install where relevant.
+
+**Commit regularly**: After each step, and after ensuring the tests still pass, make a commit with a GOOD commit message. Check the `git status` before committing to make sure you're committing what you expect.
 
 ---
 
