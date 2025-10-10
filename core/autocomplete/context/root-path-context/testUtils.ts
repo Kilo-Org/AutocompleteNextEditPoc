@@ -4,10 +4,10 @@ import { expect, vi } from "vitest";
 
 import Parser from "web-tree-sitter";
 import { Position } from "../../../..";
-import { testIde } from "../../../../test/fixtures";
-import { getAst, getTreePathAtCursor } from "../../../util/ast";
-import { ImportDefinitionsService } from "../../ImportDefinitionsService";
-import { RootPathContextService } from "../RootPathContextService";
+import { testIde } from "../../../test/fixtures";
+import { getAst, getTreePathAtCursor } from "../../util/ast";
+import { ImportDefinitionsService } from "../ImportDefinitionsService";
+import { RootPathContextService } from "./RootPathContextService";
 
 function splitTextAtPosition(
   fileContent: string,
@@ -50,7 +50,7 @@ export async function testRootPathContext(
     "autocomplete",
     "context",
     "root-path-context",
-    "test",
+    "__fixtures__",
     folderName,
   );
   const workspaceDir = (await ide.getWorkspaceDirs())[0];

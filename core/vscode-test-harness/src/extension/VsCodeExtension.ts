@@ -3,7 +3,7 @@ import path from "path";
 
 import { IContextProvider } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { EXTENSION_NAME, getControlPlaneEnv } from "core/control-plane/env";
+import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
 import { Core } from "core";
 import { FromCoreProtocol, ToCoreProtocol } from "core/protocol";
 import { InProcessMessenger } from "core/protocol/messenger";

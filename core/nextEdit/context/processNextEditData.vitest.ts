@@ -13,7 +13,7 @@ vi.mock("../NextEditProvider", () => ({
   },
 }));
 
-vi.mock("../../data/log", () => ({
+vi.mock("../../util/log", () => ({
   DataLogger: {
     getInstance: vi.fn(),
   },
@@ -37,7 +37,7 @@ vi.mock("./prevEditLruCache", () => ({
 // Import mocked modules
 import { getAutocompleteContext } from "./autocompleteContextFetching";
 import { NextEditProvider } from "../NextEditProvider";
-import { DataLogger } from "../../data/log";
+import { DataLogger } from "../../util/log";
 import { createDiff } from "./diffFormatting";
 import { getPrevEditsDescending, setPrevEdit, prevEditLruCache } from "./prevEditLruCache";
 

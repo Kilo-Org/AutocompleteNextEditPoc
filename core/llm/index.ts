@@ -1,6 +1,6 @@
 import { ModelRole } from "../../config/yaml-package";
 import { fetchwithRequestOptions } from "../fetch";
-import { findLlmInfo } from "../llm-info";
+import { findLlmInfo } from "./model-info";
 import {
   BaseLlmApi,
   ChatCompletionCreateParams,
@@ -8,8 +8,8 @@ import {
 } from "./openai-adapters";
 import Handlebars from "handlebars";
 
-import { DevDataSqliteDb } from "../data/devdataSqlite.js";
-import { DataLogger } from "../data/log.js";
+import { DevDataSqliteDb } from "../util/devdataSqlite.js";
+import { DataLogger } from "../util/log.js";
 import {
   CacheBehavior,
   ChatMessage,

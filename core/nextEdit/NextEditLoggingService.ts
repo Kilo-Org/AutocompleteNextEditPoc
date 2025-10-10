@@ -1,8 +1,8 @@
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../util/parameters";
 
 import { fetchwithRequestOptions } from "../fetch";
-import { getControlPlaneEnvSync } from "../control-plane/env";
-import { DataLogger } from "../data/log";
+import { getControlPlaneEnvSync } from "../util/env";
+import { DataLogger } from "../util/log";
 import { Telemetry } from "../util/posthog";
 import { NextEditOutcome } from "./types";
 

@@ -1,5 +1,5 @@
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { DataLogger } from "core/data/log";
+import { DataLogger } from "core/util/log";
 import { EDIT_MODE_STREAM_ID } from "core/edit/constants";
 import {
   FromCoreProtocol,

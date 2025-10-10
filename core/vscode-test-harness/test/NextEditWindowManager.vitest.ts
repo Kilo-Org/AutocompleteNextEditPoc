@@ -77,7 +77,7 @@ vi.mock("vscode", () => ({
   },
 }));
 
-vi.mock("core/control-plane/env", () => ({
+vi.mock("core/util/env", () => ({
   EXTENSION_NAME: "continue",
 }));
 
@@ -86,7 +86,7 @@ vi.mock("../src/util/getTheme", () => ({
   getThemeString: vi.fn(() => "dark"),
 }));
 
-vi.mock("core/codeRenderer/CodeRenderer", () => ({
+vi.mock("core/util/CodeRenderer", () => ({
   CodeRenderer: {
     getInstance: vi.fn(() => ({
       setTheme: vi.fn(),
