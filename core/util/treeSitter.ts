@@ -183,9 +183,7 @@ export async function getQueryForFile(
   const sourcePath = path.join(
     process.env.NODE_ENV === "test" ? process.cwd() : __dirname,
     "..",
-    ...(process.env.NODE_ENV === "test"
-      ? ["extensions", "vscode", "tree-sitter"]
-      : ["tree-sitter"]),
+    "tree-sitter",
     queryPath,
   );
   if (!fs.existsSync(sourcePath)) {

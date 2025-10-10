@@ -10,5 +10,6 @@ export default defineConfig({
     setupFiles: "./test/vitest.setup.ts",
     fileParallelism: false,
     include: ["**/*.vitest.ts"],
+    exclude: ["**/node_modules/**", "**/vscode-test-harness/**"],
   },
 });

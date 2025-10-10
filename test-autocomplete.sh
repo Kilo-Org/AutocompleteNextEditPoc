@@ -1,13 +1,13 @@
 #!/bin/bash
 set -e  # Exit on first error
 
-pushd core 
+pushd core
 echo "🧪 Running Core Vitest tests (autocomplete & nextEdit)..."
 npm run vitest -- autocomplete nextEdit
 popd
 
-echo "🧪 Running VSCode unit tests..."
-pushd extensions/vscode 
+echo "🧪 Running VSCode Integration tests (new location)..."
+pushd core/vscode-test-harness
 npm test
 popd
 
