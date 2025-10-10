@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { MinimalConfigProvider } from "../autocomplete/MinimalConfig.js";
+import { MinimalConfigProvider } from "../config/MinimalConfig.js";
 import { ChatMessage, IDE, ILLM, Range, RangeInFile } from "../index.js";
 import OpenAI from "../llm/llms/OpenAI.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";

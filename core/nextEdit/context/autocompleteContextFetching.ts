@@ -9,7 +9,7 @@ import {
   AutocompleteInput,
   RecentlyEditedRange,
 } from "../../autocomplete/util/types";
-import { ConfigHandler } from "../../config/ConfigHandler";
+import { MinimalConfigProvider } from "../../config/MinimalConfig";
 import { IDE, ILLM } from "../../index";
 import { isSecurityConcern } from "../../indexing/ignore";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../../util/parameters";
@@ -35,7 +35,7 @@ export const getAutocompleteContext = async (
   filepath: string,
   pos: Position,
   ide: IDE,
-  configHandler: ConfigHandler,
+  configHandler: MinimalConfigProvider,
   getDefinitionsFromLsp: GetLspDefinitionsFunction = async () => [],
   recentlyEditedRanges: RecentlyEditedRange[],
   recentlyVisitedRanges: AutocompleteCodeSnippet[],

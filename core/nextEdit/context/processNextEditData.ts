@@ -1,7 +1,7 @@
 import { IDE, Position } from "../..";
 import { AutocompleteCodeSnippet } from "../../autocomplete/snippets/types";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
-import { ConfigHandler } from "../../config/ConfigHandler";
+import { MinimalConfigProvider } from "../../config/MinimalConfig";
 import { DataLogger } from "../../data/log";
 import { NextEditProvider } from "../NextEditProvider";
 import { RecentlyEditedRange } from "../types";
@@ -27,7 +27,7 @@ interface ProcessNextEditDataParams {
   cursorPosBeforeEdit: Position;
   cursorPosAfterPrevEdit: Position;
   ide: IDE;
-  configHandler: ConfigHandler;
+  configHandler: MinimalConfigProvider;
   getDefinitionsFromLsp: GetLspDefinitionsFunction;
   recentlyEditedRanges: RecentlyEditedRange[];
   recentlyVisitedRanges: AutocompleteCodeSnippet[];

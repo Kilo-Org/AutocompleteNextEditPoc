@@ -1,6 +1,6 @@
 import { IDE, Position } from "../..";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
-import { ConfigHandler } from "../../config/ConfigHandler";
+import { MinimalConfigProvider } from "../../config/MinimalConfig";
 import { NextEditProvider } from "../NextEditProvider";
 import { EditAggregator } from "./aggregateEdits";
 import { BeforeAfterDiff, createDiff, DiffFormatType } from "./diffFormatting";
@@ -10,7 +10,7 @@ export const processSmallEdit = async (
   beforeAfterdiff: BeforeAfterDiff,
   cursorPosBeforeEdit: Position,
   cursorPosAfterPrevEdit: Position,
-  configHandler: ConfigHandler,
+  configHandler: MinimalConfigProvider,
   getDefsFromLspFunction: GetLspDefinitionsFunction,
   ide: IDE,
 ) => {
