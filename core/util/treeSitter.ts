@@ -180,15 +180,26 @@ export async function getQueryForFile(
     return undefined;
   }
 
-  const sourcePath = path.join(
-    process.env.NODE_ENV === "test" ? process.cwd() : __dirname,
-    "..",
-    "tree-sitter",
-    queryPath,
-  );
-  if (!fs.existsSync(sourcePath)) {
+  // Resolve the query file from consolidated tree-sitter directory.
+  // Prefer repo-root/tree-sitter in tests and runtime, but also fall back to core-local layout.
+  const baseRoots = [
+    process.env.NODE_ENV === "test" ? process.cwd() : undefined, // e.g. .../continue/core (tests run from core/)
+    path.resolve(__dirname, "..", ".."), // repo root when __dirname is .../core/util
+    path.resolve(__dirname, ".."), // legacy fallback: .../core
+  ].filter(Boolean) as string[];
+
+  let sourcePath: string | undefined = undefined;
+  for (const root of baseRoots) {
+    const candidate = path.join(root, "tree-sitter", queryPath);
+    if (fs.existsSync(candidate)) {
+      sourcePath = candidate;
+      break;
+    }
+  }
+  if (!sourcePath) {
     return undefined;
   }
+
   const querySource = fs.readFileSync(sourcePath).toString();
 
   const query = language.query(querySource);
