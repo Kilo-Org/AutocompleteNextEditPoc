@@ -1,4 +1,4 @@
-import { RequestOptions } from "../../config-types";
+import { RequestOptions } from "../../index.js";
 import { fetchwithRequestOptions, patchedFetch } from "../../fetch";
 import {
   ChatCompletionChunk,
