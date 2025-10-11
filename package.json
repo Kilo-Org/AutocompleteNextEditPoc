@@ -1,6 +1,15 @@
 {
   "name": "continue",
   "scripts": {
+    "test": "npm run test:core && npm run test:harness",
+    "test:core": "cd core && npm test",
+    "test:harness": "cd core/vscode-test-harness && npm test",
+    "test:watch": "npm run test:core -- --watch",
+    "lint": "cd core && npm run lint",
+    "lint:fix": "cd core && npm run lint:fix",
+    "build": "npm run build:core",
+    "build:core": "cd core && npm run build",
+    "typecheck": "cd core && npm run tsc:check",
     "tsc:watch": "concurrently -n vscode,core -c magenta,yellow \"npm run tsc:watch:vscode\" \"npm run tsc:watch:core\"",
     "tsc:watch:vscode": "tsc --project extensions/vscode/tsconfig.json --watch --noEmit --pretty",
     "tsc:watch:core": "tsc --project core/tsconfig.json --watch --noEmit --pretty",
