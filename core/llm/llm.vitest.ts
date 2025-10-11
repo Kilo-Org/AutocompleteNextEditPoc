@@ -1,3 +1,4 @@
+import { beforeAll, describe, expect, test } from "vitest";
 import * as dotenv from "dotenv";
 
 import { AssistantChatMessage, CompletionOptions } from "..";
