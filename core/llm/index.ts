@@ -1,4 +1,4 @@
-import { ModelRole } from "../../config/yaml-package";
+import { ModelRole } from "../index.js";
 import { fetchwithRequestOptions } from "../fetch";
 import { findLlmInfo } from "./model-info";
 import {

@@ -3,7 +3,7 @@ import {
   decodeSecretLocation,
   parseProxyModelName,
   SecretType,
-} from "../../../config/yaml-package";
+} from "../../../index.js";
 
 import { ControlPlaneProxyInfo } from "../../../util/IAnalyticsProvider.js";
 import { Telemetry } from "../../../util/posthog.js";

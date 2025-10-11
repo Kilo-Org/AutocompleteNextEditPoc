@@ -1,9 +1,24 @@
-import {
-  DataDestination,
-  ModelRole,
-  PromptTemplates,
-} from "../config/yaml-package";
 import Parser from "web-tree-sitter";
+
+// Stub types that were in yaml-package (no longer needed for minimal autocomplete)
+export type ModelRole = "chat" | "edit" | "autocomplete" | "apply" | "repoMapFileSelection";
+export type DataDestination = any;
+export type PromptTemplates = Record<string, any>;
+export enum SecretType {
+  NotFound = "not_found",
+}
+export function parseProxyModelName(model: string): { provider: string; model: string } {
+  const parts = model.split("/");
+  return {
+    provider: parts[0] || "continue-proxy",
+    model: parts.slice(1).join("/") || model,
+  };
+}
+export type ContinueProperties = any;
+export function decodeSecretLocation(location: string): { secretType: SecretType } {
+  return { secretType: SecretType.NotFound };
+}
+
 import { CodebaseIndexer } from "./indexing/CodebaseIndexer";
 import { LLMConfigurationStatuses } from "./llm/constants";
 

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 
-import { ModelRole } from "../config/yaml-package";
+import { ModelRole } from "../index.js";
 import {
   OAuthClientInformationFull,
   OAuthTokens,
