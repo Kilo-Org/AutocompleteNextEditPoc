@@ -247,7 +247,13 @@ describe("autocompleteContextFetching", () => {
       (getAllSnippetsWithoutRace as any).mockClear();
 
       const recentlyEditedRanges = [
-        { filepath: "test.ts", range: { start: { line: 0, character: 0 }, end: { line: 0, character: 5 } } },
+        {
+          filepath: "test.ts",
+          range: {
+            start: { line: 0, character: 0 },
+            end: { line: 0, character: 5 },
+          },
+        },
       ];
       const recentlyVisitedRanges = [
         { filepath: "other.ts", contents: "test", score: 1.0 },

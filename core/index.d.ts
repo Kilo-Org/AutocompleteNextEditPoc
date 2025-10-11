@@ -1,13 +1,21 @@
 import Parser from "web-tree-sitter";
 
 // Stub types that were in yaml-package (no longer needed for minimal autocomplete)
-export type ModelRole = "chat" | "edit" | "autocomplete" | "apply" | "repoMapFileSelection";
+export type ModelRole =
+  | "chat"
+  | "edit"
+  | "autocomplete"
+  | "apply"
+  | "repoMapFileSelection";
 export type DataDestination = any;
 export type PromptTemplates = Record<string, any>;
 export enum SecretType {
   NotFound = "not_found",
 }
-export function parseProxyModelName(model: string): { provider: string; model: string } {
+export function parseProxyModelName(model: string): {
+  provider: string;
+  model: string;
+} {
   const parts = model.split("/");
   return {
     provider: parts[0] || "continue-proxy",
@@ -15,7 +23,9 @@ export function parseProxyModelName(model: string): { provider: string; model: s
   };
 }
 export type ContinueProperties = any;
-export function decodeSecretLocation(location: string): { secretType: SecretType } {
+export function decodeSecretLocation(location: string): {
+  secretType: SecretType;
+} {
   return { secretType: SecretType.NotFound };
 }
 
@@ -1989,11 +1999,19 @@ export interface IMessenger<TFrom = any, TTo = any> {
   request?(messageType: string, data: any): Promise<any>;
 }
 
-export class InProcessMessenger<TFrom = any, TTo = any> implements IMessenger<TFrom, TTo> {
+export class InProcessMessenger<TFrom = any, TTo = any>
+  implements IMessenger<TFrom, TTo>
+{
   send(messageType: string, data: any, messageId?: string): string;
-  on<T extends keyof TFrom>(messageType: T, handler: (message: Message<any>) => void): void;
+  on<T extends keyof TFrom>(
+    messageType: T,
+    handler: (message: Message<any>) => void,
+  ): void;
   request(messageType: string, data: any): Promise<any>;
-  externalOn?(messageType: string, handler: (message: Message<any>) => void): void;
+  externalOn?(
+    messageType: string,
+    handler: (message: Message<any>) => void,
+  ): void;
   externalRequest?(messageType: string, data: any): Promise<any>;
 }
 
@@ -2022,7 +2040,9 @@ export interface MinimalConfig {
 declare module "core/autocomplete/MinimalConfig" {
   export interface MinimalConfigProvider {
     reloadConfig?(): Promise<void>;
-    onConfigUpdate?(handler: (newConfig: any, configLoadInterrupted: boolean) => void): void;
+    onConfigUpdate?(
+      handler: (newConfig: any, configLoadInterrupted: boolean) => void,
+    ): void;
     registerCustomContextProvider?(provider: any): void;
   }
 }

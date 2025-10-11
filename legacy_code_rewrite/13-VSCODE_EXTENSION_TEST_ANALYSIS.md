@@ -8,6 +8,7 @@
 ## Executive Summary
 
 All 6 test files analyzed are **RELEVANT** to autocomplete/nextEdit functionality. They provide comprehensive integration testing for:
+
 - **Autocomplete:** Ghost text acceptance tracking, completion provider logic
 - **NextEdit:** Window management, jump suggestions, selection handling, prefetch queuing
 
@@ -25,6 +26,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** Integration between autocomplete and nextEdit completion providers
 
 **What It Tests:**
+
 - NextEdit triggering logic (when to start new chains vs use existing)
 - Chain existence and deletion management
 - Prefetch queue integration (processed vs unprocessed items)
@@ -33,6 +35,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - Completion item generation from nextEdit outcomes
 
 **Key Imports:**
+
 - [`completionProvider.ts`](extensions/vscode/src/autocomplete/completionProvider.ts:5) - Main class under test
 - `core/nextEdit/NextEditProvider` - Core nextEdit provider
 - `core/nextEdit/NextEditPrefetchQueue` - Prefetch queue management
@@ -49,6 +52,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** Ghost text acceptance detection for autocomplete
 
 **What It Tests:**
+
 - Singleton pattern implementation
 - Tracking expected ghost text acceptance (single-line and multi-line)
 - Differentiating ghost text acceptance from cursor movement
@@ -57,6 +61,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - Edge cases (empty text, multi-line text, errors)
 
 **Key Imports:**
+
 - [`GhostTextAcceptanceTracker.ts`](extensions/vscode/src/autocomplete/GhostTextAcceptanceTracker.vitest.ts:3) - Main class under test
 
 **Rationale for KEEP:** Essential for autocomplete functionality. Prevents false rejection of completions when cursor moves due to acceptance rather than user navigation.
@@ -69,6 +74,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** NextEdit window/decoration management and user interaction
 
 **What It Tests:**
+
 - Singleton pattern
 - Key reservation state management (Tab/Esc keys)
 - Race condition prevention for concurrent operations
@@ -80,6 +86,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - Decoration creation and disposal
 
 **Key Imports:**
+
 - [`NextEditWindowManager.ts`](extensions/vscode/src/activation/NextEditWindowManager.vitest.ts:129) - Main class under test
 - `core/nextEdit/NextEditProvider` - Provider integration
 - `core/nextEdit/NextEditLoggingService` - Logging integration
@@ -95,6 +102,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** Jump suggestions between nextEdit editable regions
 
 **What It Tests:**
+
 - Singleton pattern
 - Jump suggestion logic (visible vs outside visible range)
 - Jump decoration rendering (above, below, within viewport)
@@ -105,6 +113,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - Jump state tracking (isJumpInProgress, wasJumpJustAccepted)
 
 **Key Imports:**
+
 - [`JumpManager.ts`](extensions/vscode/src/activation/JumpManager.vitest.ts:5) - Main class under test
 - `core/nextEdit/NextEditProvider` - Chain management
 - `core/nextEdit/types` - NextEditOutcome type
@@ -119,6 +128,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** Selection change event handling and nextEdit trigger logic
 
 **What It Tests:**
+
 - Singleton pattern
 - Handler registration with priority levels (CRITICAL, HIGH, NORMAL, LOW, FALLBACK)
 - Debouncing for rapid selection changes
@@ -130,6 +140,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - Handler execution order (priority-based, early exit on handled)
 
 **Key Imports:**
+
 - [`SelectionChangeManager.ts`](extensions/vscode/src/activation/SelectionChangeManager.vitest.ts:16) - Main class under test
 - `core/nextEdit/NextEditEditableRegionCalculator` - Region calculation
 - `core/nextEdit/NextEditPrefetchQueue` - Prefetch management
@@ -148,10 +159,12 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 **Primary Focus:** Platform and extension version utilities
 
 **What It Tests:**
+
 - `isUnsupportedPlatform()` - Detects unsupported Windows ARM64
 - `isExtensionPrerelease()` - Detects prerelease versions by odd minor version
 
 **Key Imports:**
+
 - [`util.ts`](extensions/vscode/src/util/util.vitest.ts:28) - Utility functions under test
 
 **Rationale for KEEP:** Small utility file, but provides platform detection that may be referenced by autocomplete/nextEdit. Low cost to keep.
@@ -163,6 +176,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 ### ✅ KEEP - Required Source Files (15 files)
 
 #### Directly Tested Files (6 files)
+
 1. [`src/autocomplete/completionProvider.ts`](extensions/vscode/src/autocomplete/completionProvider.ts:40) - Main completion provider
 2. [`src/autocomplete/GhostTextAcceptanceTracker.ts`](extensions/vscode/src/autocomplete/GhostTextAcceptanceTracker.ts:26) - Ghost text tracking
 3. [`src/activation/NextEditWindowManager.ts`](extensions/vscode/src/activation/NextEditWindowManager.ts) - Window management
@@ -171,6 +185,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 6. [`src/util/util.ts`](extensions/vscode/src/util/util.ts) - Platform utilities
 
 #### Required Dependencies (9 files)
+
 7. [`src/VsCodeIde.ts`](extensions/vscode/src/VsCodeIde.ts) - IDE abstraction (imported by SelectionChangeManager)
 8. [`src/webviewProtocol.ts`](extensions/vscode/src/webviewProtocol.ts) - Protocol definitions (imported by completionProvider)
 9. [`src/util/getTheme.ts`](extensions/vscode/src/util/getTheme.ts) - Theme detection (mocked but needed)
@@ -186,11 +201,13 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 ### ❌ REMOVE - Not Required by Tests
 
 #### Extension Core (NOT tested)
+
 - ❌ `src/extension.ts` - Main extension activation
 - ❌ `src/commands.ts` - VS Code commands
 - ❌ `src/suggestions.ts` - Suggestion handling
 
 #### Activation (NOT tested)
+
 - ❌ `src/activation/activate.ts` - Activation logic
 - ❌ `src/activation/api.ts` - API exports
 - ❌ `src/activation/InlineTipManager.ts` - Inline tips
@@ -198,12 +215,14 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - ❌ `src/activation/proxy.ts` - Proxy configuration
 
 #### Extension Subdirectory (NOT tested)
+
 - ❌ `src/extension/ConfigYamlDocumentLinkProvider.ts`
 - ❌ `src/extension/EditOutcomeTracker.ts`
 - ❌ `src/extension/VsCodeExtension.ts`
 - ❌ `src/extension/VsCodeMessenger.ts`
 
 #### Utility Files (NOT tested)
+
 - ❌ `src/util/addCode.ts`
 - ❌ `src/util/battery.ts`
 - ❌ `src/util/cleanSlate.ts`
@@ -216,6 +235,7 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 - ❌ `src/util/workspaceConfig.ts`
 
 #### Build/Package Infrastructure (NOT needed for tests)
+
 - ❌ `scripts/*` - ALL build/package scripts
 - ❌ `e2e/*` - E2E tests (different from unit tests)
 - ❌ `media/*` - Media assets
@@ -231,11 +251,13 @@ Total test coverage: **86 tests** across **~3,200 lines** of test code.
 All tests depend on `core/` package modules:
 
 ### Core AutoComplete
+
 - `core/autocomplete/CompletionProvider`
 - `core/autocomplete/util/processSingleLineCompletion`
 - `core/autocomplete/util/types`
 
 ### Core NextEdit
+
 - `core/nextEdit/NextEditProvider`
 - `core/nextEdit/NextEditPrefetchQueue`
 - `core/nextEdit/NextEditLoggingService`
@@ -244,6 +266,7 @@ All tests depend on `core/` package modules:
 - `core/nextEdit/types`
 
 ### Core Utilities
+
 - `core/config/ConfigHandler`
 - `core/codeRenderer/CodeRenderer`
 - `core/diff/myers`
@@ -256,12 +279,14 @@ All tests depend on `core/` package modules:
 ## Test Execution Requirements
 
 ### Current Setup
+
 - **Test Framework:** Vitest
 - **Config File:** [`vitest.config.ts`](extensions/vscode/vitest.config.ts)
 - **Test Pattern:** `**/*.vitest.ts`
 - **Dependencies:** vscode test API (mocked), core package
 
 ### Minimal Package.json Requirements
+
 ```json
 {
   "devDependencies": {
@@ -291,6 +316,7 @@ All tests depend on `core/` package modules:
 ### Expected Result
 
 Extension becomes a **minimal test harness** with:
+
 - **6 test files** (86 tests, ~3,200 lines)
 - **15 source files** (~2,000 lines estimated)
 - **vitest.config.ts** (test configuration)
@@ -303,15 +329,15 @@ Total reduction: From ~100+ files to ~22 files in extension package.
 
 ## Test Categories Summary
 
-| Category | Test File | Tests | Lines | Status |
-|----------|-----------|-------|-------|--------|
-| Integration | ContinueCompletionProvider.vitest.ts | 20+ | 488 | ✅ KEEP |
-| Autocomplete | GhostTextAcceptanceTracker.vitest.ts | 15 | 246 | ✅ KEEP |
-| NextEdit UI | NextEditWindowManager.vitest.ts | 40+ | 970 | ✅ KEEP |
-| NextEdit Jump | JumpManager.vitest.ts | 15+ | 596 | ✅ KEEP |
-| Event Handling | SelectionChangeManager.vitest.ts | 20+ | 899 | ✅ KEEP |
-| Utilities | util.vitest.ts | 3 | 79 | ✅ KEEP |
-| **TOTAL** | **6 files** | **~86** | **~3,278** | **ALL RELEVANT** |
+| Category       | Test File                            | Tests   | Lines      | Status           |
+| -------------- | ------------------------------------ | ------- | ---------- | ---------------- |
+| Integration    | ContinueCompletionProvider.vitest.ts | 20+     | 488        | ✅ KEEP          |
+| Autocomplete   | GhostTextAcceptanceTracker.vitest.ts | 15      | 246        | ✅ KEEP          |
+| NextEdit UI    | NextEditWindowManager.vitest.ts      | 40+     | 970        | ✅ KEEP          |
+| NextEdit Jump  | JumpManager.vitest.ts                | 15+     | 596        | ✅ KEEP          |
+| Event Handling | SelectionChangeManager.vitest.ts     | 20+     | 899        | ✅ KEEP          |
+| Utilities      | util.vitest.ts                       | 3       | 79         | ✅ KEEP          |
+| **TOTAL**      | **6 files**                          | **~86** | **~3,278** | **ALL RELEVANT** |
 
 ---
 

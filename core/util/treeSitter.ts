@@ -209,14 +209,40 @@ export async function getQueryForFile(
 async function loadLanguageForFileExt(
   fileExtension: string,
 ): Promise<Language> {
-  const wasmPath = path.join(
-    process.env.NODE_ENV === "test" ? process.cwd() : __dirname,
-    ...(process.env.NODE_ENV === "test"
-      ? ["node_modules", "tree-sitter-wasms", "out"]
-      : ["tree-sitter-wasms"]),
-    `tree-sitter-${supportedLanguages[fileExtension]}.wasm`,
+  const filename = `tree-sitter-${supportedLanguages[fileExtension]}.wasm`;
+
+  // Try multiple locations to support both hoisted (root node_modules) and local installs.
+  const candidateRoots = [
+    process.env.NODE_ENV === "test" ? process.cwd() : undefined, // e.g., /.../continue/core when running tests
+    __dirname, // compiled dir for runtime usage
+    path.resolve(__dirname, "..", ".."), // repo root when __dirname is .../core/util
+  ].filter(Boolean) as string[];
+
+  const candidatePaths: string[] = [];
+  for (const root of candidateRoots) {
+    // Typical hoisted location in monorepo tests
+    candidatePaths.push(
+      path.join(root, "node_modules", "tree-sitter-wasms", "out", filename),
+    );
+    // Legacy/local bundled layout
+    candidatePaths.push(path.join(root, "tree-sitter-wasms", filename));
+  }
+
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p)) {
+      return await Parser.Language.load(p);
+    }
+  }
+
+  // Fallback (will throw with a clear path in error if still missing)
+  const fallback = path.join(
+    candidateRoots[0]!,
+    "node_modules",
+    "tree-sitter-wasms",
+    "out",
+    filename,
   );
-  return await Parser.Language.load(wasmPath);
+  return await Parser.Language.load(fallback);
 }
 
 // See https://tree-sitter.github.io/tree-sitter/using-parsers

@@ -23,5 +23,15 @@
     "incremental": true
   },
   "include": ["./**/*.ts", "**/*.js", "./**/*.d.ts"],
-  "exclude": ["dist", "test", "**/test/**", "**/*.test.ts", "**/*.spec.ts", "**/*.vitest.ts", "**/*.test.tsx", "**/*.spec.tsx", "autocomplete/context/root-path-context/testUtils.ts"]
+  "exclude": [
+    "dist",
+    "test",
+    "**/test/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.vitest.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+    "autocomplete/context/root-path-context/testUtils.ts"
+  ]
 }

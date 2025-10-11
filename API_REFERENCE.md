@@ -32,6 +32,7 @@ constructor(
 ```
 
 **Parameters**:
+
 - `configHandler`: Configuration provider for autocomplete options
 - `ide`: IDE interface implementation for file I/O and editor operations
 - `_injectedGetLlm`: Async function that returns the LLM to use for completions
@@ -53,6 +54,7 @@ async provideInlineCompletionItems(
 ```
 
 **Parameters**:
+
 - `input`: Autocomplete context including file path, cursor position, recent edits
 - `token`: AbortSignal to cancel the request
 - `force`: If true, bypasses debouncing
@@ -60,17 +62,18 @@ async provideInlineCompletionItems(
 **Returns**: `AutocompleteOutcome` containing the completion text and metadata, or `undefined` if no completion
 
 **Example**:
+
 ```typescript
 const outcome = await completionProvider.provideInlineCompletionItems(
   {
-    filepath: '/path/to/file.ts',
+    filepath: "/path/to/file.ts",
     pos: { line: 10, character: 5 },
-    completionId: 'unique-completion-id',
+    completionId: "unique-completion-id",
     recentlyEditedRanges: [],
     recentlyEditedFiles: new Map(),
-    clipboardText: '',
+    clipboardText: "",
   },
-  abortController.signal
+  abortController.signal,
 );
 ```
 
@@ -83,6 +86,7 @@ accept(completionId: string): void
 ```
 
 **Parameters**:
+
 - `completionId`: Unique identifier for the accepted completion
 
 **Side Effects**: Updates bracket matching service and completion cache
@@ -96,6 +100,7 @@ markDisplayed(completionId: string, outcome: AutocompleteOutcome): void
 ```
 
 **Parameters**:
+
 - `completionId`: Unique identifier for the completion
 - `outcome`: The autocomplete outcome that was displayed
 
@@ -131,6 +136,7 @@ constructor(
 ```
 
 **Parameters**:
+
 - `configHandler`: Configuration provider
 - `ide`: IDE interface implementation
 - `_injectedGetLlm`: Function returning the LLM for edit predictions
@@ -151,6 +157,7 @@ async getNextEditPrediction(
 ```
 
 **Parameters**:
+
 - `context`: Context including file contents, cursor position, recent edits
 - `signal`: Optional AbortSignal to cancel the request
 - `usingFullFileDiff`: If true, generates full-file diffs; if false, only edits within a region
@@ -158,23 +165,24 @@ async getNextEditPrediction(
 **Returns**: `NextEditOutcome` containing predicted edits and final cursor position
 
 **Example**:
+
 ```typescript
 const outcome = await nextEditProvider.getNextEditPrediction(
   {
-    filepath: '/path/to/file.ts',
+    filepath: "/path/to/file.ts",
     pos: { line: 15, character: 0 },
     fileContents: currentFileContents,
     userEdits: recentDiff,
     // ... other context
   },
   abortController.signal,
-  false  // Use partial file diff
+  false, // Use partial file diff
 );
 
 if (outcome) {
-  console.log('Edit regions:', outcome.editableRegions);
-  console.log('Diff lines:', outcome.diffLines);
-  console.log('New cursor:', outcome.finalCursorPosition);
+  console.log("Edit regions:", outcome.editableRegions);
+  console.log("Diff lines:", outcome.diffLines);
+  console.log("New cursor:", outcome.finalCursorPosition);
 }
 ```
 
@@ -193,9 +201,11 @@ constructor(config?: Partial<MinimalConfig>)
 ```
 
 **Parameters**:
+
 - `config`: Optional partial configuration to override defaults
 
 **Example**:
+
 ```typescript
 const configProvider = new MinimalConfigProvider({
   tabAutocompleteOptions: {
@@ -208,7 +218,7 @@ const configProvider = new MinimalConfigProvider({
   },
   experimental: {
     enableStaticContextualization: true,
-  }
+  },
 });
 ```
 
@@ -265,25 +275,25 @@ interface MinimalConfig {
 
 ```typescript
 interface TabAutocompleteOptions {
-  debounceDelay?: number;              // Debounce delay in ms (default: 150)
-  maxPromptTokens?: number;            // Max tokens for prompt (default: 1024)
-  prefixPercentage?: number;           // Percentage of tokens for prefix (default: 0.5)
-  suffixPercentage?: number;           // Percentage of tokens for suffix (default: 0.3)
-  maxSuffixPercentage?: number;        // Max suffix tokens percentage (default: 0.5)
-  useCache?: boolean;                  // Enable completion caching (default: true)
-  onlyMyCode?: boolean;                // Only use workspace files for context (default: false)
-  template?: string;                   // Custom prompt template
-  useFileSuffix?: boolean;             // Include file suffix in context (default: true)
-  multilineCompletions?: 'always' | 'never' | 'auto';  // Multiline behavior (default: 'auto')
-  slidingWindowPrefixPercentage?: number;  // Sliding window prefix % (default: 0.75)
-  slidingWindowSize?: number;          // Sliding window size (default: 500)
-  maxSnippetPercentage?: number;       // Max tokens for snippets (default: 0.6)
-  recentlyEditedSimilarityThreshold?: number;  // Similarity threshold (default: 0.3)
-  useOtherFiles?: boolean;             // Use other files for context (default: true)
-  disableInFiles?: string[];           // Glob patterns to disable autocomplete
-  stopTokens?: string[];               // Custom stop tokens
-  tokensPerCompletion?: number;        // Tokens per completion (default: 256)
-  transform?: boolean;                 // Apply post-processing transforms (default: true)
+  debounceDelay?: number; // Debounce delay in ms (default: 150)
+  maxPromptTokens?: number; // Max tokens for prompt (default: 1024)
+  prefixPercentage?: number; // Percentage of tokens for prefix (default: 0.5)
+  suffixPercentage?: number; // Percentage of tokens for suffix (default: 0.3)
+  maxSuffixPercentage?: number; // Max suffix tokens percentage (default: 0.5)
+  useCache?: boolean; // Enable completion caching (default: true)
+  onlyMyCode?: boolean; // Only use workspace files for context (default: false)
+  template?: string; // Custom prompt template
+  useFileSuffix?: boolean; // Include file suffix in context (default: true)
+  multilineCompletions?: "always" | "never" | "auto"; // Multiline behavior (default: 'auto')
+  slidingWindowPrefixPercentage?: number; // Sliding window prefix % (default: 0.75)
+  slidingWindowSize?: number; // Sliding window size (default: 500)
+  maxSnippetPercentage?: number; // Max tokens for snippets (default: 0.6)
+  recentlyEditedSimilarityThreshold?: number; // Similarity threshold (default: 0.3)
+  useOtherFiles?: boolean; // Use other files for context (default: true)
+  disableInFiles?: string[]; // Glob patterns to disable autocomplete
+  stopTokens?: string[]; // Custom stop tokens
+  tokensPerCompletion?: number; // Tokens per completion (default: 256)
+  transform?: boolean; // Apply post-processing transforms (default: true)
 }
 ```
 
@@ -302,47 +312,56 @@ interface IDE {
   // File Operations
   readFile(filepath: string): Promise<string>;
   writeFile(filepath: string, contents: string): Promise<void>;
-  
+
   // Workspace
   getWorkspaceDirs(): Promise<string[]>;
   listWorkspaceContents(directory?: string): Promise<string[]>;
-  
+
   // Editor State
   getCurrentFile(): Promise<FileWithContents | undefined>;
   getCursorPosition(): Promise<Position>;
   getVisibleFiles(): Promise<string[]>;
-  
+
   // Code Navigation
   getDefinition(filepath: string, position: Position): Promise<Location[]>;
   getReferences(filepath: string, position: Position): Promise<Location[]>;
   getSymbols(filepath: string): Promise<SymbolWithRange[]>;
-  
+
   // File Information
   readRangeInFile(filepath: string, range: Range): Promise<string>;
   getStats(filepath: string): Promise<FileStats>;
-  
+
   // Edits
   applyEdits(edits: FileEdit[]): Promise<void>;
-  
+
   // Diff/SCM
   getDiff(includeUnstaged: boolean): Promise<string>;
   getRepoName(dir: string): Promise<string | undefined>;
   getBranch(dir: string): Promise<string>;
-  
+
   // UI
-  showMessage(message: string, severity?: 'info' | 'warning' | 'error'): Promise<void>;
-  showToast(type: 'info' | 'warning' | 'error', message: string, ...actions: string[]): Promise<string | undefined>;
-  
+  showMessage(
+    message: string,
+    severity?: "info" | "warning" | "error",
+  ): Promise<void>;
+  showToast(
+    type: "info" | "warning" | "error",
+    message: string,
+    ...actions: string[]
+  ): Promise<string | undefined>;
+
   // Terminal
   runCommand(command: string, options?: TerminalOptions): Promise<string>;
-  
+
   // Clipboard
-  getClipboardContent(): Promise<{ text: string; copiedAt: number } | undefined>;
-  
+  getClipboardContent(): Promise<
+    { text: string; copiedAt: number } | undefined
+  >;
+
   // Search
   getSearchResults(query: string): Promise<string>;
   subprocess(command: string, cwd?: string): Promise<[string, string]>;
-  
+
   // Other
   getIdeInfo(): Promise<IdeInfo>;
   getIdeSettings(): Promise<IdeSettings>;
@@ -352,6 +371,7 @@ interface IDE {
 ```
 
 **Key Methods to Implement**:
+
 - `readFile()`, `writeFile()`: Essential for file I/O
 - `getWorkspaceDirs()`: Returns workspace root directories
 - `getCurrentFile()`, `getCursorPosition()`: Current editor state
@@ -371,50 +391,50 @@ interface ILLM {
   model: string;
   contextLength: number;
   completionOptions: CompletionOptions;
-  
+
   // Provider info
   get providerName(): string;
   get underlyingProviderName(): string;
-  
+
   // Optional
   apiKey?: string;
   apiBase?: string;
   autocompleteOptions?: Partial<TabAutocompleteOptions>;
   promptTemplates?: PromptTemplates;
-  
+
   // Completion methods
   complete(
     prompt: string,
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): Promise<string>;
-  
+
   streamComplete(
     prompt: string,
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): AsyncGenerator<string, PromptLog>;
-  
+
   streamFim(
     prefix: string,
     suffix: string,
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): AsyncGenerator<string, PromptLog>;
-  
+
   // Chat methods
   chat(
     messages: ChatMessage[],
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): Promise<ChatMessage>;
-  
+
   streamChat(
     messages: ChatMessage[],
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): AsyncGenerator<ChatMessage, PromptLog>;
-  
+
   // Utility methods
   countTokens(text: string): number;
   supportsImages(): boolean;
@@ -435,20 +455,21 @@ Pre-built adapter for OpenAI and OpenAI-compatible APIs.
 **Location**: [`core/llm/llms/OpenAI.ts`](core/llm/llms/OpenAI.ts)
 
 ```typescript
-import OpenAI from '@continuedev/core/llm/llms/OpenAI';
+import OpenAI from "@continuedev/core/llm/llms/OpenAI";
 
 const llm = new OpenAI({
-  model: 'gpt-4',
+  model: "gpt-4",
   apiKey: process.env.OPENAI_API_KEY,
-  apiBase: 'https://api.openai.com/v1',  // Optional custom base URL
+  apiBase: "https://api.openai.com/v1", // Optional custom base URL
   completionOptions: {
     temperature: 0.1,
     maxTokens: 1000,
-  }
+  },
 });
 ```
 
 **Constructor Options**:
+
 ```typescript
 interface OpenAIOptions {
   model: string;
@@ -465,17 +486,21 @@ interface OpenAIOptions {
 To create a custom LLM adapter, implement the `ILLM` interface:
 
 ```typescript
-import { ILLM, CompletionOptions } from '@continuedev/core';
+import { ILLM, CompletionOptions } from "@continuedev/core";
 
 class CustomLLM implements ILLM {
-  uniqueId = 'custom-llm';
+  uniqueId = "custom-llm";
   model: string;
   contextLength: number;
   completionOptions: CompletionOptions;
-  
-  get providerName() { return 'custom'; }
-  get underlyingProviderName() { return 'custom'; }
-  
+
+  get providerName() {
+    return "custom";
+  }
+  get underlyingProviderName() {
+    return "custom";
+  }
+
   constructor(options: { model: string }) {
     this.model = options.model;
     this.contextLength = 4096;
@@ -484,34 +509,40 @@ class CustomLLM implements ILLM {
       temperature: 0.1,
     };
   }
-  
+
   async complete(prompt: string, signal: AbortSignal): Promise<string> {
     // Call your LLM API
-    const response = await fetch('your-api-endpoint', {
-      method: 'POST',
+    const response = await fetch("your-api-endpoint", {
+      method: "POST",
       body: JSON.stringify({ prompt }),
       signal,
     });
     return await response.text();
   }
-  
+
   async *streamComplete(prompt: string, signal: AbortSignal) {
     // Stream from your LLM API
     for await (const chunk of streamFromAPI(prompt, signal)) {
       yield chunk;
     }
-    return { modelTitle: this.model, prompt, completion: '' };
+    return { modelTitle: this.model, prompt, completion: "" };
   }
-  
+
   // Implement other required methods...
   countTokens(text: string): number {
     return text.length / 4; // Rough estimate
   }
-  
-  supportsImages() { return false; }
-  supportsCompletions() { return true; }
-  supportsFim() { return false; }
-  
+
+  supportsImages() {
+    return false;
+  }
+  supportsCompletions() {
+    return true;
+  }
+  supportsFim() {
+    return false;
+  }
+
   // ... other methods
 }
 ```
@@ -526,13 +557,13 @@ Input for autocomplete requests.
 
 ```typescript
 interface AutocompleteInput {
-  filepath: string;                    // Path to the file being edited
-  pos: Position;                       // Cursor position
-  completionId: string;                // Unique ID for this completion request
-  recentlyEditedRanges: Range[];       // Recently edited ranges in this file
-  recentlyEditedFiles: Map<string, [Range, number][]>;  // Recently edited files
-  clipboardText: string;               // Current clipboard content
-  manuallyPassFileContext?: RangeInFile[];  // Manually provided context
+  filepath: string; // Path to the file being edited
+  pos: Position; // Cursor position
+  completionId: string; // Unique ID for this completion request
+  recentlyEditedRanges: Range[]; // Recently edited ranges in this file
+  recentlyEditedFiles: Map<string, [Range, number][]>; // Recently edited files
+  clipboardText: string; // Current clipboard content
+  manuallyPassFileContext?: RangeInFile[]; // Manually provided context
 }
 ```
 
@@ -542,17 +573,17 @@ Result of an autocomplete request.
 
 ```typescript
 interface AutocompleteOutcome {
-  completion: string;                  // The completion text
-  completionId: string;                // Unique ID for this completion
-  filepath: string;                    // File path
-  prefix: string;                      // Code prefix (before cursor)
-  suffix: string;                      // Code suffix (after cursor)
-  prompt: string;                      // Full prompt sent to LLM
-  modelTitle: string;                  // Model used
-  modelProvider: string;               // Provider used
-  completionOptions: CompletionOptions;  // Options used
-  cacheHit: boolean;                   // Whether cached
-  latency: number;                     // Response latency in ms
+  completion: string; // The completion text
+  completionId: string; // Unique ID for this completion
+  filepath: string; // File path
+  prefix: string; // Code prefix (before cursor)
+  suffix: string; // Code suffix (after cursor)
+  prompt: string; // Full prompt sent to LLM
+  modelTitle: string; // Model used
+  modelProvider: string; // Provider used
+  completionOptions: CompletionOptions; // Options used
+  cacheHit: boolean; // Whether cached
+  latency: number; // Response latency in ms
 }
 ```
 
@@ -562,14 +593,14 @@ Result of a NextEdit prediction.
 
 ```typescript
 interface NextEditOutcome {
-  edits: string;                       // The predicted edit text
-  diffLines: DiffLine[];               // Diff representation
-  editableRegions: Range[];            // Regions that were edited
-  finalCursorPosition: Position;       // Predicted cursor position after edits
-  filepath: string;                    // File path
-  prompt: string;                      // Prompt sent to LLM
-  modelTitle: string;                  // Model used
-  latency: number;                     // Response latency in ms
+  edits: string; // The predicted edit text
+  diffLines: DiffLine[]; // Diff representation
+  editableRegions: Range[]; // Regions that were edited
+  finalCursorPosition: Position; // Predicted cursor position after edits
+  filepath: string; // File path
+  prompt: string; // Prompt sent to LLM
+  modelTitle: string; // Model used
+  latency: number; // Response latency in ms
 }
 ```
 
@@ -579,8 +610,8 @@ Position in a text document.
 
 ```typescript
 interface Position {
-  line: number;                        // 0-based line number
-  character: number;                   // 0-based character offset
+  line: number; // 0-based line number
+  character: number; // 0-based character offset
 }
 ```
 
@@ -590,8 +621,8 @@ Range in a text document.
 
 ```typescript
 interface Range {
-  start: Position;                     // Start position (inclusive)
-  end: Position;                       // End position (exclusive)
+  start: Position; // Start position (inclusive)
+  end: Position; // End position (exclusive)
 }
 ```
 
@@ -601,8 +632,8 @@ Range in a specific file.
 
 ```typescript
 interface RangeInFile {
-  filepath: string;                    // File path
-  range: Range;                        // Range within the file
+  filepath: string; // File path
+  range: Range; // Range within the file
 }
 ```
 
@@ -612,9 +643,9 @@ A single line in a diff.
 
 ```typescript
 interface DiffLine {
-  type: 'same' | 'new' | 'old';       // Type of change
-  line: string;                        // Line content
-  lineNumber: number;                  // Line number in file
+  type: "same" | "new" | "old"; // Type of change
+  line: string; // Line content
+  lineNumber: number; // Line number in file
 }
 ```
 
@@ -624,9 +655,9 @@ An edit to apply to a file.
 
 ```typescript
 interface FileEdit {
-  filepath: string;                    // File to edit
-  range: Range;                        // Range to replace
-  replacement: string;                 // New content
+  filepath: string; // File to edit
+  range: Range; // Range to replace
+  replacement: string; // New content
 }
 ```
 
@@ -637,31 +668,34 @@ interface FileEdit {
 ### Complete Example: Autocomplete with Custom IDE
 
 ```typescript
-import { CompletionProvider, MinimalConfigProvider } from '@continuedev/core/autocomplete';
-import { IDE, ILLM, Position } from '@continuedev/core';
-import OpenAI from '@continuedev/core/llm/llms/OpenAI';
+import {
+  CompletionProvider,
+  MinimalConfigProvider,
+} from "@continuedev/core/autocomplete";
+import { IDE, ILLM, Position } from "@continuedev/core";
+import OpenAI from "@continuedev/core/llm/llms/OpenAI";
 
 // 1. Implement IDE interface
 class MyIDE implements IDE {
   async readFile(filepath: string): Promise<string> {
-    return fs.readFileSync(filepath, 'utf-8');
+    return fs.readFileSync(filepath, "utf-8");
   }
-  
+
   async getWorkspaceDirs(): Promise<string[]> {
-    return ['/path/to/workspace'];
+    return ["/path/to/workspace"];
   }
-  
+
   async getCurrentFile() {
     return {
       filepath: this.currentFilePath,
       contents: await this.readFile(this.currentFilePath),
     };
   }
-  
+
   async getCursorPosition(): Promise<Position> {
     return this.cursorPosition;
   }
-  
+
   // ... implement other methods
 }
 
@@ -671,14 +705,14 @@ const config = new MinimalConfigProvider({
     debounceDelay: 150,
     maxPromptTokens: 1024,
     useCache: true,
-  }
+  },
 });
 
 // 3. Set up LLM
 const getLlm = async (): Promise<ILLM> => {
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4',
+    model: "gpt-4",
   });
 };
 
@@ -689,25 +723,25 @@ const provider = new CompletionProvider(
   ide,
   getLlm,
   (error) => console.error(error),
-  async () => []  // LSP definitions function
+  async () => [], // LSP definitions function
 );
 
 // 5. Request completion
 const outcome = await provider.provideInlineCompletionItems(
   {
-    filepath: '/path/to/file.ts',
+    filepath: "/path/to/file.ts",
     pos: { line: 10, character: 5 },
-    completionId: 'completion-1',
+    completionId: "completion-1",
     recentlyEditedRanges: [],
     recentlyEditedFiles: new Map(),
-    clipboardText: '',
+    clipboardText: "",
   },
-  new AbortController().signal
+  new AbortController().signal,
 );
 
 if (outcome) {
-  console.log('Completion:', outcome.completion);
-  provider.markDisplayed('completion-1', outcome);
+  console.log("Completion:", outcome.completion);
+  provider.markDisplayed("completion-1", outcome);
 }
 ```
 
@@ -720,7 +754,7 @@ Both `CompletionProvider` and `NextEditProvider` accept an error callback:
 ```typescript
 const onError = (error: any) => {
   if (error instanceof Error) {
-    console.error('Error:', error.message);
+    console.error("Error:", error.message);
     // Show user notification
     showNotification(error.message);
   }
@@ -730,12 +764,13 @@ const provider = new CompletionProvider(
   config,
   ide,
   getLlm,
-  onError,  // Error callback
-  getLspDefinitions
+  onError, // Error callback
+  getLspDefinitions,
 );
 ```
 
 Common errors:
+
 - **LLM API errors**: Network failures, invalid API keys, rate limits
 - **File I/O errors**: Missing files, permission errors
 - **Timeout errors**: Long-running requests that are aborted
@@ -751,8 +786,8 @@ Completions are automatically cached using an LRU cache. Configure caching:
 ```typescript
 const config = new MinimalConfigProvider({
   tabAutocompleteOptions: {
-    useCache: true,  // Enable caching (default)
-  }
+    useCache: true, // Enable caching (default)
+  },
 });
 ```
 
@@ -763,8 +798,8 @@ Prevent excessive LLM calls during rapid typing:
 ```typescript
 const config = new MinimalConfigProvider({
   tabAutocompleteOptions: {
-    debounceDelay: 150,  // Wait 150ms before requesting (default)
-  }
+    debounceDelay: 150, // Wait 150ms before requesting (default)
+  },
 });
 ```
 

@@ -95,7 +95,7 @@ vi.mock("core/nextEdit/NextEditPrefetchQueue", () => ({
 
 vi.mock("core/util/pathToUri", () => ({
   localPathOrUriToPath: vi.fn((uri) => {
-    const uriStr = typeof uri === 'string' ? uri : uri?.toString?.() || '';
+    const uriStr = typeof uri === "string" ? uri : uri?.toString?.() || "";
     return uriStr.replace("file://", "");
   }),
 }));

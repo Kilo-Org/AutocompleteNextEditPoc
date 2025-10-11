@@ -1,4 +1,9 @@
-import { FromWebviewProtocol, ToWebviewProtocol, Message, IMessenger } from "core";
+import {
+  FromWebviewProtocol,
+  ToWebviewProtocol,
+  Message,
+  IMessenger,
+} from "core";
 import { extractMinimalStackTraceInfo } from "core/util/extractMinimalStackTraceInfo";
 import { Telemetry } from "core/util/posthog";
 import { v4 as uuidv4 } from "uuid";

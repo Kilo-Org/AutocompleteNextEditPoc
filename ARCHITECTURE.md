@@ -67,38 +67,38 @@ The library is architected as a layered system with clear separation of concerns
 graph TB
     subgraph "Autocomplete System"
         CP[CompletionProvider]
-        
+
         subgraph "Input Processing"
             PRE[Prefiltering]
             DEB[Debouncer]
             HELP[HelperVars]
         end
-        
+
         subgraph "Context Gathering"
             CTX[ContextRetrievalService]
             SNIP[Snippet Retrieval]
             LSP[LSP Integration]
         end
-        
+
         subgraph "Generation"
             TMPL[Template Rendering]
             STRM[CompletionStreamer]
             LLM[LLM Interface]
         end
-        
+
         subgraph "Post-Processing"
             FILT[Filtering]
             BRKT[Bracket Matching]
             POST[Postprocessing]
         end
-        
+
         subgraph "Supporting Services"
             CACHE[LRU Cache]
             LOG[Logging Service]
             MULTI[Multiline Detection]
         end
     end
-    
+
     CP --> PRE
     PRE --> HELP
     HELP --> CTX
@@ -119,16 +119,19 @@ graph TB
 #### Key Components
 
 1. **CompletionProvider** ([`core/autocomplete/CompletionProvider.ts`](core/autocomplete/CompletionProvider.ts))
+
    - Main orchestrator for autocomplete
    - Coordinates all sub-systems
    - Manages completion lifecycle
 
 2. **ContextRetrievalService** ([`core/autocomplete/context/ContextRetrievalService.ts`](core/autocomplete/context/ContextRetrievalService.ts))
+
    - Gathers relevant code context
    - Collects recently edited files
    - Retrieves LSP definitions
 
 3. **CompletionStreamer** ([`core/autocomplete/generation/CompletionStreamer.ts`](core/autocomplete/generation/CompletionStreamer.ts))
+
    - Streams completions from LLM
    - Applies real-time filters
    - Handles abort signals
@@ -144,38 +147,38 @@ graph TB
 graph TB
     subgraph "NextEdit System"
         NEP[NextEditProvider]
-        
+
         subgraph "Model Providers"
             BASE[BaseNextEditProvider]
             INST[InstinctProvider]
             MERC[MercuryCoderProvider]
             FACT[NextEditProviderFactory]
         end
-        
+
         subgraph "Edit Calculation"
             CALC[EditableRegionCalculator]
             HIST[DocumentHistoryTracker]
             DIFF[Diff Engine]
         end
-        
+
         subgraph "Context & Prompts"
             PCTX[Prompt Context Builder]
             PMETA[Prompt Metadata]
             UEDITS[User Edits Capture]
         end
-        
+
         subgraph "Output Processing"
             EXTRACT[Completion Extraction]
             CURSOR[Cursor Positioning]
             OUTCOME[Outcome Builder]
         end
-        
+
         subgraph "Supporting Services"
             PREFETCH[Prefetch Queue]
             NLOG[NextEdit Logging]
         end
     end
-    
+
     NEP --> FACT
     FACT --> BASE
     BASE --> INST
@@ -197,16 +200,19 @@ graph TB
 #### Key Components
 
 1. **NextEditProvider** ([`core/nextEdit/NextEditProvider.ts`](core/nextEdit/NextEditProvider.ts))
+
    - Main orchestrator for NextEdit
    - Coordinates edit prediction workflow
    - Manages provider selection
 
 2. **BaseNextEditProvider** ([`core/nextEdit/providers/BaseNextEditProvider.ts`](core/nextEdit/providers/BaseNextEditProvider.ts))
+
    - Abstract base for model-specific providers
    - Defines provider interface
    - Implements common functionality
 
 3. **NextEditEditableRegionCalculator** ([`core/nextEdit/NextEditEditableRegionCalculator.ts`](core/nextEdit/NextEditEditableRegionCalculator.ts))
+
    - Calculates editable regions
    - Determines edit scope
    - Supports full-file and partial-file modes
@@ -379,12 +385,14 @@ User Makes Edit
 Autocomplete and NextEdit both rely on gathering relevant context:
 
 **Context Types**:
+
 - **File Context**: Current file contents, prefix/suffix around cursor
 - **Workspace Context**: Recently edited files, open files
 - **Semantic Context**: LSP definitions, imports, related code
 - **User Context**: Clipboard, recent selections, edit patterns
 
 **Context Retrieval Strategy**:
+
 ```typescript
 // Prioritized context gathering
 1. Current file context (prefix + suffix)
@@ -400,12 +408,14 @@ Autocomplete and NextEdit both rely on gathering relevant context:
 Tree-sitter provides accurate syntax-aware code analysis:
 
 **Usage**:
+
 - **AST Parsing**: Parse code into syntax trees
 - **Code Navigation**: Find definitions, references
 - **Context Extraction**: Extract relevant code blocks
 - **Syntax Validation**: Validate completions
 
 **Query Files** ([`core/tag-qry/`](core/tag-qry/)):
+
 - Language-specific queries for extracting code structures
 - Tag queries for finding definitions, classes, functions
 - Used for building code context
@@ -415,11 +425,13 @@ Tree-sitter provides accurate syntax-aware code analysis:
 The library abstracts LLM communication through the `ILLM` interface:
 
 **Supported Operations**:
+
 - **Fill-in-the-Middle (FIM)**: For autocomplete (prefix + suffix → middle)
 - **Chat Completion**: For NextEdit (context → predicted edits)
 - **Streaming**: Token-by-token generation for real-time filtering
 
 **Provider Implementation**:
+
 ```typescript
 // LLM providers implement ILLM interface
 class OpenAI implements ILLM {
@@ -436,6 +448,7 @@ class OpenAI implements ILLM {
 ### 4. Caching Strategy
 
 **LRU Cache** ([`core/autocomplete/util/AutocompleteLruCache.ts`](core/autocomplete/util/AutocompleteLruCache.ts)):
+
 - Caches completions by prefix
 - Reduces redundant LLM calls
 - Configurable cache size
@@ -444,6 +457,7 @@ class OpenAI implements ILLM {
 **Cache Key**: Normalized prefix (whitespace-stripped, lowercased)
 
 **Cache Hit Flow**:
+
 ```
 Request → Check Cache → Hit? → Return Cached
                       ↓ Miss
@@ -453,11 +467,13 @@ Request → Check Cache → Hit? → Return Cached
 ### 5. Diff Algorithm
 
 **Myers Diff** ([`core/diff/myers.ts`](core/diff/myers.ts)):
+
 - Efficient line-by-line diff calculation
 - Identifies additions, deletions, unchanged lines
 - Used for NextEdit to show predicted changes
 
 **Stream Diff** ([`core/diff/streamDiff.ts`](core/diff/streamDiff.ts)):
+
 - Processes diffs incrementally
 - Enables real-time diff display
 - Supports partial results
@@ -465,14 +481,17 @@ Request → Check Cache → Hit? → Return Cached
 ### 6. Filtering & Validation
 
 **Prefiltering** ([`core/autocomplete/prefiltering/`](core/autocomplete/prefiltering/)):
+
 - Checks before LLM call (security, file type)
 - Prevents wasted LLM calls
 
 **Real-time Filtering**:
+
 - Stop sequences (end of function, invalid syntax)
 - Streaming filters applied token-by-token
 
 **Post-filtering**:
+
 - Bracket matching validation
 - Indentation correction
 - Remove duplicates
@@ -480,11 +499,13 @@ Request → Check Cache → Hit? → Return Cached
 ### 7. Multiline Detection
 
 **Algorithm** ([`core/autocomplete/classification/shouldCompleteMultiline.ts`](core/autocomplete/classification/shouldCompleteMultiline.ts)):
+
 - Analyzes cursor context
 - Determines if multiline completion is appropriate
 - Considers: cursor position, syntax context, previous completions
 
 **Heuristics**:
+
 - Inside empty function: multiline
 - After opening brace: multiline
 - Middle of line: single line
@@ -624,16 +645,17 @@ class MyCustomIDE implements IDE {
   async readFile(filepath: string): Promise<string> {
     // Your implementation
   }
-  
+
   async getWorkspaceDirs(): Promise<string[]> {
     // Your implementation
   }
-  
+
   // ... implement all required methods
 }
 ```
 
 **Key Methods to Customize**:
+
 - File I/O operations
 - Editor state queries
 - Code navigation
@@ -651,12 +673,13 @@ class MyCustomLLM implements ILLM {
       yield token;
     }
   }
-  
+
   // ... implement other methods
 }
 ```
 
 **Supported LLM Operations**:
+
 - Fill-in-the-middle (FIM) for autocomplete
 - Chat completions for NextEdit
 - Token counting
@@ -699,19 +722,20 @@ class CustomNextEditProvider extends BaseNextEditProvider {
   async generatePrompts(context: ModelSpecificContext): Promise<Prompt[]> {
     // Build custom prompts for your model
   }
-  
+
   extractCompletion(message: string): string {
     // Extract completion from model response
   }
-  
+
   // ... implement other required methods
 }
 ```
 
 **Registration**:
+
 ```typescript
 // Add to NextEditProviderFactory
-NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
+NextEditProviderFactory.registerProvider("my-model", CustomNextEditProvider);
 ```
 
 ---
@@ -725,6 +749,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 **Solution**: Created `MinimalConfigProvider` with hardcoded defaults.
 
 **Benefits**:
+
 - No external dependencies on config infrastructure
 - Simple, understandable configuration
 - Easy to extend with runtime options
@@ -733,6 +758,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 2. Why Separate Autocomplete and NextEdit?
 
 **Reasoning**:
+
 - Different trigger conditions (typing vs. selection)
 - Different LLM requirements (FIM vs. chat)
 - Different UI patterns (ghost text vs. diff display)
@@ -743,6 +769,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 3. Why Stream Completions?
 
 **Benefits**:
+
 - Real-time filtering (stop invalid completions early)
 - Better UX (show partial results)
 - Reduced latency perception
@@ -753,6 +780,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 4. Why Tree-sitter over Regex?
 
 **Benefits**:
+
 - Accurate syntax understanding
 - Language-agnostic queries
 - Reliable code structure extraction
@@ -763,6 +791,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 5. Why LRU Cache?
 
 **Reasoning**:
+
 - Completions often repeat (typing patterns)
 - Limited memory footprint with LRU eviction
 - Thread-safe for concurrent requests
@@ -773,6 +802,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 6. Why Abstract IDE Interface?
 
 **Benefits**:
+
 - IDE-agnostic core library
 - Easy testing with mock IDEs
 - Clear integration contract
@@ -783,6 +813,7 @@ NextEditProviderFactory.registerProvider('my-model', CustomNextEditProvider);
 ### 7. Why Model-Specific NextEdit Providers?
 
 **Reasoning**:
+
 - Different models require different prompt formats
 - Model-specific post-processing needs
 - Allows fine-tuning per model
@@ -812,13 +843,11 @@ core/
   - Filtering logic
   - Generation pipeline
   - Caching behavior
-  
 - **NextEdit**: ~46 unit tests
   - Edit prediction
   - Diff calculation
   - Model providers
   - Region calculation
-  
 - **Integration**: 86 tests
   - VSCode integration patterns
   - UI managers
@@ -827,6 +856,7 @@ core/
 ### Test Utilities
 
 **Mock Factories** ([`core/autocomplete/util/completionTestUtils.ts`](core/autocomplete/util/completionTestUtils.ts)):
+
 - Create mock IDE implementations
 - Generate test contexts
 - Build sample completions
@@ -838,6 +868,7 @@ core/
 ### Latency Breakdown
 
 **Typical Autocomplete Request**:
+
 ```
 Total: 200-500ms
 ├── Debounce wait: 150ms
@@ -848,6 +879,7 @@ Total: 200-500ms
 ```
 
 **Typical NextEdit Request**:
+
 ```
 Total: 500-2000ms
 ├── Region calculation: 10-20ms

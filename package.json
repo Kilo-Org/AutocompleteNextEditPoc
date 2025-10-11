@@ -1,5 +1,10 @@
 {
   "name": "continue",
+  "private": true,
+  "workspaces": [
+    "core",
+    "core/vscode-test-harness"
+  ],
   "scripts": {
     "test": "npm run test:core && npm run test:harness",
     "test:core": "cd core && npm test",

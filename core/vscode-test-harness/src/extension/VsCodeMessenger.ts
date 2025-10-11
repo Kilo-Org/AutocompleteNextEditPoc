@@ -208,9 +208,9 @@ export class VsCodeMessenger {
     });
     this.onWebview("edit/sendPrompt", async (msg) => {
       const prompt = msg.data.prompt;
-      const { start, end} = msg.data.range.range;
+      const { start, end } = msg.data.range.range;
       const verticalDiffManager = await verticalDiffManagerPromise;
-      
+
       if (!verticalDiffManager) {
         throw new Error("Vertical diff manager not available");
       }

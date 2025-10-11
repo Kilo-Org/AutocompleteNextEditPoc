@@ -8,10 +8,6 @@
     "core/vscode-test-harness/src/**/*.ts"
   ],
   "project": ["core/**/*.ts"],
-  "ignore": [
-    "**/*.d.ts",
-    "**/node_modules/**",
-    "**/dist/**"
-  ],
+  "ignore": ["**/*.d.ts", "**/node_modules/**", "**/dist/**"],
   "ignoreDependencies": ["@types/*"]
 }

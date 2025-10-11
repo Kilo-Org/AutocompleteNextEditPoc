@@ -17,7 +17,11 @@ class CodeSnippetsCodebaseIndex {
     uriBatchSize: number,
     snippetOffset: number,
     snippetsBatchSize: number,
-  ): Promise<{ groupedByUri: Record<string, string[]>; hasMoreSnippets: boolean; hasMoreUris: boolean }> {
+  ): Promise<{
+    groupedByUri: Record<string, string[]>;
+    hasMoreSnippets: boolean;
+    hasMoreUris: boolean;
+  }> {
     return { groupedByUri: {}, hasMoreSnippets: false, hasMoreUris: false };
   }
   compute(_args: unknown): unknown {

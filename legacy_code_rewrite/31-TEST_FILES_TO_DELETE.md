@@ -3,8 +3,9 @@
 ## Files Exercised by test-autocomplete.sh (KEEP - 29 files)
 
 The script runs tests matching these patterns:
+
 - `autocomplete`
-- `nextEdit` 
+- `nextEdit`
 - `vscode-test-harness`
 - `diff`
 - `llm/autodetect`
@@ -12,6 +13,7 @@ The script runs tests matching these patterns:
 - `util/LruCache`
 
 ### Autocomplete Tests (14 files) ✅
+
 - core/autocomplete/context/root-path-context/RootPathContextService.vitest.ts
 - core/autocomplete/filtering/streamTransforms/charStream.vitest.ts
 - core/autocomplete/filtering/streamTransforms/filterCodeBlock.vitest.ts
@@ -22,12 +24,13 @@ The script runs tests matching these patterns:
 - core/autocomplete/generation/utils.vitest.ts
 - core/autocomplete/postprocessing/index.vitest.ts
 - core/autocomplete/snippets/gitDiffCache.vitest.ts
-- core/autocomplete/templating/__tests__/formatOpenedFilesContext.vitest.ts
-- core/autocomplete/templating/__tests__/renderPrompt.vitest.ts
+- core/autocomplete/templating/**tests**/formatOpenedFilesContext.vitest.ts
+- core/autocomplete/templating/**tests**/renderPrompt.vitest.ts
 - core/autocomplete/util/completionTestUtils.vitest.ts
 - core/autocomplete/util/processSingleLineCompletion.vitest.ts
 
 ### NextEdit Tests (13 files) ✅
+
 - core/nextEdit/context/aggregateEdits.vitest.ts
 - core/nextEdit/context/autocompleteContextFetching.vitest.ts
 - core/nextEdit/context/diffFormatting.vitest.ts
@@ -43,6 +46,7 @@ The script runs tests matching these patterns:
 - core/nextEdit/utils.vitest.ts
 
 ### VSCode Test Harness (6 files) ✅
+
 - core/vscode-test-harness/test/ContinueCompletionProvider.vitest.ts
 - core/vscode-test-harness/test/GhostTextAcceptanceTracker.vitest.ts
 - core/vscode-test-harness/test/JumpManager.vitest.ts
@@ -51,17 +55,21 @@ The script runs tests matching these patterns:
 - core/vscode-test-harness/test/util.vitest.ts
 
 ### Diff Tests (3 files) ✅
+
 - core/diff/myers.vitest.ts
 - core/diff/streamDiff.vitest.ts
 - core/diff/util.vitest.ts
 
 ### LLM Autodetect (1 file) ✅
+
 - core/llm/autodetect.vitest.ts
 
 ### Indexing/Ignore (1 file) ✅
+
 - core/indexing/ignore.vitest.ts
 
 ### Util LruCache (1 file) ✅
+
 - core/util/LruCache.vitest.ts
 
 ---
@@ -69,6 +77,7 @@ The script runs tests matching these patterns:
 ## Files to DELETE (93 files) ❌
 
 ### Fetch Tests (7 files)
+
 - core/fetch/certs.vitest.ts
 - core/fetch/fetch.e2e.vitest.ts
 - core/fetch/getAgentOptions.vitest.ts
@@ -78,6 +87,7 @@ The script runs tests matching these patterns:
 - core/fetch/util.vitest.ts
 
 ### LLM Tests (excluding autodetect) (12 files)
+
 - core/llm/llm-pre-fetch.vitest.ts
 - core/llm/llm.vitest.ts
 - core/llm/llms/OpenAI.vitest.ts
@@ -93,6 +103,7 @@ The script runs tests matching these patterns:
 - core/llm/rules/ruleColocation.vitest.ts
 
 ### Util Tests (excluding LruCache) (10 files)
+
 - core/util/extractMinimalStackTraceInfo.vitest.ts
 - core/util/grepSearch.vitest.ts
 - core/util/index.vitest.ts
@@ -106,7 +117,8 @@ The script runs tests matching these patterns:
 - core/util/text.vitest.ts
 
 ### Dist Tests (all build artifacts) (64 files)
-- core/dist/config/yaml-package/__tests__/index.test.js
+
+- core/dist/config/yaml-package/**tests**/index.test.js
 - core/dist/config/yaml-package/interfaces/SecretResult.test.js
 - core/dist/config/yaml-package/interfaces/slugs.test.js
 - core/dist/config/yaml-package/load/merge.test.js

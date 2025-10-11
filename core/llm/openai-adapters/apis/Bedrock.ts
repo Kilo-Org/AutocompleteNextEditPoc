@@ -689,7 +689,12 @@ export class BedrockApi implements BaseLlmApi {
     }
 
     // Base payload for both models
-    const payload: { query: string; documents: string[]; top_n: number; api_version?: number } = {
+    const payload: {
+      query: string;
+      documents: string[];
+      top_n: number;
+      api_version?: number;
+    } = {
       query: body.query,
       documents: body.documents,
       top_n: body.top_k ?? body.documents.length,
@@ -705,7 +710,12 @@ export class BedrockApi implements BaseLlmApi {
         body.model,
         payload,
       );
-      const scores = (responseBody.results as Array<{ index: number; relevance_score: number }>)
+      const scores = (
+        responseBody.results as Array<{
+          index: number;
+          relevance_score: number;
+        }>
+      )
         .sort((a, b) => a.index - b.index)
         .map((result) => result.relevance_score);
 

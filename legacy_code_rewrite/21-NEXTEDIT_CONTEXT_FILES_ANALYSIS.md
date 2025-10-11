@@ -1,6 +1,7 @@
 # NextEdit Context Files Analysis
 
 ## Overview
+
 This document provides a comprehensive analysis of the 5 NextEdit context files that require test coverage. These files are part of the NextEdit feature's data processing pipeline and handle edit aggregation, context fetching, and edit history management.
 
 ---
@@ -8,7 +9,9 @@ This document provides a comprehensive analysis of the 5 NextEdit context files 
 ## 1. aggregateEdits.ts
 
 ### Exports
+
 - **`EditClusterConfig` (interface)**: Configuration for edit clustering behavior
+
   - `deltaT`: Time threshold in seconds for clustering (default: 1.0)
   - `deltaL`: Line threshold for clustering (default: 5)
   - `maxEdits`: Maximum edits per cluster (default: 500)
@@ -27,12 +30,15 @@ This document provides a comprehensive analysis of the 5 NextEdit context files 
     - `resetState()`: Clear all state
 
 ### Usage Patterns
+
 **Used by**: [`processSmallEdit.ts`](core/nextEdit/context/processSmallEdit.ts:18)
+
 ```typescript
 const currentData = (EditAggregator.getInstance() as any).latestContextData || { ... }
 ```
 
 ### Key Functionality
+
 1. **Edit Clustering**: Groups related edits based on temporal and spatial proximity
 2. **File State Management**: Maintains state per file including:
    - Active clusters
@@ -48,11 +54,13 @@ const currentData = (EditAggregator.getInstance() as any).latestContextData || {
 5. **Whitespace Handling**: Skips whitespace-only edits and diffs
 
 ### Dependencies to Mock
+
 - `RangeInFileWithNextEditInfo` from core types
 - `BeforeAfterDiff`, `createBeforeAfterDiff`, `createDiff` from [`diffFormatting.ts`](core/nextEdit/context/diffFormatting.ts)
 - File content and position data
 
 ### Test Coverage Needs
+
 1. **Singleton Pattern**: Test getInstance maintains single instance
 2. **Edit Clustering**: Test edits cluster correctly based on deltaT and deltaL
 3. **Cluster Finalization**: Test various finalization triggers
@@ -67,6 +75,7 @@ const currentData = (EditAggregator.getInstance() as any).latestContextData || {
 ## 2. autocompleteContextFetching.ts
 
 ### Exports
+
 - **`getAutocompleteContext` (async function)**: Fetches formatted autocomplete context
   - **Parameters**:
     - `filepath`: File path for context
@@ -82,16 +91,26 @@ const currentData = (EditAggregator.getInstance() as any).latestContextData || {
   - **Returns**: Promise<string> - Formatted context string
 
 ### Usage Patterns
+
 **Used by**: [`processNextEditData.ts`](core/nextEdit/context/processNextEditData.ts:67)
+
 ```typescript
 const autocompleteContext = await getAutocompleteContext(
-  filePath, cursorPosBeforeEdit, ide, configHandler,
-  getDefinitionsFromLsp, recentlyEditedRanges, recentlyVisitedRanges,
-  maxPromptTokens, beforeContent, modelName
+  filePath,
+  cursorPosBeforeEdit,
+  ide,
+  configHandler,
+  getDefinitionsFromLsp,
+  recentlyEditedRanges,
+  recentlyVisitedRanges,
+  maxPromptTokens,
+  beforeContent,
+  modelName,
 );
 ```
 
 ### Key Functionality
+
 1. **Context Generation**: Mimics autocomplete pipeline to generate context
 2. **Model Selection**: Supports model override or uses configured model
 3. **Security Check**: Validates file is not a security concern
@@ -100,6 +119,7 @@ const autocompleteContext = await getAutocompleteContext(
 6. **Helper Variable Creation**: Creates HelperVars for context processing
 
 ### Dependencies to Mock
+
 - `IDE` interface (file operations, workspace dirs)
 - `MinimalConfigProvider` (config loading)
 - `GetLspDefinitionsFunction` (LSP definitions)
@@ -109,6 +129,7 @@ const autocompleteContext = await getAutocompleteContext(
 - `renderPrompt` (prompt rendering)
 
 ### Test Coverage Needs
+
 1. **Basic Context Fetching**: Test successful context generation
 2. **Model Selection**: Test model override vs configured model
 3. **Security Concerns**: Test rejection of security-concern files
@@ -123,23 +144,27 @@ const autocompleteContext = await getAutocompleteContext(
 ## 3. prevEditLruCache.ts
 
 ### Exports
+
 - **`prevEdit` (interface)**: Structure for storing previous edits
+
   - `unidiff`: Unified diff string
   - `fileUri`: File URI
   - `workspaceUri`: Workspace URI
   - `timestamp`: Edit timestamp
 
 - **`prevEditLruCache` (QuickLRU instance)**: LRU cache for previous edits
+
   - Max size: 5 edits
 
 - **`setPrevEdit` (function)**: Adds edit to cache
   - Generates unique key from fileUri, timestamp, and random suffix
-  
 - **`getPrevEditsDescending` (function)**: Gets edits in descending order (most recent first)
   - Returns up to 5 most recent edits
 
 ### Usage Patterns
+
 **Used by**: [`processNextEditData.ts`](core/nextEdit/context/processNextEditData.ts:89)
+
 ```typescript
 let prevEdits: prevEdit[] = getPrevEditsDescending();
 // ... check if edits should be cleared
@@ -149,15 +174,18 @@ setPrevEdit(thisEdit);
 ```
 
 ### Key Functionality
+
 1. **LRU Caching**: Maintains most recent 5 edits
 2. **Unique Keys**: Generates collision-free keys with random suffixes
 3. **Descending Order**: Returns edits from most to least recent
 4. **Cache Management**: Automatic eviction of oldest edits
 
 ### Dependencies to Mock
+
 - `QuickLRU` from npm package (already a standard dependency)
 
 ### Test Coverage Needs
+
 1. **Basic Operations**: Test set and get functionality
 2. **LRU Behavior**: Test cache evicts oldest when full
 3. **Descending Order**: Test edits returned in correct order
@@ -172,6 +200,7 @@ setPrevEdit(thisEdit);
 ## 4. processNextEditData.ts
 
 ### Exports
+
 - **`processNextEditData` (async function)**: Processes next edit data for logging and context
   - **Parameters**: Object with properties:
     - `filePath`: File path
@@ -188,7 +217,9 @@ setPrevEdit(thisEdit);
     - `modelNameOrInstance`: Optional model override
 
 ### Usage Patterns
+
 **Used by**: [`processSmallEdit.ts`](core/nextEdit/context/processSmallEdit.ts:37)
+
 ```typescript
 void processNextEditData({
   filePath: beforeAfterdiff.filePath,
@@ -206,6 +237,7 @@ void processNextEditData({
 ```
 
 ### Key Functionality
+
 1. **Autocomplete Context Fetching**: Gets context via `getAutocompleteContext`
 2. **Context Addition**: Adds context to NextEditProvider
 3. **History Management**: Manages previous edits cache
@@ -215,6 +247,7 @@ void processNextEditData({
 5. **Edit Storage**: Stores current edit with unified diff
 
 ### Dependencies to Mock
+
 - `IDE` interface
 - `MinimalConfigProvider`
 - `GetLspDefinitionsFunction`
@@ -225,6 +258,7 @@ void processNextEditData({
 - `prevEditLruCache` functions
 
 ### Test Coverage Needs
+
 1. **Context Fetching**: Test autocomplete context is fetched
 2. **History Timeout**: Test 10-minute timeout clears cache
 3. **Workspace Change**: Test workspace change clears cache
@@ -239,6 +273,7 @@ void processNextEditData({
 ## 5. processSmallEdit.ts
 
 ### Exports
+
 - **`processSmallEdit` (async function)**: Entry point for processing small edits
   - **Parameters**:
     - `beforeAfterdiff`: BeforeAfterDiff object
@@ -249,15 +284,18 @@ void processNextEditData({
     - `ide`: IDE interface
 
 ### Usage Patterns
+
 **Called by**: Likely extension code (no direct imports found in core/)
 
 ### Key Functionality
+
 1. **Context Data Retrieval**: Gets latest context data from EditAggregator
 2. **Diff Addition**: Adds unified diff to NextEditProvider context
 3. **Data Processing**: Triggers processNextEditData with context
 4. **Default Handling**: Provides default values if no context data available
 
 ### Dependencies to Mock
+
 - `IDE` interface
 - `MinimalConfigProvider`
 - `GetLspDefinitionsFunction`
@@ -267,6 +305,7 @@ void processNextEditData({
 - `createDiff` function
 
 ### Test Coverage Needs
+
 1. **Context Data Retrieval**: Test getting data from EditAggregator
 2. **Default Handling**: Test behavior with missing context data
 3. **Diff Creation**: Test unified diff with 3 context lines
@@ -279,9 +318,11 @@ void processNextEditData({
 ## Supporting File: diffFormatting.ts
 
 ### Status
+
 ✅ **Already has comprehensive test coverage** in [`diffFormatting.vitest.ts`](core/nextEdit/context/diffFormatting.vitest.ts)
 
 ### Exports (for reference)
+
 - `DiffFormatType` enum (Unified, RawBeforeAfter, TokenLineDiff)
 - `BeforeAfterDiff` type
 - `CreateDiffArgs` interface
@@ -290,6 +331,7 @@ void processNextEditData({
 - `extractMetadataFromUnifiedDiff` function
 
 ### Usage
+
 Used extensively by all 5 files above for diff creation and formatting.
 
 ---
@@ -318,14 +360,18 @@ Entry Point: processSmallEdit()
 ## Testing Strategy Recommendations
 
 ### 1. Unit Tests (Primary Focus)
+
 Each file should have isolated unit tests that:
+
 - Mock all external dependencies
 - Test public API thoroughly
 - Test edge cases and error conditions
 - Test async behavior and timing
 
 ### 2. Integration Tests (Secondary)
+
 Consider integration tests for:
+
 - Complete flow from processSmallEdit through entire pipeline
 - EditAggregator with real diff formatting
 - autocompleteContextFetching with mocked IDE but real context processing
@@ -333,23 +379,28 @@ Consider integration tests for:
 ### 3. Mock Patterns
 
 **Singletons to Mock**:
+
 - `EditAggregator.getInstance()`
 - `NextEditProvider.getInstance()`
 - `DataLogger.getInstance()`
 
 **Interfaces to Mock**:
+
 - `IDE` - Mock file operations, workspace dirs
 - `MinimalConfigProvider` - Mock config loading
 - `GetLspDefinitionsFunction` - Mock LSP calls
 - `ContextRetrievalService` - Mock context retrieval
 
 **Functions to Mock**:
+
 - `getAutocompleteContext` (when testing processNextEditData)
 - `processNextEditData` (when testing processSmallEdit)
 - `createDiff`, `createBeforeAfterDiff` (use real or mock depending on test)
 
 ### 4. Test Data Fixtures
+
 Create shared fixtures for:
+
 - Sample file contents (before/after)
 - Sample diffs (unified format)
 - Sample positions and ranges
@@ -361,11 +412,13 @@ Create shared fixtures for:
 ## Dependencies Summary
 
 ### External NPM Packages
+
 - `quick-lru` - Used by prevEditLruCache
 - `diff` - Used by diffFormatting (already tested)
 - `uuid` - Used by various components
 
 ### Internal Core Dependencies
+
 - `../../autocomplete/*` - Autocomplete system components
 - `../../config/MinimalConfig` - Configuration management
 - `../../data/log` - Data logging
@@ -373,6 +426,7 @@ Create shared fixtures for:
 - `../../util/*` - Various utilities
 
 ### Type Dependencies
+
 - `Position`, `Range`, `RangeInFile` - Core position types
 - `IDE`, `ILLM` - Core interfaces
 - `ChatMessage` - Message types

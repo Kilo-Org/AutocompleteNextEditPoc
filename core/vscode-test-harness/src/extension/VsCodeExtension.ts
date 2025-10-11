@@ -1,7 +1,13 @@
 import fs from "fs";
 import path from "path";
 
-import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
+import {
+  IContextProvider,
+  Core,
+  FromCoreProtocol,
+  ToCoreProtocol,
+  InProcessMessenger,
+} from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
 import {
@@ -241,9 +247,11 @@ export class VsCodeExtension {
 
     // Dependencies of core
     let resolveConfigHandler: any = undefined;
-    const configHandlerPromise = new Promise<MinimalConfigProvider>((resolve) => {
-      resolveConfigHandler = resolve;
-    });
+    const configHandlerPromise = new Promise<MinimalConfigProvider>(
+      (resolve) => {
+        resolveConfigHandler = resolve;
+      },
+    );
 
     const inProcessMessenger = new InProcessMessenger<
       ToCoreProtocol,
@@ -267,7 +275,7 @@ export class VsCodeExtension {
     void this.configHandler.loadConfig();
 
     void setupRemoteConfigSync(() =>
-      this.configHandler.reloadConfig.bind(this.configHandler)(
+      this.configHandler?.reloadConfig?.bind(this.configHandler)?.(
         "Remote config sync",
       ),
     );
@@ -280,7 +288,7 @@ export class VsCodeExtension {
       registerAllCodeLensProviders(context, config);
     });
 
-    this.configHandler.onConfigUpdate(
+    this.configHandler?.onConfigUpdate?.(
       async ({ config: newConfig, configLoadInterrupted }) => {
         const shouldUseFullFileDiff = await getUsingFullFileDiff();
         this.completionProvider.updateUsingFullFileDiff(shouldUseFullFileDiff);
@@ -367,7 +375,7 @@ export class VsCodeExtension {
       if (stats.size === 0) {
         return;
       }
-      await this.configHandler.reloadConfig(
+      await this.configHandler?.reloadConfig?.(
         "Global JSON config updated - fs file watch",
       );
     });
@@ -379,7 +387,7 @@ export class VsCodeExtension {
         if (stats.size === 0) {
           return;
         }
-        await this.configHandler.reloadConfig(
+        await this.configHandler?.reloadConfig?.(
           "Global YAML config updated - fs file watch",
         );
       },
@@ -389,7 +397,9 @@ export class VsCodeExtension {
       if (stats.size === 0) {
         return;
       }
-      void this.configHandler.reloadConfig("config.ts updated - fs file watch");
+      void this.configHandler?.reloadConfig?.(
+        "config.ts updated - fs file watch",
+      );
     });
 
     // watch global rules directory for changes
@@ -397,7 +407,7 @@ export class VsCodeExtension {
     if (fs.existsSync(globalRulesDir)) {
       fs.watch(globalRulesDir, { recursive: true }, (eventType, filename) => {
         if (filename && filename.endsWith(".md")) {
-          void this.configHandler.reloadConfig(
+          void this.configHandler?.reloadConfig?.(
             "Global rules directory updated - fs file watch",
           );
         }
@@ -495,7 +505,7 @@ export class VsCodeExtension {
         );
 
         if (e.provider.id === "github") {
-          this.configHandler.reloadConfig("Github sign-in status changed");
+          this.configHandler?.reloadConfig?.("Github sign-in status changed");
         }
       }
     });
@@ -592,7 +602,7 @@ export class VsCodeExtension {
   private PREVIOUS_BRANCH_FOR_WORKSPACE_DIR: { [dir: string]: string } = {};
 
   registerCustomContextProvider(contextProvider: IContextProvider) {
-    this.configHandler.registerCustomContextProvider(contextProvider);
+    this.configHandler?.registerCustomContextProvider?.(contextProvider);
   }
 
   public activateNextEdit() {

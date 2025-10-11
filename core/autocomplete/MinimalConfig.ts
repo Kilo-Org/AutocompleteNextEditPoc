@@ -77,7 +77,7 @@ export class MinimalConfigProvider {
         ...config?.experimental,
       },
     };
-    
+
     // Set a minimal profile for logging purposes
     // In a minimal extraction, we don't have a control-plane profile
     this.currentProfile = undefined;
@@ -115,7 +115,12 @@ export class MinimalConfigProvider {
   /**
    * Register config update handler (stub for compatibility)
    */
-  onConfigUpdate(handler: (event: { config: MinimalConfig; configLoadInterrupted: boolean }) => void): void {
+  onConfigUpdate(
+    handler: (event: {
+      config: MinimalConfig;
+      configLoadInterrupted: boolean;
+    }) => void,
+  ): void {
     // No-op for minimal config
   }
 

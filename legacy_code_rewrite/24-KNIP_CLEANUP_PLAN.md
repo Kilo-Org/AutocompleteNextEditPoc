@@ -296,7 +296,11 @@ git rm core/util/chatDescriber.test.ts
 ```json
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": ["core/autocomplete/CompletionProvider.ts", "core/nextEdit/NextEditProvider.ts", "core/**/*.vitest.ts"],
+  "entry": [
+    "core/autocomplete/CompletionProvider.ts",
+    "core/nextEdit/NextEditProvider.ts",
+    "core/**/*.vitest.ts"
+  ],
   "project": ["core/**/*.ts"],
   "ignore": ["**/*.d.ts", "**/node_modules/**", "**/dist/**"],
   "ignoreDependencies": ["@types/*"]

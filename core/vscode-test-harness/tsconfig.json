@@ -9,8 +9,6 @@
     "outDir": "dist",
     "noEmit": false
   },
-  "references": [
-    { "path": "../tsconfig.npm.json" }
-  ],
+  "references": [{ "path": "../tsconfig.npm.json" }],
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

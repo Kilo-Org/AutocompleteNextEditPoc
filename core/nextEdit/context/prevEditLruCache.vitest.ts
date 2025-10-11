@@ -166,8 +166,16 @@ describe("prevEditLruCache", () => {
     });
 
     it("should handle mixed workspace URIs", () => {
-      const edit1 = createMockEdit(1000, "file:///test.ts", "file:///workspace1");
-      const edit2 = createMockEdit(2000, "file:///test.ts", "file:///workspace2");
+      const edit1 = createMockEdit(
+        1000,
+        "file:///test.ts",
+        "file:///workspace1",
+      );
+      const edit2 = createMockEdit(
+        2000,
+        "file:///test.ts",
+        "file:///workspace2",
+      );
 
       setPrevEdit(edit1);
       setPrevEdit(edit2);

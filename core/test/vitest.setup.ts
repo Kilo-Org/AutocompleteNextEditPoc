@@ -1,17 +1,26 @@
 import { TextDecoder, TextEncoder } from "util";
-
-import fetch, { Request, Response } from "node-fetch";
 import { beforeAll } from "vitest";
 
-beforeAll(() => {
-  // @ts-ignore
-  globalThis.fetch = fetch;
-  // @ts-ignore
-  globalThis.Request = Request;
-  // @ts-ignore
-  globalThis.Response = Response;
-  // @ts-ignore
-  globalThis.TextEncoder = TextEncoder;
-  // @ts-ignore
-  globalThis.TextDecoder = TextDecoder;
+beforeAll(async () => {
+  const g: any = globalThis;
+
+  // Node 18+ provides global fetch/Request/Response.
+  // If not present (older runtime), lazily fall back to node-fetch (if installed).
+  if (
+    typeof g.fetch === "undefined" ||
+    typeof g.Request === "undefined" ||
+    typeof g.Response === "undefined"
+  ) {
+    try {
+      const mod: any = await import("node-fetch");
+      g.fetch = mod.default ?? mod.fetch ?? g.fetch;
+      g.Request = mod.Request ?? g.Request;
+      g.Response = mod.Response ?? g.Response;
+    } catch {
+      // If node-fetch isn't installed, proceed; tests relying on fetch should use Node >=18.
+    }
+  }
+
+  g.TextEncoder = TextEncoder;
+  g.TextDecoder = TextDecoder;
 });

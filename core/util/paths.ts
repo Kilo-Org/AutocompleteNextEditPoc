@@ -358,15 +358,11 @@ function getPathToRemoteConfig(remoteConfigServerUrl: string): string {
   return dir;
 }
 
-function getConfigJsonPathForRemote(
-  remoteConfigServerUrl: string,
-): string {
+function getConfigJsonPathForRemote(remoteConfigServerUrl: string): string {
   return path.join(getPathToRemoteConfig(remoteConfigServerUrl), "config.json");
 }
 
-function getConfigJsPathForRemote(
-  remoteConfigServerUrl: string,
-): string {
+function getConfigJsPathForRemote(remoteConfigServerUrl: string): string {
   return path.join(getPathToRemoteConfig(remoteConfigServerUrl), "config.js");
 }
 
@@ -473,10 +469,7 @@ function getDiffsDirectoryPath(): string {
   return diffsPath;
 }
 
-const isFileWithinFolder = (
-  fileUri: string,
-  folderPath: string,
-): boolean => {
+const isFileWithinFolder = (fileUri: string, folderPath: string): boolean => {
   try {
     if (!fileUri || !folderPath) {
       return false;

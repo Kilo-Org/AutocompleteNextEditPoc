@@ -101,52 +101,80 @@ describe("aggregateEdits", () => {
         expect(aggregator.getActiveClusterCount()).toBe(1);
       });
 
-      it.todo("should create new cluster when time threshold exceeded", async () => {
-        const aggregator = EditAggregator.getInstance(
-          { deltaT: 1.0 },
-          mockCallback,
-        );
-        const timestamp = Date.now();
+      it.todo(
+        "should create new cluster when time threshold exceeded",
+        async () => {
+          const aggregator = EditAggregator.getInstance(
+            { deltaT: 1.0 },
+            mockCallback,
+          );
+          const timestamp = Date.now();
 
-        // First edit on line 1 with initial content
-        await aggregator.processEdit(
-          createMockEdit(1, "test.ts", "new1", "line1\nline2\nline3\nline4\nline5"),
-          timestamp
-        );
-        
-        // Second edit on line 2 (different line) with modified content after time threshold
-        await aggregator.processEdit(
-          createMockEdit(2, "test.ts", "new2", "line1\nnew1\nline3\nline4\nline5"),
-          timestamp + 2000
-        );
+          // First edit on line 1 with initial content
+          await aggregator.processEdit(
+            createMockEdit(
+              1,
+              "test.ts",
+              "new1",
+              "line1\nline2\nline3\nline4\nline5",
+            ),
+            timestamp,
+          );
 
-        // Wait for async processing to complete - queue processing has delays
-        await new Promise(resolve => setTimeout(resolve, 100));
+          // Second edit on line 2 (different line) with modified content after time threshold
+          await aggregator.processEdit(
+            createMockEdit(
+              2,
+              "test.ts",
+              "new2",
+              "line1\nnew1\nline3\nline4\nline5",
+            ),
+            timestamp + 2000,
+          );
 
-        // Callback should have been invoked for finalized cluster
-        expect(mockCallback).toHaveBeenCalled();
-      });
+          // Wait for async processing to complete - queue processing has delays
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          // Callback should have been invoked for finalized cluster
+          expect(mockCallback).toHaveBeenCalled();
+        },
+      );
 
       it.todo("should finalize clusters when switching files", async () => {
         const aggregator = EditAggregator.getInstance({}, mockCallback);
 
         // First edit on file1 with initial content
         await aggregator.processEdit(
-          createMockEdit(1, "file1.ts", "new1", "line1\nline2\nline3\nline4\nline5")
+          createMockEdit(
+            1,
+            "file1.ts",
+            "new1",
+            "line1\nline2\nline3\nline4\nline5",
+          ),
         );
-        
+
         // Second edit on file1 with modified content to establish actual change
         await aggregator.processEdit(
-          createMockEdit(1, "file1.ts", "new2", "line1\nnew1\nline3\nline4\nline5")
+          createMockEdit(
+            1,
+            "file1.ts",
+            "new2",
+            "line1\nnew1\nline3\nline4\nline5",
+          ),
         );
-        
+
         // Third edit on file2 - this should trigger finalization of file1's cluster
         await aggregator.processEdit(
-          createMockEdit(1, "file2.ts", "new3", "line1\nline2\nline3\nline4\nline5")
+          createMockEdit(
+            1,
+            "file2.ts",
+            "new3",
+            "line1\nline2\nline3\nline4\nline5",
+          ),
         );
 
         // Wait for async processing to complete - queue processing has delays
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         expect(mockCallback).toHaveBeenCalledTimes(1);
       });
@@ -160,7 +188,7 @@ describe("aggregateEdits", () => {
         await aggregator.processEdits(edits);
 
         // Wait for async processing to complete - queue processing has delays
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         expect(aggregator.getProcessingQueueSize()).toBe(0);
       });
@@ -263,19 +291,31 @@ describe("aggregateEdits", () => {
 
         // Create edits with incremental content changes
         let content = "line1\nline2\nline3\nline4\nline5";
-        await aggregator.processEdit(createMockEdit(1, "test.ts", "new1", content), timestamp);
-        
+        await aggregator.processEdit(
+          createMockEdit(1, "test.ts", "new1", content),
+          timestamp,
+        );
+
         content = "line1\nnew1\nline3\nline4\nline5";
-        await aggregator.processEdit(createMockEdit(1, "test.ts", "new2", content), timestamp + 100);
-        
+        await aggregator.processEdit(
+          createMockEdit(1, "test.ts", "new2", content),
+          timestamp + 100,
+        );
+
         content = "line1\nnew1\nnew2\nline4\nline5";
-        await aggregator.processEdit(createMockEdit(1, "test.ts", "new3", content), timestamp + 200);
-        
+        await aggregator.processEdit(
+          createMockEdit(1, "test.ts", "new3", content),
+          timestamp + 200,
+        );
+
         content = "line1\nnew1\nnew2\nnew3\nline5";
-        await aggregator.processEdit(createMockEdit(1, "test.ts", "new4", content), timestamp + 300);
+        await aggregator.processEdit(
+          createMockEdit(1, "test.ts", "new4", content),
+          timestamp + 300,
+        );
 
         // Wait for async processing to complete - queue processing has delays
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         expect(mockCallback).toHaveBeenCalled();
       });
