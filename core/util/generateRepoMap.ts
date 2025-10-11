@@ -20,7 +20,7 @@ class CodeSnippetsCodebaseIndex {
   ): Promise<{ groupedByUri: Record<string, string[]>; hasMoreSnippets: boolean; hasMoreUris: boolean }> {
     return { groupedByUri: {}, hasMoreSnippets: false, hasMoreUris: false };
   }
-  compute(_args: any): any {
+  compute(_args: unknown): unknown {
     return {};
   }
 }
@@ -194,7 +194,7 @@ class RepoMapGenerator {
   private indentMultilineString(str: string) {
     return str
       .split("\n")
-      .map((line: any) => "\t" + line)
+      .map((line: string) => "\t" + line)
       .join("\n");
   }
 }

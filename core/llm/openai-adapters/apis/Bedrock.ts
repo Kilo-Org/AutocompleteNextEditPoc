@@ -41,13 +41,15 @@ import {
   RerankCreateParams,
 } from "./base.js";
 
+type GetSecureIDWithStatic = (() => string) & { uuid?: string };
 // Utility function to get or generate UUID for prompt caching
 function getSecureID(): string {
   // Adding a type declaration for the static property
-  if (!(getSecureID as any).uuid) {
-    (getSecureID as any).uuid = uuidv4();
+  const fn = getSecureID as GetSecureIDWithStatic;
+  if (!fn.uuid) {
+    fn.uuid = uuidv4();
   }
-  return `<!-- SID: ${(getSecureID as any).uuid} -->`;
+  return `<!-- SID: ${fn.uuid} -->`;
 }
 
 /**
@@ -106,7 +108,7 @@ export class BedrockApi implements BaseLlmApi {
           accessKeyId: this.config.apiKey,
           secretAccessKey: this.config.apiKey,
         },
-      } as any);
+      });
     }
 
     // Otherwise use IAM credentials (existing behavior)
@@ -389,13 +391,24 @@ export class BedrockApi implements BaseLlmApi {
     );
 
     // Build final request body
-    const body: any = {
+    const body: {
+      modelId: string;
+      messages: Message[];
+      inferenceConfig: {
+        temperature?: number;
+        topP?: number;
+        maxTokens?: number;
+        stopSequences?: string[] | undefined;
+      };
+      system?: Array<{ text: string } | { cachePoint: { type: "default" } }>;
+      toolConfig?: ToolConfiguration;
+    } = {
       modelId: oaiBody.model,
       messages: convertedMessages,
       inferenceConfig: {
-        temperature: oaiBody.temperature,
-        topP: oaiBody.top_p,
-        maxTokens: oaiBody.max_tokens,
+        temperature: oaiBody.temperature ?? undefined,
+        topP: oaiBody.top_p ?? undefined,
+        maxTokens: oaiBody.max_tokens ?? undefined,
         stopSequences: Array.isArray(oaiBody.stop)
           ? oaiBody.stop.filter((s) => s.trim() !== "").slice(0, 4)
           : oaiBody.stop
@@ -493,7 +506,12 @@ export class BedrockApi implements BaseLlmApi {
 
       for await (const chunk of response.stream) {
         if (chunk.contentBlockDelta?.delta) {
-          const delta: any = chunk.contentBlockDelta.delta;
+          type DeltaBlock = {
+            text?: string;
+            reasoningContent?: { text?: string };
+            toolUse?: { toolUseId: string; name: string; input: string };
+          };
+          const delta = chunk.contentBlockDelta.delta as unknown as DeltaBlock;
 
           // Handle text content
           if (delta.text) {
@@ -559,8 +577,9 @@ export class BedrockApi implements BaseLlmApi {
     } catch (error) {
       if (error instanceof Error) {
         if ("code" in error) {
+          const code = (error as { code?: string }).code;
           throw new Error(
-            `AWS Bedrock stream error (${(error as any).code}): ${error.message}`,
+            `AWS Bedrock stream error (${code ?? "UNKNOWN"}): ${error.message}`,
           );
         }
         throw new Error(`Error processing Bedrock stream: ${error.message}`);
@@ -670,7 +689,7 @@ export class BedrockApi implements BaseLlmApi {
     }
 
     // Base payload for both models
-    const payload: any = {
+    const payload: { query: string; documents: string[]; top_n: number; api_version?: number } = {
       query: body.query,
       documents: body.documents,
       top_n: body.top_k ?? body.documents.length,
@@ -686,9 +705,9 @@ export class BedrockApi implements BaseLlmApi {
         body.model,
         payload,
       );
-      const scores = responseBody.results
-        .sort((a: any, b: any) => a.index - b.index)
-        .map((result: any) => result.relevance_score);
+      const scores = (responseBody.results as Array<{ index: number; relevance_score: number }>)
+        .sort((a, b) => a.index - b.index)
+        .map((result) => result.relevance_score);
 
       return rerank({
         model: body.model,
@@ -701,8 +720,9 @@ export class BedrockApi implements BaseLlmApi {
       if (error instanceof Error) {
         if ("code" in error) {
           // AWS SDK specific errors
+          const code = (error as { code?: string }).code;
           throw new Error(
-            `AWS Bedrock rerank error (${(error as any).code}): ${error.message}`,
+            `AWS Bedrock rerank error (${code ?? "UNKNOWN"}): ${error.message}`,
           );
         }
         throw new Error(`Error in BedrockReranker.rerank: ${error.message}`);

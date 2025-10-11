@@ -28,7 +28,7 @@ export interface MinimalConfig {
     chat?: ILLM;
     rerank?: ILLM;
   };
-  rules?: any[];
+  rules?: unknown[];
 }
 
 export interface MinimalProfile {
@@ -108,21 +108,21 @@ export class MinimalConfigProvider {
   /**
    * Reload config (stub for compatibility)
    */
-  async reloadConfig(...args: any[]): Promise<void> {
+  async reloadConfig(..._args: unknown[]): Promise<void> {
     // No-op for minimal config
   }
 
   /**
    * Register config update handler (stub for compatibility)
    */
-  onConfigUpdate(handler: (newConfig: any, configLoadInterrupted: boolean) => void): void {
+  onConfigUpdate(handler: (event: { config: MinimalConfig; configLoadInterrupted: boolean }) => void): void {
     // No-op for minimal config
   }
 
   /**
    * Register custom context provider (stub for compatibility)
    */
-  registerCustomContextProvider(provider: any): void {
+  registerCustomContextProvider(provider: unknown): void {
     // No-op for minimal config
   }
 }

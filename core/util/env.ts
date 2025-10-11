@@ -6,7 +6,7 @@ type ControlPlaneEnv = {
   AUTH_TYPE?: string;
 } | undefined;
 
-export function getControlPlaneEnv(...args: any[]): Promise<ControlPlaneEnv> {
+export function getControlPlaneEnv(): Promise<ControlPlaneEnv> {
   return Promise.resolve(undefined);
 }
 
