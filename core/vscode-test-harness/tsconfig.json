@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "types": ["vscode", "vitest/globals", "node"],
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "references": [
+    { "path": "../tsconfig.npm.json" }
+  ],
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

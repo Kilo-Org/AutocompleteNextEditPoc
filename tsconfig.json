@@ -1,1 +1,7 @@
-{}
+{
+  "files": [],
+  "references": [
+    { "path": "./core/tsconfig.npm.json" },
+    { "path": "./core/vscode-test-harness" }
+  ]
+}

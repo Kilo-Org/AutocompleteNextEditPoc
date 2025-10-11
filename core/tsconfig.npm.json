@@ -18,8 +18,10 @@
     "types": ["node"],
     "outDir": "dist",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "composite": true,
+    "incremental": true
   },
   "include": ["./**/*.ts", "**/*.js", "./**/*.d.ts"],
-  "exclude": ["dist", "test", "**/test/**", "**/*.test.ts", "**/*.spec.ts", "**/*.vitest.ts", "**/*.test.tsx", "**/*.spec.tsx"]
+  "exclude": ["dist", "test", "**/test/**", "**/*.test.ts", "**/*.spec.ts", "**/*.vitest.ts", "**/*.test.tsx", "**/*.spec.tsx", "autocomplete/context/root-path-context/testUtils.ts"]
 }
