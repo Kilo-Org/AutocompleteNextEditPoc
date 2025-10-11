@@ -3,7 +3,6 @@
   "entry": [
     "core/autocomplete/CompletionProvider.ts",
     "core/nextEdit/NextEditProvider.ts",
-    "core/**/*.test.ts",
     "core/**/*.vitest.ts",
     "core/vscode-test-harness/test/**/*.vitest.ts",
     "core/vscode-test-harness/src/**/*.ts"
