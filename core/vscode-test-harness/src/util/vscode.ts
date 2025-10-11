@@ -1,4 +1,8 @@
-import { machineIdSync } from "node-machine-id";
+// Stub for missing node-machine-id package
+function machineIdSync(): string {
+  return "stub-machine-id";
+}
+
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 

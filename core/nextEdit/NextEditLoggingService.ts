@@ -232,7 +232,10 @@ export class NextEditLoggingService {
         return;
       }
 
-      const controlPlaneEnv = getControlPlaneEnvSync("production");
+      const controlPlaneEnv = getControlPlaneEnvSync();
+      if (!controlPlaneEnv || !controlPlaneEnv.CONTROL_PLANE_URL) {
+        return;
+      }
       const resp = await fetchwithRequestOptions(
         new URL("model-proxy/v1/feedback", controlPlaneEnv.CONTROL_PLANE_URL),
         {

@@ -1,11 +1,16 @@
 // Minimal stub for removed control-plane functionality
 export const EXTENSION_NAME = "continue";
 
-export function getControlPlaneEnv() {
-  return undefined;
+type ControlPlaneEnv = {
+  CONTROL_PLANE_URL?: string;
+  AUTH_TYPE?: string;
+} | undefined;
+
+export function getControlPlaneEnv(...args: any[]): Promise<ControlPlaneEnv> {
+  return Promise.resolve(undefined);
 }
 
-export function getControlPlaneEnvSync() {
+export function getControlPlaneEnvSync(): ControlPlaneEnv {
   return undefined;
 }
 

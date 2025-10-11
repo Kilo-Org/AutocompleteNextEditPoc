@@ -10,8 +10,7 @@ import { fetchwithRequestOptions } from "../fetch";
 import * as URI from "uri-js";
 import { fileURLToPath } from "url";
 import { z } from "zod";
-import { Core } from "../core.js";
-import { ContinueConfig, IdeInfo, IdeSettings } from "../index.js";
+import { Core, ContinueConfig, IdeInfo, IdeSettings } from "../index.js";
 import { getDevDataFilePath } from "../util/paths.js";
 import { joinPathsToUri } from "../util/uri.js";
 
@@ -112,7 +111,7 @@ export class DataLogger {
     const config = (await this.core?.configHandler.loadConfig())?.config;
     if (config?.data?.length) {
       await Promise.allSettled(
-        config.data.map((dataConfig) =>
+        config.data.map((dataConfig: any) =>
           this.logToOneDestination(dataConfig, event),
         ),
       );

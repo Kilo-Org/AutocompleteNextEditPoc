@@ -15,6 +15,9 @@ const defaultConfig = {};
 type ConfigYaml = any;
 type DevEventName = string;
 
+// Stub for Types definition file content
+const Types = "";
+
 dotenv.config();
 
 const CONTINUE_GLOBAL_DIR = (() => {

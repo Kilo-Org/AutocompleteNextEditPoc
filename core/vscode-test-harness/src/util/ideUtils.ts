@@ -136,7 +136,7 @@ export class VsCodeIdeUtils {
         // Found an open document with this URI.
         // Return its current content (including any unsaved changes) as Uint8Array.
         const docText = document.getText();
-        return Buffer.from(docText, "utf8");
+        return new Uint8Array(Buffer.from(docText, "utf8"));
       }
     }
 
@@ -362,9 +362,13 @@ export class VsCodeIdeUtils {
 
   private async _getThreads(session: vscode.DebugSession) {
     const threadsResponse = await session.customRequest("threads");
-    const threads = threadsResponse.threads.filter((thread: any) =>
-      threadStopped.get(thread.id),
-    );
+    const threads = threadsResponse.threads.filter((thread: any) => {
+      try {
+        return Boolean(threadStopped(thread.id));
+      } catch {
+        return false;
+      }
+    });
     threads.sort((a: any, b: any) => a.id - b.id);
     threadsResponse.threads = threads;
 
@@ -624,6 +628,9 @@ export class VsCodeIdeUtils {
     try {
       if (repos) {
         for (const repo of repos) {
+          if (!repo.diff) {
+            continue;
+          }
           const staged = await repo.diff(true);
 
           diffs.push(staged);

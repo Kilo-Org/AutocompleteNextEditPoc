@@ -73,7 +73,7 @@ export interface CompletionDataForAfterJump {
  * the _jumpAccepted flag to determine whether we should delete chains.
  */
 export class JumpManager {
-  private static _instance: JumpManager | undefined;
+  public static _instance: JumpManager | undefined;
 
   // Decoration state.
   private _jumpIcon: vscode.Uri | undefined;

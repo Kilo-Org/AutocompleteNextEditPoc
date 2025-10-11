@@ -4,7 +4,7 @@ import { PrecalculatedLruCache } from "./LruCache";
 describe("PrecalculatedLruCache", () => {
   const N = 2;
 
-  let calculateValue: ReturnType<typeof vi.fn<[string], Promise<number>>>;
+  let calculateValue: any;
   let cache: PrecalculatedLruCache<number>;
 
   beforeEach(() => {

@@ -1959,3 +1959,94 @@ export interface DocumentSymbol {
   selectionRange: Range;
   children?: DocumentSymbol[];
 }
+
+// Protocol stubs for vscode-test-harness
+export type FromCoreProtocol = any;
+export type ToCoreProtocol = any;
+export type FromWebviewProtocol = any;
+export type ToWebviewProtocol = any;
+export type ToIdeFromCoreProtocol = any;
+export type ToIdeFromWebviewOrCoreProtocol = any;
+export type ToWebviewFromCoreProtocol = any;
+
+export interface Message<T = any> {
+  messageType: string;
+  data: T;
+  messageId?: string;
+}
+
+export interface ListHistoryOptions {
+  offset?: number;
+  limit?: number;
+}
+
+export interface IMessenger<TFrom = any, TTo = any> {
+  send(messageType: string, data: any, messageId?: string): string;
+  on<T extends keyof TFrom>(
+    messageType: T,
+    handler: (message: Message<any>) => Promise<any> | any,
+  ): void;
+  request?(messageType: string, data: any): Promise<any>;
+}
+
+export class InProcessMessenger<TFrom = any, TTo = any> implements IMessenger<TFrom, TTo> {
+  send(messageType: string, data: any, messageId?: string): string;
+  on<T extends keyof TFrom>(messageType: T, handler: (message: Message<any>) => void): void;
+  request(messageType: string, data: any): Promise<any>;
+  externalOn?(messageType: string, handler: (message: Message<any>) => void): void;
+  externalRequest?(messageType: string, data: any): Promise<any>;
+}
+
+export const CORE_TO_WEBVIEW_PASS_THROUGH: string[] = [];
+export const WEBVIEW_TO_CORE_PASS_THROUGH: string[] = [];
+
+// Stub for Core class
+export class Core {
+  constructor(messenger: InProcessMessenger, ide: IDE, configProvider?: any);
+  configHandler: any;
+  invoke(method: string, ...args: any[]): Promise<any>;
+}
+
+// MinimalConfig interface with all required properties
+export interface MinimalConfig {
+  selectedModelByRole?: {
+    autocomplete?: ILLM;
+    edit?: ILLM;
+    chat?: ILLM;
+    rerank?: ILLM;
+  };
+  rules?: any[];
+}
+
+// Stub for MinimalConfigProvider additions
+declare module "core/autocomplete/MinimalConfig" {
+  export interface MinimalConfigProvider {
+    reloadConfig?(): Promise<void>;
+    onConfigUpdate?(handler: (newConfig: any, configLoadInterrupted: boolean) => void): void;
+    registerCustomContextProvider?(provider: any): void;
+  }
+}
+
+// Stubs for missing external modules
+declare module "@sentry/node" {
+  export function startSpan<T>(options: any, callback: () => T): T;
+  export const spanToJSON: any;
+}
+
+declare module "@sentry/core" {
+  export function startInactiveSpan(options: any): any;
+}
+
+declare module "@modelcontextprotocol/sdk/shared/auth.js" {
+  export const OAuthClientFactory: any;
+}
+
+declare module "node-machine-id" {
+  export function machineId(): Promise<string>;
+  export function machineIdSync(): string;
+}
+
+// Stub for missing Types in paths.ts
+export namespace Types {
+  export const FileSystemProvider: any;
+}

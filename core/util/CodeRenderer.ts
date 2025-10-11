@@ -13,12 +13,7 @@ export class CodeRenderer {
     // No-op stub
   }
 
-  async getDataUri(
-    text: string,
-    language?: string,
-    fontSize?: number,
-    fontFamily?: string,
-  ): Promise<string> {
+  async getDataUri(...args: any[]): Promise<string> {
     // Return empty data URI as stub
     return "data:image/svg+xml;base64,";
   }

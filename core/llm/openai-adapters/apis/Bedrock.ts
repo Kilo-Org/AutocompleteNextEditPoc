@@ -102,10 +102,11 @@ export class BedrockApi implements BaseLlmApi {
     if (this.config.apiKey) {
       return new BedrockRuntimeClient({
         region,
-        token: fromStatic({
-          token: { token: this.config.apiKey },
-        }),
-      });
+        credentials: {
+          accessKeyId: this.config.apiKey,
+          secretAccessKey: this.config.apiKey,
+        },
+      } as any);
     }
 
     // Otherwise use IAM credentials (existing behavior)

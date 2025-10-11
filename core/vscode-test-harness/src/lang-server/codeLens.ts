@@ -1,2 +1,2 @@
 // Stub for testing - not used in actual tests
-export function registerAllCodeLensProviders() {}
+export function registerAllCodeLensProviders(...args: any[]) {}

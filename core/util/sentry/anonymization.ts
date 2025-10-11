@@ -1,5 +1,3 @@
-import * as Sentry from "@sentry/node";
-import { type Event } from "@sentry/core";
 /**
  * Minimalist Sentry anonymization utilities
  */

@@ -1,12 +1,9 @@
 import fs from "fs";
 import path from "path";
 
-import { IContextProvider } from "core";
+import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
-import { Core } from "core";
-import { FromCoreProtocol, ToCoreProtocol } from "core/protocol";
-import { InProcessMessenger } from "core/protocol/messenger";
 import {
   getConfigJsonPath,
   getConfigTsPath,
@@ -87,7 +84,7 @@ export class VsCodeExtension {
     context: vscode.ExtensionContext,
   ): Promise<void> {
     const { config: continueConfig } = await this.configHandler.loadConfig();
-    const autocompleteModel = continueConfig?.selectedModelByRole.autocomplete;
+    const autocompleteModel = continueConfig?.selectedModelByRole?.autocomplete;
     const vscodeConfig = vscode.workspace.getConfiguration(EXTENSION_NAME);
 
     const modelSupportsNext =
@@ -186,7 +183,7 @@ export class VsCodeExtension {
     // Check if model supports next edit to determine if we should use full file diff.
     const getUsingFullFileDiff = async () => {
       const { config } = await this.configHandler.loadConfig();
-      const autocompleteModel = config?.selectedModelByRole.autocomplete;
+      const autocompleteModel = config?.selectedModelByRole?.autocomplete;
 
       if (!autocompleteModel) {
         return false;
@@ -324,7 +321,7 @@ export class VsCodeExtension {
     );
 
     // Handle uri events
-    this.uriHandler.event((uri) => {
+    this.uriHandler.event((uri: any) => {
       const queryParams = new URLSearchParams(uri.query);
       let profileId = queryParams.get("profile_id");
       let orgId = queryParams.get("org_id");
@@ -475,7 +472,10 @@ export class VsCodeExtension {
 
     // When GitHub sign-in status changes, reload config
     vscode.authentication.onDidChangeSessions(async (e) => {
-      const env = await getControlPlaneEnv(this.ide.getIdeSettings());
+      const env = await getControlPlaneEnv();
+      if (!env || !env.AUTH_TYPE) {
+        return;
+      }
       if (e.provider.id === env.AUTH_TYPE) {
         void vscode.commands.executeCommand(
           "setContext",

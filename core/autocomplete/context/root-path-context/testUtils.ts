@@ -3,7 +3,7 @@ import path from "path";
 import { expect, vi } from "vitest";
 
 import Parser from "web-tree-sitter";
-import { Position } from "../../../..";
+import type { Position } from "../../../index.js";
 import { testIde } from "../../../test/fixtures";
 import { getAst, getTreePathAtCursor } from "../../util/ast";
 import { ImportDefinitionsService } from "../ImportDefinitionsService";

@@ -24,7 +24,11 @@ export interface MinimalConfig {
   };
   selectedModelByRole?: {
     autocomplete?: ILLM;
+    edit?: ILLM;
+    chat?: ILLM;
+    rerank?: ILLM;
   };
+  rules?: any[];
 }
 
 export interface MinimalProfile {
@@ -99,5 +103,26 @@ export class MinimalConfigProvider {
    */
   isStaticContextualizationEnabled(): boolean {
     return this.config.experimental?.enableStaticContextualization ?? false;
+  }
+
+  /**
+   * Reload config (stub for compatibility)
+   */
+  async reloadConfig(...args: any[]): Promise<void> {
+    // No-op for minimal config
+  }
+
+  /**
+   * Register config update handler (stub for compatibility)
+   */
+  onConfigUpdate(handler: (newConfig: any, configLoadInterrupted: boolean) => void): void {
+    // No-op for minimal config
+  }
+
+  /**
+   * Register custom context provider (stub for compatibility)
+   */
+  registerCustomContextProvider(provider: any): void {
+    // No-op for minimal config
   }
 }

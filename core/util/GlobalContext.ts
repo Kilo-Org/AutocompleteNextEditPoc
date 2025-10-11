@@ -1,10 +1,10 @@
 import fs from "node:fs";
 
 import { ModelRole } from "../index.js";
-import {
-  OAuthClientInformationFull,
-  OAuthTokens,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
+
+// Stub types for MCP SDK (not available in this minimal build)
+type OAuthClientInformationFull = any;
+type OAuthTokens = any;
 
 import { SiteIndexingConfig } from "..";
 import {

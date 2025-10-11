@@ -1,20 +1,21 @@
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { DataLogger } from "core/util/log";
-import { EDIT_MODE_STREAM_ID } from "core/edit/constants";
 import {
   FromCoreProtocol,
   FromWebviewProtocol,
   ToCoreProtocol,
-} from "core/protocol";
-import { ToWebviewFromCoreProtocol } from "core/protocol/coreWebview";
-import { ToIdeFromWebviewOrCoreProtocol } from "core/protocol/ide";
-import { ToIdeFromCoreProtocol } from "core/protocol/ideCore";
-import { InProcessMessenger, Message } from "core/protocol/messenger";
-import {
+  ToWebviewFromCoreProtocol,
+  ToIdeFromWebviewOrCoreProtocol,
+  ToIdeFromCoreProtocol,
+  InProcessMessenger,
+  Message,
   CORE_TO_WEBVIEW_PASS_THROUGH,
   WEBVIEW_TO_CORE_PASS_THROUGH,
-} from "core/protocol/passThrough";
+} from "core";
 import { stripImages } from "core/util/messageContent";
+
+// Stub for EDIT_MODE_STREAM_ID
+const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
 import { ApplyManager } from "../apply";
@@ -58,7 +59,7 @@ export class VsCodeMessenger {
       | Promise<ToIdeOrWebviewFromCoreProtocol[T][1]>
       | ToIdeOrWebviewFromCoreProtocol[T][1],
   ): void {
-    this.inProcessMessenger.externalOn(messageType, handler);
+    this.inProcessMessenger.externalOn?.(messageType as string, handler as any);
   }
 
   onWebviewOrCore<T extends keyof ToIdeFromWebviewOrCoreProtocol>(
@@ -80,12 +81,12 @@ export class VsCodeMessenger {
     >,
     private readonly webviewProtocol: VsCodeWebviewProtocol,
     private readonly ide: VsCodeIde,
-    private readonly verticalDiffManagerPromise: Promise<VerticalDiffManager>,
     private readonly configHandlerPromise: Promise<MinimalConfigProvider>,
     private readonly workOsAuthProvider: WorkOsAuthProvider,
-    private readonly editDecorationManager: EditDecorationManager,
     private readonly context: vscode.ExtensionContext,
     private readonly vsCodeExtension: VsCodeExtension,
+    private readonly verticalDiffManagerPromise?: Promise<VerticalDiffManager>,
+    private readonly editDecorationManager?: EditDecorationManager,
   ) {
     /** WEBVIEW ONLY LISTENERS **/
     this.onWebview("showFile", (msg) => {
@@ -207,8 +208,12 @@ export class VsCodeMessenger {
     });
     this.onWebview("edit/sendPrompt", async (msg) => {
       const prompt = msg.data.prompt;
-      const { start, end } = msg.data.range.range;
+      const { start, end} = msg.data.range.range;
       const verticalDiffManager = await verticalDiffManagerPromise;
+      
+      if (!verticalDiffManager) {
+        throw new Error("Vertical diff manager not available");
+      }
 
       const configHandler = await configHandlerPromise;
       const { config } = await configHandler.loadConfig();
@@ -218,7 +223,7 @@ export class VsCodeMessenger {
       }
 
       const model =
-        config?.selectedModelByRole.edit ?? config?.selectedModelByRole.chat;
+        config?.selectedModelByRole?.edit ?? config?.selectedModelByRole?.chat;
 
       if (!model) {
         throw new Error("No Edit or Chat model selected");
@@ -253,7 +258,7 @@ export class VsCodeMessenger {
     });
 
     this.onWebview("edit/clearDecorations", async (msg) => {
-      editDecorationManager.clear();
+      editDecorationManager?.clear();
     });
 
     this.onWebview("session/share", async (msg) => {
@@ -265,12 +270,14 @@ export class VsCodeMessenger {
 
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
     WEBVIEW_TO_CORE_PASS_THROUGH.forEach((messageType) => {
-      this.onWebview(messageType, async (msg) => {
-        return await this.inProcessMessenger.externalRequest(
-          messageType,
-          msg.data,
-          msg.messageId,
-        );
+      this.onWebview(messageType as any, async (msg) => {
+        if (this.inProcessMessenger.externalRequest) {
+          return await this.inProcessMessenger.externalRequest(
+            String(messageType),
+            msg.data,
+          );
+        }
+        return undefined as any;
       });
     });
 
@@ -364,7 +371,7 @@ export class VsCodeMessenger {
       return ide.showLines(filepath, startLine, endLine);
     });
     this.onWebviewOrCore("showToast", (msg) => {
-      this.ide.showToast(...msg.data);
+      this.ide.showToast(...(msg.data as [any, any, ...any[]]));
     });
     this.onWebviewOrCore("getControlPlaneSessionInfo", async (msg) => {
       return getControlPlaneSessionInfo(
