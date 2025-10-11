@@ -3,12 +3,7 @@ set -e  # Exit on first error
 
 pushd core
 echo "🧪 Running Core Vitest tests (autocomplete & nextEdit)..."
-npm test -- autocomplete nextEdit
-popd
-
-echo "🧪 Running VSCode Integration tests (new location)..."
-pushd core/vscode-test-harness
-npm test
+npm test -- autocomplete nextEdit vscode-test-harness
 popd
 
 echo "✅ All autocomplete and NextEdit tests passed!"
