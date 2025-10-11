@@ -38,17 +38,13 @@
     "@types/tar": "^6.1.13",
     "@types/uuid": "^9.0.7",
     "@types/win-ca": "^3.5.4",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
     "cross-env": "^7.0.3",
     "esbuild": "0.17.19",
-    "eslint": "^8",
     "myers-diff": "^2.1.0",
     "onnxruntime-common": "1.14.0",
     "onnxruntime-web": "1.14.0",
     "shiki": "^3.6.0",
-    "typescript": "^5.6.3",
-    "vitest": "^3.1.4"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.62.0",

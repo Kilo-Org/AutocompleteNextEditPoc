@@ -8,8 +8,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0",
-    "vitest": "^3.1.4"
+    "@types/vscode": "^1.80.0"
   },
   "dependencies": {
     "core": "file:../",
