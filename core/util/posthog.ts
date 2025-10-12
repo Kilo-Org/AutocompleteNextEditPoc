@@ -14,7 +14,7 @@ export enum PosthogFeatureFlag {
 
 const EXPERIMENTS: {
   [key in PosthogFeatureFlag]: {
-    [key: string]: { value: any };
+    [key: string]: { value: number | null };
   };
 } = {
   [PosthogFeatureFlag.AutocompleteTimeout]: {
@@ -59,7 +59,7 @@ export class Telemetry {
 
   static async capture(
     event: string,
-    properties: { [key: string]: any },
+    properties: Record<string, unknown>,
     sendToTeam: boolean = false,
     isExtensionActivationError: boolean = false,
   ) {

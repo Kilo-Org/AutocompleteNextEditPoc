@@ -7,7 +7,7 @@ export class ListenableGenerator<T> {
 
   constructor(
     source: AsyncGenerator<T>,
-    private readonly onError: (e: any) => void,
+    private readonly onError: (e: unknown) => void,
     abortController: AbortController,
   ) {
     this._source = source;
@@ -60,7 +60,7 @@ export class ListenableGenerator<T> {
         yield this._buffer[i++];
       }
       while (!this._isEnded) {
-        let resolve: (value: any) => void;
+        let resolve: (value: IteratorResult<T>) => void;
         const promise = new Promise<T>((res) => {
           resolve = res;
           this._listeners.add(resolve!);

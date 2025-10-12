@@ -4,9 +4,9 @@
  * @param err - The error object to analyze. It can be of any type.
  * @returns The root cause of the error, or the original error if no further cause is found.
  */
-function getRootCause(err: any): any {
-  if (err.cause) {
-    return getRootCause(err.cause);
+function getRootCause(err: unknown): unknown {
+  if (err && typeof err === 'object' && 'cause' in err) {
+    return getRootCause((err as { cause: unknown }).cause);
   }
   return err;
 }

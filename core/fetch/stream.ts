@@ -73,7 +73,7 @@ export async function* streamResponse(
 }
 
 // Export for testing purposes
-function parseDataLine(line: string): any {
+function parseDataLine(line: string): unknown {
   const json = line.startsWith("data: ")
     ? line.slice("data: ".length)
     : line.slice("data:".length);
@@ -108,7 +108,7 @@ function parseDataLine(line: string): any {
   }
 }
 
-function parseSseLine(line: string): { done: boolean; data: any } {
+function parseSseLine(line: string): { done: boolean; data: unknown } {
   if (line.startsWith("data:[DONE]") || line.startsWith("data: [DONE]")) {
     return { done: true, data: undefined };
   }

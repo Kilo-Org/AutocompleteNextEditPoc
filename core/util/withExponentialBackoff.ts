@@ -13,7 +13,7 @@ const withExponentialBackoff = async <T>(
     try {
       const result = await apiCall();
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if ((error as APIError).response?.status === 429) {
         const retryAfter = (error as APIError).response?.headers.get(
           RETRY_AFTER_HEADER,

@@ -1,13 +1,12 @@
 import { ConfigMergeType } from "../index.js";
 
-type JsonObject = { [key: string]: any };
-
-export function mergeJson(
-  first: JsonObject,
-  second: JsonObject,
+// Allow any JSON-compatible value, including complex objects
+export function mergeJson<T = Record<string, unknown>>(
+  first: T,
+  second: Partial<T>,
   mergeBehavior?: ConfigMergeType,
-  mergeKeys?: { [key: string]: (a: any, b: any) => boolean },
-): any {
+  mergeKeys?: { [key: string]: (a: unknown, b: unknown) => boolean },
+): T {
   const copyOfFirst = JSON.parse(JSON.stringify(first));
 
   try {
@@ -25,10 +24,10 @@ export function mergeJson(
         // Array
         if (mergeKeys?.[key]) {
           // Merge keys are used to determine whether an item form the second object should override one from the first
-          const keptFromFirst: any[] = [];
-          firstValue.forEach((item: any) => {
+          const keptFromFirst: unknown[] = [];
+          firstValue.forEach((item: unknown) => {
             if (
-              !secondValue.some((item2: any) => mergeKeys[key](item, item2))
+              !secondValue.some((item2: unknown) => mergeKeys[key](item, item2))
             ) {
               keptFromFirst.push(item);
             }

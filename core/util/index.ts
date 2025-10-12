@@ -112,7 +112,7 @@ function sanitizeExtension(ext?: string): string | undefined {
   return ext;
 }
 
-function copyOf(obj: any): any {
+function copyOf<T>(obj: T): T {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -136,7 +136,7 @@ function deduplicateArray<T>(
 
 type TODO = any;
 
-export function dedent(strings: TemplateStringsArray, ...values: any[]) {
+export function dedent(strings: TemplateStringsArray, ...values: unknown[]) {
   let raw = "";
   for (let i = 0; i < strings.length; i++) {
     raw += strings[i];
@@ -175,7 +175,7 @@ export function dedent(strings: TemplateStringsArray, ...values: any[]) {
   }
 
   // Calculate minimum indentation (excluding empty lines)
-  let minIndent = lines.reduce((min: any, line: any) => {
+  let minIndent = lines.reduce((min: number | null, line: string) => {
     if (line.trim() === "") return min;
     let match = line.match(/^(\s*)/);
     let indent = match ? match[1].length : 0;
