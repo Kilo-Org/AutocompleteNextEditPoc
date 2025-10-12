@@ -2,7 +2,7 @@ interface APIError extends Error {
   response?: Response;
 }
 
-export const RETRY_AFTER_HEADER = "Retry-After";
+const RETRY_AFTER_HEADER = "Retry-After";
 
 const withExponentialBackoff = async <T>(
   apiCall: () => Promise<T>,

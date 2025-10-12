@@ -28,7 +28,7 @@ export async function isLemonadeInstalled(): Promise<boolean> {
   }
 }
 
-export async function startLocalLemonade(ide: IDE): Promise<any> {
+async function startLocalLemonade(ide: IDE): Promise<any> {
   let startCommand: string | undefined;
 
   switch (process.platform) {

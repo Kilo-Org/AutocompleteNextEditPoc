@@ -447,8 +447,6 @@ export {
   autodetectPromptTemplates,
   autodetectTemplateFunction,
   autodetectTemplateType,
-  llmCanGenerateInParallel,
   modelSupportsImages,
   modelSupportsNextEdit,
-  modelSupportsReasoning,
 };

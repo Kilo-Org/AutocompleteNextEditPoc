@@ -73,7 +73,7 @@ export async function* streamResponse(
 }
 
 // Export for testing purposes
-export function parseDataLine(line: string): any {
+function parseDataLine(line: string): any {
   const json = line.startsWith("data: ")
     ? line.slice("data: ".length)
     : line.slice("data:".length);

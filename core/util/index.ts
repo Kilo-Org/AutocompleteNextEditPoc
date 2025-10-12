@@ -1,4 +1,4 @@
-export function removeQuotesAndEscapes(input: string): string {
+function removeQuotesAndEscapes(input: string): string {
   let output = input.trim();
 
   // Replace smart quotes
@@ -27,7 +27,7 @@ export function removeQuotesAndEscapes(input: string): string {
   return output;
 }
 
-export function dedentAndGetCommonWhitespace(s: string): [string, string] {
+function dedentAndGetCommonWhitespace(s: string): [string, string] {
   const lines = s.split("\n");
   if (lines.length === 0 || (lines[0].trim() === "" && lines.length === 1)) {
     return ["", ""];
@@ -66,7 +66,7 @@ export function dedentAndGetCommonWhitespace(s: string): [string, string] {
   return [lines.map((x) => x.replace(lcp, "")).join("\n"), lcp];
 }
 
-export function getMarkdownLanguageTagForFile(filepath: string): string {
+function getMarkdownLanguageTagForFile(filepath: string): string {
   const extToLangMap: { [key: string]: string } = {
     py: "python",
     js: "javascript",
@@ -112,14 +112,14 @@ function sanitizeExtension(ext?: string): string | undefined {
   return ext;
 }
 
-export function copyOf(obj: any): any {
+function copyOf(obj: any): any {
   if (obj === null || obj === undefined) {
     return obj;
   }
   return JSON.parse(JSON.stringify(obj));
 }
 
-export function deduplicateArray<T>(
+function deduplicateArray<T>(
   array: T[],
   equal: (a: T, b: T) => boolean,
 ): T[] {
@@ -195,7 +195,7 @@ export function dedent(strings: TemplateStringsArray, ...values: any[]) {
  *
  * Return modified message text.
  */
-export function removeCodeBlocksAndTrim(text: string): string {
+function removeCodeBlocksAndTrim(text: string): string {
   const codeBlockRegex = /```[\s\S]*?```/g;
 
   // Remove code blocks from the message text
@@ -204,7 +204,7 @@ export function removeCodeBlocksAndTrim(text: string): string {
   return textWithoutCodeBlocks.trim();
 }
 
-export function splitCamelCaseAndNonAlphaNumeric(value: string) {
+function splitCamelCaseAndNonAlphaNumeric(value: string) {
   return value
     .split(/(?<=[a-z0-9])(?=[A-Z])|[^a-zA-Z0-9]/)
     .filter((t) => t.length > 0)
