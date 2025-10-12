@@ -93,6 +93,9 @@ vi.mock("vscode", () => {
     Uri: {
       parse: vi.fn().mockReturnValue({ toString: () => "mock-uri" }),
     },
+    extensions: {
+      all: [],
+    },
   };
 });
 
