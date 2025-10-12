@@ -104,13 +104,13 @@ export const ContinueProxyConfigSchema = BasePlusConfig.extend({
     proxyUrl: z.string().optional(),
   }),
 });
-export type ContinueProxyConfig = z.infer<typeof ContinueProxyConfigSchema>;
+type ContinueProxyConfig = z.infer<typeof ContinueProxyConfigSchema>;
 
 const MockConfigSchema = BasePlusConfig.extend({
   provider: z.literal("mock"),
 });
 
-export type MockConfig = z.infer<typeof MockConfigSchema>;
+type MockConfig = z.infer<typeof MockConfigSchema>;
 
 // Other APIs
 const CohereConfigSchema = OpenAIConfigSchema.extend({
@@ -139,7 +139,7 @@ export const AzureConfigSchema = OpenAIConfigSchema.extend({
     })
     .optional(),
 });
-export type AzureConfig = z.infer<typeof AzureConfigSchema>;
+type AzureConfig = z.infer<typeof AzureConfigSchema>;
 
 const GeminiConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("gemini"),

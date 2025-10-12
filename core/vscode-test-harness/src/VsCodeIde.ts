@@ -7,11 +7,7 @@ import { DEFAULT_IGNORES, defaultIgnoresGlob } from "core/indexing/ignore";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
-import {
-  executeGotoProvider,
-  executeSignatureHelpProvider,
-  executeSymbolProvider,
-} from "./autocomplete/lsp";
+import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvider } from "./autocomplete/lsp";
 import { Repository } from "./otherExtensions/git";
 import { SecretStorage } from "./stubs/SecretStorage";
 import { VsCodeIdeUtils } from "./util/ideUtils";
@@ -41,7 +37,7 @@ class VsCodeIde implements IDE {
 
   constructor(
     private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
-    private readonly context: vscode.ExtensionContext,
+    private readonly context: vscode.ExtensionContext
   ) {
     this.ideUtils = new VsCodeIdeUtils();
     this.secretStorage = new SecretStorage(context);
@@ -60,7 +56,7 @@ class VsCodeIde implements IDE {
         acc[key] = secretValues[index];
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     );
   }
 
@@ -127,7 +123,7 @@ class VsCodeIde implements IDE {
   }
 
   async getDocumentSymbols(
-    textDocumentIdentifier: string, // uri
+    textDocumentIdentifier: string // uri
   ): Promise<DocumentSymbol[]> {
     const result = await executeSymbolProvider({
       uri: vscode.Uri.parse(textDocumentIdentifier),
@@ -147,8 +143,7 @@ class VsCodeIde implements IDE {
 
   showToast: IDE["showToast"] = async (...params) => {
     const [type, message, ...otherParams] = params;
-    const { showErrorMessage, showWarningMessage, showInformationMessage } =
-      vscode.window;
+    const { showErrorMessage, showWarningMessage, showInformationMessage } = vscode.window;
 
     switch (type) {
       case "error":
@@ -170,24 +165,18 @@ class VsCodeIde implements IDE {
     if (!remotes) {
       return undefined;
     }
-    const remote =
-      remotes?.find((r: any) => r.name === "origin") ?? remotes?.[0];
+    const remote = remotes?.find((r: any) => r.name === "origin") ?? remotes?.[0];
     if (!remote) {
       return undefined;
     }
-    const ownerAndRepo = remote.fetchUrl
-      ?.replace(".git", "")
-      .split("/")
-      .slice(-2);
+    const ownerAndRepo = remote.fetchUrl?.replace(".git", "").split("/").slice(-2);
     return ownerAndRepo?.join("/");
   }
 
   async getTags(artifactId: string): Promise<IndexTag[]> {
     const workspaceDirs = await this.getWorkspaceDirs();
 
-    const branches = await Promise.all(
-      workspaceDirs.map((dir) => this.getBranch(dir)),
-    );
+    const branches = await Promise.all(workspaceDirs.map((dir) => this.getBranch(dir)));
 
     const tags: IndexTag[] = workspaceDirs.map((directory, i) => ({
       directory,
@@ -214,8 +203,8 @@ class VsCodeIde implements IDE {
       vscode.Uri.parse(fileUri),
       new vscode.Range(
         new vscode.Position(range.start.line, range.start.character),
-        new vscode.Position(range.end.line, range.end.character),
-      ),
+        new vscode.Position(range.end.line, range.end.character)
+      )
     );
   }
 
@@ -223,15 +212,12 @@ class VsCodeIde implements IDE {
     const pathToLastModified: FileStatsMap = {};
     await Promise.all(
       files.map(async (file) => {
-        const stat = await this.ideUtils.stat(
-          vscode.Uri.parse(file),
-          false /* No need to catch ENOPRO exceptions */,
-        );
+        const stat = await this.ideUtils.stat(vscode.Uri.parse(file), false /* No need to catch ENOPRO exceptions */);
         pathToLastModified[file] = {
           lastModified: stat!.mtime,
           size: stat!.size,
         };
-      }),
+      })
     );
 
     return pathToLastModified;
@@ -244,9 +230,7 @@ class VsCodeIde implements IDE {
   async isTelemetryEnabled(): Promise<boolean> {
     const globalEnabled = vscode.env.isTelemetryEnabled;
     const continueEnabled: boolean =
-      (await vscode.workspace
-        .getConfiguration(EXTENSION_NAME)
-        .get("telemetryEnabled")) ?? true;
+      (await vscode.workspace.getConfiguration(EXTENSION_NAME).get("telemetryEnabled")) ?? true;
     return globalEnabled && continueEnabled;
   }
 
@@ -277,14 +261,8 @@ class VsCodeIde implements IDE {
     return await this.ideUtils.getDebugLocals(threadIndex);
   }
 
-  async getTopLevelCallStackSources(
-    threadIndex: number,
-    stackDepth: number,
-  ): Promise<string[]> {
-    return await this.ideUtils.getTopLevelCallStackSources(
-      threadIndex,
-      stackDepth,
-    );
+  async getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]> {
+    return await this.ideUtils.getTopLevelCallStackSources(threadIndex, stackDepth);
   }
   async getAvailableThreads(): Promise<Thread[]> {
     return await this.ideUtils.getAvailableThreads();
@@ -295,10 +273,7 @@ class VsCodeIde implements IDE {
   }
 
   async writeFile(fileUri: string, contents: string): Promise<void> {
-    await vscode.workspace.fs.writeFile(
-      vscode.Uri.parse(fileUri),
-      new Uint8Array(Buffer.from(contents)),
-    );
+    await vscode.workspace.fs.writeFile(vscode.Uri.parse(fileUri), new Uint8Array(Buffer.from(contents)));
   }
 
   async showVirtualFile(title: string, contents: string): Promise<void> {
@@ -309,36 +284,19 @@ class VsCodeIde implements IDE {
     await this.ideUtils.openFile(vscode.Uri.parse(fileUri));
   }
 
-  async showLines(
-    fileUri: string,
-    startLine: number,
-    endLine: number,
-  ): Promise<void> {
-    const range = new vscode.Range(
-      new vscode.Position(startLine, 0),
-      new vscode.Position(endLine, 0),
-    );
-    openEditorAndRevealRange(vscode.Uri.parse(fileUri), range).then(
-      (editor) => {
-        // Select the lines
-        editor.selection = new vscode.Selection(
-          new vscode.Position(startLine, 0),
-          new vscode.Position(endLine, 0),
-        );
-      },
-    );
+  async showLines(fileUri: string, startLine: number, endLine: number): Promise<void> {
+    const range = new vscode.Range(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
+    openEditorAndRevealRange(vscode.Uri.parse(fileUri), range).then((editor) => {
+      // Select the lines
+      editor.selection = new vscode.Selection(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
+    });
   }
 
-  async runCommand(
-    command: string,
-    options: TerminalOptions = { reuseTerminal: true },
-  ): Promise<void> {
+  async runCommand(command: string, options: TerminalOptions = { reuseTerminal: true }): Promise<void> {
     let terminal: vscode.Terminal | undefined;
     if (vscode.window.terminals.length && options.reuseTerminal) {
       if (options.terminalName) {
-        terminal = vscode.window.terminals.find(
-          (t) => t?.name === options.terminalName,
-        );
+        terminal = vscode.window.terminals.find((t) => t?.name === options.terminalName);
       } else {
         terminal = vscode.window.activeTerminal ?? vscode.window.terminals[0];
       }
@@ -364,12 +322,8 @@ class VsCodeIde implements IDE {
       // First, check whether it's a notebook document
       // Need to iterate over the cells to get full contents
       const notebook =
-        vscode.workspace.notebookDocuments.find((doc) =>
-          URI.equal(doc.uri.toString(), uri.toString()),
-        ) ??
-        (uri.path.endsWith("ipynb")
-          ? await vscode.workspace.openNotebookDocument(uri)
-          : undefined);
+        vscode.workspace.notebookDocuments.find((doc) => URI.equal(doc.uri.toString(), uri.toString())) ??
+        (uri.path.endsWith("ipynb") ? await vscode.workspace.openNotebookDocument(uri) : undefined);
       if (notebook) {
         return notebook
           .getCells()
@@ -379,7 +333,7 @@ class VsCodeIde implements IDE {
 
       // Check whether it's an open document
       const openTextDocument = vscode.workspace.textDocuments.find((doc) =>
-        URI.equal(doc.uri.toString(), uri.toString()),
+        URI.equal(doc.uri.toString(), uri.toString())
       );
       if (openTextDocument !== undefined) {
         return openTextDocument.getText();
@@ -432,17 +386,12 @@ class VsCodeIde implements IDE {
   async getPinnedFiles(): Promise<string[]> {
     const tabArray = vscode.window.tabGroups.all[0].tabs;
 
-    return tabArray
-      .filter((t) => t.isPinned)
-      .map((t) => (t.input as vscode.TabInputText).uri.toString());
+    return tabArray.filter((t) => t.isPinned).map((t) => (t.input as vscode.TabInputText).uri.toString());
   }
 
   runRipgrepQuery(dirUri: string, args: string[]) {
     const relativeDir = vscode.Uri.parse(dirUri).fsPath;
-    const ripGrepUri = vscode.Uri.joinPath(
-      getExtensionUri(),
-      "out/node_modules/@vscode/ripgrep/bin/rg",
-    );
+    const ripGrepUri = vscode.Uri.joinPath(getExtensionUri(), "out/node_modules/@vscode/ripgrep/bin/rg");
     const p = child_process.spawn(ripGrepUri.fsPath, args, {
       cwd: relativeDir,
     });
@@ -459,9 +408,7 @@ class VsCodeIde implements IDE {
           resolve(output);
         } else if (code === 1) {
           // No matches
-          resolve(
-            "No matches found. Build, secrets, etc. dirs and files are not included.",
-          );
+          resolve("No matches found. Build, secrets, etc. dirs and files are not included.");
         } else {
           reject(new Error(`Process exited with code ${code}`));
         }
@@ -469,10 +416,7 @@ class VsCodeIde implements IDE {
     });
   }
 
-  async getFileResults(
-    pattern: string,
-    maxResults?: number,
-  ): Promise<string[]> {
+  async getFileResults(pattern: string, maxResults?: number): Promise<string[]> {
     // Create a single combined ignore pattern for ripgrep (calculated once)
 
     if (vscode.env.remoteName) {
@@ -480,10 +424,7 @@ class VsCodeIde implements IDE {
       // throw new Error("Ripgrep not supported, this workspace is remote");
 
       // IMPORTANT: findFiles automatically accounts for .gitignore
-      const ignoreFiles = await vscode.workspace.findFiles(
-        "**/.continueignore",
-        null,
-      );
+      const ignoreFiles = await vscode.workspace.findFiles("**/.continueignore", null);
 
       const ignoreGlobs: Set<string> = new Set();
       // Add default ignores from core
@@ -497,20 +438,13 @@ class VsCodeIde implements IDE {
           continue;
         }
         const filePath = vscode.workspace.asRelativePath(file);
-        const fileDir = filePath
-          .replace(/\\/g, "/")
-          .replace(/\/$/, "")
-          .split("/")
-          .slice(0, -1)
-          .join("/");
+        const fileDir = filePath.replace(/\\/g, "/").replace(/\/$/, "").split("/").slice(0, -1).join("/");
 
         const patterns = Buffer.from(content)
           .toString()
           .split("\n")
           .map((line) => line.trim())
-          .filter(
-            (line) => line && !line.startsWith("#") && !pattern.startsWith("!"),
-          );
+          .filter((line) => line && !line.startsWith("#") && !pattern.startsWith("!"));
         // VSCode does not support negations
 
         patterns
@@ -546,7 +480,7 @@ class VsCodeIde implements IDE {
       const results = await vscode.workspace.findFiles(
         pattern,
         ignoreGlobs.size ? `{${ignoreGlobsArray.join(",")}}` : null,
-        maxResults,
+        maxResults
       );
       return results.map((result) => vscode.workspace.asRelativePath(result));
     } else {
@@ -625,9 +559,7 @@ class VsCodeIde implements IDE {
   }
 
   async getProblems(fileUri?: string | undefined): Promise<Problem[]> {
-    const uri = fileUri
-      ? vscode.Uri.parse(fileUri)
-      : vscode.window.activeTextEditor?.document.uri;
+    const uri = fileUri ? vscode.Uri.parse(fileUri) : vscode.window.activeTextEditor?.document.uri;
     if (!uri) {
       return [];
     }
@@ -674,22 +606,13 @@ class VsCodeIde implements IDE {
 
   private getIdeSettingsSync(): IdeSettings {
     const settings = vscode.workspace.getConfiguration(EXTENSION_NAME);
-    const remoteConfigServerUrl = settings.get<string | undefined>(
-      "remoteConfigServerUrl",
-      undefined,
-    );
+    const remoteConfigServerUrl = settings.get<string | undefined>("remoteConfigServerUrl", undefined);
     const ideSettings: IdeSettings = {
       remoteConfigServerUrl,
-      remoteConfigSyncPeriod: settings.get<number>(
-        "remoteConfigSyncPeriod",
-        60,
-      ),
+      remoteConfigSyncPeriod: settings.get<number>("remoteConfigSyncPeriod", 60),
       userToken: settings.get<string>("userToken", ""),
       continueTestEnvironment: "production",
-      pauseCodebaseIndexOnStart: settings.get<boolean>(
-        "pauseCodebaseIndexOnStart",
-        false,
-      ),
+      pauseCodebaseIndexOnStart: settings.get<boolean>("pauseCodebaseIndexOnStart", false),
     };
     return ideSettings;
   }

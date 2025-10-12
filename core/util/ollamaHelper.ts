@@ -3,7 +3,7 @@ import { exec } from "node:child_process";
 import path from "node:path";
 import { IDE } from "..";
 
-export interface ModelInfo {
+interface ModelInfo {
   id: string;
   size: number;
   digest: string;

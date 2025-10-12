@@ -117,5 +117,3 @@ export class AutocompleteLruCache {
     }
   }
 }
-
-export default AutocompleteLruCache;

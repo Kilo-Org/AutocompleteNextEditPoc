@@ -134,7 +134,7 @@ export function deduplicateArray<T>(
   return result;
 }
 
-export type TODO = any;
+type TODO = any;
 
 export function dedent(strings: TemplateStringsArray, ...values: any[]) {
   let raw = "";

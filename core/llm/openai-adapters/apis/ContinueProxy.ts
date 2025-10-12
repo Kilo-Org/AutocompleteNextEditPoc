@@ -9,7 +9,7 @@ import { ContinueProxyConfigSchema } from "../types.js";
 import { FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
 import { OpenAIApi } from "./OpenAI.js";
 
-export interface ContinueProperties {
+interface ContinueProperties {
   apiKeyLocation?: string;
   envSecretLocations?: Record<string, string>;
   apiBase?: string;
@@ -17,7 +17,7 @@ export interface ContinueProperties {
   env?: Record<string, any>;
 }
 
-export interface ProxyModelName {
+interface ProxyModelName {
   ownerSlug: string;
   packageSlug: string;
   provider: string;

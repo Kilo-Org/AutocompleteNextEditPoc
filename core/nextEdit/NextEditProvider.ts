@@ -15,7 +15,7 @@ import { AutocompleteCodeSnippet } from "../autocomplete/snippets/types.js";
 import { GetLspDefinitionsFunction } from "../autocomplete/types.js";
 import { getAst } from "../autocomplete/util/ast.js";
 import { AutocompleteDebouncer } from "../autocomplete/util/AutocompleteDebouncer.js";
-import AutocompleteLruCache from "../autocomplete/util/AutocompleteLruCache.js";
+import { AutocompleteLruCache } from "../autocomplete/util/AutocompleteLruCache.js";
 import { HelperVars } from "../autocomplete/util/HelperVars.js";
 import { AutocompleteInput } from "../autocomplete/util/types.js";
 import { isSecurityConcern } from "../indexing/ignore.js";

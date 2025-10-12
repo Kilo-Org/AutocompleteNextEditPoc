@@ -3,9 +3,9 @@ import { fetchwithRequestOptions } from "../fetch";
 import { findLlmInfo } from "./model-info";
 import {
   BaseLlmApi,
-  ChatCompletionCreateParams,
   constructLlmApi,
 } from "./openai-adapters";
+import { ChatCompletionCreateParams } from "openai/resources/index";
 import Handlebars from "handlebars";
 
 import { DevDataSqliteDb } from "../util/devdataSqlite.js";
@@ -32,7 +32,7 @@ import {
 } from "../index.js";
 import { isLemonadeInstalled } from "../util/lemonadeHelper.js";
 import { Logger } from "../util/Logger.js";
-import mergeJson from "../util/merge.js";
+import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { isOllamaInstalled } from "../util/ollamaHelper.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
