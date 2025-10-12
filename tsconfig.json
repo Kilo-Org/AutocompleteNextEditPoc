@@ -24,8 +24,8 @@
     "composite": false,
     "incremental": false,
     "sourceRoot": "/",
-    "baseUrl": ".",
     "paths": {
+      "*": ["./*"],
       "core": ["./core/index.d.ts"],
       "core/*": ["./core/*"]
     }
