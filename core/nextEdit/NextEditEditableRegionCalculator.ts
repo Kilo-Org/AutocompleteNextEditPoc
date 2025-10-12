@@ -534,7 +534,8 @@ async function staticJump(ctx: {
 /* AST HELPER FUNCTIONS */
 
 // Helper function to find the closest identifier node.
-function findClosestIdentifierNode(
+// Exported for testing
+export function findClosestIdentifierNode(
   node: Parser.SyntaxNode | null,
 ): Parser.SyntaxNode | null {
   if (!node) return null;
@@ -567,7 +568,8 @@ function findClosestIdentifierNode(
   return findClosestIdentifierNode(parent);
 }
 
-function findLeftmostIdentifier(
+// Exported for testing
+export function findLeftmostIdentifier(
   node: Parser.SyntaxNode,
 ): Parser.SyntaxNode | null {
   if (isIdentifierNode(node)) return node;
@@ -584,7 +586,8 @@ function findLeftmostIdentifier(
 }
 
 // Helper function to check if a node is an identifier.
-function isIdentifierNode(node: Parser.SyntaxNode) {
+// Exported for testing
+export function isIdentifierNode(node: Parser.SyntaxNode) {
   const nodeType = node.type;
 
   if (nodeType === "identifier") return true;
@@ -598,7 +601,8 @@ function isIdentifierNode(node: Parser.SyntaxNode) {
 }
 
 // Helper function to check if a node is a declaration.
-function isDeclarationNode(node: Parser.SyntaxNode) {
+// Exported for testing
+export function isDeclarationNode(node: Parser.SyntaxNode) {
   const nodeType = node.type;
 
   // Common declaration patterns.
