@@ -20,19 +20,16 @@ The repository is now a truly flat monorepo with a single package manifest at th
 The minimal set kept to support development, typechecking, incremental builds, and harness tests:
 
 - Root workspace: [tsconfig.json](tsconfig.json) — contains only project references to:
-  - [core/tsconfig.npm.json](core/tsconfig.npm.json) (build)
+  - [core/](core) (core dev/test)
   - [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json) (harness)
 - Core (development/test): [core/tsconfig.json](core/tsconfig.json)
   - Strict settings, noEmit, composite/incremental for IDE speed and tsc --build graph.
-- Core (build): [core/tsconfig.npm.json](core/tsconfig.npm.json)
-  - Emits ESM to [core/dist](core/dist), generates declarations and maps.
-  - Excludes harness sources to avoid requiring path aliases in library build.
 - VS Code Test Harness: [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json)
-  - Extends core dev config; references the core build config to ensure types are available.
+  - Extends core dev config; uses path mappings to consume core types.
 
 ## Rationale
 
-- A single tsconfig would either emit during dev or disable emit for build. Splitting core dev/test and build keeps fast noEmit checks while producing declarations/outDir for publishing and consumers.
+- Production build configuration was intentionally removed to enable a ground-up redesign of the build/publish process.
 - A single root tsconfig without project references would lose incremental, multi-project correctness. Keeping a tiny root with references preserves tsc --build and editor navigation.
 - The harness remains an isolated project with its own [tsconfig.json](core/vscode-test-harness/tsconfig.json) due to its VS Code type environment.
 
@@ -40,9 +37,8 @@ The minimal set kept to support development, typechecking, incremental builds, a
 
 - Install: npm install
 - Typecheck: npm run typecheck
-- Build: npm run build
 - Test (all): npm test
-- Incremental build: npx tsc --build
+- Incremental typecheck/build graph: npx tsc --build
 - Lint: npm run lint
 - Format: npm run format
 
@@ -52,8 +48,6 @@ The minimal set kept to support development, typechecking, incremental builds, a
 - [tsconfig.json](tsconfig.json) — root references
 - [core/](core)
   - [tsconfig.json](core/tsconfig.json) — dev/test
-  - [tsconfig.npm.json](core/tsconfig.npm.json) — build/emit
-  - [dist/](core/dist) — build output
   - [vscode-test-harness/](core/vscode-test-harness)
     - [tsconfig.json](core/vscode-test-harness/tsconfig.json)
 - [tree-sitter/tag-queries/](tree-sitter/tag-queries) — consolidated tag queries
@@ -62,7 +56,6 @@ The minimal set kept to support development, typechecking, incremental builds, a
 
 The flat structure is validated end-to-end:
 - TypeScript compilation: npm run typecheck and npx tsc --build both succeed.
-- Build: npm run build produces [core/dist](core/dist) with declarations and maps.
 - Tests: npm test — 707 tests passing (621 core + 86 harness).
 - Editor support: project references provide correct navigation and incremental checking.
 
@@ -75,6 +68,6 @@ The flat structure is validated end-to-end:
 
 ## Change log (Phase 8)
 
-- Consolidated tsconfig to: root references, core dev/test, core build, harness config.
-- Excluded [core/vscode-test-harness/**](core/vscode-test-harness) in [core/tsconfig.npm.json](core/tsconfig.npm.json) to avoid path aliasing in build.
-- Updated documentation to reflect the final flat structure and workflows.
+- Removed [core/tsconfig.npm.json](core/tsconfig.npm.json) and all references to it.
+- Updated [tsconfig.json](tsconfig.json) to reference [core/](core) and [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json) directly.
+- Updated documentation to reflect the simplified, development-only TypeScript setup.

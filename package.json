@@ -12,7 +12,6 @@
     "test:watch": "vitest --config core/vitest.config.ts",
     "lint": "eslint core --ext ts",
     "lint:fix": "eslint core --ext ts --fix",
-    "build": "tsc -p core/tsconfig.npm.json",
     "typecheck": "tsc -p core/tsconfig.json --noEmit",
     "tsc:watch": "concurrently -n vscode,core -c magenta,yellow \"npm run tsc:watch:vscode\" \"npm run tsc:watch:core\"",
     "tsc:watch:vscode": "tsc --project extensions/vscode/tsconfig.json --watch --noEmit --pretty",
