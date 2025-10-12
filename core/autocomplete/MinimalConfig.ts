@@ -13,7 +13,7 @@
 import { ILLM, TabAutocompleteOptions } from "../index.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
 
-export interface MinimalConfig {
+interface MinimalConfig {
   tabAutocompleteOptions?: TabAutocompleteOptions;
   experimental?: {
     enableStaticContextualization?: boolean;
@@ -31,7 +31,7 @@ export interface MinimalConfig {
   rules?: unknown[];
 }
 
-export interface MinimalProfile {
+interface MinimalProfile {
   profileDescription: {
     profileType?: "control-plane" | "local" | "platform";
   };

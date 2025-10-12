@@ -15,7 +15,7 @@ export type RecentlyEditedRange = RangeInFile & {
   symbols: Set<string>;
 };
 
-export interface AutocompleteInput {
+interface AutocompleteInput {
   isUntitledFile: boolean;
   completionId: string;
   filepath: string;
@@ -79,12 +79,12 @@ export interface PromptMetadata {
 
 export type Prompt = SystemPrompt | UserPrompt;
 
-export interface SystemPrompt {
+interface SystemPrompt {
   role: "system";
   content: string;
 }
 
-export interface UserPrompt {
+interface UserPrompt {
   role: "user";
   content: string;
 }

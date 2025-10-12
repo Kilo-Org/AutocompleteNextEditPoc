@@ -23,7 +23,7 @@ export interface RerankCreateParams {
   top_k?: number;
 }
 
-export interface CreateRerankItem {
+interface CreateRerankItem {
   relevance_score: number;
   index: number;
 }

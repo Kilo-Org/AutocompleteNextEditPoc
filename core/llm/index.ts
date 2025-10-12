@@ -3,9 +3,9 @@ import { fetchwithRequestOptions } from "../fetch";
 import { findLlmInfo } from "./model-info";
 import {
   BaseLlmApi,
-  ChatCompletionCreateParams,
   constructLlmApi,
 } from "./openai-adapters";
+import { ChatCompletionCreateParams } from "openai/resources/index";
 import Handlebars from "handlebars";
 
 import { DevDataSqliteDb } from "../util/devdataSqlite.js";

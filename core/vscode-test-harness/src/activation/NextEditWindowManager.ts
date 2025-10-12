@@ -15,7 +15,7 @@ import {
   SelectionChangeManager,
 } from "./SelectionChangeManager";
 
-export interface TextApplier {
+interface TextApplier {
   applyText(
     editor: vscode.TextEditor,
     text: string,
