@@ -330,9 +330,7 @@ export class SelectionChangeManager {
       return false;
     }
 
-    console.debug(
-      "defaultFallbackHandler: deleteChain called from onDidChangeTextEditorSelection",
-    );
+    // Delete chain when selection changes - this is the default fallback behavior
     await NextEditProvider.getInstance().deleteChain();
 
     if (!this.usingFullFileDiff) {

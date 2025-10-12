@@ -620,6 +620,7 @@ describe("NextEditWindowManager", () => {
     });
 
     it("should recover from failed key reservation", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const executeCommand = mockVscode.commands
         .executeCommand as MockedFunction<any>;
 
@@ -637,9 +638,11 @@ describe("NextEditWindowManager", () => {
       executeCommand.mockResolvedValueOnce(undefined);
       await NextEditWindowManager.reserveTabAndEsc();
       expect(manager["keyReservationState"]).toBe("reserved");
+      consoleErrorSpy.mockRestore();
     });
 
     it("should recover from failed key freeing", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const executeCommand = mockVscode.commands
         .executeCommand as MockedFunction<any>;
 
@@ -656,9 +659,11 @@ describe("NextEditWindowManager", () => {
 
       // State should still reset to free (safety mechanism)
       expect(manager["keyReservationState"]).toBe("free");
+      consoleErrorSpy.mockRestore();
     });
 
     it("should handle decoration creation failure", async () => {
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const createDecoration = mockVscode.window
         .createTextEditorDecorationType as MockedFunction<any>;
       createDecoration.mockImplementationOnce(() => {
@@ -678,6 +683,7 @@ describe("NextEditWindowManager", () => {
 
       // Keys should be freed due to error
       expect(manager["keyReservationState"]).toBe("free");
+      consoleErrorSpy.mockRestore();
       expect(manager["currentDecoration"]).toBeNull();
     });
   });

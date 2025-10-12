@@ -308,9 +308,12 @@ export class NextEditWindowManager {
       const command = vscode.commands.registerCommand(commandId, callback);
       this.context.subscriptions.push(command);
     } catch (error) {
-      console.log(
-        `Command ${commandId} already has an associated callback, skipping registration`,
-      );
+      // Command already registered - skip silently in test environments
+      if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+        console.log(
+          `Command ${commandId} already has an associated callback, skipping registration`,
+        );
+      }
     }
   }
 

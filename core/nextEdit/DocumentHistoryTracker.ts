@@ -86,7 +86,7 @@ export class DocumentHistoryTracker {
       return null;
     }
     if (astHistory.length === 0) {
-      console.error(`Document ${documentPath} has no ASTs`);
+      // Document has no ASTs - return null without logging
       return null;
     }
 
@@ -109,7 +109,7 @@ export class DocumentHistoryTracker {
       return null;
     }
     if (documentHistory.length === 0) {
-      console.error(`Document ${documentPath} has no history`);
+      // Document has no history - return null without logging
       return null;
     }
 

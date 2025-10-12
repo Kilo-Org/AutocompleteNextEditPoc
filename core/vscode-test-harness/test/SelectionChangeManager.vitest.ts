@@ -542,21 +542,17 @@ describe("SelectionChangeManager", () => {
         .mockImplementation(() => {});
 
       // Start processing and advance past timeout
-      console.log("Starting event processing");
       const eventPromise =
         selectionChangeManager.handleSelectionChange(mockEvent);
 
-      console.log("Advancing timers by 600ms");
       vi.advanceTimersByTime(700); // PROCESSING_TIMEOUT is 500ms
 
       try {
         await eventPromise;
-        console.log("Event promise resolved successfully");
       } catch (error) {
-        console.log("Event promise rejected:", error);
+        // Expected timeout error
       }
 
-      console.log("Console error calls:", consoleErrorSpy.mock.calls);
       expect(consoleErrorSpy).toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();

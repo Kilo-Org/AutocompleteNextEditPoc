@@ -93,42 +93,18 @@ describe("DocumentHistoryTracker", () => {
     });
 
     it("should return null if the document doesn't exist", () => {
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const ast = tracker.getMostRecentAst("nonexistent-path");
-
       expect(ast).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Document nonexistent-path not found in AST tracker",
-      );
-
-      consoleErrorSpy.mockRestore();
     });
 
     it("should return null if the document has no ASTs", () => {
-      // This test would require modifying private properties
-      // So we'll mock an empty array situation
       tracker.addDocument(testDocPath, testContent1, mockAst1);
 
       // @ts-ignore - accessing private property for testing
       tracker.documentAstMap.set(testDocPath, []);
 
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const ast = tracker.getMostRecentAst(testDocPath);
-
       expect(ast).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        `Document ${testDocPath} has no ASTs`,
-      );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -143,19 +119,8 @@ describe("DocumentHistoryTracker", () => {
     });
 
     it("should return null if the document doesn't exist", () => {
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const content = tracker.getMostRecentDocumentHistory("nonexistent-path");
-
       expect(content).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Document nonexistent-path not found in AST tracker",
-      );
-
-      consoleErrorSpy.mockRestore();
     });
 
     it("should return null if the document has no history", () => {
@@ -164,19 +129,8 @@ describe("DocumentHistoryTracker", () => {
       // @ts-ignore - accessing private property for testing
       tracker.documentContentHistoryMap.set(testDocPath, []);
 
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const content = tracker.getMostRecentDocumentHistory(testDocPath);
-
       expect(content).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        `Document ${testDocPath} has no history`,
-      );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -185,21 +139,11 @@ describe("DocumentHistoryTracker", () => {
       tracker.addDocument(testDocPath, testContent1, mockAst1);
       tracker.deleteDocument(testDocPath);
 
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       const ast = tracker.getMostRecentAst(testDocPath);
       const content = tracker.getMostRecentDocumentHistory(testDocPath);
 
       expect(ast).toBeNull();
       expect(content).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        `Document ${testDocPath} not found in AST tracker`,
-      );
-
-      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -212,17 +156,10 @@ describe("DocumentHistoryTracker", () => {
 
       tracker.clearMap();
 
-      // Spy on console.error
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
       expect(tracker.getMostRecentAst(testDocPath)).toBeNull();
       expect(tracker.getMostRecentAst(anotherDocPath)).toBeNull();
       expect(tracker.getMostRecentDocumentHistory(testDocPath)).toBeNull();
       expect(tracker.getMostRecentDocumentHistory(anotherDocPath)).toBeNull();
-
-      consoleErrorSpy.mockRestore();
     });
   });
 });
