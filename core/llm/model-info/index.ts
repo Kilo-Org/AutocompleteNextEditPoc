@@ -1,9 +1,7 @@
 import { OpenAi } from "./providers/openai.js";
 import { LlmInfoWithProvider, ModelProvider, UseCase } from "./types.js";
 
-export const allModelProviders: ModelProvider[] = [
-  OpenAi,
-];
+export const allModelProviders: ModelProvider[] = [OpenAi];
 
 export const allLlms: LlmInfoWithProvider[] = allModelProviders.flatMap(
   (provider) =>

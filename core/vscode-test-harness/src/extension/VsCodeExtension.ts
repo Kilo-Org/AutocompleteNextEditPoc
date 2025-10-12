@@ -1,12 +1,15 @@
 import fs from "fs";
 import path from "path";
 
-import { IContextProvider } from "core";
+import {
+  IContextProvider,
+  Core,
+  FromCoreProtocol,
+  ToCoreProtocol,
+  InProcessMessenger,
+} from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
-import { Core } from "core";
-import { FromCoreProtocol, ToCoreProtocol } from "core/protocol";
-import { InProcessMessenger } from "core/protocol/messenger";
 import {
   getConfigJsonPath,
   getConfigTsPath,
@@ -87,7 +90,7 @@ export class VsCodeExtension {
     context: vscode.ExtensionContext,
   ): Promise<void> {
     const { config: continueConfig } = await this.configHandler.loadConfig();
-    const autocompleteModel = continueConfig?.selectedModelByRole.autocomplete;
+    const autocompleteModel = continueConfig?.selectedModelByRole?.autocomplete;
     const vscodeConfig = vscode.workspace.getConfiguration(EXTENSION_NAME);
 
     const modelSupportsNext =
@@ -186,7 +189,7 @@ export class VsCodeExtension {
     // Check if model supports next edit to determine if we should use full file diff.
     const getUsingFullFileDiff = async () => {
       const { config } = await this.configHandler.loadConfig();
-      const autocompleteModel = config?.selectedModelByRole.autocomplete;
+      const autocompleteModel = config?.selectedModelByRole?.autocomplete;
 
       if (!autocompleteModel) {
         return false;
@@ -244,9 +247,11 @@ export class VsCodeExtension {
 
     // Dependencies of core
     let resolveConfigHandler: any = undefined;
-    const configHandlerPromise = new Promise<MinimalConfigProvider>((resolve) => {
-      resolveConfigHandler = resolve;
-    });
+    const configHandlerPromise = new Promise<MinimalConfigProvider>(
+      (resolve) => {
+        resolveConfigHandler = resolve;
+      },
+    );
 
     const inProcessMessenger = new InProcessMessenger<
       ToCoreProtocol,
@@ -270,7 +275,7 @@ export class VsCodeExtension {
     void this.configHandler.loadConfig();
 
     void setupRemoteConfigSync(() =>
-      this.configHandler.reloadConfig.bind(this.configHandler)(
+      this.configHandler?.reloadConfig?.bind(this.configHandler)?.(
         "Remote config sync",
       ),
     );
@@ -283,7 +288,7 @@ export class VsCodeExtension {
       registerAllCodeLensProviders(context, config);
     });
 
-    this.configHandler.onConfigUpdate(
+    this.configHandler?.onConfigUpdate?.(
       async ({ config: newConfig, configLoadInterrupted }) => {
         const shouldUseFullFileDiff = await getUsingFullFileDiff();
         this.completionProvider.updateUsingFullFileDiff(shouldUseFullFileDiff);
@@ -324,7 +329,7 @@ export class VsCodeExtension {
     );
 
     // Handle uri events
-    this.uriHandler.event((uri) => {
+    this.uriHandler.event((uri: any) => {
       const queryParams = new URLSearchParams(uri.query);
       let profileId = queryParams.get("profile_id");
       let orgId = queryParams.get("org_id");
@@ -370,7 +375,7 @@ export class VsCodeExtension {
       if (stats.size === 0) {
         return;
       }
-      await this.configHandler.reloadConfig(
+      await this.configHandler?.reloadConfig?.(
         "Global JSON config updated - fs file watch",
       );
     });
@@ -382,7 +387,7 @@ export class VsCodeExtension {
         if (stats.size === 0) {
           return;
         }
-        await this.configHandler.reloadConfig(
+        await this.configHandler?.reloadConfig?.(
           "Global YAML config updated - fs file watch",
         );
       },
@@ -392,7 +397,9 @@ export class VsCodeExtension {
       if (stats.size === 0) {
         return;
       }
-      void this.configHandler.reloadConfig("config.ts updated - fs file watch");
+      void this.configHandler?.reloadConfig?.(
+        "config.ts updated - fs file watch",
+      );
     });
 
     // watch global rules directory for changes
@@ -400,7 +407,7 @@ export class VsCodeExtension {
     if (fs.existsSync(globalRulesDir)) {
       fs.watch(globalRulesDir, { recursive: true }, (eventType, filename) => {
         if (filename && filename.endsWith(".md")) {
-          void this.configHandler.reloadConfig(
+          void this.configHandler?.reloadConfig?.(
             "Global rules directory updated - fs file watch",
           );
         }
@@ -475,7 +482,10 @@ export class VsCodeExtension {
 
     // When GitHub sign-in status changes, reload config
     vscode.authentication.onDidChangeSessions(async (e) => {
-      const env = await getControlPlaneEnv(this.ide.getIdeSettings());
+      const env = await getControlPlaneEnv();
+      if (!env || !env.AUTH_TYPE) {
+        return;
+      }
       if (e.provider.id === env.AUTH_TYPE) {
         void vscode.commands.executeCommand(
           "setContext",
@@ -495,7 +505,7 @@ export class VsCodeExtension {
         );
 
         if (e.provider.id === "github") {
-          this.configHandler.reloadConfig("Github sign-in status changed");
+          this.configHandler?.reloadConfig?.("Github sign-in status changed");
         }
       }
     });
@@ -592,7 +602,7 @@ export class VsCodeExtension {
   private PREVIOUS_BRANCH_FOR_WORKSPACE_DIR: { [dir: string]: string } = {};
 
   registerCustomContextProvider(contextProvider: IContextProvider) {
-    this.configHandler.registerCustomContextProvider(contextProvider);
+    this.configHandler?.registerCustomContextProvider?.(contextProvider);
   }
 
   public activateNextEdit() {

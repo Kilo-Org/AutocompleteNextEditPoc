@@ -95,7 +95,7 @@ vi.mock("core/nextEdit/NextEditPrefetchQueue", () => ({
 
 vi.mock("core/util/pathToUri", () => ({
   localPathOrUriToPath: vi.fn((uri) => {
-    const uriStr = typeof uri === 'string' ? uri : uri?.toString?.() || '';
+    const uriStr = typeof uri === "string" ? uri : uri?.toString?.() || "";
     return uriStr.replace("file://", "");
   }),
 }));
@@ -187,7 +187,7 @@ describe("SelectionChangeManager", () => {
       logPath: "/mock/log",
       extensionMode: 1, // Production mode
       extension: {} as any,
-    } as vscode.ExtensionContext;
+    } as unknown as vscode.ExtensionContext;
     let resolveWebviewProtocol: any = undefined;
     const webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>(
       (resolve) => {

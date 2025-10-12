@@ -35,9 +35,11 @@ After completing the extraction plan, knip analysis (knip-phase7-analysis.txt) r
 These files are not imported by autocomplete or nextEdit:
 
 #### 1.1 Mock Files
+
 - `core/__mocks__/@continuedev/fetch/index.ts` - Unused mock, no imports found
 
-#### 1.2 LLM Infrastructure Files  
+#### 1.2 LLM Infrastructure Files
+
 - `core/llm/llms/index.ts` - Re-export file, not used
 - `core/llm/llms/llm.ts` - Old LLM base class, not used
 - `core/llm/llms/llmTestHarness.ts` - Test harness, not used
@@ -51,6 +53,7 @@ These files are not imported by autocomplete or nextEdit:
 - `core/llm/utils/parseArgs.ts` - Argument parsing, not used
 
 #### 1.3 Utility Files
+
 - `core/util/handlebars/` - Template utilities, not used
 - `core/util/ideUtils.ts` - IDE utilities, not used
 - `core/util/shellPath.ts` - Shell path utilities, not used
@@ -59,6 +62,7 @@ These files are not imported by autocomplete or nextEdit:
 - `core/util/sentry/constants.ts` - Sentry constants, not used
 
 #### 1.4 Other Files
+
 - `core/llm-info/util.ts` - LLM info utilities, not used
 
 **Risk Level**: ✅ LOW - These files have no imports in autocomplete/nextEdit code
@@ -70,6 +74,7 @@ These files are not imported by autocomplete or nextEdit:
 The codebase has two test systems:
 
 #### Current State
+
 ```
 Vitest (.vitest.ts)          Jest (.test.ts)
 ├── core/autocomplete/       ├── core/fetch/        (9 files)
@@ -77,12 +82,13 @@ Vitest (.vitest.ts)          Jest (.test.ts)
 ├── core/diff/               ├── core/llm/          (4 files)
 ├── core/util/ (some)        └── core/test/         (1 file)
 └── core/vscode-test-harness/
-    
+
 Run by test-autocomplete.sh  NOT run by test script
 532 tests passing            Unknown number of tests
 ```
 
 #### Problem
+
 - Jest tests exist but aren't run by `test-autocomplete.sh`
 - These tests cover core functionality that autocomplete/nextEdit depend on:
   - **fetch/** - HTTP request handling (critical for LLM calls)
@@ -90,9 +96,11 @@ Run by test-autocomplete.sh  NOT run by test script
   - **llm/** - LLM provider tests
 
 #### Recommendation
+
 **Migrate critical tests to Vitest, then remove Jest**
 
 Priority tests to migrate:
+
 1. **High**: fetch tests (fetch.e2e.test.ts, certs.test.ts, ssl-certificate.test.ts, etc.)
 2. **High**: util/ranges.test.ts (used by nextEdit)
 3. **High**: util/index.test.ts (deduplicateArray, dedent utilities)
@@ -108,18 +116,22 @@ Priority tests to migrate:
 Knip flagged 180 unused exports, mostly:
 
 #### 3.1 Language Information (Low Priority)
+
 - Language constants in `AutocompleteLanguageInfo.ts` (Typescript, JavaScript, Python, Java, etc.)
 - These are defined but not used because autocomplete is language-agnostic in current implementation
 - **Action**: Can remove or mark as `@internal` if keeping for future use
 
 #### 3.2 Internal Utilities (Low Priority)
+
 - Stream transforms: `onlyWhitespaceAfterEndOfLine`, `noFirstCharNewline`, etc.
 - Filtering utilities: `BRACKETS`, `BRACKETS_REVERSE`
 - These are internal implementation details
 - **Action**: Review if truly unused or just not exported externally
 
 #### 3.3 Path and Config Utilities (Medium Priority)
+
 Many path/config utilities flagged:
+
 - `getIndexFolderPath`, `getConfigJsonPath`, `getContinueRcPath`, etc.
 - These were part of the original Continue config system
 - **Action**: Remove if config system is fully replaced with MinimalConfig
@@ -133,13 +145,16 @@ Many path/config utilities flagged:
 Searched for remaining control-plane references:
 
 ### Found References (Type-Only)
+
 These are just type annotations, not actual dependencies:
+
 - `core/nextEdit/types.ts`: `profileType?: "local" | "platform" | "control-plane"`
 - `core/autocomplete/util/types.ts`: Similar type annotation
 - `core/autocomplete/MinimalConfig.ts`: Type and comments
 - Stub files: `core/util/env.ts`, `core/util/controlPlaneClient.ts`, etc.
 
 ### Status
+
 ✅ **Acceptable** - These are minimal type references in stub files  
 ✅ **Already removed**: control-plane/ directory is empty  
 ✅ **Stubs exist**: For backward compatibility (env.ts, controlPlaneClient.ts)
@@ -155,7 +170,7 @@ These are just type annotations, not actual dependencies:
 Execute **Phase 1** of KNIP_CLEANUP_PLAN.md:
 
 1. Remove unused mock file
-2. Remove unused LLM files  
+2. Remove unused LLM files
 3. Remove unused utility files
 4. Remove unused llm-info/util.ts
 
@@ -185,6 +200,7 @@ Execute **Phases 3-5** of KNIP_CLEANUP_PLAN.md:
 ### Optional Actions (Very Low Priority)
 
 1. Clean up unused exports (180 items)
+
    - Review language constants - keep or remove
    - Review internal utilities - mark as internal or remove
    - Remove unused config path utilities
@@ -200,10 +216,12 @@ Execute **Phases 3-5** of KNIP_CLEANUP_PLAN.md:
 ### What Could Break
 
 1. **If removing files without checking dependencies**:
+
    - Autocomplete or nextEdit might import something unexpectedly
    - **Mitigation**: Run tests after each removal
 
 2. **If migrating tests incorrectly**:
+
    - Loss of test coverage for core functionality
    - **Mitigation**: Migrate high-priority tests first, verify each migration
 
@@ -222,19 +240,22 @@ Execute **Phases 3-5** of KNIP_CLEANUP_PLAN.md:
 ## Metrics
 
 ### Before Cleanup (Current State)
+
 - Unused files: 32
-- Unused exports: 180  
+- Unused exports: 180
 - Test frameworks: 2 (Jest + Vitest)
 - Test files: ~60 (.test.ts + .vitest.ts)
 - Tests passing: 532 (Vitest only)
 
 ### After Phase 1 (Immediate Cleanup)
+
 - Unused files: ~15-20 ← Remove 12-17 files
 - Unused exports: ~170 ← Minor reduction
 - Test frameworks: 2 (unchanged)
 - Tests passing: 532 (should remain same)
 
 ### After All Phases (Complete Cleanup)
+
 - Unused files: <10 ← Only unavoidable items
 - Unused exports: ~50 ← Cleaned up most
 - Test frameworks: 1 (Vitest only) ← Simplified
@@ -245,9 +266,10 @@ Execute **Phases 3-5** of KNIP_CLEANUP_PLAN.md:
 
 ## Conclusion
 
-The extraction plan successfully removed major unrelated components (GUI, docs, CLI, etc.), but left some unused files and dual test infrastructure. 
+The extraction plan successfully removed major unrelated components (GUI, docs, CLI, etc.), but left some unused files and dual test infrastructure.
 
 **Key Takeaway**: The codebase is in good shape, but needs:
+
 1. **Immediate cleanup** of obviously unused files (low risk)
 2. **Test consolidation** by migrating to Vitest (medium effort)
 3. **Optional polishing** of unused exports (low priority)

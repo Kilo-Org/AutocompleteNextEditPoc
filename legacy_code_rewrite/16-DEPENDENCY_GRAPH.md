@@ -9,12 +9,14 @@ This document provides a detailed dependency map showing what [`CompletionProvid
 ### CompletionProvider.ts Direct Imports
 
 **Config & Infrastructure:**
+
 - [`ConfigHandler`](core/config/ConfigHandler.ts) - Configuration management
 - [`IDE, ILLM`](core/index.ts) - Core interfaces
 - [`OpenAI`](core/llm/llms/OpenAI.ts) - LLM provider
 - [`DEFAULT_AUTOCOMPLETE_OPTS`](core/util/parameters.ts) - Default options
 
 **Core Autocomplete Logic:**
+
 - [`shouldCompleteMultiline`](core/autocomplete/classification/shouldCompleteMultiline.ts) - Multiline classification
 - [`ContextRetrievalService`](core/autocomplete/context/ContextRetrievalService.ts) - Context gathering
 - [`BracketMatchingService`](core/autocomplete/filtering/BracketMatchingService.ts) - Bracket filtering
@@ -25,6 +27,7 @@ This document provides a detailed dependency map showing what [`CompletionProvid
 - [`renderPromptWithTokenLimit`](core/autocomplete/templating/index.ts) - Prompt rendering
 
 **Utilities:**
+
 - [`isSecurityConcern`](core/indexing/ignore.ts) - Security checks
 - [`AutocompleteDebouncer`](core/autocomplete/util/AutocompleteDebouncer.ts) - Debouncing
 - [`AutocompleteLoggingService`](core/autocomplete/util/AutocompleteLoggingService.ts) - Logging
@@ -35,11 +38,13 @@ This document provides a detailed dependency map showing what [`CompletionProvid
 ### NextEditProvider.ts Direct Imports
 
 **Shared with CompletionProvider:**
+
 - All autocomplete infrastructure (ContextRetrievalService, BracketMatchingService, CompletionStreamer, etc.)
 - Config and LLM systems
 - Same utility classes
 
 **NextEdit-Specific:**
+
 - [`modelSupportsNextEdit`](core/llm/autodetect.ts) - Model capability checking
 - [`DocumentHistoryTracker`](core/nextEdit/DocumentHistoryTracker.ts) - Document history
 - [`NextEditLoggingService`](core/nextEdit/NextEditLoggingService.ts) - NextEdit logging
@@ -149,20 +154,20 @@ graph TD
     CP --> LLM[LLM System]
     CP --> AC[Autocomplete Infrastructure]
     CP --> Utils[Core Utilities]
-    
+
     NEP[NextEditProvider] --> Config
     NEP --> LLM
     NEP --> AC
     NEP --> Utils
     NEP --> NE[NextEdit-Specific]
-    
+
     Config --> ControlPlane[control-plane/*]
     Config --> YamlPkg[yaml-package/*]
     Config --> Profiles[Profile System]
-    
+
     LLM --> OpenAI[OpenAI Provider]
     LLM --> Autodetect[Model Detection]
-    
+
     AC --> Context[ContextRetrieval]
     AC --> Filtering[BracketMatching]
     AC --> Generation[CompletionStreamer]
@@ -170,17 +175,17 @@ graph TD
     AC --> Processing[Pre/Post Processing]
     AC --> Templating[Prompt Rendering]
     AC --> ACUtil[Autocomplete Utils]
-    
+
     NE --> History[DocumentHistory]
     NE --> Logging[NextEditLogging]
     NE --> Prefetch[PrefetchQueue]
     NE --> Providers[Model Providers]
     NE --> Diff[Diff Formatting]
-    
+
     Utils --> Security[Security Checks]
     Utils --> Params[Parameters]
     Utils --> Paths[Path Utils]
-    
+
     style CP fill:#4CAF50
     style NEP fill:#4CAF50
     style Config fill:#FFC107
@@ -199,6 +204,7 @@ graph TD
 These are directly imported and essential for autocomplete/nextEdit functionality:
 
 **Autocomplete Core (`core/autocomplete/`):**
+
 - ✅ `classification/` - Multiline detection logic
 - ✅ `context/` - Context retrieval service
 - ✅ `filtering/` - Bracket matching and stream transforms
@@ -210,6 +216,7 @@ These are directly imported and essential for autocomplete/nextEdit functionalit
 - ✅ `util/` - Debouncer, logging, caching, helper vars
 
 **NextEdit Core (`core/nextEdit/`):**
+
 - ✅ `DocumentHistoryTracker.ts` - Track document changes
 - ✅ `NextEditLoggingService.ts` - NextEdit-specific logging
 - ✅ `NextEditPrefetchQueue.ts` - Prefetch management
@@ -218,17 +225,21 @@ These are directly imported and essential for autocomplete/nextEdit functionalit
 - ✅ `context/diffFormatting.ts` - Create diffs for context
 
 **LLM System (`core/llm/`):**
+
 - ✅ `llms/OpenAI.ts` - OpenAI LLM provider (directly instantiated)
 - ✅ `autodetect.ts` - Model capability detection (NextEdit only)
 
 **Utilities (`core/util/`):**
+
 - ✅ `parameters.ts` - DEFAULT_AUTOCOMPLETE_OPTS
 - ✅ `pathToUri.ts` - Path conversion utilities
 
 **Indexing (`core/indexing/`):**
+
 - ✅ `ignore.ts` - Security concern checking
 
 **Core Interfaces (`core/index.ts`):**
+
 - ✅ IDE, ILLM, ChatMessage, Range types
 
 ### Category B: Critical Indirect Dependencies (MUST KEEP)
@@ -236,22 +247,26 @@ These are directly imported and essential for autocomplete/nextEdit functionalit
 These support Category A dependencies:
 
 **LLM Support (`core/llm/`):**
+
 - ✅ Base LLM infrastructure (even if not all providers used)
 - ✅ OpenAI adapters system
 - ✅ Message formatting utilities
 - ✅ Token encoding (llamaTokenizer, tiktokenWorkerPool)
 
 **Diff System (`core/diff/`):**
+
 - ✅ myers.ts - Diff algorithm
 - ✅ streamDiff.ts - Streaming diff
 - ✅ util.ts - Diff utilities
 
 **Fetch System (`core/fetch/`):**
+
 - ✅ fetch.ts - HTTP client with certificate support
 - ✅ stream.ts - Stream handling
 - ✅ util.ts - Fetch utilities
 
 **Utilities (`core/util/`):**
+
 - ✅ Various utility functions used by Category A
 - ✅ Error handling
 - ✅ Path utilities
@@ -264,12 +279,14 @@ These are dependencies that could be replaced with simpler alternatives:
 **🔄 Config System (`core/config/`):**
 
 **Current State:**
+
 - Complex YAML parsing and validation system
 - Profile management with local/platform loaders
 - Control plane integration
 - Multiple file format support
 
 **Replacement Strategy:**
+
 ```typescript
 // Minimal hardcoded config for autocomplete/nextEdit
 interface MinimalConfig {
@@ -291,13 +308,13 @@ class MinimalConfigHandler {
       debounceDelay: 150,
       modelTimeout: 5000,
       useCache: true,
-    }
+    },
   };
-  
+
   async loadConfig() {
     return { config: this.config };
   }
-  
+
   get currentProfile() {
     return { profileDescription: { profileType: "local" } };
   }
@@ -305,6 +322,7 @@ class MinimalConfigHandler {
 ```
 
 **Benefits:**
+
 - Eliminates 1000+ lines of config system code
 - No YAML parsing needed
 - No profile management needed
@@ -312,9 +330,10 @@ class MinimalConfigHandler {
 - Still allows configuration via hardcoded values
 
 **Files to Replace:**
+
 - `core/config/ConfigHandler.ts` → Minimal version
 - Remove: `core/config/yaml-package/*` (entire directory)
-- Remove: `core/config/profile/*` 
+- Remove: `core/config/profile/*`
 - Remove: `core/config/ProfileLifecycleManager.ts`
 - Remove: `core/config/loadLocalAssistants.ts`
 - Keep: `core/config-types/` (type definitions still useful)
@@ -324,6 +343,7 @@ class MinimalConfigHandler {
 These directories/files are NOT imported by CompletionProvider or NextEditProvider:
 
 **🔴 control-plane/ (ENTIRE DIRECTORY - 12 files)**
+
 - Confirmed by Knip: `control-plane/auth/index.ts` unused
 - Confirmed by Knip: `control-plane/schema.ts` unused
 - Purpose: Telemetry, analytics, authentication
@@ -331,11 +351,13 @@ These directories/files are NOT imported by CompletionProvider or NextEditProvid
 - **Can remove:** All of `core/control-plane/*`
 
 **🔴 codeRenderer/ (ENTIRE DIRECTORY)**
+
 - Purpose: Code rendering functionality
 - Status: Not imported anywhere in dependency chain
 - **Can remove:** `core/codeRenderer/CodeRenderer.ts`
 
 **🔴 Unused Config Files (from Knip):**
+
 - `core/config/createNewAssistantFile.ts`
 - `core/config/onboarding.ts`
 - `core/config/yaml-package/cli.ts`
@@ -343,6 +365,7 @@ These directories/files are NOT imported by CompletionProvider or NextEditProvid
 - `core/config/yaml/default.ts`
 
 **🔴 Unused Test Support Files:**
+
 - `core/__mocks__/@continuedev/fetch/index.ts`
 - `core/autocomplete/context/root-path-context/test/files/` (5 test files)
 - `core/test/jest.global-setup.ts`
@@ -350,6 +373,7 @@ These directories/files are NOT imported by CompletionProvider or NextEditProvid
 - `core/test/vitest.setup.ts`
 
 **🔴 Unused NextEdit Context Files:**
+
 - `core/nextEdit/context/aggregateEdits.ts` (Knip confirmed)
 - `core/nextEdit/context/autocompleteContextFetching.ts` (Knip confirmed)
 - `core/nextEdit/context/prevEditLruCache.ts` (Knip confirmed)
@@ -357,6 +381,7 @@ These directories/files are NOT imported by CompletionProvider or NextEditProvid
 - `core/nextEdit/context/processSmallEdit.ts` (Knip confirmed)
 
 **🔴 Other Unused Files:**
+
 - `core/llm-info/providers/vertexai.ts`
 - `core/llm-info/util.ts`
 - `core/llm/defaultSystemMessages.ts`
@@ -376,17 +401,20 @@ These directories/files are NOT imported by CompletionProvider or NextEditProvid
 These were identified as unused by both dependency tracing AND Knip:
 
 **Directories Safe to Remove:**
+
 1. ✅ `core/control-plane/` - Not in dependency chain, Knip confirms unused
 2. ✅ `core/codeRenderer/` - Not in dependency chain, implied by structure
 3. ✅ `core/nextEdit/context/` (5 specific files) - Knip confirmed unused
 
 **Individual Files Safe to Remove:**
+
 - All 33 files listed in Knip's "Unused files" section
 - These are truly dead code with no imports
 
 ### Knip-Only Findings
 
 **228 Unused Exports:**
+
 - Many language definitions in `AutocompleteLanguageInfo.ts` (not used by core)
 - Schema exports that may be used by extensions
 - Test utilities and helper functions
@@ -397,6 +425,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### Dependency-Only Findings
 
 **Files in Dependency Chain but Not Flagged by Knip:**
+
 - All of `core/autocomplete/` infrastructure
 - All of `core/nextEdit/` core files
 - `core/llm/` system files
@@ -410,6 +439,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### 1. 🔴 Heavy Control Plane Dependency via Config
 
 **Finding:** ConfigHandler pulls in the ENTIRE control-plane system:
+
 - Authentication (WorkOS, OAuth)
 - Telemetry (PostHog)
 - Analytics providers (LogStash, ContinueProxy)
@@ -423,6 +453,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### 2. ⚠️ Complex Config System Overhead
 
 **Finding:** The yaml-package system is a full-featured config parser:
+
 - YAML to JSON conversion
 - Schema validation
 - Secret management
@@ -437,6 +468,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### 3. ✅ Excellent Autocomplete Architecture
 
 **Finding:** The autocomplete system is well-structured:
+
 - Clear separation of concerns
 - Pipeline architecture for filtering
 - Modular snippet gathering
@@ -447,6 +479,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### 4. ✅ NextEdit Shares Infrastructure
 
 **Finding:** NextEdit reuses almost all autocomplete infrastructure:
+
 - Same context retrieval
 - Same filtering
 - Same completion streaming
@@ -457,6 +490,7 @@ These were identified as unused by both dependency tracing AND Knip:
 ### 5. 🔄 OpenAI Direct Instantiation
 
 **Finding:** Both providers directly instantiate OpenAI class:
+
 ```typescript
 if (llm instanceof OpenAI) {
   llm.useLegacyCompletionsEndpoint = true;
@@ -470,6 +504,7 @@ if (llm instanceof OpenAI) {
 ### 6. ⚠️ Duplicate NextEdit Context Files
 
 **Finding:** NextEdit has 5 unused context files that seem redundant:
+
 - `aggregateEdits.ts`
 - `autocompleteContextFetching.ts`
 - `prevEditLruCache.ts`
@@ -495,13 +530,16 @@ if (llm instanceof OpenAI) {
 Safe to remove immediately (confirmed by both analyses):
 
 1. **Delete control-plane/ directory** (12 files)
+
    - Not imported by autocomplete/nextEdit
    - Only used via ConfigHandler (which we'll replace)
 
 2. **Delete codeRenderer/ directory**
+
    - Not imported anywhere
 
 3. **Delete unused NextEdit context files** (5 files)
+
    - aggregateEdits.ts
    - autocompleteContextFetching.ts
    - prevEditLruCache.ts
@@ -509,6 +547,7 @@ Safe to remove immediately (confirmed by both analyses):
    - processSmallEdit.ts
 
 4. **Delete unused test files** (8 files)
+
    - Test fixtures and setup files
 
 5. **Delete other unused files** (10+ files)
@@ -521,6 +560,7 @@ Safe to remove immediately (confirmed by both analyses):
 **Goal:** Replace ConfigHandler with minimal hardcoded config
 
 **Steps:**
+
 1. Create `MinimalConfigHandler` class with hardcoded defaults
 2. Update CompletionProvider to use new handler
 3. Update NextEditProvider to use new handler
@@ -535,6 +575,7 @@ Safe to remove immediately (confirmed by both analyses):
 ### Phase 6+: Further Optimization
 
 **Potential future work:**
+
 1. Simplify LLM system (keep only OpenAI)
 2. Remove unused language definitions
 3. Clean up unused exports (228 identified by Knip)
@@ -545,16 +586,19 @@ Safe to remove immediately (confirmed by both analyses):
 These must remain as they are essential:
 
 **Autocomplete Infrastructure:**
+
 - All of `core/autocomplete/` (except test files)
 - Classification, context, filtering, generation
 - Snippets, templating, utilities
 
 **NextEdit Infrastructure:**
+
 - Core NextEdit files (7 main files)
 - Model providers
 - Diff formatting
 
 **Supporting Systems:**
+
 - `core/llm/` - LLM provider system
 - `core/diff/` - Diff algorithms
 - `core/fetch/` - HTTP client
@@ -565,6 +609,7 @@ These must remain as they are essential:
 ## Summary Statistics
 
 ### Current State
+
 - **Total core/ files:** ~300+ files
 - **Entry points:** 2 (CompletionProvider, NextEditProvider)
 - **Direct dependencies:** ~45 files
@@ -573,16 +618,19 @@ These must remain as they are essential:
 - **Removable directories:** 2 (control-plane, codeRenderer)
 
 ### After Phase 4 (Immediate Removals)
+
 - **Files removed:** ~40 files
 - **Lines removed:** ~3000-5000 lines
 - **No breaking changes:** All removals are dead code
 
 ### After Phase 5 (Config Replacement)
+
 - **Files removed:** ~80+ files (cumulative)
 - **Lines removed:** ~8000-13000 lines (cumulative)
 - **Breaking changes:** Requires ConfigHandler replacement
 
 ### Minimal Viable Core
+
 - **Essential files:** ~120-150 files
 - **Entry points:** 2
 - **Core systems:** Autocomplete, NextEdit, LLM, Diff, Fetch
@@ -601,6 +649,7 @@ These must remain as they are essential:
 All file paths in this document are relative to the workspace root: `/Users/eamonnerbonne/Documents/VCS/continue`
 
 Key directories:
+
 - Entry points: `core/autocomplete/CompletionProvider.ts`, `core/nextEdit/NextEditProvider.ts`
 - Config system: `core/config/`
 - Control plane: `core/control-plane/` 🔴 REMOVABLE

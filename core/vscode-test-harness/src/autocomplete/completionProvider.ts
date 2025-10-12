@@ -93,7 +93,7 @@ export class ContinueCompletionProvider
       if (!config) {
         return;
       }
-      return config.selectedModelByRole.autocomplete ?? undefined;
+      return config.selectedModelByRole?.autocomplete ?? undefined;
     }
 
     this.completionProvider = new CompletionProvider(
@@ -129,7 +129,7 @@ export class ContinueCompletionProvider
     if (!config) {
       return;
     }
-    return config.selectedModelByRole.rerank ?? undefined;
+    return config.selectedModelByRole?.rerank ?? undefined;
   }
 
   /**

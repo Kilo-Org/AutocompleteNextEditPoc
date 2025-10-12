@@ -18,9 +18,11 @@
     "noEmitOnError": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["jest", "node"],
+    "types": ["vitest/globals", "node"],
     "sourceMap": true,
     "inlineSources": true,
+    "composite": true,
+    "incremental": true,
 
     // Set `sourceRoot` to  "/" to strip the build path prefix
     // from generated source code references.
@@ -28,5 +30,5 @@
     "sourceRoot": "/"
   },
   "include": ["./**/*.ts", "./**/*.js", "./**/*.d.ts"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "vscode-test-harness/**"]
 }

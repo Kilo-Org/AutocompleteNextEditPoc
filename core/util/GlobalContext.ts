@@ -1,10 +1,19 @@
 import fs from "node:fs";
 
-import { ModelRole } from "../config/yaml-package";
-import {
-  OAuthClientInformationFull,
-  OAuthTokens,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
+import { ModelRole } from "../index.js";
+
+// Stub types for MCP SDK (not available in this minimal build)
+type OAuthClientInformationFull = {
+  clientId?: string;
+  tokenEndpoint?: string;
+  [key: string]: unknown;
+};
+type OAuthTokens = {
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: number;
+  [key: string]: unknown;
+};
 
 import { SiteIndexingConfig } from "..";
 import {
@@ -73,9 +82,10 @@ export class GlobalContext {
       let parsed;
       try {
         parsed = JSON.parse(data);
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : String(e);
         console.warn(
-          `Error updating global context, attempting to salvage security-sensitive values: ${e}`,
+          `Error updating global context, attempting to salvage security-sensitive values: ${errMsg}`,
         );
 
         // Attempt to salvage security-sensitive values before deleting
@@ -127,9 +137,10 @@ export class GlobalContext {
     try {
       const parsed = JSON.parse(data);
       return parsed[key];
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
       console.warn(
-        `Error parsing global context, deleting corrupted file: ${e}`,
+        `Error parsing global context, deleting corrupted file: ${errMsg}`,
       );
       // Delete the corrupted file so it can be recreated fresh
       try {

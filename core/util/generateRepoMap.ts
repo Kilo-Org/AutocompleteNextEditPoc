@@ -1,8 +1,33 @@
 import fs from "node:fs";
 
 import { IDE, ILLM } from "..";
-import { CodeSnippetsCodebaseIndex } from "../indexing/CodeSnippetsIndex";
 import { walkDirs } from "../indexing/walkDir";
+
+// Stub for missing CodeSnippetsCodebaseIndex
+class CodeSnippetsCodebaseIndex {
+  static async refresh(
+    workspaceDirs: string[],
+    ide: IDE,
+  ): Promise<CodeSnippetsCodebaseIndex> {
+    return new CodeSnippetsCodebaseIndex();
+  }
+  static async getPathsAndSignatures(
+    allUris: string[],
+    uriOffset: number,
+    uriBatchSize: number,
+    snippetOffset: number,
+    snippetsBatchSize: number,
+  ): Promise<{
+    groupedByUri: Record<string, string[]>;
+    hasMoreSnippets: boolean;
+    hasMoreUris: boolean;
+  }> {
+    return { groupedByUri: {}, hasMoreSnippets: false, hasMoreUris: false };
+  }
+  compute(_args: unknown): unknown {
+    return {};
+  }
+}
 import { pruneLinesFromTop } from "../llm/countTokens";
 
 import { getRepoMapFilePath } from "./paths";
@@ -91,8 +116,8 @@ class RepoMapGenerator {
             continue;
           }
 
-          const filteredSignatures = signatures.filter(
-            (signature) => signature.trim() !== fileContent.trim(),
+          const filteredSignatures = (signatures as string[]).filter(
+            (signature: string) => signature.trim() !== fileContent.trim(),
           );
 
           if (filteredSignatures.length > 0) {
@@ -101,12 +126,12 @@ class RepoMapGenerator {
 
           let content = `${this.getUriForWrite(uri)}:\n`;
 
-          for (const signature of signatures.slice(0, -1)) {
+          for (const signature of (signatures as string[]).slice(0, -1)) {
             content += `${this.indentMultilineString(signature)}\n\t...\n`;
           }
 
           content += `${this.indentMultilineString(
-            signatures[signatures.length - 1],
+            (signatures as string[])[signatures.length - 1],
           )}\n\n`;
 
           if (content) {
@@ -173,7 +198,7 @@ class RepoMapGenerator {
   private indentMultilineString(str: string) {
     return str
       .split("\n")
-      .map((line: any) => "\t" + line)
+      .map((line: string) => "\t" + line)
       .join("\n");
   }
 }

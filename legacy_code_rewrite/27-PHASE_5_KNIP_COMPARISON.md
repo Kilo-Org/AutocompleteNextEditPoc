@@ -7,16 +7,19 @@ Phase 4 cleanup successfully reduced code bloat in the Continue codebase. This r
 ## Comparison Results
 
 ### Unused Files
+
 - **Before**: 32 files
 - **After**: 18 files
 - **Improvement**: 14 files removed (43.8% reduction)
 
 ### Unused Exports
+
 - **Before**: 180 exports
 - **After**: 115 exports (plus 64 unused exported types)
 - **Improvement**: 65 exports removed (36.1% reduction)
 
 ### Unused Dependencies
+
 - **Before**: Not analyzed in detail
 - **After**: 3 unused devDependencies identified
   - `eslint-plugin-import`
@@ -94,7 +97,7 @@ The remaining unused exports fall into several categories:
 
 1. **Test Suite**: All tests must pass after cleanup
 2. **Type Checking**: No new type errors introduced
-3. **Functionality**: 
+3. **Functionality**:
    - Autocomplete still works
    - NextEdit still works
    - No runtime errors
@@ -123,6 +126,7 @@ The remaining unused exports fall into several categories:
 ### Configuration Improvements
 
 The remaining unused files suggest opportunities for:
+
 - Consolidating test configurations
 - Reviewing utility modules for potential removal or consolidation
 - Documenting which exports are part of the public API vs internal use

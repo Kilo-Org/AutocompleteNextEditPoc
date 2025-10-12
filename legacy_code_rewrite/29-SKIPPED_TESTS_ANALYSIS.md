@@ -13,6 +13,7 @@ The command `npm test -- autocomplete nextEdit vscode-test-harness` runs vitest 
 ### Tests That WILL RUN (18 files)
 
 #### Autocomplete Tests (5 files)
+
 - `core/autocomplete/generation/GeneratorReuseManager.vitest.ts`
 - `core/autocomplete/generation/ListenableGenerator.vitest.ts`
 - `core/autocomplete/generation/utils.vitest.ts`
@@ -20,6 +21,7 @@ The command `npm test -- autocomplete nextEdit vscode-test-harness` runs vitest 
 - `core/autocomplete/postprocessing/index.vitest.ts`
 
 #### NextEdit Tests (13 files)
+
 - `core/nextEdit/DocumentHistoryTracker.vitest.ts`
 - `core/nextEdit/utils.vitest.ts`
 - `core/nextEdit/context/aggregateEdits.vitest.ts`
@@ -35,6 +37,7 @@ The command `npm test -- autocomplete nextEdit vscode-test-harness` runs vitest 
 - `core/nextEdit/templating/utils.vitest.ts`
 
 #### VSCode Test Harness Tests (6 files)
+
 - `core/vscode-test-harness/test/ContinueCompletionProvider.vitest.ts`
 - `core/vscode-test-harness/test/GhostTextAcceptanceTracker.vitest.ts`
 - `core/vscode-test-harness/test/JumpManager.vitest.ts`
@@ -51,11 +54,13 @@ The command `npm test -- autocomplete nextEdit vscode-test-harness` runs vitest 
 These tests cover functionality directly used by NextEdit and/or autocomplete:
 
 #### 1. **Diff Functionality** (3 files) - 🔴 CRITICAL
+
 - `core/diff/myers.vitest.ts`
 - `core/diff/streamDiff.vitest.ts`
 - `core/diff/util.vitest.ts`
 
-**Why Relevant**: 
+**Why Relevant**:
+
 - NextEdit uses `createDiff` from `./context/diffFormatting.ts`
 - CompletionProvider may use diff functionality for change detection
 - NextEdit has its own diff implementation in `core/nextEdit/diff/` but also uses core diff utilities
@@ -64,6 +69,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 **Impact**: Without these tests, diff-related bugs could go undetected, affecting NextEdit's ability to accurately track and display changes.
 
 #### 2. **LLM Functionality** (8 files) - 🔴 CRITICAL
+
 - `core/llm/autodetect.vitest.ts`
 - `core/llm/llm-pre-fetch.vitest.ts`
 - `core/llm/llm.vitest.ts`
@@ -74,6 +80,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 - `core/llm/rules/alwaysApplyRules.vitest.ts`
 
 **Why Relevant**:
+
 - NextEditProvider imports `modelSupportsNextEdit` from `../llm/autodetect.js`
 - Both NextEdit and autocomplete rely on OpenAI LLM class
 - CompletionProvider sets `useLegacyCompletionsEndpoint = true` for OpenAI instances
@@ -83,9 +90,11 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 **Impact**: LLM-related bugs could cause model selection issues, incorrect prompts, or performance problems for both features.
 
 #### 3. **Security/Indexing** (1 file) - 🟡 MEDIUM
+
 - `core/indexing/ignore.vitest.ts`
 
 **Why Relevant**:
+
 - Both CompletionProvider and NextEditProvider import `isSecurityConcern` from `../indexing/ignore.js`
 - Security checks prevent completion/edit suggestions in sensitive contexts
 
@@ -96,6 +105,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 ### MEDIUM RELEVANCE - Indirect Dependencies 🟡
 
 #### 4. **Utility Functions** (9 files)
+
 - `core/util/extractMinimalStackTraceInfo.vitest.ts`
 - `core/util/index.vitest.ts`
 - `core/util/log.vitest.ts`
@@ -107,6 +117,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 - `core/util/text.vitest.ts`
 
 **Why Relevant**:
+
 - LruCache: Both features use `AutocompleteLruCache.get()` for caching
 - Logging: Errors and debugging depend on logging infrastructure
 - Text utilities: String manipulation for code analysis
@@ -115,6 +126,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 **Impact**: Utility bugs could cause subtle issues in caching, logging, or text processing.
 
 #### 5. **Fetch/Network** (6 files)
+
 - `core/fetch/certs.vitest.ts`
 - `core/fetch/fetch.e2e.vitest.ts`
 - `core/fetch/getAgentOptions.vitest.ts`
@@ -123,6 +135,7 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 - `core/fetch/util.vitest.ts`
 
 **Why Relevant**:
+
 - LLM calls require HTTP/HTTPS communication
 - SSL/certificate handling affects API connectivity
 - Streaming is used for completion generation
@@ -134,12 +147,14 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 ### LOW RELEVANCE - Configuration/Rules 🟢
 
 #### 6. **LLM Rules** (5 files)
+
 - `core/llm/rules/fileProtocolMatching.vitest.ts`
 - `core/llm/rules/implicitGlobalRules.vitest.ts`
 - `core/llm/rules/nestedDirectoryRules.vitest.ts`
 - `core/llm/rules/ruleColocation.vitest.ts`
 
 **Why Relevant**:
+
 - Rules affect LLM behavior indirectly through system messages
 - File protocol matching could affect context gathering
 
@@ -150,25 +165,27 @@ These tests cover functionality directly used by NextEdit and/or autocomplete:
 ## Recommendations
 
 ### Priority 1: CRITICAL - Add to Test Suite Immediately
+
 1. **All diff tests** (`core/diff/*.vitest.ts`)
    - Rationale: NextEdit fundamentally depends on diff functionality
-   
 2. **Core LLM tests**:
    - `core/llm/autodetect.vitest.ts` (model detection)
    - `core/llm/llm.vitest.ts` (base LLM functionality)
    - `core/llm/llms/OpenAI.vitest.ts` (OpenAI-specific behavior)
 
 ### Priority 2: HIGH - Strongly Recommend Including
+
 3. **Security test**: `core/indexing/ignore.vitest.ts`
    - Rationale: Prevents security issues
-   
 4. **Caching test**: `core/util/LruCache.vitest.ts`
+
    - Rationale: Both features use AutocompleteLruCache
 
 5. **Pre-fetch test**: `core/llm/llm-pre-fetch.vitest.ts`
    - Rationale: Performance optimization test
 
 ### Priority 3: MEDIUM - Consider Including for Comprehensive Coverage
+
 6. **Fetch/streaming tests** (especially `core/fetch/stream.vitest.ts`)
 7. **Logging tests** (`core/util/log.vitest.ts`)
 8. **Rules tests** (especially `getSystemMessageWithRules.vitest.ts`)
@@ -184,6 +201,7 @@ npm test -- autocomplete nextEdit vscode-test-harness diff llm/autodetect llm/ll
 ```
 
 Or run all tests:
+
 ```bash
 npm test
 ```
@@ -193,6 +211,7 @@ npm test
 ## Dependency Graph Insights
 
 ### NextEdit Dependencies
+
 ```
 NextEditProvider
 ├── autocomplete/context/ContextRetrievalService (TESTED)
@@ -206,6 +225,7 @@ NextEditProvider
 ```
 
 ### Autocomplete Dependencies
+
 ```
 CompletionProvider
 ├── autocomplete/context/ContextRetrievalService (TESTED)

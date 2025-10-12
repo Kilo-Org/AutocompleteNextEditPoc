@@ -1,9 +1,9 @@
 import * as fs from "fs";
 
-import { Session, BaseSessionMetadata } from "../index.js";
-import { ListHistoryOptions } from "../protocol/core.js";
+import { Session, BaseSessionMetadata, ListHistoryOptions } from "../index.js";
 
-import { NEW_SESSION_TITLE } from "./constants.js";
+// Stub for missing constant
+const NEW_SESSION_TITLE = "New Session";
 import {
   getSessionFilePath,
   getSessionsFolderPath,

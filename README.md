@@ -14,6 +14,7 @@ Originally part of Continue's VS Code extension, this library has been extracted
 ## Features
 
 ### 🎯 Autocomplete
+
 - **Context-aware completions**: Analyzes surrounding code, imports, and recently edited files
 - **Multi-line support**: Generates complete code blocks, not just single lines
 - **Smart filtering**: Removes invalid completions using AST analysis and bracket matching
@@ -22,6 +23,7 @@ Originally part of Continue's VS Code extension, this library has been extracted
 - **Tree-sitter integration**: Accurate syntax-aware code analysis
 
 ### ✨ NextEdit
+
 - **Predictive edits**: Suggests edits across multiple locations based on your changes
 - **Full-file and partial-file diffs**: Flexible edit region calculation
 - **Multiple model support**: Built-in support for Instinct and MercuryCoder models
@@ -29,6 +31,7 @@ Originally part of Continue's VS Code extension, this library has been extracted
 - **Cursor positioning**: Intelligent cursor placement after edits
 
 ### 🔧 Additional Features
+
 - **OpenAI-compatible LLM support**: Works with any OpenAI-compatible API
 - **Extensible architecture**: Easy to add custom LLM providers and IDE integrations
 - **Comprehensive testing**: 532 tests covering all major functionality
@@ -51,6 +54,7 @@ npm install
 ```
 
 For future npm publication:
+
 ```bash
 npm install @continuedev/autocomplete-nextedit
 ```
@@ -60,22 +64,27 @@ npm install @continuedev/autocomplete-nextedit
 ### Basic Autocomplete Usage
 
 ```typescript
-import { CompletionProvider, MinimalConfigProvider } from '@continuedev/core/autocomplete';
-import { IDE, ILLM } from '@continuedev/core';
-import OpenAI from '@continuedev/core/llm/llms/OpenAI';
+import {
+  CompletionProvider,
+  MinimalConfigProvider,
+} from "@continuedev/core/autocomplete";
+import { IDE, ILLM } from "@continuedev/core";
+import OpenAI from "@continuedev/core/llm/llms/OpenAI";
 
 // 1. Create configuration provider
 const configProvider = new MinimalConfigProvider({
   tabAutocompleteOptions: {
     debounceDelay: 150,
     maxPromptTokens: 1024,
-  }
+  },
 });
 
 // 2. Implement IDE interface (simplified example)
 const ide: IDE = {
-  readFile: async (filepath) => { /* ... */ },
-  getWorkspaceDirs: async () => ['/path/to/workspace'],
+  readFile: async (filepath) => {
+    /* ... */
+  },
+  getWorkspaceDirs: async () => ["/path/to/workspace"],
   // ... implement other required methods
 };
 
@@ -83,7 +92,7 @@ const ide: IDE = {
 const getLlm = async (): Promise<ILLM> => {
   return new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
-    model: 'gpt-4',
+    model: "gpt-4",
   });
 };
 
@@ -92,59 +101,59 @@ const completionProvider = new CompletionProvider(
   configProvider,
   ide,
   getLlm,
-  (error) => console.error('Autocomplete error:', error),
-  getDefinitionsFromLsp  // LSP integration function
+  (error) => console.error("Autocomplete error:", error),
+  getDefinitionsFromLsp, // LSP integration function
 );
 
 // 5. Request completion
 const outcome = await completionProvider.provideInlineCompletionItems(
   {
-    filepath: '/path/to/file.ts',
+    filepath: "/path/to/file.ts",
     pos: { line: 10, character: 5 },
-    completionId: 'unique-id',
+    completionId: "unique-id",
     recentlyEditedRanges: [],
     recentlyEditedFiles: new Map(),
-    clipboardText: '',
+    clipboardText: "",
   },
-  abortSignal
+  abortSignal,
 );
 
 if (outcome) {
-  console.log('Completion:', outcome.completion);
-  
+  console.log("Completion:", outcome.completion);
+
   // Mark as displayed
-  completionProvider.markDisplayed('unique-id', outcome);
-  
+  completionProvider.markDisplayed("unique-id", outcome);
+
   // On user acceptance
-  completionProvider.accept('unique-id');
+  completionProvider.accept("unique-id");
 }
 ```
 
 ### Basic NextEdit Usage
 
 ```typescript
-import { NextEditProvider } from '@continuedev/core/nextEdit/NextEditProvider';
-import { NextEditProviderFactory } from '@continuedev/core/nextEdit/NextEditProviderFactory';
+import { NextEditProvider } from "@continuedev/core/nextEdit/NextEditProvider";
+import { NextEditProviderFactory } from "@continuedev/core/nextEdit/NextEditProviderFactory";
 
 // 1. Create NextEdit provider
 const nextEditProvider = new NextEditProvider(
   configProvider,
   ide,
   getLlm,
-  (error) => console.error('NextEdit error:', error)
+  (error) => console.error("NextEdit error:", error),
 );
 
 // 2. Request next edit prediction
 const outcome = await nextEditProvider.getNextEditPrediction({
-  filepath: '/path/to/file.ts',
+  filepath: "/path/to/file.ts",
   pos: { line: 15, character: 0 },
   fileContents: currentFileContents,
   // ... other context
 });
 
 if (outcome) {
-  console.log('Predicted edits:', outcome.diffLines);
-  console.log('New cursor position:', outcome.finalCursorPosition);
+  console.log("Predicted edits:", outcome.diffLines);
+  console.log("New cursor position:", outcome.finalCursorPosition);
 }
 ```
 
@@ -233,16 +242,19 @@ For detailed API documentation, see [`API_REFERENCE.md`](API_REFERENCE.md).
 Quick reference for main exports:
 
 ### Autocomplete
+
 - [`CompletionProvider`](core/autocomplete/CompletionProvider.ts) - Main autocomplete class
 - [`MinimalConfigProvider`](core/autocomplete/MinimalConfig.ts) - Configuration provider
 - Types: `AutocompleteInput`, `AutocompleteOutcome`, `TabAutocompleteOptions`
 
 ### NextEdit
+
 - [`NextEditProvider`](core/nextEdit/NextEditProvider.ts) - Main NextEdit class
 - [`NextEditProviderFactory`](core/nextEdit/NextEditProviderFactory.ts) - Creates model-specific providers
 - Types: `NextEditOutcome`, `ModelSpecificContext`, `EditableRegion`
 
 ### Core Interfaces
+
 - [`IDE`](core/index.d.ts) - Interface for IDE integration
 - [`ILLM`](core/index.d.ts) - Interface for LLM providers
 - [`Position`, `Range`, `RangeInFile`](core/index.d.ts) - Common types
@@ -260,6 +272,7 @@ To integrate this library into your IDE or text editor:
 5. **Reference implementation**: See [`core/vscode-test-harness/`](core/vscode-test-harness/) for a complete example
 
 Key IDE methods to implement:
+
 - `readFile()`, `writeFile()` - File I/O
 - `getWorkspaceDirs()` - Workspace roots
 - `getCurrentFile()` - Active file info
@@ -349,6 +362,7 @@ This library is extracted from [Continue](https://github.com/continuedev/continu
 The autocomplete and NextEdit functionality in this library was developed by the Continue team. This extraction preserves the original code structure and functionality while providing a minimal, reusable package.
 
 Key contributors to the original Continue project:
+
 - The Continue team and community
 - See the original repository for full contributor list
 
@@ -373,11 +387,13 @@ Key contributors to the original Continue project:
 ## Support
 
 For questions about this extraction:
+
 - Check the [`ARCHITECTURE.md`](ARCHITECTURE.md) for technical details
 - Review [`EXAMPLES.md`](EXAMPLES.md) for usage patterns
 - Examine the test harness in [`core/vscode-test-harness/`](core/vscode-test-harness/)
 
 For questions about the original Continue project:
+
 - Visit https://docs.continue.dev
 - Join the Discord: https://discord.gg/continue
 - Open an issue: https://github.com/continuedev/continue/issues

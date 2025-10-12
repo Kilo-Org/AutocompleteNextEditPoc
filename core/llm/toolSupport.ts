@@ -1,4 +1,4 @@
-import { parseProxyModelName } from "../config/yaml-package";
+import { parseProxyModelName } from "../index.js";
 import { ModelDescription } from "..";
 
 export const PROVIDER_TOOL_SUPPORT: Record<string, (model: string) => boolean> =

@@ -1,12 +1,15 @@
 # Test Cleanup Summary
 
 ## Objective
+
 Remove all test files from the codebase that are NOT exercised by `./test-autocomplete.sh` to ensure only relevant tests for autocomplete and NextEdit functionality remain.
 
 ## Actions Taken
 
 ### 1. Updated test-autocomplete.sh
+
 Added critical dependency tests to the script:
+
 ```bash
 #!/bin/bash
 
@@ -18,12 +21,14 @@ popd
 ### 2. Deleted Irrelevant Test Files
 
 #### Removed Directories
+
 - **`core/dist/`** - Entire directory removed (64+ test files)
   - All build artifacts and compiled test files
 
 #### Removed Test Files by Category
 
 **Fetch Tests (7 files removed):**
+
 - core/fetch/certs.vitest.ts
 - core/fetch/fetch.e2e.vitest.ts
 - core/fetch/getAgentOptions.vitest.ts
@@ -33,6 +38,7 @@ popd
 - core/fetch/util.vitest.ts
 
 **LLM Tests (12 files removed, kept autodetect.vitest.ts):**
+
 - core/llm/llm-pre-fetch.vitest.ts
 - core/llm/llm.vitest.ts
 - core/llm/llms/OpenAI.vitest.ts
@@ -48,6 +54,7 @@ popd
 - core/llm/rules/ruleColocation.vitest.ts
 
 **Util Tests (11 files removed, kept LruCache.vitest.ts):**
+
 - core/util/extractMinimalStackTraceInfo.vitest.ts
 - core/util/grepSearch.vitest.ts
 - core/util/index.vitest.ts
@@ -65,6 +72,7 @@ popd
 ## Remaining Test Files (38 files)
 
 ### Autocomplete Tests (14 files) ✅
+
 - core/autocomplete/context/root-path-context/RootPathContextService.vitest.ts
 - core/autocomplete/filtering/streamTransforms/charStream.vitest.ts
 - core/autocomplete/filtering/streamTransforms/filterCodeBlock.vitest.ts
@@ -75,12 +83,13 @@ popd
 - core/autocomplete/generation/utils.vitest.ts
 - core/autocomplete/postprocessing/index.vitest.ts
 - core/autocomplete/snippets/gitDiffCache.vitest.ts
-- core/autocomplete/templating/__tests__/formatOpenedFilesContext.vitest.ts
-- core/autocomplete/templating/__tests__/renderPrompt.vitest.ts
+- core/autocomplete/templating/**tests**/formatOpenedFilesContext.vitest.ts
+- core/autocomplete/templating/**tests**/renderPrompt.vitest.ts
 - core/autocomplete/util/completionTestUtils.vitest.ts
 - core/autocomplete/util/processSingleLineCompletion.vitest.ts
 
 ### NextEdit Tests (13 files) ✅
+
 - core/nextEdit/context/aggregateEdits.vitest.ts
 - core/nextEdit/context/autocompleteContextFetching.vitest.ts
 - core/nextEdit/context/diffFormatting.vitest.ts
@@ -96,6 +105,7 @@ popd
 - core/nextEdit/utils.vitest.ts
 
 ### VSCode Test Harness (6 files) ✅
+
 - core/vscode-test-harness/test/ContinueCompletionProvider.vitest.ts
 - core/vscode-test-harness/test/GhostTextAcceptanceTracker.vitest.ts
 - core/vscode-test-harness/test/JumpManager.vitest.ts
@@ -104,11 +114,13 @@ popd
 - core/vscode-test-harness/test/util.vitest.ts
 
 ### Diff Tests (3 files) ✅
+
 - core/diff/myers.vitest.ts
 - core/diff/streamDiff.vitest.ts
 - core/diff/util.vitest.ts
 
 ### Critical Dependencies (3 files) ✅
+
 - core/llm/autodetect.vitest.ts
 - core/indexing/ignore.vitest.ts
 - core/util/LruCache.vitest.ts
@@ -116,6 +128,7 @@ popd
 ## Verification
 
 Tests were verified to run correctly:
+
 ```bash
 cd core && npm test -- --reporter=verbose autocomplete nextEdit vscode-test-harness diff llm/autodetect indexing/ignore util/LruCache --run=false
 ```

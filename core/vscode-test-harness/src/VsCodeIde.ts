@@ -297,7 +297,7 @@ class VsCodeIde implements IDE {
   async writeFile(fileUri: string, contents: string): Promise<void> {
     await vscode.workspace.fs.writeFile(
       vscode.Uri.parse(fileUri),
-      Buffer.from(contents),
+      new Uint8Array(Buffer.from(contents)),
     );
   }
 

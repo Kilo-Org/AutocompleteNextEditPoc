@@ -449,9 +449,7 @@ export async function* skipLines(stream: LineStream): LineStream {
  * @param {LineStream} stream - The input stream of lines.
  * @yields {string} Filtered lines that are stripped of trailing whitespace
  */
-async function* removeTrailingWhitespace(
-  stream: LineStream,
-): LineStream {
+async function* removeTrailingWhitespace(stream: LineStream): LineStream {
   for await (const line of stream) {
     yield line.trimEnd();
   }

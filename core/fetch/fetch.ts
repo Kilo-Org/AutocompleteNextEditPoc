@@ -1,4 +1,4 @@
-import { RequestOptions } from "../config-types";
+import { RequestOptions } from "../index.js";
 import * as followRedirects from "follow-redirects";
 import { HttpProxyAgent } from "http-proxy-agent";
 import { HttpsProxyAgent } from "https-proxy-agent";

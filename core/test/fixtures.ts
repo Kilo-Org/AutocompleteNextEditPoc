@@ -10,10 +10,7 @@ export const testIde = new FileSystemIde(TEST_DIR);
 
 export const ideSettingsPromise = testIde.getIdeSettings();
 
-export const testControlPlaneClient = new ControlPlaneClient(
-  Promise.resolve(undefined),
-  testIde,
-);
+export const testControlPlaneClient = new ControlPlaneClient();
 
 // For autocomplete/nextEdit tests, use MinimalConfigProvider
 export const testMinimalConfigProvider = new MinimalConfigProvider();

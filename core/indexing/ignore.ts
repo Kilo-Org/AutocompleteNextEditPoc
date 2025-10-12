@@ -204,7 +204,7 @@ const DEFAULT_IGNORE_DIRS = [
   ...ADDITIONAL_INDEXING_IGNORE_DIRS,
 ];
 
-const DEFAULT_IGNORES = [
+export const DEFAULT_IGNORES = [
   ...DEFAULT_IGNORE_FILETYPES,
   ...DEFAULT_IGNORE_DIRS,
 ];
@@ -215,9 +215,7 @@ export const defaultIgnoresGlob = `!{${DEFAULT_IGNORES.join(",")}}`;
 const defaultSecurityIgnoreFile = ignore().add(
   DEFAULT_SECURITY_IGNORE_FILETYPES,
 );
-const defaultSecurityIgnoreDir = ignore().add(
-  DEFAULT_SECURITY_IGNORE_DIRS,
-);
+const defaultSecurityIgnoreDir = ignore().add(DEFAULT_SECURITY_IGNORE_DIRS);
 const defaultIgnoreFile = ignore().add(DEFAULT_IGNORE_FILETYPES);
 const defaultIgnoreDir = ignore().add(DEFAULT_IGNORE_DIRS);
 

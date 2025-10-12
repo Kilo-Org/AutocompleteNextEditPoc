@@ -1,7 +1,11 @@
 import { CompletionUsage } from "openai/resources/completions.mjs";
 import { BaseLlmApi, constructLlmApi } from "../index.js";
 import { LLMConfig } from "../types.js";
-import { TestConfigOptions } from "./main.test.js";
+
+// Stub for missing test type
+export interface TestConfigOptions {
+  [key: string]: any;
+}
 
 export function getLlmApi(config: LLMConfig) {
   const api = constructLlmApi(config);

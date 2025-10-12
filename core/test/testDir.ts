@@ -9,14 +9,14 @@ export const TEST_DIR = localPathToUri(TEST_DIR_PATH); // URI
 
 export function setUpTestDir() {
   if (fs.existsSync(TEST_DIR_PATH)) {
-    fs.rmSync(TEST_DIR_PATH, { recursive: true });
+    fs.rmSync(TEST_DIR_PATH, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   }
   fs.mkdirSync(TEST_DIR_PATH);
 }
 
 export function tearDownTestDir() {
   if (fs.existsSync(TEST_DIR_PATH)) {
-    fs.rmSync(TEST_DIR_PATH, { recursive: true });
+    fs.rmSync(TEST_DIR_PATH, { recursive: true, force: true, maxRetries: 5, retryDelay: 50 });
   }
 }
 

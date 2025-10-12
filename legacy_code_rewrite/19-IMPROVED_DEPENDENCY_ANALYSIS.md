@@ -13,18 +13,20 @@
 ### 1. Knip Configuration Issue
 
 **Original `knip.json` (Phase 4):**
+
 ```json
 {
   "ignore": [
     "**/*.d.ts",
     "**/node_modules/**",
     "**/dist/**",
-    "core/vscode-test-harness/**"  // ← THIS WAS THE PROBLEM
+    "core/vscode-test-harness/**" // ← THIS WAS THE PROBLEM
   ]
 }
 ```
 
 **Impact:** By ignoring the entire test harness directory, Knip couldn't see:
+
 - Real imports in [`core/vscode-test-harness/src/`](core/vscode-test-harness/src)
 - Actual runtime code (not just tests)
 - CodeRenderer usage in [`NextEditWindowManager.ts`](core/vscode-test-harness/src/activation/NextEditWindowManager.ts)
@@ -32,6 +34,7 @@
 ### 2. Missed Dependencies
 
 The ignored directory contained:
+
 - **Real Extension Code:** [`core/vscode-test-harness/src/`](core/vscode-test-harness/src) contains actual VS Code extension implementation
 - **Test Files:** [`core/vscode-test-harness/test/`](core/vscode-test-harness/test) contains `.vitest.ts` test files
 - Both import from [`core/`](core) and create dependencies
@@ -56,6 +59,7 @@ util/posthog.ts (exports Telemetry class)
 **Purpose:** [`TeamAnalytics`](core/control-plane/TeamAnalytics.ts:29) handles team-level analytics reporting, used by both autocomplete and nextEdit for logging completion events.
 
 **Key Files:**
+
 - [`core/util/posthog.ts`](core/util/posthog.ts:3) - Imports `TeamAnalytics` at line 3
 - [`core/autocomplete/util/AutocompleteLoggingService.ts`](core/autocomplete/util/AutocompleteLoggingService.ts:3) - Imports `Telemetry`
 - [`core/nextEdit/NextEditLoggingService.ts`](core/nextEdit/NextEditLoggingService.ts:6) - Imports `Telemetry`
@@ -74,12 +78,14 @@ config/ConfigHandler.ts
 **Purpose:** [`ConfigHandler`](core/config/ConfigHandler.ts:41) manages configuration and requires control-plane components for authentication and policy enforcement.
 
 **Control-plane imports in ConfigHandler:**
+
 - [`ControlPlaneClient`](core/config/ConfigHandler.ts:3) - Line 3
 - [`AuthType, ControlPlaneSessionInfo`](core/config/ConfigHandler.ts:16) - Lines 16-18
 - [`getControlPlaneEnv`](core/config/ConfigHandler.ts:19) - Line 19
 - [`PolicySingleton`](core/config/ConfigHandler.ts:20) - Line 20
 
 **Direct usage:**
+
 - [`core/autocomplete/CompletionProvider.ts:1`](core/autocomplete/CompletionProvider.ts:1) - Imports ConfigHandler
 - [`core/nextEdit/NextEditProvider.ts:2`](core/nextEdit/NextEditProvider.ts:2) - Imports ConfigHandler
 
@@ -88,29 +94,20 @@ config/ConfigHandler.ts
 Total: **16 files** (found via grep search)
 
 **Core Dependencies:**
+
 1. [`util/posthog.ts`](core/util/posthog.ts:3) - TeamAnalytics
 2. [`config/ConfigHandler.ts`](core/config/ConfigHandler.ts:3) - ControlPlaneClient, AuthTypes, env, PolicySingleton
 
-**Config System Files:**
-3. [`config/yaml/LocalPlatformClient.ts`](core/config/yaml/LocalPlatformClient.ts:9) - ControlPlaneClient
-4. [`config/yaml/LocalPlatformClient.vitest.ts`](core/config/yaml/LocalPlatformClient.vitest.ts:12)
-5. [`config/profile/PlatformProfileLoader.ts`](core/config/profile/PlatformProfileLoader.ts:3)
-6. [`config/yaml/loadLocalYamlBlocks.ts`](core/config/yaml/loadLocalYamlBlocks.ts:9)
-7. [`config/yaml/loadYaml.ts`](core/config/yaml/loadYaml.ts:28)
-8. [`config/profile/doLoadConfig.ts`](core/config/profile/doLoadConfig.ts:26)
-9. [`config/load.ts`](core/config/load.ts:41)
-10. [`config/profile/LocalProfileLoader.ts`](core/config/profile/LocalProfileLoader.ts:3)
+**Config System Files:** 3. [`config/yaml/LocalPlatformClient.ts`](core/config/yaml/LocalPlatformClient.ts:9) - ControlPlaneClient 4. [`config/yaml/LocalPlatformClient.vitest.ts`](core/config/yaml/LocalPlatformClient.vitest.ts:12) 5. [`config/profile/PlatformProfileLoader.ts`](core/config/profile/PlatformProfileLoader.ts:3) 6. [`config/yaml/loadLocalYamlBlocks.ts`](core/config/yaml/loadLocalYamlBlocks.ts:9) 7. [`config/yaml/loadYaml.ts`](core/config/yaml/loadYaml.ts:28) 8. [`config/profile/doLoadConfig.ts`](core/config/profile/doLoadConfig.ts:26) 9. [`config/load.ts`](core/config/load.ts:41) 10. [`config/profile/LocalProfileLoader.ts`](core/config/profile/LocalProfileLoader.ts:3)
 
-**LLM/Other:**
-11. [`llm/llms/stubs/ContinueProxy.ts`](core/llm/llms/stubs/ContinueProxy.ts:8) - ControlPlaneProxyInfo
-12. [`nextEdit/NextEditLoggingService.ts`](core/nextEdit/NextEditLoggingService.ts:4) - getControlPlaneEnvSync
+**LLM/Other:** 11. [`llm/llms/stubs/ContinueProxy.ts`](core/llm/llms/stubs/ContinueProxy.ts:8) - ControlPlaneProxyInfo 12. [`nextEdit/NextEditLoggingService.ts`](core/nextEdit/NextEditLoggingService.ts:4) - getControlPlaneEnvSync
 
-**Test Files:**
-13. [`test/fixtures.ts`](core/test/fixtures.ts:2) - ControlPlaneClient
+**Test Files:** 13. [`test/fixtures.ts`](core/test/fixtures.ts:2) - ControlPlaneClient
 
 ### Unused control-plane/ Files
 
 According to improved Knip analysis, only **2 files** are unused:
+
 1. [`control-plane/auth/index.ts`](core/control-plane/auth/index.ts)
 2. [`control-plane/schema.ts`](core/control-plane/schema.ts)
 
@@ -125,6 +122,7 @@ According to improved Knip analysis, only **2 files** are unused:
 **Original Knip ignored:** `core/vscode-test-harness/**`
 
 **Actual Usage:**
+
 - File: [`core/vscode-test-harness/src/activation/NextEditWindowManager.ts:7`](core/vscode-test-harness/src/activation/NextEditWindowManager.ts:7)
 - Import: `import { CodeRenderer } from "core/codeRenderer/CodeRenderer"`
 - Usage: Syntax highlighting for next edit diff rendering
@@ -134,6 +132,7 @@ According to improved Knip analysis, only **2 files** are unused:
 **REAL RUNTIME DEPENDENCY** - Not mocking.
 
 **Evidence:**
+
 1. Located in [`src/activation/`](core/vscode-test-harness/src/activation) (production code, not test/)
 2. Creates actual [`CodeRenderer`](core/vscode-test-harness/src/activation/NextEditWindowManager.ts:175) instance: `this.codeRenderer = CodeRenderer.getInstance()`
 3. Calls real methods:
@@ -142,16 +141,19 @@ According to improved Knip analysis, only **2 files** are unused:
 
 **Purpose:**
 [`NextEditWindowManager`](core/vscode-test-harness/src/activation/NextEditWindowManager.ts:112) uses CodeRenderer to:
+
 - Syntax highlight code diffs
 - Generate SVG images for VS Code decorations
 - Apply theme-aware coloring
 
 **Comment from source:**
+
 > "The syntax highlighting and the actual building of SVG happens inside [`core/codeRenderer/CodeRenderer.ts`](core/codeRenderer/CodeRenderer.ts)."
 
 ### Test File
 
 [`core/vscode-test-harness/test/NextEditWindowManager.vitest.ts:89`](core/vscode-test-harness/test/NextEditWindowManager.vitest.ts:89) **does** mock CodeRenderer:
+
 ```typescript
 vi.mock("core/codeRenderer/CodeRenderer", () => ({
   CodeRenderer: {
@@ -167,6 +169,7 @@ But this is standard practice - tests mock external dependencies while the real 
 ### Changes Made
 
 **Before (Phase 4):**
+
 ```json
 {
   "entry": [
@@ -179,12 +182,13 @@ But this is standard practice - tests mock external dependencies while the real 
     "**/*.d.ts",
     "**/node_modules/**",
     "**/dist/**",
-    "core/vscode-test-harness/**"  // ← REMOVED THIS
+    "core/vscode-test-harness/**" // ← REMOVED THIS
   ]
 }
 ```
 
 **After (Phase 4.5):**
+
 ```json
 {
   "entry": [
@@ -192,8 +196,8 @@ But this is standard practice - tests mock external dependencies while the real 
     "core/nextEdit/NextEditProvider.ts",
     "core/**/*.test.ts",
     "core/**/*.vitest.ts",
-    "core/vscode-test-harness/test/**/*.vitest.ts",  // ← ADDED
-    "core/vscode-test-harness/src/**/*.ts"           // ← ADDED
+    "core/vscode-test-harness/test/**/*.vitest.ts", // ← ADDED
+    "core/vscode-test-harness/src/**/*.ts" // ← ADDED
   ],
   "ignore": [
     "**/*.d.ts",
@@ -207,6 +211,7 @@ But this is standard practice - tests mock external dependencies while the real 
 ### Impact
 
 **Now Detected:**
+
 - ✅ CodeRenderer usage in test harness
 - ✅ All vscode-test-harness imports
 - ✅ More accurate unused file list
@@ -220,7 +225,9 @@ But this is standard practice - tests mock external dependencies while the real 
 ### Files Previously Marked Unused (But Actually Used)
 
 **Phase 4 said these were unused:**
+
 1. **`control-plane/` directory** - WRONG
+
    - Actually used by `posthog.ts` (TeamAnalytics)
    - Actually used by `ConfigHandler.ts` (ControlPlaneClient, etc.)
 
@@ -230,16 +237,17 @@ But this is standard practice - tests mock external dependencies while the real 
 ### Confirmed Unused After Improved Analysis
 
 Only **2 control-plane files:**
+
 1. `control-plane/auth/index.ts`
 2. `control-plane/schema.ts`
 
 ### Directories Analysis
 
-| Directory | Phase 4 Status | Phase 4.5 Status | Reason |
-|-----------|---------------|------------------|--------|
-| `control-plane/` | "Can Remove" ❌ | **MUST KEEP** ✅ | Used by analytics & config |
-| `codeRenderer/` | "Can Remove" ❌ | **MUST KEEP** ✅ | Used by test harness rendering |
-| `tree-sitter/` | Analyzed separately | ✅ No imports found | Independent module |
+| Directory        | Phase 4 Status      | Phase 4.5 Status    | Reason                         |
+| ---------------- | ------------------- | ------------------- | ------------------------------ |
+| `control-plane/` | "Can Remove" ❌     | **MUST KEEP** ✅    | Used by analytics & config     |
+| `codeRenderer/`  | "Can Remove" ❌     | **MUST KEEP** ✅    | Used by test harness rendering |
+| `tree-sitter/`   | Analyzed separately | ✅ No imports found | Independent module             |
 
 ---
 
@@ -248,6 +256,7 @@ Only **2 control-plane files:**
 ### 1. Analytics Requirement
 
 **Current Architecture:**
+
 ```
 AutocompleteLoggingService.ts
     ↓ uses
@@ -259,14 +268,16 @@ ControlPlaneClient, Analytics Providers
 ```
 
 **Impact of Removal:**
+
 - ❌ Breaks autocomplete logging
-- ❌ Breaks nextEdit logging  
+- ❌ Breaks nextEdit logging
 - ❌ Loses telemetry data
 - ❌ No usage tracking
 
 ### 2. Configuration Requirement
 
 **Current Architecture:**
+
 ```
 CompletionProvider.ts / NextEditProvider.ts
     ↓ requires
@@ -276,12 +287,14 @@ ControlPlaneClient, PolicySingleton, getControlPlaneEnv, AuthTypes
 ```
 
 **What ConfigHandler Uses:**
+
 - **ControlPlaneClient**: Authentication and remote config fetching
 - **PolicySingleton**: Policy enforcement
 - **getControlPlaneEnv**: Environment detection (hub vs local)
 - **AuthTypes**: Type definitions for auth flows
 
 **Impact of Removal:**
+
 - ❌ Breaks configuration loading
 - ❌ No authentication support
 - ❌ No policy enforcement
@@ -290,9 +303,10 @@ ControlPlaneClient, PolicySingleton, getControlPlaneEnv, AuthTypes
 ### 3. Scope of Control-Plane
 
 The `control-plane/` directory contains **65 files** across multiple subdirectories:
+
 - `analytics/` - 4 files
 - `auth/` - 1 file
-- `mdm/` - 2 files  
+- `mdm/` - 2 files
 - Root level - 6 files
 
 **Only 2 are unused** - the rest form an interconnected system.
@@ -317,12 +331,14 @@ The `control-plane/` directory contains **65 files** across multiple subdirector
 
 **Q: Could we remove CodeRenderer and use plain text?**
 **A:** No - poor user experience. Syntax highlighting is essential for:
+
 - Code readability
 - Distinguishing changes
 - Professional appearance
 
 **Q: Could we use a different highlighter?**
 **A:** Possible, but:
+
 - CodeRenderer already works
 - Uses shiki (industry standard)
 - Supports VS Code themes
@@ -335,6 +351,7 @@ The `control-plane/` directory contains **65 files** across multiple subdirector
 ### What Autocomplete Actually Uses
 
 From [`CompletionProvider.ts`](core/autocomplete/CompletionProvider.ts:43):
+
 ```typescript
 constructor(
   private readonly configHandler: ConfigHandler,
@@ -344,11 +361,13 @@ constructor(
 ```
 
 **ConfigHandler provides:**
+
 - LLM configuration (model, API keys, etc.)
 - Autocomplete options (temperature, max tokens, etc.)
 - Provider selection
 
 **Accessed via:**
+
 - `configHandler.llmProvider` - Get configured LLM
 - `configHandler.config` - Access full configuration
 - Event listeners for config changes
@@ -356,6 +375,7 @@ constructor(
 ### What NextEdit Actually Uses
 
 From [`NextEditProvider.ts`](core/nextEdit/NextEditProvider.ts:78):
+
 ```typescript
 private constructor(
   private readonly configHandler: ConfigHandler,
@@ -373,14 +393,14 @@ To eliminate ConfigHandler, we'd need to provide:
 interface MinimalConfig {
   // LLM Configuration
   getLLM(): Promise<ILLM>;
-  
-  // Autocomplete Settings  
+
+  // Autocomplete Settings
   autocompleteOptions: {
     temperature?: number;
     maxTokens?: number;
     // ... other options
   };
-  
+
   // Event System
   onConfigUpdate(callback: () => void): void;
 }
@@ -389,14 +409,16 @@ interface MinimalConfig {
 **Problem:** This is essentially recreating ConfigHandler without control-plane dependencies.
 
 **Current ConfigHandler imports from control-plane:**
+
 1. `ControlPlaneClient` - Remote config fetching
 2. `PolicySingleton` - Policy checks
 3. `getControlPlaneEnv` - Environment detection
 4. `AuthTypes` - Authentication flow types
 
 **To eliminate control-plane from ConfigHandler would require:**
+
 - Removing remote config support
-- Removing policy enforcement  
+- Removing policy enforcement
 - Hardcoding environment assumptions
 - Removing authentication
 
@@ -409,10 +431,12 @@ interface MinimalConfig {
 ### Can Remove Immediately ✅
 
 **Only 2 Files:**
+
 1. [`control-plane/auth/index.ts`](core/control-plane/auth/index.ts)
 2. [`control-plane/schema.ts`](core/control-plane/schema.ts)
 
 **Verification:**
+
 ```bash
 # Confirmed via Knip with test harness included
 grep "control-plane/auth/index.ts" knip-phase4.5-improved.txt
@@ -422,11 +446,13 @@ grep "control-plane/schema.ts" knip-phase4.5-improved.txt
 ### Cannot Remove ❌
 
 **control-plane/ (except 2 files above):**
+
 - **Reason:** Required by `posthog.ts` (TeamAnalytics) and `ConfigHandler`
 - **Used By:** Both autocomplete and nextEdit for logging and configuration
 - **Scope:** 63 of 65 files are actively used
 
 **codeRenderer/:**
+
 - **Reason:** Required by `vscode-test-harness` for visual diff rendering
 - **Used By:** NextEditWindowManager for syntax highlighting
 - **Scope:** Essential for user experience
@@ -436,11 +462,13 @@ grep "control-plane/schema.ts" knip-phase4.5-improved.txt
 **If we wanted to remove control-plane/ in the future:**
 
 1. **Replace Analytics:**
+
    - Create standalone Telemetry class
    - Remove TeamAnalytics dependency
    - Keep PostHog integration, remove control-plane integration
 
 2. **Simplify ConfigHandler:**
+
    - Remove remote config fetching (ControlPlaneClient)
    - Remove policy enforcement (PolicySingleton)
    - Remove environment detection (getControlPlaneEnv)
@@ -458,7 +486,7 @@ grep "control-plane/schema.ts" knip-phase4.5-improved.txt
 
 ### Root Cause of Phase 4 Failure
 
-**Knip was ignoring `core/vscode-test-harness/**`**, causing it to miss real dependencies.
+**Knip was ignoring `core/vscode-test-harness/**`\*\*, causing it to miss real dependencies.
 
 ### Why Dependencies Weren't Detected
 
@@ -467,12 +495,12 @@ grep "control-plane/schema.ts" knip-phase4.5-improved.txt
 
 ### Actual Dependency Status
 
-| Component | Phase 4 | Phase 4.5 | Reason |
-|-----------|---------|-----------|--------|
-| **control-plane/** | "Unused" ❌ | **REQUIRED** ✅ | Analytics + Config |
-| **codeRenderer/** | "Unused" ❌ | **REQUIRED** ✅ | Test harness rendering |
-| **control-plane/auth/index.ts** | - | Can Remove ✅ | Actually unused |
-| **control-plane/schema.ts** | - | Can Remove ✅ | Actually unused |
+| Component                       | Phase 4     | Phase 4.5       | Reason                 |
+| ------------------------------- | ----------- | --------------- | ---------------------- |
+| **control-plane/**              | "Unused" ❌ | **REQUIRED** ✅ | Analytics + Config     |
+| **codeRenderer/**               | "Unused" ❌ | **REQUIRED** ✅ | Test harness rendering |
+| **control-plane/auth/index.ts** | -           | Can Remove ✅   | Actually unused        |
+| **control-plane/schema.ts**     | -           | Can Remove ✅   | Actually unused        |
 
 ### Dependency Chains Discovered
 
@@ -503,12 +531,14 @@ codeRenderer/CodeRenderer
 ### Immediate Actions
 
 1. **Delete 2 unused control-plane files:**
+
    - `control-plane/auth/index.ts`
    - `control-plane/schema.ts`
 
 2. **Keep everything else:**
+
    - ✅ control-plane/ (63 files) - Required dependency
-   - ✅ codeRenderer/ - Required dependency  
+   - ✅ codeRenderer/ - Required dependency
    - ✅ config/ - Required dependency
 
 3. **Focus on config replacement instead:**
@@ -521,12 +551,14 @@ codeRenderer/CodeRenderer
 **Goal:** Create a minimal config interface that autocomplete/nextEdit can use without requiring full ConfigHandler.
 
 **Approach:**
+
 1. Define minimal interface needed by CompletionProvider/NextEditProvider
 2. Create lightweight implementation
 3. Remove dependency on ConfigHandler
 4. As a side effect, removes dependency on control-plane (except for analytics)
 
 **Priority Order:**
+
 1. ✅ Config replacement (unlocks everything)
 2. ✅ Analytics simplification (optional - could keep TeamAnalytics)
 3. ❌ Don't try to remove codeRenderer (essential for UX)
@@ -534,14 +566,16 @@ codeRenderer/CodeRenderer
 ### Why Config Replacement is Key
 
 **Current blocker:**
+
 - CompletionProvider needs ConfigHandler
 - NextEditProvider needs ConfigHandler
 - ConfigHandler needs control-plane/
 - Therefore autocomplete/nextEdit depends on control-plane/
 
 **After config replacement:**
+
 - CompletionProvider uses MinimalConfig interface
-- NextEditProvider uses MinimalConfig interface  
+- NextEditProvider uses MinimalConfig interface
 - MinimalConfig doesn't need control-plane/
 - Clean separation achieved ✅
 
@@ -568,17 +602,18 @@ codeRenderer/CodeRenderer
 
 ### What Changed from Phase 4
 
-| Aspect | Phase 4 | Phase 4.5 |
-|--------|---------|-----------|
-| **Knip config** | Ignored test harness | Includes test harness |
-| **control-plane/** | "Can remove" ❌ | "Must keep" ✅ |
-| **codeRenderer/** | "Can remove" ❌ | "Must keep" ✅ |
-| **Unused files** | ~50+ files | 30 files |
-| **Confidence** | Low | High ✅ |
+| Aspect             | Phase 4              | Phase 4.5             |
+| ------------------ | -------------------- | --------------------- |
+| **Knip config**    | Ignored test harness | Includes test harness |
+| **control-plane/** | "Can remove" ❌      | "Must keep" ✅        |
+| **codeRenderer/**  | "Can remove" ❌      | "Must keep" ✅        |
+| **Unused files**   | ~50+ files           | 30 files              |
+| **Confidence**     | Low                  | High ✅               |
 
 ### Next Steps
 
 **Focus on config replacement**, not removing control-plane or codeRenderer. They are legitimate dependencies serving real purposes:
+
 - **control-plane/**: Analytics and configuration management
 - **codeRenderer/**: User-facing syntax highlighting
 
@@ -615,6 +650,8 @@ The path forward is **replacing ConfigHandler** with a minimal alternative, whic
 **Result:** No imports from control-plane or codeRenderer found in tree-sitter/ directory.
 
 **Verification:**
+
 ```bash
 grep -r "control-plane\|codeRenderer" tree-sitter/
 # Result: (empty)
+```

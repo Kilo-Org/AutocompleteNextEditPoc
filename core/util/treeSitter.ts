@@ -142,12 +142,22 @@ export async function getParserForFile(filepath: string) {
 // to Language object
 const nameToLanguage = new Map<string, Language>();
 
+function getExtensionFromPathOrUri(input: string): string {
+  // Treat inputs with a scheme as URIs; otherwise as local filesystem paths
+  if (input.includes("://") || input.startsWith("file:")) {
+    return getUriFileExtension(input);
+  }
+  const base = path.basename(input);
+  const dot = base.lastIndexOf(".");
+  return dot >= 0 ? base.slice(dot + 1).toLowerCase() : "";
+}
+
 export async function getLanguageForFile(
-  filepath: string,
+  filepathOrUri: string,
 ): Promise<Language | undefined> {
   try {
     await Parser.init();
-    const extension = getUriFileExtension(filepath);
+    const extension = getExtensionFromPathOrUri(filepathOrUri);
 
     const languageName = supportedLanguages[extension];
     if (!languageName) {
@@ -161,34 +171,50 @@ export async function getLanguageForFile(
     }
     return language;
   } catch (e) {
-    console.debug("Unable to load language for file", filepath, e);
+    console.debug("Unable to load language for file", filepathOrUri, e);
     return undefined;
   }
 }
 
-export const getFullLanguageName = (filepath: string) => {
-  const extension = getUriFileExtension(filepath);
+export const getFullLanguageName = (filepathOrUri: string) => {
+  const extension = getExtensionFromPathOrUri(filepathOrUri);
   return supportedLanguages[extension];
 };
 
 export async function getQueryForFile(
-  filepath: string,
+  filepathOrUri: string,
   queryPath: string,
 ): Promise<Parser.Query | undefined> {
-  const language = await getLanguageForFile(filepath);
+  const language = await getLanguageForFile(filepathOrUri);
   if (!language) {
     return undefined;
   }
 
-  const sourcePath = path.join(
-    process.env.NODE_ENV === "test" ? process.cwd() : __dirname,
-    "..",
-    "tree-sitter",
-    queryPath,
-  );
-  if (!fs.existsSync(sourcePath)) {
+  // Resolve the query file from consolidated tree-sitter directory.
+  // Prefer repo-root/tree-sitter in tests and runtime, but also fall back to core-local layout.
+  const baseRoots = [
+    // Ensure we can resolve from the repo root first (…/continue)
+    path.resolve(__dirname, "..", "..", ".."),
+    // When tests run with cwd=core, still check there for backwards-compat
+    process.env.NODE_ENV === "test" ? process.cwd() : undefined, // e.g. .../continue/core (tests run from core/)
+    // Core directory (…/continue/core)
+    path.resolve(__dirname, "..", ".."),
+    // Legacy fallback: …/continue/core/util -> core
+    path.resolve(__dirname, ".."),
+  ].filter(Boolean) as string[];
+
+  let sourcePath: string | undefined = undefined;
+  for (const root of baseRoots) {
+    const candidate = path.join(root, "tree-sitter", queryPath);
+    if (fs.existsSync(candidate)) {
+      sourcePath = candidate;
+      break;
+    }
+  }
+  if (!sourcePath) {
     return undefined;
   }
+
   const querySource = fs.readFileSync(sourcePath).toString();
 
   const query = language.query(querySource);
@@ -198,14 +224,45 @@ export async function getQueryForFile(
 async function loadLanguageForFileExt(
   fileExtension: string,
 ): Promise<Language> {
-  const wasmPath = path.join(
-    process.env.NODE_ENV === "test" ? process.cwd() : __dirname,
-    ...(process.env.NODE_ENV === "test"
-      ? ["node_modules", "tree-sitter-wasms", "out"]
-      : ["tree-sitter-wasms"]),
-    `tree-sitter-${supportedLanguages[fileExtension]}.wasm`,
+  const filename = `tree-sitter-${supportedLanguages[fileExtension]}.wasm`;
+
+  // Try multiple locations to support both hoisted (root node_modules) and local installs.
+  const candidateRoots = [
+    // Prefer repo root first so hoisted node_modules are found (…/continue)
+    path.resolve(__dirname, "..", "..", ".."),
+    // Then current working directory when running tests (often …/continue/core)
+    process.env.NODE_ENV === "test" ? process.cwd() : undefined,
+    // Compiled dir for runtime usage
+    __dirname,
+    // Core directory (…/continue/core)
+    path.resolve(__dirname, "..", ".."),
+  ].filter(Boolean) as string[];
+
+  const candidatePaths: string[] = [];
+  for (const root of candidateRoots) {
+    // Typical hoisted location in monorepo tests
+    candidatePaths.push(
+      path.join(root, "node_modules", "tree-sitter-wasms", "out", filename),
+    );
+    // Legacy/local bundled layout
+    candidatePaths.push(path.join(root, "tree-sitter-wasms", filename));
+  }
+
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p)) {
+      return await Parser.Language.load(p);
+    }
+  }
+
+  // Fallback (will throw with a clear path in error if still missing)
+  const fallback = path.join(
+    candidateRoots[0]!,
+    "node_modules",
+    "tree-sitter-wasms",
+    "out",
+    filename,
   );
-  return await Parser.Language.load(wasmPath);
+  return await Parser.Language.load(fallback);
 }
 
 // See https://tree-sitter.github.io/tree-sitter/using-parsers

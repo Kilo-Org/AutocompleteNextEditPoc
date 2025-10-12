@@ -1,11 +1,13 @@
-import { FromWebviewProtocol, ToWebviewProtocol } from "core/protocol";
-import { Message } from "core/protocol/messenger";
+import {
+  FromWebviewProtocol,
+  ToWebviewProtocol,
+  Message,
+  IMessenger,
+} from "core";
 import { extractMinimalStackTraceInfo } from "core/util/extractMinimalStackTraceInfo";
 import { Telemetry } from "core/util/posthog";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
-
-import { IMessenger } from "../../../core/protocol/messenger";
 
 import { handleLLMError } from "./util/errorHandling";
 
@@ -186,7 +188,7 @@ export class VsCodeWebviewProtocol
         }
       }
 
-      this.send(messageType, data, messageId);
+      this.send(String(messageType), data, messageId);
 
       if (this.webview) {
         const disposable = this.webview.onDidReceiveMessage(

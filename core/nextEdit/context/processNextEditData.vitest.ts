@@ -39,7 +39,11 @@ import { getAutocompleteContext } from "./autocompleteContextFetching";
 import { NextEditProvider } from "../NextEditProvider";
 import { DataLogger } from "../../util/log";
 import { createDiff } from "./diffFormatting";
-import { getPrevEditsDescending, setPrevEdit, prevEditLruCache } from "./prevEditLruCache";
+import {
+  getPrevEditsDescending,
+  setPrevEdit,
+  prevEditLruCache,
+} from "./prevEditLruCache";
 
 describe("processNextEditData", () => {
   let mockIde: any;
@@ -84,10 +88,14 @@ describe("processNextEditData", () => {
     (DataLogger.getInstance as any).mockReturnValue(mockDataLogger);
 
     // Setup mock getAutocompleteContext
-    (getAutocompleteContext as any).mockResolvedValue("test autocomplete context");
+    (getAutocompleteContext as any).mockResolvedValue(
+      "test autocomplete context",
+    );
 
     // Setup mock createDiff
-    (createDiff as any).mockReturnValue("--- test.ts\n+++ test.ts\n@@ -1,1 +1,1 @@\n-old\n+new");
+    (createDiff as any).mockReturnValue(
+      "--- test.ts\n+++ test.ts\n@@ -1,1 +1,1 @@\n-old\n+new",
+    );
 
     // Setup mock prevEditLruCache functions
     (getPrevEditsDescending as any).mockReturnValue([]);
@@ -316,8 +324,7 @@ describe("processNextEditData", () => {
 
       await processNextEditData(baseParams);
 
-      const maxPromptTokens =
-        (getAutocompleteContext as any).mock.calls[0][7];
+      const maxPromptTokens = (getAutocompleteContext as any).mock.calls[0][7];
 
       expect(maxPromptTokens).toBeGreaterThanOrEqual(500);
       expect(maxPromptTokens).toBeLessThanOrEqual(12000);

@@ -15,11 +15,24 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "noEmitOnError": false,
-    "types": ["jest", "node"],
+    "types": ["node"],
     "outDir": "dist",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "composite": true,
+    "incremental": true
   },
   "include": ["./**/*.ts", "**/*.js", "./**/*.d.ts"],
-  "exclude": ["test", "dist"]
+  "exclude": [
+    "dist",
+    "vscode-test-harness/**",
+    "test",
+    "**/test/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.vitest.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+    "autocomplete/context/root-path-context/testUtils.ts"
+  ]
 }
