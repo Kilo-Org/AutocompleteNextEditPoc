@@ -333,7 +333,6 @@ export class ContinueCompletionProvider
       let chainExists = this.nextEditProvider.chainExists();
       const processedCount = this.prefetchQueue.processedCount;
       const unprocessedCount = this.prefetchQueue.unprocessedCount;
-      console.debug("isJumping:", isJumping, "/ chainExists:", chainExists);
       this.prefetchQueue.peekThreeProcessed();
 
       let resetChainInFullFileDiff = false;
@@ -351,8 +350,6 @@ export class ContinueCompletionProvider
 
       if (isJumping && chainExists) {
         // Case 2: Jumping (chain exists, jump was taken)
-        console.debug("trigger reason: jumping");
-
         // Reset jump state.
         this.jumpManager.setJumpInProgress(false);
 
@@ -380,8 +377,6 @@ export class ContinueCompletionProvider
         }
       } else if (chainExists) {
         // Case 3: Accepting next edit outcome (chain exists, jump is not taken).
-        console.debug("trigger reason: accepting");
-
         // Try suggesting jump for each location.
         let isJumpSuggested = false;
 

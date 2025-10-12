@@ -192,13 +192,11 @@ export class JumpManager {
     // identical to the completion content,
     // then we don't have to jump.
     if (completionContent !== undefined) {
-      console.debug("completionContent is not null");
       const editor = vscode.window.activeTextEditor;
 
       if (editor) {
         try {
           const completionLines = completionContent.split("\n");
-          console.debug("completionLines:", completionLines);
 
           // Get document content at jump location spanning multiple lines.
           const document = editor.document;
@@ -212,9 +210,6 @@ export class JumpManager {
           if (endLine - startLine + 1 < completionLines.length) {
             // Not enough lines in document, so content can't be identical.
             // Proceed to jump!
-            console.debug(
-              "Not enough lines in document to match completion content",
-            );
           } else {
             let contentMatches = true;
 
@@ -224,14 +219,10 @@ export class JumpManager {
               const lineText = document.lineAt(documentLine).text;
               if (lineText !== completionLines[i]) {
                 contentMatches = false;
-                console.debug(`Line ${i + 1} doesn't match`);
               }
             }
 
             if (contentMatches) {
-              console.debug(
-                "Skipping jump as content is identical at jump location",
-              );
               return false; // Exit early, don't suggest jump.
             }
           }
@@ -242,20 +233,17 @@ export class JumpManager {
       }
     }
 
-    console.debug("this._jumpInProgress");
     this._jumpInProgress = true;
     this._oldCursorPosition = currentPosition;
 
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
-      console.debug("No active editor, cannot suggest jump");
       this._jumpInProgress = false;
       return false;
     }
 
     const visibleRanges = editor.visibleRanges;
     if (visibleRanges.length === 0) {
-      console.debug("No visible ranges in editor, cannot suggest jump");
       this._jumpInProgress = false;
       return false;
     }
@@ -375,9 +363,6 @@ export class JumpManager {
       "continue.rejectJump",
       async () => {
         if (this._jumpDecorationVisible) {
-          console.debug(
-            "deleteChain from JumpManager.ts: rejectJump and decoration visible",
-          );
           NextEditProvider.getInstance().deleteChain();
           await this.clearJumpDecoration();
         }
