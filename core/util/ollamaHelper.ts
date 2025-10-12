@@ -19,7 +19,7 @@ export async function isOllamaInstalled(): Promise<boolean> {
   });
 }
 
-export async function startLocalOllama(ide: IDE): Promise<any> {
+async function startLocalOllama(ide: IDE): Promise<any> {
   let startCommand: string | undefined;
 
   switch (process.platform) {
@@ -51,7 +51,7 @@ export async function startLocalOllama(ide: IDE): Promise<any> {
   }
 }
 
-export async function getRemoteModelInfo(
+async function getRemoteModelInfo(
   modelId: string,
   signal?: AbortSignal,
 ): Promise<ModelInfo | undefined> {

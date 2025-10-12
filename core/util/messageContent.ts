@@ -31,11 +31,11 @@ export function renderChatMessage(message: ChatMessage): string {
   }
 }
 
-export function renderContextItems(contextItems: ContextItem[]): string {
+function renderContextItems(contextItems: ContextItem[]): string {
   return contextItems.map((item) => item.content).join("\n\n");
 }
 
-export function renderContextItemsWithStatus(contextItems: any[]): string {
+function renderContextItemsWithStatus(contextItems: any[]): string {
   return contextItems
     .map((item) => {
       let result = item.content;
@@ -50,7 +50,7 @@ export function renderContextItemsWithStatus(contextItems: any[]): string {
     .join("\n\n");
 }
 
-export function normalizeToMessageParts(message: ChatMessage): MessagePart[] {
+function normalizeToMessageParts(message: ChatMessage): MessagePart[] {
   switch (message.role) {
     case "user":
     case "assistant":
