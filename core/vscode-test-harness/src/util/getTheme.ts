@@ -159,7 +159,6 @@ export function getTheme() {
     }
 
     if (!currentTheme) {
-      console.warn(`did not find any theme files for theme ${colorTheme}`);
       return undefined;
     }
 
