@@ -164,13 +164,6 @@ export class NextEditWindowManager {
 
   private constructor() {
     this.theme = getThemeString();
-
-    console.debug(
-      "Next Edit Theme initialized:",
-      this.theme
-        ? `Theme exists: ${JSON.stringify(this.theme)}`
-        : "Theme is undefined",
-    );
     this.setupListeners();
     this.codeRenderer = CodeRenderer.getInstance();
 
@@ -269,9 +262,6 @@ export class NextEditWindowManager {
 
     // Register HIDE_TOOLTIP_COMMAND and ACCEPT_NEXT_EDIT_COMMAND with their corresponding callbacks.
     this.registerCommandSafely(HIDE_NEXT_EDIT_SUGGESTION_COMMAND, async () => {
-      console.debug(
-        "deleteChain from NextEditWindowManager.ts: hide next edit command",
-      );
       NextEditProvider.getInstance().deleteChain();
       await this.hideAllNextEditWindowsAndResetCompletionId();
     });
@@ -616,10 +606,6 @@ export class NextEditWindowManager {
       ) {
         this.theme = getThemeString();
         await this.codeRenderer.setTheme(this.theme);
-        console.debug(
-          "Theme updated:",
-          this.theme ? "Theme exists" : "Theme is undefined",
-        );
         const editorConfig = vscode.workspace.getConfiguration("editor");
         this.fontSize = editorConfig.get<number>("fontSize") ?? 14;
         this.fontFamily = editorConfig.get<string>("fontFamily") ?? "monospace";
