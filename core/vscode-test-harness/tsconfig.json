@@ -14,6 +14,5 @@
       "core/*": ["../*"]
     }
   },
-  "references": [{ "path": "../tsconfig.npm.json" }],
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
