@@ -22,7 +22,7 @@ The repository now uses a single root tsconfig for development and tests:
 - Root: [tsconfig.json](tsconfig.json) — single configuration for all code
   - Global types: ["vitest/globals", "node"]; VS Code types are imported explicitly in harness files
   - noEmit: true; composite/incremental disabled
-  - baseUrl/paths: maps "core" and "core/*" to allow harness imports
+  - baseUrl/paths: maps "core" and "core/\*" to allow harness imports
 - Removed:
   - [core/tsconfig.json](core/tsconfig.json)
   - [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json)
@@ -53,6 +53,7 @@ The repository now uses a single root tsconfig for development and tests:
 ## Verification
 
 The flat structure is validated end-to-end:
+
 - TypeScript compilation: `npm run typecheck` succeeds.
 - Tests: `npm test` — 707 tests passing (621 core + 86 harness).
 - Editor support: single-project configuration with explicit VS Code imports in the harness.
