@@ -1,5 +1,5 @@
 import { RequestOptions } from "../../index.js";
-import { fetchwithRequestOptions, patchedFetch } from "../../fetch";
+import { fetchwithRequestOptions } from "../../fetch";
 import {
   ChatCompletionChunk,
   CompletionUsage,
@@ -154,9 +154,9 @@ function model(options: { id: string; owned_by?: string }): Model {
 
 export function customFetch(
   requestOptions: RequestOptions | undefined,
-): typeof patchedFetch {
+): typeof fetch {
   if (process.env.FEATURE_FLAG_DISABLE_CUSTOM_FETCH) {
-    return patchedFetch;
+    return fetch;
   }
   return (req: URL | string | Request, init?: any) => {
     if (typeof req === "string" || req instanceof URL) {

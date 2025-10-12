@@ -220,7 +220,7 @@ export class NextEditLoggingService {
     if (outcome.requestId && outcome.accepted !== undefined) {
       void this.logAcceptReject(outcome.requestId, outcome.accepted);
     }
-    void Telemetry.capture("nextEditOutcome", outcome, true);
+    void Telemetry.capture("nextEditOutcome", outcome as unknown as Record<string, unknown>, true);
   }
 
   private async logAcceptReject(
