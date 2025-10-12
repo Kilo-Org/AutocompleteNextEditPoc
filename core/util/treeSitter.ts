@@ -142,12 +142,22 @@ export async function getParserForFile(filepath: string) {
 // to Language object
 const nameToLanguage = new Map<string, Language>();
 
+function getExtensionFromPathOrUri(input: string): string {
+  // Treat inputs with a scheme as URIs; otherwise as local filesystem paths
+  if (input.includes("://") || input.startsWith("file:")) {
+    return getUriFileExtension(input);
+  }
+  const base = path.basename(input);
+  const dot = base.lastIndexOf(".");
+  return dot >= 0 ? base.slice(dot + 1).toLowerCase() : "";
+}
+
 export async function getLanguageForFile(
-  filepath: string,
+  filepathOrUri: string,
 ): Promise<Language | undefined> {
   try {
     await Parser.init();
-    const extension = getUriFileExtension(filepath);
+    const extension = getExtensionFromPathOrUri(filepathOrUri);
 
     const languageName = supportedLanguages[extension];
     if (!languageName) {
@@ -161,21 +171,21 @@ export async function getLanguageForFile(
     }
     return language;
   } catch (e) {
-    console.debug("Unable to load language for file", filepath, e);
+    console.debug("Unable to load language for file", filepathOrUri, e);
     return undefined;
   }
 }
 
-export const getFullLanguageName = (filepath: string) => {
-  const extension = getUriFileExtension(filepath);
+export const getFullLanguageName = (filepathOrUri: string) => {
+  const extension = getExtensionFromPathOrUri(filepathOrUri);
   return supportedLanguages[extension];
 };
 
 export async function getQueryForFile(
-  filepath: string,
+  filepathOrUri: string,
   queryPath: string,
 ): Promise<Parser.Query | undefined> {
-  const language = await getLanguageForFile(filepath);
+  const language = await getLanguageForFile(filepathOrUri);
   if (!language) {
     return undefined;
   }
@@ -183,9 +193,14 @@ export async function getQueryForFile(
   // Resolve the query file from consolidated tree-sitter directory.
   // Prefer repo-root/tree-sitter in tests and runtime, but also fall back to core-local layout.
   const baseRoots = [
+    // Ensure we can resolve from the repo root first (…/continue)
+    path.resolve(__dirname, "..", "..", ".."),
+    // When tests run with cwd=core, still check there for backwards-compat
     process.env.NODE_ENV === "test" ? process.cwd() : undefined, // e.g. .../continue/core (tests run from core/)
-    path.resolve(__dirname, "..", ".."), // repo root when __dirname is .../core/util
-    path.resolve(__dirname, ".."), // legacy fallback: .../core
+    // Core directory (…/continue/core)
+    path.resolve(__dirname, "..", ".."),
+    // Legacy fallback: …/continue/core/util -> core
+    path.resolve(__dirname, ".."),
   ].filter(Boolean) as string[];
 
   let sourcePath: string | undefined = undefined;
@@ -213,9 +228,14 @@ async function loadLanguageForFileExt(
 
   // Try multiple locations to support both hoisted (root node_modules) and local installs.
   const candidateRoots = [
-    process.env.NODE_ENV === "test" ? process.cwd() : undefined, // e.g., /.../continue/core when running tests
-    __dirname, // compiled dir for runtime usage
-    path.resolve(__dirname, "..", ".."), // repo root when __dirname is .../core/util
+    // Prefer repo root first so hoisted node_modules are found (…/continue)
+    path.resolve(__dirname, "..", "..", ".."),
+    // Then current working directory when running tests (often …/continue/core)
+    process.env.NODE_ENV === "test" ? process.cwd() : undefined,
+    // Compiled dir for runtime usage
+    __dirname,
+    // Core directory (…/continue/core)
+    path.resolve(__dirname, "..", ".."),
   ].filter(Boolean) as string[];
 
   const candidatePaths: string[] = [];

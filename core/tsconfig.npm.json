@@ -25,6 +25,7 @@
   "include": ["./**/*.ts", "**/*.js", "./**/*.d.ts"],
   "exclude": [
     "dist",
+    "vscode-test-harness/**",
     "test",
     "**/test/**",
     "**/*.test.ts",

@@ -30,5 +30,5 @@
     "sourceRoot": "/"
   },
   "include": ["./**/*.ts", "./**/*.js", "./**/*.d.ts"],
-  "exclude": ["dist"]
+  "exclude": ["dist", "vscode-test-harness/**"]
 }
