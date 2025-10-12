@@ -6,6 +6,11 @@ const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   root: rootDir,
+  resolve: {
+    alias: {
+      core: path.resolve(rootDir),
+    },
+  },
   test: {
     testTransformMode: {
       web: ["/.[jt]s?$/"],
@@ -15,6 +20,6 @@ export default defineConfig({
     setupFiles: path.resolve(rootDir, "test/vitest.setup.ts"),
     fileParallelism: false,
     include: ["**/*.vitest.ts"],
-    exclude: ["**/node_modules/**", "**/vscode-test-harness/**"],
+    exclude: ["**/node_modules/**"],
   },
 });
