@@ -13,13 +13,7 @@ import {
 } from "openai/resources/index";
 import { z } from "zod";
 import { OpenAIConfigSchema } from "../types.js";
-import { customFetch } from "../util.js";
-import {
-  BaseLlmApi,
-  CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
-} from "./base.js";
+import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
 
 export class OpenAIApi implements BaseLlmApi {
   openai: OpenAI;
@@ -31,7 +25,6 @@ export class OpenAIApi implements BaseLlmApi {
       // Necessary because `new OpenAI()` will throw an error if there is no API Key
       apiKey: config.apiKey ?? "",
       baseURL: this.apiBase,
-      fetch: customFetch(config.requestOptions),
     });
   }
   modifyChatBody<T extends ChatCompletionCreateParams>(body: T): T {
@@ -63,17 +56,11 @@ export class OpenAIApi implements BaseLlmApi {
     return body;
   }
 
-  modifyCompletionBody<
-    T extends
-      | CompletionCreateParamsNonStreaming
-      | CompletionCreateParamsStreaming,
-  >(body: T): T {
+  modifyCompletionBody<T extends CompletionCreateParamsNonStreaming | CompletionCreateParamsStreaming>(body: T): T {
     return body;
   }
 
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
-    body: T,
-  ): T {
+  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(body: T): T {
     return body;
   }
 
@@ -96,60 +83,45 @@ export class OpenAIApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<ChatCompletion> {
-    const response = await this.openai.chat.completions.create(
-      this.modifyChatBody(body),
-      {
-        signal,
-      },
-    );
+    const response = await this.openai.chat.completions.create(this.modifyChatBody(body), {
+      signal,
+    });
     return response;
   }
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
-    const response = await this.openai.chat.completions.create(
-      this.modifyChatBody(body),
-      {
-        signal,
-      },
-    );
+    const response = await this.openai.chat.completions.create(this.modifyChatBody(body), {
+      signal,
+    });
     for await (const result of response) {
       yield result;
     }
   }
-  async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
-    const response = await this.openai.completions.create(
-      this.modifyCompletionBody(body),
-      { signal },
-    );
+  async completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
+    const response = await this.openai.completions.create(this.modifyCompletionBody(body), { signal });
     return response;
   }
   async *completionStream(
     body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<Completion, any, unknown> {
-    const response = await this.openai.completions.create(
-      this.modifyCompletionBody(body),
-      { signal },
-    );
+    const response = await this.openai.completions.create(this.modifyCompletionBody(body), { signal });
     for await (const result of response) {
       yield result;
     }
   }
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL("fim/completions", this.apiBase);
     const modifiedBody = this.modifyFimBody(body);
-    const resp = await customFetch(this.config.requestOptions)(endpoint, {
+    const resp = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify({
         model: modifiedBody.model,
@@ -174,19 +146,15 @@ export class OpenAIApi implements BaseLlmApi {
     }
   }
 
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    const response = await this.openai.embeddings.create(
-      this.modifyEmbedBody(body),
-    );
+  async embed(body: OpenAI.Embeddings.EmbeddingCreateParams): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+    const response = await this.openai.embeddings.create(this.modifyEmbedBody(body));
     return response;
   }
 
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
     const endpoint = new URL("rerank", this.apiBase);
     const modifiedBody = this.modifyRerankBody(body);
-    const response = await customFetch(this.config.requestOptions)(endpoint, {
+    const response = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify(modifiedBody),
       headers: this.getHeaders(),

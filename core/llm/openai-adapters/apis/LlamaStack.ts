@@ -1,7 +1,7 @@
 import { streamSse } from "../../../fetch";
 import { ChatCompletionChunk } from "openai/resources/index";
 import { LlamastackConfig } from "../types.js";
-import { chatChunk, customFetch } from "../util.js";
+import { chatChunk } from "../util.js";
 import { OpenAIApi } from "./OpenAI.js";
 import { FimCreateParamsStreaming } from "./base.js";
 
@@ -18,10 +18,10 @@ export class LlamastackApi extends OpenAIApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL("completions", this.apiBase);
-    const resp = await customFetch(this.config.requestOptions)(endpoint, {
+    const resp = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify({
         model: body.model,

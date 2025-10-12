@@ -1,19 +1,39 @@
-export async function* toAsyncIterable(
-  nodeReadable: NodeJS.ReadableStream,
-): AsyncGenerator<Uint8Array> {
-  for await (const chunk of nodeReadable) {
-    // @ts-ignore
-    yield chunk as Uint8Array;
+/**
+ * Parses a single line from an SSE (Server-Sent Events) stream.
+ */
+function parseSseLine(line: string): { done: boolean; data: unknown } {
+  if (line.startsWith("data:[DONE]") || line.startsWith("data: [DONE]")) {
+    return { done: true, data: undefined };
   }
+  if (line.startsWith("data:")) {
+    const jsonStr = line.slice(5).trim();
+    try {
+      return { done: false, data: JSON.parse(jsonStr) };
+    } catch {
+      return { done: false, data: undefined };
+    }
+  }
+  if (line.startsWith(": ping")) {
+    return { done: true, data: undefined };
+  }
+  return { done: false, data: undefined };
 }
 
+/**
+ * Streams a Response body as UTF-8 text chunks.
+ *
+ * Modern implementation using native ReadableStream and TextDecoderStream APIs.
+ * Requires Node.js 18+ or modern browsers.
+ */
 export async function* streamResponse(
   response: Response,
 ): AsyncGenerator<string> {
+  // Handle client-side cancellation
   if (response.status === 499) {
-    return; // In case of client-side cancellation, just return
+    return;
   }
 
+  // Check for error responses
   if (response.status !== 200) {
     throw new Error(await response.text());
   }
@@ -22,41 +42,32 @@ export async function* streamResponse(
     throw new Error("No response body returned.");
   }
 
-  // Get the major version of Node.js
-  const nodeMajorVersion = parseInt(process.versions.node.split(".")[0], 10);
   let chunks = 0;
 
   try {
-    if (nodeMajorVersion >= 20) {
-      // Use the new API for Node 20 and above
-      const stream = (ReadableStream as any).from(response.body);
-      for await (const chunk of stream.pipeThrough(
-        new TextDecoderStream("utf-8"),
-      )) {
-        yield chunk;
+    // Modern API: Use TextDecoderStream to decode the response body
+    const textStream = response.body.pipeThrough(new TextDecoderStream("utf-8"));
+    const reader = textStream.getReader();
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        yield value;
         chunks++;
       }
-    } else {
-      // Fallback for Node versions below 20
-      // Streaming with this method doesn't work as version 20+ does
-      const decoder = new TextDecoder("utf-8");
-      const nodeStream = response.body as unknown as NodeJS.ReadableStream;
-      for await (const chunk of toAsyncIterable(nodeStream)) {
-        yield decoder.decode(chunk, { stream: true });
-        chunks++;
-      }
+    } finally {
+      reader.releaseLock();
     }
   } catch (e) {
     if (e instanceof Error) {
+      // Handle graceful cancellation
       if (e.name.startsWith("AbortError")) {
-        return; // In case of client-side cancellation, just return
+        return;
       }
+
+      // Handle premature close errors
       if (e.message.toLowerCase().includes("premature close")) {
-        // Premature close can happen for various reasons, including:
-        // - Malformed chunks of data received from the server
-        // - The server closed the connection before sending the complete response
-        // - Long delays from the server during streaming
-        // - 'Keep alive' header being used in combination with an http agent and a set, low number of maxSockets
         if (chunks === 0) {
           throw new Error(
             "Stream was closed before any data was received. Try again. (Premature Close)",
@@ -71,58 +82,13 @@ export async function* streamResponse(
     throw e;
   }
 }
-
-// Export for testing purposes
-function parseDataLine(line: string): unknown {
-  const json = line.startsWith("data: ")
-    ? line.slice("data: ".length)
-    : line.slice("data:".length);
-
-  try {
-    const data = JSON.parse(json);
-    if (data.error) {
-      if (
-        data.error &&
-        typeof data.error === "object" &&
-        "message" in data.error
-      ) {
-        console.error("Error in streamed response:", data.error);
-        throw new Error(`Error streaming response: ${data.error.message}`);
-      }
-      throw new Error(
-        `Error streaming response: ${JSON.stringify(data.error)}`,
-      );
-    }
-
-    return data;
-  } catch (e) {
-    // If the error was thrown by our error check, rethrow it
-    if (
-      e instanceof Error &&
-      e.message.startsWith("Error streaming response:")
-    ) {
-      throw e;
-    }
-    // Otherwise it's a JSON parsing error
-    throw new Error(`Malformed JSON sent from server: ${json}`);
-  }
-}
-
-function parseSseLine(line: string): { done: boolean; data: unknown } {
-  if (line.startsWith("data:[DONE]") || line.startsWith("data: [DONE]")) {
-    return { done: true, data: undefined };
-  }
-  if (line.startsWith("data:")) {
-    return { done: false, data: parseDataLine(line) };
-  }
-  if (line.startsWith(": ping")) {
-    return { done: true, data: undefined };
-  }
-  return { done: false, data: undefined };
-}
-
+/**
+ * Streams Server-Sent Events (SSE) from a Response.
+ * Parses SSE format and yields parsed data objects.
+ */
 export async function* streamSse(response: Response): AsyncGenerator<any> {
   let buffer = "";
+  
   for await (const value of streamResponse(response)) {
     buffer += value;
 
@@ -141,6 +107,7 @@ export async function* streamSse(response: Response): AsyncGenerator<any> {
     }
   }
 
+  // Process any remaining buffered content
   if (buffer.length > 0) {
     const { done, data } = parseSseLine(buffer);
     if (!done && data) {
@@ -149,21 +116,29 @@ export async function* streamSse(response: Response): AsyncGenerator<any> {
   }
 }
 
+/**
+ * Streams newline-delimited JSON from a Response.
+ * Each line should be a complete JSON object.
+ */
 export async function* streamJSON(response: Response): AsyncGenerator<any> {
   let buffer = "";
+  
   for await (const value of streamResponse(response)) {
     buffer += value;
 
-    let position;
+    let position: number;
     while ((position = buffer.indexOf("\n")) >= 0) {
       const line = buffer.slice(0, position);
-      try {
-        const data = JSON.parse(line);
-        yield data;
-      } catch (e) {
-        throw new Error(`Malformed JSON sent from server: ${line}`);
-      }
       buffer = buffer.slice(position + 1);
+      
+      if (line.trim()) {
+        try {
+          const data = JSON.parse(line);
+          yield data;
+        } catch (e) {
+          throw new Error(`Malformed JSON sent from server: ${line}`);
+        }
+      }
     }
   }
 }

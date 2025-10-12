@@ -6,7 +6,6 @@ import {
 } from "openai/resources/index";
 import { z } from "zod";
 import { AzureConfigSchema } from "../types.js";
-import { customFetch } from "../util.js";
 import { OpenAIApi } from "./OpenAI.js";
 
 export class AzureApi extends OpenAIApi {
@@ -21,7 +20,6 @@ export class AzureApi extends OpenAIApi {
     this.openai = new OpenAI({
       apiKey: azureConfig.apiKey,
       baseURL,
-      fetch: customFetch(azureConfig.requestOptions),
       defaultQuery,
     });
   }

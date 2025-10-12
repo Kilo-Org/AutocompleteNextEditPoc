@@ -26,30 +26,17 @@ import {
 } from "openai/resources/index";
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
 import { AnthropicConfig } from "../types.js";
-import {
-  chatChunk,
-  chatChunkFromDelta,
-  customFetch,
-  usageChatChunk,
-} from "../util.js";
+import { chatChunk, chatChunkFromDelta, usageChatChunk } from "../util.js";
 import { EMPTY_CHAT_COMPLETION } from "../util/emptyChatCompletion.js";
 import { safeParseArgs } from "../util/parseArgs.js";
-import {
-  CACHING_STRATEGIES,
-  CachingStrategyName,
-} from "./AnthropicCachingStrategies.js";
+import { CACHING_STRATEGIES, CachingStrategyName } from "./AnthropicCachingStrategies.js";
 import {
   getAnthropicHeaders,
   getAnthropicMediaTypeFromDataUrl,
   openAiToolChoiceToAnthropicToolChoice,
   openaiToolToAnthropicTool,
 } from "./AnthropicUtils.js";
-import {
-  BaseLlmApi,
-  CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
-} from "./base.js";
+import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
 
 export class AnthropicApi implements BaseLlmApi {
   apiBase: string = "https://api.anthropic.com/v1/";
@@ -57,7 +44,7 @@ export class AnthropicApi implements BaseLlmApi {
   constructor(
     protected config: AnthropicConfig & {
       cachingStrategy?: CachingStrategyName;
-    },
+    }
   ) {
     this.apiBase = config.apiBase ?? this.apiBase;
     if (!this.apiBase.endsWith("/")) {
@@ -70,8 +57,7 @@ export class AnthropicApi implements BaseLlmApi {
     const cleanBody = this._convertToCleanAnthropicBody(oaiBody);
 
     // Step 2: Apply caching strategy
-    const cachingStrategy =
-      CACHING_STRATEGIES[this.config.cachingStrategy ?? "systemAndTools"];
+    const cachingStrategy = CACHING_STRATEGIES[this.config.cachingStrategy ?? "systemAndTools"];
     return cachingStrategy(cleanBody);
   }
 
@@ -82,9 +68,7 @@ export class AnthropicApi implements BaseLlmApi {
     return 32_000;
   }
 
-  public _convertToCleanAnthropicBody(
-    oaiBody: ChatCompletionCreateParams,
-  ): MessageCreateParams {
+  public _convertToCleanAnthropicBody(oaiBody: ChatCompletionCreateParams): MessageCreateParams {
     let stop = undefined;
     if (oaiBody.stop && Array.isArray(oaiBody.stop)) {
       stop = oaiBody.stop.filter((x) => x.trim() !== "");
@@ -92,31 +76,16 @@ export class AnthropicApi implements BaseLlmApi {
       stop = [oaiBody.stop];
     }
 
-    const systemMessage = oaiBody.messages.find(
-      (msg) => msg.role === "system",
-    )?.content;
+    const systemMessage = oaiBody.messages.find((msg) => msg.role === "system")?.content;
 
     // TODO support custom tools
     const functionTools = oaiBody.tools?.filter((t) => t.type === "function");
     let tools: Tool[] | undefined = undefined;
 
-    if (
-      oaiBody.tool_choice !== "none" &&
-      functionTools &&
-      functionTools.length > 0
-    ) {
-      if (
-        typeof oaiBody.tool_choice !== "string" &&
-        oaiBody.tool_choice?.type === "allowed_tools"
-      ) {
-        const allowedToolNames = new Set(
-          oaiBody.tool_choice?.allowed_tools.tools.map(
-            (tool) => tool["name"],
-          ) ?? [],
-        );
-        const allowedTools = functionTools.filter((t) =>
-          allowedToolNames.has(t.function.name),
-        );
+    if (oaiBody.tool_choice !== "none" && functionTools && functionTools.length > 0) {
+      if (typeof oaiBody.tool_choice !== "string" && oaiBody.tool_choice?.type === "allowed_tools") {
+        const allowedToolNames = new Set(oaiBody.tool_choice?.allowed_tools.tools.map((tool) => tool["name"]) ?? []);
+        const allowedTools = functionTools.filter((t) => allowedToolNames.has(t.function.name));
         tools = allowedTools.map(openaiToolToAnthropicTool);
       } else {
         tools = functionTools.map(openaiToolToAnthropicTool);
@@ -124,9 +93,7 @@ export class AnthropicApi implements BaseLlmApi {
     }
 
     const anthropicBody: MessageCreateParams = {
-      messages: this._convertMessages(
-        oaiBody.messages.filter((msg) => msg.role !== "system"),
-      ),
+      messages: this._convertMessages(oaiBody.messages.filter((msg) => msg.role !== "system")),
       system:
         typeof systemMessage === "string"
           ? [
@@ -150,7 +117,7 @@ export class AnthropicApi implements BaseLlmApi {
   }
 
   private convertToolCallsToBlocks(
-    toolCall: OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall,
+    toolCall: OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall
   ): ToolUseBlock | undefined {
     const toolCallId = toolCall.id;
     const toolName = toolCall.function?.name;
@@ -159,10 +126,7 @@ export class AnthropicApi implements BaseLlmApi {
         type: "tool_use",
         id: toolCallId,
         name: toolName,
-        input: safeParseArgs(
-          toolCall.function.arguments,
-          `${toolName} ${toolCallId}`,
-        ),
+        input: safeParseArgs(toolCall.function.arguments, `${toolName} ${toolCallId}`),
       };
     }
   }
@@ -175,7 +139,7 @@ export class AnthropicApi implements BaseLlmApi {
     content:
       | string
       | OpenAI.Chat.Completions.ChatCompletionContentPart[]
-      | (ChatCompletionContentPartText | ChatCompletionContentPartRefusal)[],
+      | (ChatCompletionContentPartText | ChatCompletionContentPartRefusal)[]
   ): ContentBlockParam[] {
     const blocks: ContentBlockParam[] = [];
     if (typeof content === "string") {
@@ -186,10 +150,7 @@ export class AnthropicApi implements BaseLlmApi {
         });
       }
     } else {
-      const supportedParts = content.filter(
-        (p) =>
-          p.type === "text" || p.type === "image_url" || p.type === "refusal",
-      );
+      const supportedParts = content.filter((p) => p.type === "text" || p.type === "image_url" || p.type === "refusal");
       for (const part of supportedParts) {
         if (part.type === "image_url") {
           const dataUrl = part.image_url.url;
@@ -218,7 +179,7 @@ export class AnthropicApi implements BaseLlmApi {
   }
 
   private getContentBlocksFromChatMessage(
-    message: OpenAI.Chat.Completions.ChatCompletionMessageParam,
+    message: OpenAI.Chat.Completions.ChatCompletionMessageParam
   ): ContentBlockParam[] {
     switch (message.role) {
       // One tool message = one tool_result block
@@ -233,9 +194,7 @@ export class AnthropicApi implements BaseLlmApi {
       case "user":
         return this.convertMessageContentToBlocks(message.content);
       case "assistant":
-        const blocks: ContentBlockParam[] = message.content
-          ? this.convertMessageContentToBlocks(message.content)
-          : [];
+        const blocks: ContentBlockParam[] = message.content ? this.convertMessageContentToBlocks(message.content) : [];
         // If any tool calls are present, always put them last
         // Loses order vs what was originally sent, but they typically come last
         for (const toolCall of message.tool_calls ?? []) {
@@ -255,9 +214,7 @@ export class AnthropicApi implements BaseLlmApi {
     }
   }
 
-  private _convertMessages(
-    msgs: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-  ): MessageParam[] {
+  private _convertMessages(msgs: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): MessageParam[] {
     const nonSystemMessages = msgs.filter((m) => m.role !== "system");
 
     const convertedMessages: MessageParam[] = [];
@@ -275,10 +232,7 @@ export class AnthropicApi implements BaseLlmApi {
     };
 
     for (const message of nonSystemMessages) {
-      const newRole =
-        message.role === "user" || message.role === "tool"
-          ? "user"
-          : "assistant";
+      const newRole = message.role === "user" || message.role === "tool" ? "user" : "assistant";
       if (currentRole !== newRole) {
         flushCurrentMessage();
         currentRole = newRole;
@@ -292,17 +246,14 @@ export class AnthropicApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<ChatCompletion> {
-    const response = await customFetch(this.config.requestOptions)(
-      new URL("messages", this.apiBase),
-      {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify(this._convertBody(body)),
-        signal,
-      },
-    );
+    const response = await fetch(new URL("messages", this.apiBase), {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(this._convertBody(body)),
+      signal,
+    });
 
     if (response.status === 499) {
       return EMPTY_CHAT_COMPLETION;
@@ -364,8 +315,7 @@ export class AnthropicApi implements BaseLlmApi {
           const startEvent = rawEvent as RawMessageStartEvent;
           usage.prompt_tokens = startEvent.message.usage?.input_tokens ?? 0;
           usage.prompt_tokens_details = {
-            cached_tokens:
-              startEvent.message.usage?.cache_read_input_tokens ?? 0,
+            cached_tokens: startEvent.message.usage?.cache_read_input_tokens ?? 0,
           };
           break;
         case "message_delta":
@@ -425,17 +375,14 @@ export class AnthropicApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk> {
-    const response = await customFetch(this.config.requestOptions)(
-      new URL("messages", this.apiBase),
-      {
-        method: "POST",
-        headers: this.getHeaders(),
-        body: JSON.stringify(this._convertBody(body)),
-        signal,
-      },
-    );
+    const response = await fetch(new URL("messages", this.apiBase), {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(this._convertBody(body)),
+      signal,
+    });
     yield* this.handleStreamResponse(response, body.model);
   }
 
@@ -444,28 +391,17 @@ export class AnthropicApi implements BaseLlmApi {
     return getAnthropicHeaders(this.config.apiKey, enableCaching);
   }
 
-  async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
+  async completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
-  async *completionStream(
-    body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<Completion> {
+  async *completionStream(body: CompletionCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
-  async *fimStream(
-    body: FimCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<ChatCompletionChunk> {
+  async *fimStream(body: FimCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
 
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+  async embed(body: OpenAI.Embeddings.EmbeddingCreateParams): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 

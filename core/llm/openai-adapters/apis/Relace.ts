@@ -4,10 +4,7 @@ import {
   CompletionCreateParamsStreaming,
   CompletionUsage,
 } from "openai/resources/completions.mjs";
-import {
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
-} from "openai/resources/embeddings.mjs";
+import { CreateEmbeddingResponse, EmbeddingCreateParams } from "openai/resources/embeddings.mjs";
 import {
   ChatCompletion,
   ChatCompletionChunk,
@@ -17,23 +14,10 @@ import {
 import { Model } from "openai/resources/models.mjs";
 import { z } from "zod";
 import { OpenAIConfigSchema } from "../types.js";
-import {
-  chatChunk,
-  chatCompletion,
-  customFetch,
-  usageChatChunk,
-} from "../util.js";
-import {
-  BaseLlmApi,
-  CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
-} from "./base.js";
+import { chatChunk, chatCompletion, usageChatChunk } from "../util.js";
+import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
 
-type UsageInfo = Pick<
-  CompletionUsage,
-  "total_tokens" | "completion_tokens" | "prompt_tokens"
->;
+type UsageInfo = Pick<CompletionUsage, "total_tokens" | "completion_tokens" | "prompt_tokens">;
 
 // Relace only supports apply through a /v1/apply endpoint
 export class RelaceApi implements BaseLlmApi {
@@ -49,7 +33,7 @@ export class RelaceApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<ChatCompletion> {
     let content = "";
     let usage: UsageInfo | undefined = undefined;
@@ -60,10 +44,7 @@ export class RelaceApi implements BaseLlmApi {
       stream: true,
     };
 
-    for await (const chunk of this.chatCompletionStream(
-      streamingBody,
-      signal,
-    )) {
+    for await (const chunk of this.chatCompletionStream(streamingBody, signal)) {
       if (chunk.choices.length > 0) {
         content += chunk.choices[0]?.delta?.content || "";
       }
@@ -83,7 +64,7 @@ export class RelaceApi implements BaseLlmApi {
   // to Relace's format
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk> {
     const headers = {
       "Content-Type": "application/json",
@@ -91,10 +72,7 @@ export class RelaceApi implements BaseLlmApi {
     };
 
     const prediction = body.prediction?.content ?? "";
-    const initialCode =
-      typeof prediction === "string"
-        ? prediction
-        : prediction.map((p) => p.text).join("");
+    const initialCode = typeof prediction === "string" ? prediction : prediction.map((p) => p.text).join("");
 
     const userContent = body.messages.find((m) => m.role === "user")?.content;
     if (!userContent) {
@@ -115,7 +93,7 @@ export class RelaceApi implements BaseLlmApi {
     };
 
     const url = this.apiBase + "code/apply";
-    const response = await customFetch(this.config.requestOptions)(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
@@ -144,27 +122,14 @@ export class RelaceApi implements BaseLlmApi {
     });
   }
 
-  completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
-    throw new Error(
-      "Relace provider does not support non-streaming completion.",
-    );
+  completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
+    throw new Error("Relace provider does not support non-streaming completion.");
   }
-  completionStream(
-    body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<Completion> {
+  completionStream(body: CompletionCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<Completion> {
     throw new Error("Relace provider does not support streaming completion.");
   }
-  fimStream(
-    body: FimCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<ChatCompletionChunk> {
-    throw new Error(
-      "Relace provider does not support streaming FIM completion.",
-    );
+  fimStream(body: FimCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<ChatCompletionChunk> {
+    throw new Error("Relace provider does not support streaming FIM completion.");
   }
   embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
     throw new Error("Relace provider does not support embeddings.");

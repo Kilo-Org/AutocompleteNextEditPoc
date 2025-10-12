@@ -15,7 +15,8 @@ class MockLLM extends BaseLLM {
   constructor(options: LLMOptions) {
     super(options);
     this.templateMessages = undefined;
-    this.chatStreams = options.requestOptions?.extraBodyProperties?.chatStream;
+    this.chatStreams = options.chatStreams;
+    
   }
 
   protected async *_streamComplete(

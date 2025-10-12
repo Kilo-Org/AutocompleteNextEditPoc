@@ -44,7 +44,6 @@ export class ContinueProxyApi extends OpenAIApi {
       apiBase: config.env?.proxyUrl
         ? new URL("model-proxy/v1/", config.env?.proxyUrl).toString()
         : "https://api.continue.dev/model-proxy/v1/",
-      requestOptions: config.requestOptions,
     };
 
     super(openaiConfig);
@@ -67,9 +66,7 @@ export class ContinueProxyApi extends OpenAIApi {
     };
   }
 
-  private modifyBodyWithContinueProperties<T extends Record<string, any>>(
-    body: T,
-  ): T {
+  private modifyBodyWithContinueProperties<T extends Record<string, any>>(body: T): T {
     return {
       ...body,
       ...this.extraBodyProperties(),
@@ -83,11 +80,7 @@ export class ContinueProxyApi extends OpenAIApi {
     return this.modifyBodyWithContinueProperties(modifiedBody);
   }
 
-  modifyCompletionBody<
-    T extends
-      | CompletionCreateParamsNonStreaming
-      | CompletionCreateParamsStreaming,
-  >(body: T): T {
+  modifyCompletionBody<T extends CompletionCreateParamsNonStreaming | CompletionCreateParamsStreaming>(body: T): T {
     return this.modifyBodyWithContinueProperties(body);
   }
 
@@ -105,9 +98,7 @@ export class ContinueProxyApi extends OpenAIApi {
     };
   }
 
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
-    body: T,
-  ): T {
+  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(body: T): T {
     return this.modifyBodyWithContinueProperties(body);
   }
 

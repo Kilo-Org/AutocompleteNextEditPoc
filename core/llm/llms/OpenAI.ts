@@ -1,22 +1,10 @@
-import {
-  ChatCompletionCreateParams,
-  ChatCompletionMessageParam,
-} from "openai/resources/index";
+import { ChatCompletionCreateParams, ChatCompletionMessageParam } from "openai/resources/index";
 
 import { streamSse } from "../../fetch";
-import {
-  ChatMessage,
-  CompletionOptions,
-  LLMOptions,
-  Tool,
-} from "../../index.js";
+import { ChatMessage, CompletionOptions, LLMOptions, Tool } from "../../index.js";
 import { renderChatMessage } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";
-import {
-  fromChatCompletionChunk,
-  LlmApiRequestType,
-  toChatBody,
-} from "../openaiTypeConverters.js";
+import { fromChatCompletionChunk, LlmApiRequestType, toChatBody } from "../openaiTypeConverters.js";
 
 const NON_CHAT_MODELS = [
   "text-davinci-002",
@@ -86,12 +74,7 @@ class OpenAI extends BaseLLM {
   }
 
   protected supportsPrediction(model: string): boolean {
-    const SUPPORTED_MODELS = [
-      "gpt-4o-mini",
-      "gpt-4o",
-      "mistral-large",
-      "Fast-Apply",
-    ];
+    const SUPPORTED_MODELS = ["gpt-4o-mini", "gpt-4o", "mistral-large", "Fast-Apply"];
     return SUPPORTED_MODELS.some((m) => model.includes(m));
   }
 
@@ -130,10 +113,7 @@ class OpenAI extends BaseLLM {
     }
   }
 
-  protected _convertArgs(
-    options: CompletionOptions,
-    messages: ChatMessage[],
-  ): ChatCompletionCreateParams {
+  protected _convertArgs(options: CompletionOptions, messages: ChatMessage[]): ChatCompletionCreateParams {
     const finalOptions = toChatBody(messages, options);
 
     finalOptions.stop = options.stop?.slice(0, this.getMaxStopWords());
@@ -179,40 +159,25 @@ class OpenAI extends BaseLLM {
     };
   }
 
-  protected async _complete(
-    prompt: string,
-    signal: AbortSignal,
-    options: CompletionOptions,
-  ): Promise<string> {
+  protected async _complete(prompt: string, signal: AbortSignal, options: CompletionOptions): Promise<string> {
     let completion = "";
-    for await (const chunk of this._streamChat(
-      [{ role: "user", content: prompt }],
-      signal,
-      options,
-    )) {
+    for await (const chunk of this._streamChat([{ role: "user", content: prompt }], signal, options)) {
       completion += chunk.content;
     }
 
     return completion;
   }
 
-  protected _getEndpoint(
-    endpoint: "chat/completions" | "completions" | "models",
-  ) {
+  protected _getEndpoint(endpoint: "chat/completions" | "completions" | "models") {
     if (!this.apiBase) {
-      throw new Error(
-        "No API base URL provided. Please set the 'apiBase' option in config.json",
-      );
+      throw new Error("No API base URL provided. Please set the 'apiBase' option in config.json");
     }
 
     if (this.apiType?.includes("azure")) {
       // Default is `azure-openai`, but previously was `azure`
-      const isAzureOpenAI =
-        this.apiType === "azure-openai" || this.apiType === "azure";
+      const isAzureOpenAI = this.apiType === "azure-openai" || this.apiType === "azure";
 
-      const path = isAzureOpenAI
-        ? `openai/deployments/${this.deployment}/${endpoint}`
-        : endpoint;
+      const path = isAzureOpenAI ? `openai/deployments/${this.deployment}/${endpoint}` : endpoint;
 
       const version = this.apiVersion ? `?api-version=${this.apiVersion}` : "";
       return new URL(`${path}${version}`, this.apiBase);
@@ -224,20 +189,14 @@ class OpenAI extends BaseLLM {
   protected async *_streamComplete(
     prompt: string,
     signal: AbortSignal,
-    options: CompletionOptions,
+    options: CompletionOptions
   ): AsyncGenerator<string> {
-    for await (const chunk of this._streamChat(
-      [{ role: "user", content: prompt }],
-      signal,
-      options,
-    )) {
+    for await (const chunk of this._streamChat([{ role: "user", content: prompt }], signal, options)) {
       yield renderChatMessage(chunk);
     }
   }
 
-  protected modifyChatBody(
-    body: ChatCompletionCreateParams,
-  ): ChatCompletionCreateParams {
+  protected modifyChatBody(body: ChatCompletionCreateParams): ChatCompletionCreateParams {
     body.stop = body.stop?.slice(0, this.getMaxStopWords());
 
     // OpenAI o1-preview and o1-mini or o3-mini:
@@ -289,13 +248,13 @@ class OpenAI extends BaseLLM {
   protected async *_legacystreamComplete(
     prompt: string,
     signal: AbortSignal,
-    options: CompletionOptions,
+    options: CompletionOptions
   ): AsyncGenerator<string> {
     const args: any = this._convertArgs(options, []);
     args.prompt = prompt;
     args.messages = undefined;
 
-    const response = await this.fetch(this._getEndpoint("completions"), {
+    const response = await fetch(this._getEndpoint("completions"), {
       method: "POST",
       headers: this._getHeaders(),
       body: JSON.stringify({
@@ -316,19 +275,17 @@ class OpenAI extends BaseLLM {
   protected async *_streamChat(
     messages: ChatMessage[],
     signal: AbortSignal,
-    options: CompletionOptions,
+    options: CompletionOptions
   ): AsyncGenerator<ChatMessage> {
     if (
       !isChatOnlyModel(options.model) &&
       this.supportsCompletions() &&
-      (NON_CHAT_MODELS.includes(options.model) ||
-        this.useLegacyCompletionsEndpoint ||
-        options.raw)
+      (NON_CHAT_MODELS.includes(options.model) || this.useLegacyCompletionsEndpoint || options.raw)
     ) {
       for await (const content of this._legacystreamComplete(
         renderChatMessage(messages[messages.length - 1]),
         signal,
-        options,
+        options
       )) {
         yield {
           role: "assistant",
@@ -340,7 +297,7 @@ class OpenAI extends BaseLLM {
 
     const body = this._convertArgs(options, messages);
 
-    const response = await this.fetch(this._getEndpoint("chat/completions"), {
+    const response = await fetch(this._getEndpoint("chat/completions"), {
       method: "POST",
       headers: this._getHeaders(),
       body: JSON.stringify({
@@ -372,10 +329,10 @@ class OpenAI extends BaseLLM {
     prefix: string,
     suffix: string,
     signal: AbortSignal,
-    options: CompletionOptions,
+    options: CompletionOptions
   ): AsyncGenerator<string> {
     const endpoint = new URL("fim/completions", this.apiBase);
-    const resp = await this.fetch(endpoint, {
+    const resp = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify({
         model: options.model,
@@ -404,7 +361,7 @@ class OpenAI extends BaseLLM {
   }
 
   async listModels(): Promise<string[]> {
-    const response = await this.fetch(this._getEndpoint("models"), {
+    const response = await fetch(this._getEndpoint("models"), {
       method: "GET",
       headers: this._getHeaders(),
     });
@@ -415,22 +372,17 @@ class OpenAI extends BaseLLM {
 
   private _getEmbedEndpoint() {
     if (!this.apiBase) {
-      throw new Error(
-        "No API base URL provided. Please set the 'apiBase' option in config.json",
-      );
+      throw new Error("No API base URL provided. Please set the 'apiBase' option in config.json");
     }
 
     if (this.apiType === "azure") {
-      return new URL(
-        `openai/deployments/${this.deployment}/embeddings?api-version=${this.apiVersion}`,
-        this.apiBase,
-      );
+      return new URL(`openai/deployments/${this.deployment}/embeddings?api-version=${this.apiVersion}`, this.apiBase);
     }
     return new URL("embeddings", this.apiBase);
   }
 
   protected async _embed(chunks: string[]): Promise<number[][]> {
-    const resp = await this.fetch(this._getEmbedEndpoint(), {
+    const resp = await fetch(this._getEmbedEndpoint(), {
       method: "POST",
       body: JSON.stringify({
         input: chunks,
