@@ -32,11 +32,13 @@ test("GitDiffCache refreshes cache after expiration", async () => {
 });
 
 test("GitDiffCache returns empty array on error", async () => {
+  const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   const getDiffFn = vi.fn().mockRejectedValue(new Error("Git error"));
   const cache = GitDiffCache.getInstance(getDiffFn);
 
   const result = await cache.get();
   expect(result).toEqual([]);
+  consoleErrorSpy.mockRestore();
 });
 
 test("GitDiffCache reuses pending request", async () => {
