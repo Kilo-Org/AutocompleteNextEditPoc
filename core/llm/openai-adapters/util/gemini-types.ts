@@ -2,7 +2,7 @@ import { JSONSchema7Object } from "json-schema";
 import { ChatCompletionTool } from "openai/resources/index.mjs";
 
 // https://ai.google.dev/api/generate-content
-export interface GeminiGenerationConfig {
+interface GeminiGenerationConfig {
   stopSequences?: string[];
   responseMimeType?: string;
   candidateCount?: number;
@@ -17,7 +17,7 @@ export interface GeminiGenerationConfig {
   // responseSchema?: object; // https://ai.google.dev/api/caching#Schema
 }
 
-export type GeminiObjectSchemaType =
+type GeminiObjectSchemaType =
   | "TYPE_UNSPECIFIED"
   | "STRING"
   | "NUMBER"
@@ -26,7 +26,7 @@ export type GeminiObjectSchemaType =
   | "ARRAY"
   | "OBJECT";
 
-export interface GeminiObjectSchema {
+interface GeminiObjectSchema {
   type: GeminiObjectSchemaType;
   format?: string;
   title?: string;
@@ -180,18 +180,18 @@ export function convertOpenAIToolToGeminiFunction(
   return fn;
 }
 
-export type GeminiTextContentPart = {
+type GeminiTextContentPart = {
   text: string;
 };
 
-export type GeminiInlineDataContentPart = {
+type GeminiInlineDataContentPart = {
   inlineData: {
     mimeType: string;
     data: string;
   };
 };
 
-export type GeminiFunctionCallContentPart = {
+type GeminiFunctionCallContentPart = {
   functionCall: {
     id?: string;
     name: string;
@@ -199,7 +199,7 @@ export type GeminiFunctionCallContentPart = {
   };
 };
 
-export type GeminiFunctionResponseContentPart = {
+type GeminiFunctionResponseContentPart = {
   functionResponse: {
     id?: string;
     name: string;
@@ -207,21 +207,21 @@ export type GeminiFunctionResponseContentPart = {
   };
 };
 
-export type GeminiFileDataContentPart = {
+type GeminiFileDataContentPart = {
   fileData: {
     fileUri: string;
     mimeType: string; // See possible values here: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference#filedata
   };
 };
 
-export type GeminiExecutableCodeContentPart = {
+type GeminiExecutableCodeContentPart = {
   executableCode: {
     language: "PYTHON" | "LANGUAGE_UNSPECIFIED";
     code: string;
   };
 };
 
-export type GeminiCodeExecutionResultContentPart = {
+type GeminiCodeExecutionResultContentPart = {
   codeExecutionResult: {
     outcome:
       | "OUTCOME_UNSPECIFIED"
@@ -252,7 +252,7 @@ export interface GeminiToolFunctionDeclaration {
   parameters?: GeminiObjectSchema;
   response?: GeminiObjectSchema;
 }
-export interface GeminiTool {
+interface GeminiTool {
   functionDeclarations?: GeminiToolFunctionDeclaration[];
   googleSearchRetrieval?: {
     dynamicRetrievalConfig: {
@@ -263,7 +263,7 @@ export interface GeminiTool {
   codeExecution?: {};
 }
 
-export interface GeminiToolConfig {
+interface GeminiToolConfig {
   functionCallingConfig?: {
     mode?: "NONE" | "ANY" | "AUTO";
     allowedFunctionNames?: string[];
@@ -271,7 +271,7 @@ export interface GeminiToolConfig {
 }
 
 // https://ai.google.dev/api/generate-content#request-body
-export interface GeminiChatRequestBody {
+interface GeminiChatRequestBody {
   contents: GeminiChatContent[];
   tools?: GeminiTool[];
   toolConfig?: GeminiToolConfig;
@@ -280,19 +280,19 @@ export interface GeminiChatRequestBody {
   // cachedContent?: string;
 }
 
-export interface GeminiChatResponseSuccess {
+interface GeminiChatResponseSuccess {
   candidates: Candidate[];
   promptFeedback: PromptFeedback;
   usageMetadata: UsageMetadata;
 }
 
-export interface GeminiChatResponseError {
+interface GeminiChatResponseError {
   error: {
     message: string;
   };
 }
 
-export type GeminiChatResponse =
+type GeminiChatResponse =
   | GeminiChatResponseError
   | GeminiChatResponseSuccess;
 

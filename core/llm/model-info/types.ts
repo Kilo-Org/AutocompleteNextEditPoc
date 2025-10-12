@@ -1,8 +1,8 @@
 export type UseCase = "chat" | "autocomplete" | "rerank" | "embed";
 
-export type ParameterType = "string" | "number" | "boolean";
+type ParameterType = "string" | "number" | "boolean";
 
-export interface Parameter {
+interface Parameter {
   key: string;
   required: boolean;
   valueType: ParameterType;
@@ -11,12 +11,12 @@ export interface Parameter {
   defaultValue?: any;
 }
 
-export enum ChatTemplate {
+enum ChatTemplate {
   None = "none",
   // TODO
 }
 
-export interface LlmInfo {
+interface LlmInfo {
   model: string;
   // providers: string[]; // TODO: uncomment and deal with the consequences
   displayName?: string;
@@ -38,27 +38,27 @@ export type LlmInfoWithProvider = LlmInfo & {
   provider: string;
 };
 
-export enum MediaType {
+enum MediaType {
   Text = "text",
   Image = "image",
   Audio = "audio",
   Video = "video",
 }
 
-export const AllMediaTypes = [
+const AllMediaTypes = [
   MediaType.Text,
   MediaType.Image,
   MediaType.Audio,
   MediaType.Video,
 ];
 
-export interface ApiProviderInfo {
+interface ApiProviderInfo {
   displayName: string;
   supportsStreaming: boolean;
   handlesTemplating: boolean;
 }
 
-export type ModelProviderCapability =
+type ModelProviderCapability =
   | "stream"
   | "fim"
   | "image"
