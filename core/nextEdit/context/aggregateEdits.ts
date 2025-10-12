@@ -40,6 +40,7 @@ export class EditAggregator {
   public config: EditClusterConfig;
   private previousEditFinalCursorPosition: Position;
   private lastProcessedFilePath: string | null = null;
+  public latestContextData: any;
   public onComparisonFinalized: (
     diff: BeforeAfterDiff,
     beforeCursorPos: Position,
