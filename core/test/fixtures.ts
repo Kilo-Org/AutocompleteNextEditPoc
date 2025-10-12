@@ -8,14 +8,14 @@ import { TEST_DIR } from "./testDir";
 
 export const testIde = new FileSystemIde(TEST_DIR);
 
-export const ideSettingsPromise = testIde.getIdeSettings();
+const ideSettingsPromise = testIde.getIdeSettings();
 
-export const testControlPlaneClient = new ControlPlaneClient();
+const testControlPlaneClient = new ControlPlaneClient();
 
 // For autocomplete/nextEdit tests, use MinimalConfigProvider
 export const testMinimalConfigProvider = new MinimalConfigProvider();
 
-export const testLLM = new Mock({
+const testLLM = new Mock({
   model: "mock-model",
   title: "Mock LLM",
   uniqueId: "not-unique",

@@ -4,7 +4,7 @@ import path from "path";
 import { localPathOrUriToPath, localPathToUri } from "../util/pathToUri";
 
 // Want this outside of the git repository so we can change branches in tests
-export const TEST_DIR_PATH = path.join(os.tmpdir(), "testWorkspaceDir");
+const TEST_DIR_PATH = path.join(os.tmpdir(), "testWorkspaceDir");
 export const TEST_DIR = localPathToUri(TEST_DIR_PATH); // URI
 
 export function setUpTestDir() {
