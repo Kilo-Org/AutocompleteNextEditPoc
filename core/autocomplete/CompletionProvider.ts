@@ -16,7 +16,7 @@ import { renderPromptWithTokenLimit } from "./templating/index.js";
 import { GetLspDefinitionsFunction } from "./types.js";
 import { AutocompleteDebouncer } from "./util/AutocompleteDebouncer.js";
 import { AutocompleteLoggingService } from "./util/AutocompleteLoggingService.js";
-import AutocompleteLruCache from "./util/AutocompleteLruCache.js";
+import { AutocompleteLruCache } from "./util/AutocompleteLruCache.js";
 import { HelperVars } from "./util/HelperVars.js";
 import { AutocompleteInput, AutocompleteOutcome } from "./util/types.js";
 

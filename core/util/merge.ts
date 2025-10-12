@@ -57,5 +57,3 @@ export function mergeJson(
     };
   }
 }
-
-export default mergeJson;
