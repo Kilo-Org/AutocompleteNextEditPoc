@@ -3,9 +3,7 @@ import { MessageCreateParams } from "@anthropic-ai/sdk/resources";
 const MAX_CACHING_MESSAGES = 4;
 
 // Caching strategy type - transforms a clean Anthropic body by adding cache_control
-export type CachingStrategy = (
-  anthropicBody: MessageCreateParams,
-) => MessageCreateParams;
+type CachingStrategy = (anthropicBody: MessageCreateParams) => MessageCreateParams;
 
 // Utility function to estimate token count
 const estimateTokenCount = (text: string): number => Math.ceil(text.length / 4);
@@ -127,11 +125,7 @@ const optimizedStrategy: CachingStrategy = (body) => {
         const updatedContent = message.content.map((item) => {
           if (item.type === "text" && item.text) {
             const tokens = estimateTokenCount(item.text);
-            if (
-              tokens > 500 &&
-              availableCacheMessages > 0 &&
-              !addedCacheControl
-            ) {
+            if (tokens > 500 && availableCacheMessages > 0 && !addedCacheControl) {
               availableCacheMessages -= 1;
               addedCacheControl = true;
               return {
@@ -171,15 +165,12 @@ const getAvailableStrategies = () => {
 };
 
 // Helper function to get strategy description
-const getStrategyDescription = (
-  strategy: CachingStrategyName,
-): string => {
+const getStrategyDescription = (strategy: CachingStrategyName): string => {
   const descriptions = {
     none: "No caching - baseline for comparison",
     systemOnly: "Cache only system messages (current implementation)",
     systemAndTools: "Cache system messages and tool definitions (high impact)",
-    optimized:
-      "Intelligent caching - system, tools, and large content (best performance)",
+    optimized: "Intelligent caching - system, tools, and large content (best performance)",
   };
   return descriptions[strategy];
 };
