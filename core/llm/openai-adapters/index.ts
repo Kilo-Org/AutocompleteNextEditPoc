@@ -168,9 +168,3 @@ export function constructLlmApi(config: LLMConfig): BaseLlmApi | undefined {
 
 // export
 export type { BaseLlmApi } from "./apis/base.js";
-
-export {
-  addCacheControlToLastTwoUserMessages,
-  getAnthropicHeaders,
-  getAnthropicMediaTypeFromDataUrl,
-} from "./apis/AnthropicUtils.js";

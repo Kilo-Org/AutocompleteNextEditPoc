@@ -12,7 +12,7 @@ export enum PosthogFeatureFlag {
   RecentlyVisitedRangesNumSurroundingLines = "recently-visited-ranges-num-surrounding-lines",
 }
 
-export const EXPERIMENTS: {
+const EXPERIMENTS: {
   [key in PosthogFeatureFlag]: {
     [key: string]: { value: any };
   };

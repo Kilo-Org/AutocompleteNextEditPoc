@@ -43,21 +43,6 @@ import {
 } from "node-fetch/src/utils/is.js";
 import { parseReferrerPolicyFromHeader } from "node-fetch/src/utils/referrer.js";
 
-export {
-  AbortError,
-  Blob,
-  blobFrom,
-  blobFromSync,
-  FetchError,
-  File,
-  fileFrom,
-  fileFromSync,
-  FormData,
-  Headers,
-  isRedirect,
-  Request,
-  Response,
-};
 
 const supportedSchemas = new Set(["data:", "http:", "https:"]);
 

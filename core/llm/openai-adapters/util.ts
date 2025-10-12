@@ -143,7 +143,7 @@ export function rerank(options: {
   };
 }
 
-export function model(options: { id: string; owned_by?: string }): Model {
+function model(options: { id: string; owned_by?: string }): Model {
   return {
     id: options.id,
     object: "model",

@@ -10,7 +10,7 @@ type SentryScope = any;
 type SeverityLevel = "fatal" | "error" | "warning" | "log" | "info" | "debug";
 type Extras = Record<string, any>;
 
-export class SentryLogger {
+class SentryLogger {
   static client: SentryNodeClient | undefined = undefined;
   static scope: SentryScope | undefined = undefined;
   static uniqueId = "NOT_UNIQUE";
@@ -67,7 +67,7 @@ export class SentryLogger {
  * Returns the Sentry client and scope, or undefined objects if telemetry is disabled.
  * Stub implementation - Sentry not available.
  */
-export function initializeSentry(): {
+function initializeSentry(): {
   client: SentryNodeClient | undefined;
   scope: SentryScope | undefined;
 } {
@@ -83,7 +83,7 @@ export function initializeSentry(): {
  * Create a custom span for performance monitoring
  * Stub implementation - Sentry not available.
  */
-export function createSpan<T>(
+function createSpan<T>(
   _operation: string,
   _name: string,
   callback: () => T | Promise<T>,
@@ -107,7 +107,7 @@ export function captureException(
  * Capture a structured log message and send it to Sentry
  * Stub implementation - Sentry not available.
  */
-export function captureLog(
+function captureLog(
   _message: string,
   _level: SeverityLevel = "info",
   _context?: Extras,
