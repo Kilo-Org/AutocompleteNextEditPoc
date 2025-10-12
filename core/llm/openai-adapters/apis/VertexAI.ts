@@ -1,4 +1,4 @@
-import { streamSse } from "../../../fetch";
+import { streamSse } from "../../../fetch/stream.js";
 import { AuthClient, GoogleAuth, JWT, auth } from "google-auth-library";
 import {
   ChatCompletion,

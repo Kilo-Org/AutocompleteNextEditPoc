@@ -1,4 +1,4 @@
-import { streamSse } from "../../../fetch";
+import { streamSse } from "../../../fetch/stream.js";
 import { ChatCompletionChunk } from "openai/resources/index";
 import { LlamastackConfig } from "../types.js";
 import { chatChunk } from "../util.js";

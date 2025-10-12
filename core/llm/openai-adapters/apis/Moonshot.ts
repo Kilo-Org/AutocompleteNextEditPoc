@@ -1,4 +1,4 @@
-import { streamSse } from "../../../fetch";
+import { streamSse } from "../../../fetch/stream.js";
 import { ChatCompletionChunk, Model } from "openai/resources/index";
 import { MoonshotConfig } from "../types.js";
 import { chatChunk } from "../util.js";

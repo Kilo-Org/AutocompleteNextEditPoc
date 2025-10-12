@@ -1,6 +1,6 @@
 import { ChatCompletionCreateParams, ChatCompletionMessageParam } from "openai/resources/index";
 
-import { streamSse } from "../../fetch";
+import { streamSse } from "../../fetch/stream.js";
 import { ChatMessage, CompletionOptions, LLMOptions, Tool } from "../../index.js";
 import { renderChatMessage } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";

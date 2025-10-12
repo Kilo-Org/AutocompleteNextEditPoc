@@ -1,4 +1,4 @@
-import { streamJSON } from "../../../fetch";
+import { streamJSON } from "../../../fetch/stream.js";
 import { OpenAI } from "openai/index";
 import {
   ChatCompletion,

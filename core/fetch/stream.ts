@@ -25,9 +25,7 @@ function parseSseLine(line: string): { done: boolean; data: unknown } {
  * Modern implementation using native ReadableStream and TextDecoderStream APIs.
  * Requires Node.js 18+ or modern browsers.
  */
-export async function* streamResponse(
-  response: Response,
-): AsyncGenerator<string> {
+export async function* streamResponse(response: Response): AsyncGenerator<string> {
   // Handle client-side cancellation
   if (response.status === 499) {
     return;
@@ -48,7 +46,7 @@ export async function* streamResponse(
     // Modern API: Use TextDecoderStream to decode the response body
     const textStream = response.body.pipeThrough(new TextDecoderStream("utf-8"));
     const reader = textStream.getReader();
-    
+
     try {
       while (true) {
         const { done, value } = await reader.read();
@@ -69,13 +67,9 @@ export async function* streamResponse(
       // Handle premature close errors
       if (e.message.toLowerCase().includes("premature close")) {
         if (chunks === 0) {
-          throw new Error(
-            "Stream was closed before any data was received. Try again. (Premature Close)",
-          );
+          throw new Error("Stream was closed before any data was received. Try again. (Premature Close)");
         } else {
-          throw new Error(
-            "The response was cancelled mid-stream. Try again. (Premature Close).",
-          );
+          throw new Error("The response was cancelled mid-stream. Try again. (Premature Close).");
         }
       }
     }
@@ -86,9 +80,9 @@ export async function* streamResponse(
  * Streams Server-Sent Events (SSE) from a Response.
  * Parses SSE format and yields parsed data objects.
  */
-export async function* streamSse(response: Response): AsyncGenerator<any> {
+export async function* streamSse(response: Response): AsyncGenerator<{}> {
   let buffer = "";
-  
+
   for await (const value of streamResponse(response)) {
     buffer += value;
 
@@ -120,9 +114,9 @@ export async function* streamSse(response: Response): AsyncGenerator<any> {
  * Streams newline-delimited JSON from a Response.
  * Each line should be a complete JSON object.
  */
-export async function* streamJSON(response: Response): AsyncGenerator<any> {
+export async function* streamJSON(response: Response): AsyncGenerator<string> {
   let buffer = "";
-  
+
   for await (const value of streamResponse(response)) {
     buffer += value;
 
@@ -130,7 +124,7 @@ export async function* streamJSON(response: Response): AsyncGenerator<any> {
     while ((position = buffer.indexOf("\n")) >= 0) {
       const line = buffer.slice(0, position);
       buffer = buffer.slice(position + 1);
-      
+
       if (line.trim()) {
         try {
           const data = JSON.parse(line);

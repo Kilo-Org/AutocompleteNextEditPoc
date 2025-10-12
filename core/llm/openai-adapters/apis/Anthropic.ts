@@ -10,7 +10,7 @@ import {
   Tool,
   ToolUseBlock,
 } from "@anthropic-ai/sdk/resources";
-import { streamSse } from "../../../fetch";
+import { streamSse } from "../../../fetch/stream.js";
 import { OpenAI } from "openai/index";
 import {
   ChatCompletion,
