@@ -33,10 +33,6 @@ describe("lineStream", () => {
     mockFullStop = vi.fn();
   });
 
-  describe("noTopLevelKeywordsMidline", () => {
-    it.todo("Need some sample inputs to properly test this");
-  });
-
   describe("avoidPathLine", () => {
     it("should filter out path lines", async () => {
       const linesGenerator = await getLineGenerator([
