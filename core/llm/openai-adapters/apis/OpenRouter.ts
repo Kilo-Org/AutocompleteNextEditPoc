@@ -39,5 +39,3 @@ export class OpenRouterApi extends OpenAIApi {
     return modifiedBody;
   }
 }
-
-export default OpenRouterApi;

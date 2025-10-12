@@ -95,7 +95,7 @@ export interface NextEditTemplate {
 
 export interface TemplateVars {}
 
-export interface InstinctTemplateVars extends TemplateVars {
+interface InstinctTemplateVars extends TemplateVars {
   contextSnippets: string;
   currentFileContent: string;
   editDiffHistory: string; // could be a singe large unified diff
@@ -103,7 +103,7 @@ export interface InstinctTemplateVars extends TemplateVars {
   languageShorthand: string;
 }
 
-export interface MercuryTemplateVars extends TemplateVars {
+interface MercuryTemplateVars extends TemplateVars {
   recentlyViewedCodeSnippets: string;
   currentFileContent: string;
   editDiffHistory: string; // could be a singe large unified diff
@@ -127,7 +127,7 @@ export interface ModelSpecificContext {
 /**
  * Configuration for editable region calculation.
  */
-export interface EditableRegionConfig {
+interface EditableRegionConfig {
   usingFullFileDiff?: boolean;
   maxTokens?: number;
   topMargin?: number;
@@ -137,7 +137,7 @@ export interface EditableRegionConfig {
 /**
  * Configuration for prompt generation.
  */
-export interface PromptConfig {
+interface PromptConfig {
   includeHistory?: boolean;
   includeRecentEdits?: boolean;
   maxContextSnippets?: number;
