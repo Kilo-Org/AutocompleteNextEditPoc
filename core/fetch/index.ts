@@ -2,7 +2,6 @@ import {
   streamJSON,
   streamResponse,
   streamSse,
-  toAsyncIterable,
 } from "./stream.js";
 
 import patchedFetch from "./node-fetch-patch.js";
@@ -15,5 +14,4 @@ export {
   streamJSON,
   streamResponse,
   streamSse,
-  toAsyncIterable,
 };

@@ -1,9 +1,9 @@
 import { OpenAi } from "./providers/openai.js";
 import { LlmInfoWithProvider, ModelProvider, UseCase } from "./types.js";
 
-export const allModelProviders: ModelProvider[] = [OpenAi];
+const allModelProviders: ModelProvider[] = [OpenAi];
 
-export const allLlms: LlmInfoWithProvider[] = allModelProviders.flatMap(
+const allLlms: LlmInfoWithProvider[] = allModelProviders.flatMap(
   (provider) =>
     provider.models.map((model) => ({ ...model, provider: provider.id })),
 );
@@ -29,6 +29,6 @@ export function findLlmInfo(
   );
 }
 
-export function getAllRecommendedFor(useCase: UseCase): LlmInfoWithProvider[] {
+function getAllRecommendedFor(useCase: UseCase): LlmInfoWithProvider[] {
   return allLlms.filter((llm) => llm.recommendedFor?.includes(useCase));
 }

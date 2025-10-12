@@ -32,7 +32,7 @@ export class LlamaAsyncEncoder implements AsyncEncoder {
 }
 
 // this class does not yet do anything asynchronous
-export class GPTAsyncEncoder implements AsyncEncoder {
+class GPTAsyncEncoder implements AsyncEncoder {
   private workerPool: workerpool.Pool;
 
   constructor() {

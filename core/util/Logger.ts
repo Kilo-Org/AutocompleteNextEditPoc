@@ -45,25 +45,25 @@ class LoggerClass {
     return process.env.NODE_ENV !== "test" && process.env.NODE_ENV !== "e2e";
   }
 
-  public log(message: string, meta?: any): void {
+  public log(message: string, meta?: Record<string, unknown>): void {
     this.winston.info(message, meta);
   }
 
-  public debug(message: string, meta?: any): void {
+  public debug(message: string, meta?: Record<string, unknown>): void {
     this.winston.debug(message, meta);
   }
 
-  public info(message: string, meta?: any): void {
+  public info(message: string, meta?: Record<string, unknown>): void {
     this.winston.info(message, meta);
   }
 
-  public warn(message: string, meta?: any): void {
+  public warn(message: string, meta?: Record<string, unknown>): void {
     this.winston.warn(message, meta);
   }
 
   public error(
     error: Error | string | unknown,
-    context?: Record<string, any>,
+    context?: Record<string, unknown>,
   ): void {
     let errorMessage: string;
 

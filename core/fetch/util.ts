@@ -5,7 +5,7 @@ import { RequestOptions } from "../index.js";
  * @param protocol The URL protocol (http: or https:)
  * @returns The proxy URL if available, otherwise undefined
  */
-export function getProxyFromEnv(protocol: string): string | undefined {
+function getProxyFromEnv(protocol: string): string | undefined {
   if (protocol === "https:") {
     return (
       process.env.HTTPS_PROXY ||
@@ -29,7 +29,7 @@ export function getProxy(
   return getProxyFromEnv(protocol);
 }
 
-export function getEnvNoProxyPatterns(): string[] {
+function getEnvNoProxyPatterns(): string[] {
   const envValue = process.env.NO_PROXY || process.env.no_proxy;
   if (envValue) {
     return envValue
@@ -41,7 +41,7 @@ export function getEnvNoProxyPatterns(): string[] {
   }
 }
 
-export function getReqOptionsNoProxyPatterns(
+function getReqOptionsNoProxyPatterns(
   options: RequestOptions | undefined,
 ): string[] {
   return (
@@ -50,7 +50,7 @@ export function getReqOptionsNoProxyPatterns(
   );
 }
 
-export function patternMatchesHostname(hostname: string, pattern: string) {
+function patternMatchesHostname(hostname: string, pattern: string) {
   // Split hostname and pattern to separate hostname and port
   const [hostnameWithoutPort, hostnamePort] = hostname.toLowerCase().split(":");
   const [patternWithoutPort, patternPort] = pattern.toLowerCase().split(":");

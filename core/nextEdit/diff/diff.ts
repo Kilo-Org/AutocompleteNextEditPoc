@@ -60,7 +60,7 @@ export function getOffsetPositionAtLastNewLine(
   };
 }
 
-export function getRenderableDiffWithGutterAnnotations(
+function getRenderableDiffWithGutterAnnotations(
   diffLines: DiffLine[],
   lineContentAtCursorPos: string,
   lineOffsetAtCursorPos: number,
@@ -247,7 +247,7 @@ export function calculateFinalCursorPosition(
  * @param linesToReplace Optional number of lines to replace; if not provided, will replace the same number of lines as in the completion
  * @returns The file content with the completion applied
  */
-export function applyCompletionToFile(
+function applyCompletionToFile(
   fileContent: string,
   completion: string,
   startLineNumber: number,

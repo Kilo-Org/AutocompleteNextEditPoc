@@ -43,7 +43,7 @@ export class CompletionProvider {
     private readonly configHandler: MinimalConfigProvider,
     private readonly ide: IDE,
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
-    private readonly _onError: (e: any) => void,
+    private readonly _onError: (e: unknown) => void,
     private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
   ) {
     this.completionStreamer = new CompletionStreamer(this.onError.bind(this));
@@ -80,10 +80,10 @@ export class CompletionProvider {
     return llm;
   }
 
-  private onError(e: any) {
+  private onError(e: unknown) {
     if (
       ERRORS_TO_IGNORE.some((err) =>
-        typeof e === "string" ? e.includes(err) : e?.message?.includes(err),
+        typeof e === "string" ? e.includes(err) : (e as Error)?.message?.includes(err),
       )
     ) {
       return;
@@ -293,7 +293,7 @@ export class CompletionProvider {
       }
 
       return outcome;
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.onError(e);
     } finally {
       this.loggingService.deleteAbortController(input.completionId);

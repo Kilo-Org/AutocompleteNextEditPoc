@@ -1,10 +1,10 @@
 import { ChatMessage } from "..";
 
-export function messageHasToolCalls(msg: ChatMessage): boolean {
+function messageHasToolCalls(msg: ChatMessage): boolean {
   return msg.role === "assistant" && !!msg.toolCalls;
 }
 
-export function messageIsEmpty(message: ChatMessage): boolean {
+function messageIsEmpty(message: ChatMessage): boolean {
   if (typeof message.content === "string") {
     return message.content.trim() === "";
   }
@@ -35,7 +35,7 @@ export function isUserOrToolMsg(msg: ChatMessage | undefined): boolean {
   return msg.role === "user" || msg.role === "tool";
 }
 
-export function isToolMessageForId(
+function isToolMessageForId(
   msg: ChatMessage | undefined,
   toolCallId: string,
 ): boolean {

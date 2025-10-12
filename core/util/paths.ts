@@ -71,7 +71,7 @@ export function getContinueGlobalPath(): string {
   return continuePath;
 }
 
-export function getSessionsFolderPath(): string {
+function getSessionsFolderPath(): string {
   const sessionsPath = path.join(getContinueGlobalPath(), "sessions");
   if (!fs.existsSync(sessionsPath)) {
     fs.mkdirSync(sessionsPath);
@@ -87,7 +87,7 @@ function getIndexFolderPath(): string {
   return indexPath;
 }
 
-export function getGlobalContextFilePath(): string {
+function getGlobalContextFilePath(): string {
   return path.join(getIndexFolderPath(), "globalContext.json");
 }
 
@@ -95,11 +95,11 @@ function getSharedConfigFilePath(): string {
   return path.join(getContinueGlobalPath(), "sharedConfig.json");
 }
 
-export function getSessionFilePath(sessionId: string): string {
+function getSessionFilePath(sessionId: string): string {
   return path.join(getSessionsFolderPath(), `${sessionId}.json`);
 }
 
-export function getSessionsListPath(): string {
+function getSessionsListPath(): string {
   const filepath = path.join(getSessionsFolderPath(), "sessions.json");
   if (!fs.existsSync(filepath)) {
     fs.writeFileSync(filepath, JSON.stringify([]));
@@ -422,7 +422,7 @@ function readAllGlobalPromptFiles(
   return promptFiles;
 }
 
-export function getRepoMapFilePath(): string {
+function getRepoMapFilePath(): string {
   return path.join(getContinueUtilsPath(), "repo_map.txt");
 }
 

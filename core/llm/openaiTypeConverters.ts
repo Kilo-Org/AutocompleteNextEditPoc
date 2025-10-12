@@ -10,7 +10,7 @@ import {
 
 import { ChatMessage, CompletionOptions, TextMessagePart } from "..";
 
-export function toChatMessage(
+function toChatMessage(
   message: ChatMessage,
 ): ChatCompletionMessageParam {
   if (message.role === "tool") {

@@ -4,7 +4,7 @@ import { OpenAIConfig } from "../types.js";
 import { OpenAIApi } from "./OpenAI.js";
 import { applyAnthropicCachingToOpenRouterBody } from "./OpenRouterCaching.js";
 
-export interface OpenRouterConfig extends OpenAIConfig {
+interface OpenRouterConfig extends OpenAIConfig {
   cachingStrategy?: import("./AnthropicCachingStrategies.js").CachingStrategyName;
 }
 
@@ -33,7 +33,7 @@ export class OpenRouterApi extends OpenAIApi {
 
     applyAnthropicCachingToOpenRouterBody(
       modifiedBody as unknown as ChatCompletionCreateParams,
-      (this.config as OpenRouterConfig).cachingStrategy ?? "systemAndTools",
+      (this.config as OpenRouterConfig).cachingStrategy ?? "systemAndTools"
     );
 
     return modifiedBody;

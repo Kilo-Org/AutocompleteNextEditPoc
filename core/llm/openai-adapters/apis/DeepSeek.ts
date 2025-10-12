@@ -5,7 +5,7 @@ import { chatChunk, customFetch } from "../util.js";
 import { OpenAIApi } from "./OpenAI.js";
 import { FimCreateParamsStreaming } from "./base.js";
 
-export const DEEPSEEK_API_BASE = "https://api.deepseek.com/";
+const DEEPSEEK_API_BASE = "https://api.deepseek.com/";
 export class DeepSeekApi extends OpenAIApi {
   constructor(config: DeepseekConfig) {
     super({

@@ -545,14 +545,11 @@ async function cleanupAsyncEncoders(): Promise<void> {
 }
 
 export {
-  cleanupAsyncEncoders,
   compileChatMessages,
   countTokens,
   countTokensAsync,
-  extractToolSequence,
   pruneLinesFromBottom,
   pruneLinesFromTop,
   pruneRawPromptFromTop,
   pruneStringFromBottom,
-  pruneStringFromTop,
 };

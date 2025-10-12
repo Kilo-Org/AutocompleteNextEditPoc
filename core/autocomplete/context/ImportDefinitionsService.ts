@@ -14,7 +14,7 @@ interface FileInfo {
 export class ImportDefinitionsService {
   static N = 10;
 
-  private cache: PrecalculatedLruCache<FileInfo> =
+  public cache: PrecalculatedLruCache<FileInfo> =
     new PrecalculatedLruCache<FileInfo>(
       this._getFileInfo.bind(this),
       ImportDefinitionsService.N,

@@ -5,7 +5,7 @@ import * as URI from "uri-js";
         \this\is\afile.ts -> this/is/afile.ts
         is/already/clean -> is/already/clean
   **/
-export function pathToUriPathSegment(path: string) {
+function pathToUriPathSegment(path: string) {
   let clean = path.replace(/[\\]/g, "/"); // backslashes -> forward slashes
   clean = clean.replace(/^\//, ""); // remove start slash
   clean = clean.replace(/\/$/, ""); // remove end slash
@@ -15,7 +15,7 @@ export function pathToUriPathSegment(path: string) {
     .join("/");
 }
 
-export function getCleanUriPath(uri: string) {
+function getCleanUriPath(uri: string) {
   const path = URI.parse(uri).path ?? "";
   let clean = path.replace(/^\//, ""); // remove start slash
   clean = clean.replace(/\/$/, ""); // remove end slash
@@ -90,7 +90,7 @@ export function getUriPathBasename(uri: string): string {
   return decodeURIComponent(basename);
 }
 
-export function getFileExtensionFromBasename(basename: string) {
+function getFileExtensionFromBasename(basename: string) {
   const parts = basename.split(".");
   if (parts.length < 2) {
     return "";
@@ -124,7 +124,7 @@ export function joinPathsToUri(uri: string, ...pathSegments: string[]) {
   return URI.resolve(baseUri, segments.join("/"));
 }
 
-export function joinEncodedUriPathSegmentToUri(
+function joinEncodedUriPathSegmentToUri(
   uri: string,
   pathSegment: string,
 ) {
@@ -175,14 +175,14 @@ export function getShortestUniqueRelativeUriPaths(
 
 // Only used when working with system paths and relative paths
 // Since doesn't account for URI segements before workspace
-export function getLastNPathParts(filepath: string, n: number): string {
+function getLastNPathParts(filepath: string, n: number): string {
   if (n <= 0) {
     return "";
   }
   return filepath.split(/[\\/]/).slice(-n).join("/");
 }
 
-export function getUriDescription(uri: string, dirUriCandidates: string[]) {
+function getUriDescription(uri: string, dirUriCandidates: string[]) {
   const { relativePathOrBasename, foundInDir } = findUriInDirs(
     uri,
     dirUriCandidates,

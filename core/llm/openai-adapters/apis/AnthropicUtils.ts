@@ -10,7 +10,7 @@ import {
   ChatCompletionToolChoiceOption,
 } from "openai/resources";
 
-export function getAnthropicErrorMessage(response: ErrorResponse): string {
+function getAnthropicErrorMessage(response: ErrorResponse): string {
   switch (response.error.type) {
     case "api_error":
       return "An unexpected error has occurred internal to Anthropic's systems.";

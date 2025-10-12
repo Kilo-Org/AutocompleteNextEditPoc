@@ -57,7 +57,7 @@ export function intersection(a: Range, b: Range): Range | null {
   };
 }
 
-export function union(a: Range, b: Range): Range {
+function union(a: Range, b: Range): Range {
   let start: Position;
   if (a.start.line === b.start.line) {
     start = {
@@ -82,7 +82,7 @@ export function union(a: Range, b: Range): Range {
   };
 }
 
-export function maxPosition(a: Position, b: Position): Position {
+function maxPosition(a: Position, b: Position): Position {
   if (a.line > b.line) {
     return a;
   } else if (a.line < b.line) {
@@ -92,7 +92,7 @@ export function maxPosition(a: Position, b: Position): Position {
   }
 }
 
-export function minPosition(a: Position, b: Position): Position {
+function minPosition(a: Position, b: Position): Position {
   if (a.line < b.line) {
     return a;
   } else if (a.line > b.line) {

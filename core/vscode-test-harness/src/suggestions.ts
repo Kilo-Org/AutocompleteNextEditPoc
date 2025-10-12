@@ -11,11 +11,11 @@ export interface SuggestionRanges {
 }
 
 /* Keyed by editor.document.uri.toString() */
-export const editorToSuggestions: Map<
+const editorToSuggestions: Map<
   string, // URI of file
   SuggestionRanges[]
 > = new Map();
-export const currentSuggestion: Map<string, number> = new Map(); // Map from editor URI to index of current SuggestionRanges in editorToSuggestions
+const currentSuggestion: Map<string, number> = new Map(); // Map from editor URI to index of current SuggestionRanges in editorToSuggestions
 
 // When tab is reopened, rerender the decorations:
 vscode.window.onDidChangeActiveTextEditor((editor) => {
@@ -54,7 +54,7 @@ const oldSelDecorationType = vscode.window.createTextEditorDecorationType({
   // },
 });
 
-export function rerenderDecorations(editorUri: string) {
+function rerenderDecorations(editorUri: string) {
   const suggestions = editorToSuggestions.get(editorUri);
   const idx = currentSuggestion.get(editorUri);
   const editor = vscode.window.visibleTextEditors.find((editor) =>
@@ -134,7 +134,7 @@ export function rerenderDecorations(editorUri: string) {
   // }
 }
 
-export function suggestionDownCommand() {
+function suggestionDownCommand() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
@@ -158,7 +158,7 @@ export function suggestionDownCommand() {
   rerenderDecorations(editorUri);
 }
 
-export function suggestionUpCommand() {
+function suggestionUpCommand() {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return;
@@ -285,11 +285,11 @@ function handleAllSuggestions(accept: boolean) {
   }
 }
 
-export function acceptAllSuggestionsCommand() {
+function acceptAllSuggestionsCommand() {
   handleAllSuggestions(true);
 }
 
-export function rejectAllSuggestionsCommand() {
+function rejectAllSuggestionsCommand() {
   handleAllSuggestions(false);
 }
 

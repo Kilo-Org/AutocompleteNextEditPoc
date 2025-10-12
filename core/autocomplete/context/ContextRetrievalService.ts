@@ -88,7 +88,7 @@ export class ContextRetrievalService {
    */
   public async initializeForFile(filepath: string): Promise<void> {
     try {
-      await (this.importDefinitionsService as any).cache.initKey(filepath);
+      await this.importDefinitionsService.cache.initKey(filepath);
     } catch (e) {
       console.warn(
         `Failed to initialize import definitions cache for ${filepath}:`,

@@ -9,7 +9,7 @@ export class CompletionStreamer {
   private streamTransformPipeline = new StreamTransformPipeline();
   private generatorReuseManager: GeneratorReuseManager;
 
-  constructor(onError: (err: any) => void) {
+  constructor(onError: (err: unknown) => void) {
     this.generatorReuseManager = new GeneratorReuseManager(onError);
   }
 

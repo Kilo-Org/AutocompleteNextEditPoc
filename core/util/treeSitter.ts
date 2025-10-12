@@ -35,7 +35,7 @@ export enum LanguageName {
   SOLIDITY = "solidity",
 }
 
-export const supportedLanguages: { [key: string]: LanguageName } = {
+const supportedLanguages: { [key: string]: LanguageName } = {
   cpp: LanguageName.CPP,
   hpp: LanguageName.CPP,
   cc: LanguageName.CPP,
@@ -152,7 +152,7 @@ function getExtensionFromPathOrUri(input: string): string {
   return dot >= 0 ? base.slice(dot + 1).toLowerCase() : "";
 }
 
-export async function getLanguageForFile(
+async function getLanguageForFile(
   filepathOrUri: string,
 ): Promise<Language | undefined> {
   try {
@@ -279,7 +279,7 @@ const GET_SYMBOLS_FOR_NODE_TYPES: Parser.SyntaxNode["type"][] = [
   // "arrow_function",
 ];
 
-export async function getSymbolsForFile(
+async function getSymbolsForFile(
   filepath: string,
   contents: string,
 ): Promise<SymbolWithRange[] | undefined> {
@@ -346,7 +346,7 @@ export async function getSymbolsForFile(
   return symbols;
 }
 
-export async function getSymbolsForManyFiles(
+async function getSymbolsForManyFiles(
   uris: string[],
   ide: IDE,
 ): Promise<FileSymbolMap> {

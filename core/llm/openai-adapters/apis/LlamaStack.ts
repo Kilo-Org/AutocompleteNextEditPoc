@@ -5,7 +5,7 @@ import { chatChunk, customFetch } from "../util.js";
 import { OpenAIApi } from "./OpenAI.js";
 import { FimCreateParamsStreaming } from "./base.js";
 
-export const Llamastack_API_BASE = "http://localhost:8321/v1/openai/v1/";
+const Llamastack_API_BASE = "http://localhost:8321/v1/openai/v1/";
 export class LlamastackApi extends OpenAIApi {
   constructor(config: LlamastackConfig) {
     super({

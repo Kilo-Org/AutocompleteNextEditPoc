@@ -5,7 +5,7 @@ export class GeneratorReuseManager {
   pendingGeneratorPrefix: string | undefined;
   pendingCompletion = "";
 
-  constructor(private readonly onError: (err: any) => void) {}
+  constructor(private readonly onError: (err: unknown) => void) {}
 
   private _createListenableGenerator(
     abortController: AbortController,

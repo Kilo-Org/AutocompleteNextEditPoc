@@ -78,7 +78,7 @@ export class NextEditProvider {
     private readonly configHandler: MinimalConfigProvider,
     private readonly ide: IDE,
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
-    private readonly _onError: (e: any) => void,
+    private readonly _onError: (e: unknown) => void,
     private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
     endpointType: "default" | "fineTuned",
   ) {
@@ -92,7 +92,7 @@ export class NextEditProvider {
     configHandler: MinimalConfigProvider,
     ide: IDE,
     injectedGetLlm: () => Promise<ILLM | undefined>,
-    onError: (e: any) => void,
+    onError: (e: unknown) => void,
     getDefinitionsFromLsp: GetLspDefinitionsFunction,
     endpointType: "default" | "fineTuned",
   ): NextEditProvider {
@@ -166,10 +166,10 @@ export class NextEditProvider {
     return llm;
   }
 
-  private onError(e: any) {
+  private onError(e: unknown) {
     if (
       ERRORS_TO_IGNORE.some((err) =>
-        typeof e === "string" ? e.includes(err) : e?.message?.includes(err),
+        typeof e === "string" ? e.includes(err) : (e as Error)?.message?.includes(err),
       )
     ) {
       return;
@@ -300,7 +300,7 @@ export class NextEditProvider {
         editableRegionEndLine,
         opts,
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.onError(e);
     } finally {
       this.loggingService.deleteAbortController(input.completionId);
@@ -585,7 +585,7 @@ export class NextEditProvider {
         withChain: true,
         usingFullFileDiff,
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.onError(e);
     }
   }
@@ -620,6 +620,7 @@ export class NextEditProvider {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockNextEditProviderInstance(mockInstance: any) {
+export function __setMockNextEditProviderInstance(mockInstance: NextEditProvider | null) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditProvider as any)._instance = mockInstance;
 }

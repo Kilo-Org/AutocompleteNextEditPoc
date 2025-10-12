@@ -15,7 +15,7 @@ export enum StatusBarStatus {
   Paused,
 }
 
-export const quickPickStatusText = (status: StatusBarStatus | undefined) => {
+const quickPickStatusText = (status: StatusBarStatus | undefined) => {
   switch (status) {
     case undefined:
     case StatusBarStatus.Disabled:
@@ -27,7 +27,7 @@ export const quickPickStatusText = (status: StatusBarStatus | undefined) => {
   }
 };
 
-export const getStatusBarStatusFromQuickPickItemLabel = (
+const getStatusBarStatusFromQuickPickItemLabel = (
   label: string,
 ): StatusBarStatus | undefined => {
   switch (label) {
@@ -189,7 +189,7 @@ export function monitorBatteryChanges(battery: Battery): vscode.Disposable {
   });
 }
 
-export function getAutocompleteStatusBarDescription(
+function getAutocompleteStatusBarDescription(
   selected: string | undefined,
   { title, apiKey, providerName }: ILLM,
 ): string | undefined {
@@ -208,7 +208,7 @@ export function getAutocompleteStatusBarDescription(
   return description;
 }
 
-export function getAutocompleteStatusBarTitle(
+function getAutocompleteStatusBarTitle(
   selected: string | undefined,
   { title }: ILLM,
 ): string {
@@ -228,7 +228,7 @@ const USE_NEXT_EDIT_MENU_ITEM_LABEL =
   "$(sparkle) Use Next Edit over FIM autocomplete";
 
 // Shows what items get rendered in the autocomplete menu.
-export function getNextEditMenuItems(
+function getNextEditMenuItems(
   currentStatus: StatusBarStatus | undefined,
   nextEditEnabled: boolean,
 ): vscode.QuickPickItem[] {
@@ -245,14 +245,14 @@ export function getNextEditMenuItems(
 }
 
 // Checks if the current selected option is a Next Edit toggle label.
-export function isNextEditToggleLabel(label: string): boolean {
+function isNextEditToggleLabel(label: string): boolean {
   return (
     label === USE_FIM_MENU_ITEM_LABEL || label === USE_NEXT_EDIT_MENU_ITEM_LABEL
   );
 }
 
 // Updates the config once Next Edit is toggled.
-export function handleNextEditToggle(
+function handleNextEditToggle(
   label: string,
   config: vscode.WorkspaceConfiguration,
 ) {

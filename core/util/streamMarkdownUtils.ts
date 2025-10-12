@@ -36,7 +36,7 @@ export function processBlockNesting(
  * Stream transformation that stops when encountering a markdown code block ending.
  * Handles nested markdown blocks in markdown files.
  */
-export async function* stopAtLinesWithMarkdownSupport(
+async function* stopAtLinesWithMarkdownSupport(
   lines: LineStream,
   filename: string,
 ): LineStream {

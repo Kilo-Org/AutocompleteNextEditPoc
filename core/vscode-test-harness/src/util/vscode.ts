@@ -15,7 +15,7 @@ export function translate(range: vscode.Range, lines: number): vscode.Range {
   );
 }
 
-export function getNonce() {
+function getNonce() {
   let text = "";
   const possible =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -29,7 +29,7 @@ export function getExtensionUri(): vscode.Uri {
   return vscode.extensions.getExtension("Continue.continue")!.extensionUri;
 }
 
-export function getViewColumnOfFile(
+function getViewColumnOfFile(
   uri: vscode.Uri,
 ): vscode.ViewColumn | undefined {
   for (const tabGroup of vscode.window.tabGroups.all) {
@@ -45,7 +45,7 @@ export function getViewColumnOfFile(
   return undefined;
 }
 
-export function getRightViewColumn(): vscode.ViewColumn {
+function getRightViewColumn(): vscode.ViewColumn {
   // When you want to place in the rightmost panel if there is already more than one, otherwise use Beside
   let column = vscode.ViewColumn.Beside;
   const columnOrdering = [

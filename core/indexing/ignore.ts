@@ -233,7 +233,7 @@ export const defaultFileAndFolderSecurityIgnores = ignore()
   .add(defaultSecurityIgnoreFile)
   .add(defaultSecurityIgnoreDir);
 
-export const defaultIgnoreFileAndDir = ignore()
+const defaultIgnoreFileAndDir = ignore()
   .add(defaultIgnoreFile)
   .add(defaultIgnoreDir);
 
@@ -256,7 +256,7 @@ export function isSecurityConcern(filePathOrUri: string) {
   return defaultFileAndFolderSecurityIgnores.ignores(filepath);
 }
 
-export function throwIfFileIsSecurityConcern(filepath: string) {
+function throwIfFileIsSecurityConcern(filepath: string) {
   if (isSecurityConcern(filepath)) {
     throw new ContinueError(
       ContinueErrorReason.FileIsSecurityConcern,
