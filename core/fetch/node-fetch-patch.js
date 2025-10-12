@@ -64,9 +64,9 @@ const supportedSchemas = new Set(["data:", "http:", "https:"]);
 /**
  * Fetch function
  *
- * @param   {string | URL | import('./request').default} url - Absolute url or Request instance
+ * @param   {string | URL | Request} url - Absolute url or Request instance
  * @param   {*} [options_] - Fetch options
- * @return  {Promise<import('./response').default>}
+ * @return  {Promise<Response>}
  */
 export default async function fetch(url, options_) {
   return new Promise((resolve, reject) => {

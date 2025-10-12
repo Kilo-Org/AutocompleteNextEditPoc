@@ -29,7 +29,6 @@ export function decodeSecretLocation(location: string): {
   return { secretType: SecretType.NotFound };
 }
 
-import { CodebaseIndexer } from "./indexing/CodebaseIndexer";
 import { LLMConfigurationStatuses } from "./llm/constants";
 
 declare global {
@@ -1099,7 +1098,7 @@ export interface ToolExtras {
     contextItems: ContextItem[];
   }) => void;
   config: ContinueConfig;
-  codeBaseIndexer?: CodebaseIndexer;
+  codeBaseIndexer?: any; // TODO: Type properly when CodebaseIndexer is implemented
 }
 
 export interface Tool {
