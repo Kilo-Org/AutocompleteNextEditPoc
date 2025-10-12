@@ -166,12 +166,12 @@ export const CACHING_STRATEGIES = {
 export type CachingStrategyName = keyof typeof CACHING_STRATEGIES;
 
 // Helper function to get available strategies
-export const getAvailableStrategies = () => {
+const getAvailableStrategies = () => {
   return Object.keys(CACHING_STRATEGIES) as CachingStrategyName[];
 };
 
 // Helper function to get strategy description
-export const getStrategyDescription = (
+const getStrategyDescription = (
   strategy: CachingStrategyName,
 ): string => {
   const descriptions = {

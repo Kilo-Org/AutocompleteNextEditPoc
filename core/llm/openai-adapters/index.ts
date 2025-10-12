@@ -171,7 +171,6 @@ export type { BaseLlmApi } from "./apis/base.js";
 
 export {
   addCacheControlToLastTwoUserMessages,
-  getAnthropicErrorMessage,
   getAnthropicHeaders,
   getAnthropicMediaTypeFromDataUrl,
 } from "./apis/AnthropicUtils.js";

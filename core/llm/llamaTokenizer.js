@@ -104,7 +104,7 @@ class PriorityQueue {
   }
 }
 
-export class LlamaTokenizer {
+class LlamaTokenizer {
   vocabById;
   vocabByString;
   merges;
