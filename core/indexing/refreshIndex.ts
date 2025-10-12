@@ -18,7 +18,7 @@ import {
 
 export type DatabaseConnection = Database<sqlite3.Database>;
 
-export class SqliteDb {
+class SqliteDb {
   static db: DatabaseConnection | null = null;
 
   private static async createTables(db: DatabaseConnection) {
@@ -524,7 +524,7 @@ export class GlobalCacheCodeBaseIndex implements CodebaseIndex {
 
 const SQLITE_MAX_LIKE_PATTERN_LENGTH = 50000;
 
-export function truncateToLastNBytes(input: string, maxBytes: number): string {
+function truncateToLastNBytes(input: string, maxBytes: number): string {
   let bytes = 0;
   let startIndex = 0;
 
@@ -543,7 +543,7 @@ export function truncateSqliteLikePattern(input: string, safety: number = 100) {
   return truncateToLastNBytes(input, SQLITE_MAX_LIKE_PATTERN_LENGTH - safety);
 }
 
-export class IndexLock {
+class IndexLock {
   private static getLockTableName() {
     return "indexing_lock";
   }

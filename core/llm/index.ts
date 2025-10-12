@@ -65,7 +65,7 @@ import {
   toCompleteBody,
   toFimBody,
 } from "./openaiTypeConverters.js";
-export class LLMError extends Error {
+class LLMError extends Error {
   constructor(
     message: string,
     public llm: ILLM,
