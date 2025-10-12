@@ -12,7 +12,7 @@ function charIsEscapedAtIndex(index: number, str: string): boolean {
   return !charIsEscapedAtIndex(index - 1, str);
 }
 
-export function convertSingleToDoubleQuoteJSON(json: string): string {
+function convertSingleToDoubleQuoteJSON(json: string): string {
   const singleQuote = "'";
   const doubleQuote = '"';
   const isQuote = (char: string) =>
@@ -56,7 +56,7 @@ export function convertSingleToDoubleQuoteJSON(json: string): string {
   return newJson;
 }
 
-export function debounced(delay: number, fn: (...args: any[]) => void) {
+function debounced(delay: number, fn: (...args: any[]) => void) {
   let timerId: NodeJS.Timeout | null;
   return (...args: any[]) => {
     if (timerId) {
@@ -72,7 +72,7 @@ export function debounced(delay: number, fn: (...args: any[]) => void) {
 type Platform = "mac" | "linux" | "windows" | "unknown";
 type Architecture = "x64" | "arm64" | "unknown";
 
-export function getPlatform(): Platform {
+function getPlatform(): Platform {
   const platform = os.platform();
   if (platform === "darwin") {
     return "mac";
@@ -85,7 +85,7 @@ export function getPlatform(): Platform {
   }
 }
 
-export function getArchitecture(): Architecture {
+function getArchitecture(): Architecture {
   const arch = os.arch();
   if (arch === "x64" || arch === "ia32") {
     return "x64";
@@ -121,7 +121,7 @@ export function isUnsupportedPlatform(): {
   return { isUnsupported: false };
 }
 
-export function getAltOrOption() {
+function getAltOrOption() {
   if (getPlatform() === "mac") {
     return "⌥";
   } else {
@@ -142,7 +142,7 @@ export function getMetaKeyLabel() {
   }
 }
 
-export function getMetaKeyName() {
+function getMetaKeyName() {
   const platform = getPlatform();
   switch (platform) {
     case "mac":
@@ -160,7 +160,7 @@ export function getExtensionVersion(): string {
   return extension?.packageJSON.version || "0.1.0";
 }
 
-export function getvsCodeUriScheme(): string {
+function getvsCodeUriScheme(): string {
   return vscode.env.uriScheme;
 }
 

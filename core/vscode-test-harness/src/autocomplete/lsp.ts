@@ -225,7 +225,7 @@ async function crawlTypes(
   return results;
 }
 
-export async function getDefinitionsForNode(
+async function getDefinitionsForNode(
   uri: vscode.Uri,
   node: Parser.SyntaxNode,
   ide: IDE,

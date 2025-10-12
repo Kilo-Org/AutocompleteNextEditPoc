@@ -1,5 +1,5 @@
 // Stub for editLoggingUtils module
-export function logEditEvent(...args: any[]): any {
+function logEditEvent(...args: any[]): any {
   return undefined;
 }
 
