@@ -2,7 +2,7 @@
   "root": true,
   "extends": ["../.eslintrc.shared.json"],
   "parserOptions": {
-    "project": "./tsconfig.json"
+    "project": "../tsconfig.json"
   },
   "rules": {
     "quotes": ["off", "double", {}],

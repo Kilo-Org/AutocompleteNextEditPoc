@@ -12,10 +12,8 @@
     "test:watch": "vitest --config core/vitest.config.ts",
     "lint": "eslint core --ext ts",
     "lint:fix": "eslint core --ext ts --fix",
-    "typecheck": "tsc -p core/tsconfig.json --noEmit",
-    "tsc:watch": "concurrently -n vscode,core -c magenta,yellow \"npm run tsc:watch:vscode\" \"npm run tsc:watch:core\"",
-    "tsc:watch:vscode": "tsc --project extensions/vscode/tsconfig.json --watch --noEmit --pretty",
-    "tsc:watch:core": "tsc --project core/tsconfig.json --watch --noEmit --pretty",
+    "typecheck": "tsc --noEmit",
+    "tsc:watch": "tsc --watch --noEmit --pretty",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "prepare": "husky"
