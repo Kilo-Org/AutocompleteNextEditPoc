@@ -292,20 +292,23 @@ See the complete VSCode integration in [`core/vscode-test-harness/`](core/vscode
 ### Running Tests
 
 ```bash
-# Run all tests (532 tests)
-./test-autocomplete.sh
-
-# Run only core tests (446 tests)
-cd core
-npm run vitest
-
-# Run only VSCode integration tests (86 tests)
-cd core/vscode-test-harness
+# Run all tests from root (707 tests: 621 core + 86 harness)
 npm test
 
-# Watch mode
-cd core
-npm run vitest -- --watch
+# Run only core tests (621 tests)
+npm run test:core
+
+# Run only VSCode integration tests (86 tests)
+npm run test:harness
+
+# Watch mode for core tests
+npm run test:watch
+
+# Type checking
+npm run typecheck
+
+# Type checking in watch mode
+npm run tsc:watch
 ```
 
 ### Test Coverage

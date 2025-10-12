@@ -17,47 +17,45 @@ The repository is now a truly flat monorepo with a single package manifest at th
 
 ## Final tsconfig structure
 
-The minimal set kept to support development, typechecking, incremental builds, and harness tests:
+The repository now uses a single root tsconfig for development and tests:
 
-- Root workspace: [tsconfig.json](tsconfig.json) — contains only project references to:
-  - [core/](core) (core dev/test)
-  - [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json) (harness)
-- Core (development/test): [core/tsconfig.json](core/tsconfig.json)
-  - Strict settings, noEmit, composite/incremental for IDE speed and tsc --build graph.
-- VS Code Test Harness: [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json)
-  - Extends core dev config; uses path mappings to consume core types.
+- Root: [tsconfig.json](tsconfig.json) — single configuration for all code
+  - Global types: ["vitest/globals", "node"]; VS Code types are imported explicitly in harness files
+  - noEmit: true; composite/incremental disabled
+  - baseUrl/paths: maps "core" and "core/*" to allow harness imports
+- Removed:
+  - [core/tsconfig.json](core/tsconfig.json)
+  - [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json)
 
 ## Rationale
 
-- Production build configuration was intentionally removed to enable a ground-up redesign of the build/publish process.
-- A single root tsconfig without project references would lose incremental, multi-project correctness. Keeping a tiny root with references preserves tsc --build and editor navigation.
-- The harness remains an isolated project with its own [tsconfig.json](core/vscode-test-harness/tsconfig.json) due to its VS Code type environment.
+- Production build configuration remains intentionally removed to enable a ground-up redesign of the build/publish process.
+- Project references were removed to reduce configuration complexity; incremental builds are traded off for simplicity.
+- VS Code types are brought in via explicit imports (for example, `import * as vscode from "vscode"`) within the harness, avoiding global type pollution.
 
 ## Developer workflow (root)
 
 - Install: npm install
 - Typecheck: npm run typecheck
 - Test (all): npm test
-- Incremental typecheck/build graph: npx tsc --build
+- Note: Project references removed; incremental build graphs (`tsc --build`) are not used.
 - Lint: npm run lint
 - Format: npm run format
 
 ## File layout (key items)
 
 - [package.json](package.json) — single manifest with all dependencies and scripts
-- [tsconfig.json](tsconfig.json) — root references
+- [tsconfig.json](tsconfig.json) — single TypeScript configuration
 - [core/](core)
-  - [tsconfig.json](core/tsconfig.json) — dev/test
   - [vscode-test-harness/](core/vscode-test-harness)
-    - [tsconfig.json](core/vscode-test-harness/tsconfig.json)
 - [tree-sitter/tag-queries/](tree-sitter/tag-queries) — consolidated tag queries
 
 ## Verification
 
 The flat structure is validated end-to-end:
-- TypeScript compilation: npm run typecheck and npx tsc --build both succeed.
-- Tests: npm test — 707 tests passing (621 core + 86 harness).
-- Editor support: project references provide correct navigation and incremental checking.
+- TypeScript compilation: `npm run typecheck` succeeds.
+- Tests: `npm test` — 707 tests passing (621 core + 86 harness).
+- Editor support: single-project configuration with explicit VS Code imports in the harness.
 
 ## Notes
 
@@ -68,6 +66,6 @@ The flat structure is validated end-to-end:
 
 ## Change log (Phase 8)
 
-- Removed [core/tsconfig.npm.json](core/tsconfig.npm.json) and all references to it.
-- Updated [tsconfig.json](tsconfig.json) to reference [core/](core) and [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json) directly.
-- Updated documentation to reflect the simplified, development-only TypeScript setup.
+- Removed [core/tsconfig.json](core/tsconfig.json) and [core/vscode-test-harness/tsconfig.json](core/vscode-test-harness/tsconfig.json).
+- Replaced the project-reference graph with a single root [tsconfig.json](tsconfig.json) that uses baseUrl/paths for harness imports and relies on explicit `vscode` imports.
+- Updated documentation to reflect the unified, development-only TypeScript setup.
