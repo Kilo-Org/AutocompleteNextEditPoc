@@ -19,7 +19,6 @@ const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
 import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
-import { getControlPlaneSessionInfo } from "../stubs/WorkOsAuthProvider";
 import { handleLLMError } from "../util/errorHandling";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
@@ -161,9 +160,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("showToast", (msg) => {
       this.ide.showToast(...(msg.data as [any, any, ...any[]]));
-    });
-    this.onWebviewOrCore("getControlPlaneSessionInfo", async (msg) => {
-      return getControlPlaneSessionInfo(msg.data.silent, msg.data.useOnboarding);
     });
     this.onWebviewOrCore("saveFile", async (msg) => {
       return await ide.saveFile(msg.data.filepath);

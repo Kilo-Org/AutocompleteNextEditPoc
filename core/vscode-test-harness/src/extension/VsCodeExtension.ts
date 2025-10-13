@@ -3,7 +3,7 @@ import path from "path";
 
 import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
+import { EXTENSION_NAME } from "core/util/env";
 import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath, getContinueGlobalPath } from "core/util/paths";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
@@ -13,8 +13,6 @@ import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
 import { registerAllCodeLensProviders } from "../lang-server/codeLens";
 import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
 import { setupRemoteConfigSync } from "../stubs/activation";
-import { UriEventHandler } from "../stubs/uriHandler";
-import { getControlPlaneSessionInfo } from "../stubs/WorkOsAuthProvider";
 import { FileSearch } from "../util/FileSearch";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
@@ -48,7 +46,6 @@ export class VsCodeExtension {
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
   private fileSearch: FileSearch;
-  private uriHandler = new UriEventHandler();
   private completionProvider: ContinueCompletionProvider;
 
   private ARBITRARY_TYPING_DELAY = 2000;
@@ -244,19 +241,6 @@ export class VsCodeExtension {
       vscode.languages.registerInlineCompletionItemProvider([{ pattern: "**" }], this.completionProvider)
     );
 
-    // Handle uri events
-    this.uriHandler.event((uri: any) => {
-      const queryParams = new URLSearchParams(uri.query);
-      let profileId = queryParams.get("profile_id");
-      let orgId = queryParams.get("org_id");
-
-      this.core.invoke("config/refreshProfiles", {
-        reason: "VS Code deep link",
-        selectOrgId: orgId === "null" ? undefined : (orgId ?? undefined),
-        selectProfileId: profileId === "null" ? undefined : (profileId ?? undefined),
-      });
-    });
-
     // FileSearch
     this.fileSearch = new FileSearch(this.ide);
     registerAllPromptFilesCompletionProviders(context, this.fileSearch, this.ide);
@@ -354,28 +338,6 @@ export class VsCodeExtension {
       const ast = await getAst(event.fileName, event.getText());
       if (ast) {
         DocumentHistoryTracker.getInstance().addDocument(localPathOrUriToPath(event.fileName), event.getText(), ast);
-      }
-    });
-
-    // When GitHub sign-in status changes, reload config
-    vscode.authentication.onDidChangeSessions(async (e) => {
-      const env = await getControlPlaneEnv();
-      if (!env || !env.AUTH_TYPE) {
-        return;
-      }
-      if (e.provider.id === env.AUTH_TYPE) {
-        void vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", true);
-
-        const sessionInfo = await getControlPlaneSessionInfo(true, false);
-        void this.core.invoke("didChangeControlPlaneSessionInfo", {
-          sessionInfo,
-        });
-      } else {
-        void vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", false);
-
-        if (e.provider.id === "github") {
-          this.configHandler?.reloadConfig?.("Github sign-in status changed");
-        }
       }
     });
 
