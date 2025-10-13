@@ -3,7 +3,6 @@ import { NextEditOutcome } from "core/nextEdit/types";
 // @ts-ignore
 import svgBuilder from "svg-builder";
 import * as vscode from "vscode";
-import { getTheme } from "../util/getTheme";
 import {
   HandlerPriority,
   SelectionChangeManager,
@@ -80,7 +79,6 @@ export class JumpManager {
   private _jumpDecoration: vscode.TextEditorDecorationType | undefined;
   private _jumpDecorationVisible = false;
   private _disposables: vscode.Disposable[] = [];
-  private _theme = getTheme();
 
   private _jumpInProgress: boolean = false;
   private _jumpAccepted: boolean = false;
@@ -94,7 +92,6 @@ export class JumpManager {
     // Re‑build when the colour theme changes
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration("workbench.colorTheme")) {
-        this._theme = getTheme();
         this._createSvgJumpIcon();
       }
     });
@@ -145,7 +142,7 @@ export class JumpManager {
           {
             ...baseTextConfig,
             x: 4,
-            fill: this._theme?.colors["editor.foreground"] ?? SVG_CONFIG.stroke,
+            fill: SVG_CONFIG.stroke,
           },
           SVG_CONFIG.label,
         )
@@ -167,8 +164,7 @@ export class JumpManager {
   }
 
   private _createSvgJumpDecoration(): vscode.TextEditorDecorationType {
-    const backgroundColour =
-      this._theme?.colors["editor.background"] ?? "#333333";
+    const backgroundColour = "#333333";
 
     return vscode.window.createTextEditorDecorationType({
       after: {
