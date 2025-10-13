@@ -1,6 +1,4 @@
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../util/parameters";
-
-import { getControlPlaneEnvSync } from "../util/env";
 import { DataLogger } from "../util/log";
 import { NextEditOutcome } from "./types";
 
@@ -22,8 +20,6 @@ export class NextEditLoggingService {
     }
   >();
   _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined = undefined;
-
-  private constructor() {}
 
   public static getInstance(): NextEditLoggingService {
     if (!NextEditLoggingService.instance) {

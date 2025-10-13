@@ -1,4 +1,3 @@
-import { EXTENSION_NAME } from "core/util/env";
 import { findUriInDirs } from "core/util/uri";
 import _ from "lodash";
 import * as URI from "uri-js";
@@ -193,48 +192,6 @@ export class VsCodeIdeUtils {
     }
   }
 
-  showVirtualFile(name: string, contents: string) {
-    vscode.workspace
-      .openTextDocument(
-        vscode.Uri.parse(
-          `${VsCodeExtension.continueVirtualDocumentScheme}:${encodeURIComponent(name)}?${encodeURIComponent(contents)}`
-        )
-      )
-      .then((doc) => {
-        vscode.window.showTextDocument(doc, { preview: false });
-      });
-  }
-
-  async getUserSecret(key: string) {
-    // Check if secret already exists in VS Code settings (global)
-    let secret = vscode.workspace.getConfiguration(EXTENSION_NAME).get(key);
-    if (typeof secret !== "undefined" && secret !== null) {
-      return secret;
-    }
-
-    // If not, ask user for secret
-    secret = await vscode.window.showInputBox({
-      prompt: `Either enter secret for ${key} or press enter to try Continue for free.`,
-      password: true,
-    });
-
-    // Add secret to VS Code settings
-    vscode.workspace.getConfiguration(EXTENSION_NAME).update(key, secret, vscode.ConfigurationTarget.Global);
-
-    return secret;
-  }
-
-  // ------------------------------------ //
-  // Initiate Request
-
-  acceptRejectSuggestion(accept: boolean, key: SuggestionRanges) {
-    if (accept) {
-      acceptSuggestionCommand(key);
-    } else {
-      rejectSuggestionCommand(key);
-    }
-  }
-
   // ------------------------------------ //
   // Respond to request
 
@@ -308,8 +265,6 @@ export class VsCodeIdeUtils {
 
     return terminalContents;
   }
-
-
 
   async getTopLevelCallStackSources(threadIndex: number, stackDepth = 3): Promise<string[]> {
     const session = vscode.debug.activeDebugSession;

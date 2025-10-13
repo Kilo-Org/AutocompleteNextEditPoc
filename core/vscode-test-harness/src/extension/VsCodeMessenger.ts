@@ -102,9 +102,6 @@ export class VsCodeMessenger {
       });
     });
 
-    this.onWebviewOrCore("getIdeSettings", async (msg) => {
-      return ide.getIdeSettings();
-    });
     this.onWebviewOrCore("getDiff", async (msg) => {
       return ide.getDiff(msg.data.includeUnstaged);
     });
@@ -119,9 +116,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("writeFile", async (msg) => {
       return ide.writeFile(msg.data.path, msg.data.contents);
-    });
-    this.onWebviewOrCore("showVirtualFile", async (msg) => {
-      return ide.showVirtualFile(msg.data.name, msg.data.content);
     });
     this.onWebviewOrCore("openFile", async (msg) => {
       return ide.openFile(msg.data.path);
