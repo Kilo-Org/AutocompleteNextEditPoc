@@ -25,7 +25,6 @@ import { setupNextEditWindowManager, NextEditWindowManager } from "../activation
 import { HandlerPriority, SelectionChangeManager } from "../activation/SelectionChangeManager";
 import { GhostTextAcceptanceTracker } from "../autocomplete/GhostTextAcceptanceTracker";
 import { getDefinitionsFromLsp } from "../autocomplete/lsp";
-import { handleTextDocumentChange } from "../util/editLoggingUtils";
 import type { VsCodeWebviewProtocol } from "../webviewProtocol";
 
 export class VsCodeExtension {
@@ -240,16 +239,6 @@ export class VsCodeExtension {
       if (event.contentChanges.length > 0) {
         selectionManager.documentChanged();
       }
-
-      const editInfo = await handleTextDocumentChange(
-        event,
-        this.configHandler,
-        this.ide,
-        this.completionProvider,
-        getDefinitionsFromLsp
-      );
-
-      if (editInfo) this.core.invoke("files/smallEdit", editInfo);
     });
 
     vscode.workspace.onDidSaveTextDocument(async (event) => {

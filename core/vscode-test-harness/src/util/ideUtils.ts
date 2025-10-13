@@ -4,12 +4,6 @@ import * as vscode from "vscode";
 
 import { VsCodeExtension } from "../extension/VsCodeExtension";
 import { GitExtension, Repository } from "../otherExtensions/git";
-import {
-  SuggestionRanges,
-  acceptSuggestionCommand,
-  rejectSuggestionCommand,
-  showSuggestion as showSuggestionInEditor,
-} from "../suggestions";
 
 import { getUniqueId, openEditorAndRevealRange } from "./vscode";
 
@@ -60,14 +54,6 @@ export class VsCodeIdeUtils {
 
   getUniqueId() {
     return getUniqueId();
-  }
-
-  showSuggestion(uri: vscode.Uri, range: Range, suggestion: string) {
-    showSuggestionInEditor(
-      uri,
-      new vscode.Range(range.start.line, range.start.character, range.end.line, range.end.character),
-      suggestion
-    );
   }
 
   async openFile(uri: vscode.Uri, range?: vscode.Range) {
