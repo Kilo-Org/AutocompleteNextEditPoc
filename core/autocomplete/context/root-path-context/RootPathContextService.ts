@@ -118,21 +118,6 @@ export class RootPathContextService {
 
     await Promise.all(queries);
 
-    // Fallback: if no matches from the query (e.g., parser/fixture mismatch),
-    // attempt a single snippet lookup at the end position of this node.
-    if (snippets.length === 0) {
-      try {
-        const fallbackSnippets = await this.getSnippets(
-          filepath,
-          node.endPosition,
-          language,
-        );
-        snippets.push(...fallbackSnippets);
-      } catch {
-        // swallow; tests only assert calls occurred, not contents
-      }
-    }
-
     return snippets;
   }
 
@@ -199,32 +184,6 @@ export class RootPathContextService {
       }
 
       parentKey = key;
-    }
-
-    // Global fallback: if nothing was captured by queries or cache, try a single lookup
-    if (snippets.length === 0) {
-      try {
-        const lastNode = astPath[astPath.length - 1];
-        const language = getFullLanguageName(filepath);
-        // Only attempt if we have a sensible end position and language
-        if (lastNode && language) {
-          const fallback = await this.getSnippets(
-            filepath,
-            lastNode.endPosition,
-            language,
-          );
-          const formattedFallback: AutocompleteCodeSnippet[] = fallback.map(
-            (item) => ({
-              filepath: item.filepath,
-              content: item.contents,
-              type: AutocompleteSnippetType.Code,
-            }),
-          );
-          snippets.push(...formattedFallback);
-        }
-      } catch {
-        // ignore – tests verify invocation took place, not contents
-      }
     }
 
     return snippets;

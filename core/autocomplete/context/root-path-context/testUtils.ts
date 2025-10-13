@@ -76,19 +76,16 @@ export async function testRootPathContext(
   const treePath = await getTreePathAtCursor(ast, prefix.length);
   await service.getContextForPath(startPath, treePath);
 
-  // Relax assertion: ensure at least one snippet lookup occurred
-  expect(getSnippetsMock).toHaveBeenCalled();
+  expect(getSnippetsMock).toHaveBeenCalledTimes(
+    expectedDefinitionPositions.length,
+  );
 
-  // Optionally validate the shape of at least the first call without enforcing exact counts/ordering
-  const firstCall = (getSnippetsMock as any).mock?.calls?.[0];
-  if (firstCall) {
-    expect(firstCall[0]).toEqual(expect.any(String)); // filepath
-    expect(firstCall[1]).toEqual(
-      expect.objectContaining({
-        row: expect.any(Number),
-        column: expect.any(Number),
-      }),
-    ); // point
-    expect(firstCall[2]).toEqual(expect.any(String)); // language
-  }
+  expectedDefinitionPositions.forEach((position, index) => {
+    expect(getSnippetsMock).toHaveBeenNthCalledWith(
+      index + 1,
+      expect.any(String), // filepath argument
+      position,
+      expect.any(String), // language argument
+    );
+  });
 }

@@ -1,30 +1,33 @@
-interface Person {}
-interface Address {}
+// @ts-nocheck
 
-export function func1(person: Person): Address {
-  return {} as Address;
+function getAddress(person: Person): Address {
+  // TODO
 }
 
-export function func2(people: Person[]): Address[] {
-  return [] as Address[];
+function getFirstAddress(people: Person[]): Address {
+  // TODO
 }
 
-export function func3(person: Person): void {}
-
-export function func4(): Person {
-  return {} as Person;
+function logPerson(person: Person) {
+  // TODO
 }
 
-export function func5(people: Person[]): Address[] {
-  return [] as Address[];
+function getHardcodedAddress(): Address {
+  // TODO
 }
 
-export function func6<T extends Person | Address>(value: T): T {
-  return value;
+function getAddresses(people: Person[]): Address[] {
+  // TODO
 }
 
-export function func7(value: Person | Address): Person | Address {
-  return value;
+function logPersonWithAddress(person: Person<Address>): Person<Address> {
+  // TODO
 }
 
-export function func8(person: Person, address: Address): void {}
+function logPersonOrAddress(person: Person | Address): Person | Address {
+  // TODO
+}
+
+function logPersonAndAddress(person: Person, address: Address) {
+  // TODO
+}
