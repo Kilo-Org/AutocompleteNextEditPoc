@@ -200,15 +200,7 @@ export class VsCodeExtension {
 
     const inProcessMessenger = new InProcessMessenger<ToCoreProtocol, FromCoreProtocol>();
 
-    new VsCodeMessenger(
-      inProcessMessenger,
-      stubWebviewProtocol,
-      this.ide,
-      configHandlerPromise,
-      this.workOsAuthProvider,
-      context,
-      this
-    );
+    new VsCodeMessenger(inProcessMessenger, stubWebviewProtocol, this.ide, this.workOsAuthProvider);
 
     this.core = new Core(inProcessMessenger, this.ide);
     this.configHandler = this.core.configHandler;

@@ -257,15 +257,8 @@ class VsCodeIde implements IDE {
     return await this.ideUtils.getTerminalContents(1);
   }
 
-  async getDebugLocals(threadIndex: number): Promise<string> {
-    return await this.ideUtils.getDebugLocals(threadIndex);
-  }
-
   async getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]> {
     return await this.ideUtils.getTopLevelCallStackSources(threadIndex, stackDepth);
-  }
-  async getAvailableThreads(): Promise<Thread[]> {
-    return await this.ideUtils.getAvailableThreads();
   }
 
   async getWorkspaceDirs(): Promise<string[]> {
