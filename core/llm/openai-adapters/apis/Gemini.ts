@@ -33,17 +33,8 @@ type UsageInfo = Pick<CompletionUsage, "total_tokens" | "completion_tokens" | "p
 export class GeminiApi implements BaseLlmApi {
   apiBase: string = "https://generativelanguage.googleapis.com/v1beta/";
 
-  static maxStopSequences = 5;
-
   constructor(protected config: GeminiConfig) {
     this.apiBase = config.apiBase ?? this.apiBase;
-  }
-
-  private _convertMessages(msgs: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): any[] {
-    return msgs.map((m) => ({
-      role: m.role === "assistant" ? "CHATBOT" : "USER",
-      message: m.content,
-    }));
   }
 
   private _oaiPartToGeminiPart(

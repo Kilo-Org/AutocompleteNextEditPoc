@@ -751,8 +751,6 @@ export type FileStatsMap = {
 export interface IDE {
   getIdeInfo(): Promise<IdeInfo>;
 
-  getDiff(includeUnstaged: boolean): Promise<string[]>;
-
   getClipboardContent(): Promise<{ text: string; copiedAt: string }>;
 
   getUniqueId(): Promise<string>;
@@ -779,12 +777,6 @@ export interface IDE {
         contents: string;
       }
   >;
-
-  getBranch(dir: string): Promise<string>;
-
-  getRepoName(dir: string): Promise<string | undefined>;
-
-  getGitRootPath(dir: string): Promise<string | undefined>;
 
   getFileStats(files: string[]): Promise<FileStatsMap>;
 

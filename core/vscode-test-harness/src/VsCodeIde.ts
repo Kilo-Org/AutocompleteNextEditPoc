@@ -3,19 +3,10 @@ import * as URI from "uri-js";
 import * as vscode from "vscode";
 
 import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvider } from "./autocomplete/lsp";
-import { Repository } from "./otherExtensions/git";
 import { VsCodeIdeUtils } from "./util/ideUtils";
 import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
-import type {
-  DocumentSymbol,
-  FileStatsMap,
-  IDE,
-  IdeInfo,
-  Location,
-  RangeInFile,
-  SignatureHelp,
-} from "core";
+import type { DocumentSymbol, FileStatsMap, IDE, IdeInfo, Location, RangeInFile, SignatureHelp } from "core";
 import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
 
 class VsCodeIde implements IDE {
@@ -103,20 +94,6 @@ class VsCodeIde implements IDE {
     });
   }
 
-  async getRepoName(dir: string): Promise<string | undefined> {
-    const repo = await this.getRepo(dir);
-    const remotes = repo?.state.remotes;
-    if (!remotes) {
-      return undefined;
-    }
-    const remote = remotes?.find((r: any) => r.name === "origin") ?? remotes?.[0];
-    if (!remote) {
-      return undefined;
-    }
-    const ownerAndRepo = remote.fetchUrl?.replace(".git", "").split("/").slice(-2);
-    return ownerAndRepo?.join("/");
-  }
-
   getIdeInfo(): Promise<IdeInfo> {
     return Promise.resolve({
       ideType: "vscode",
@@ -153,16 +130,8 @@ class VsCodeIde implements IDE {
     return pathToLastModified;
   }
 
-  async getRepo(dir: string): Promise<Repository | undefined> {
-    return this.ideUtils.getRepo(vscode.Uri.parse(dir));
-  }
-
   getUniqueId(): Promise<string> {
     return Promise.resolve(vscode.env.machineId);
-  }
-
-  async getDiff(includeUnstaged: boolean): Promise<string[]> {
-    return await this.ideUtils.getDiff(includeUnstaged);
   }
 
   async getClipboardContent() {
@@ -242,15 +211,6 @@ class VsCodeIde implements IDE {
       path: vscode.window.activeTextEditor.document.uri.toString(),
       contents: vscode.window.activeTextEditor.document.getText(),
     };
-  }
-
-  async getBranch(dir: string): Promise<string> {
-    return this.ideUtils.getBranch(vscode.Uri.parse(dir));
-  }
-
-  async getGitRootPath(dir: string): Promise<string | undefined> {
-    const root = await this.ideUtils.getGitRoot(vscode.Uri.parse(dir));
-    return root?.toString();
   }
 }
 

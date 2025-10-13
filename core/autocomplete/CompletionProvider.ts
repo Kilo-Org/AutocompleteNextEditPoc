@@ -245,7 +245,7 @@ export class CompletionProvider {
         filepath: helper.filepath,
         numLines: completion.split("\n").length,
         completionId: helper.input.completionId,
-        gitRepo: await this.ide.getRepoName(helper.filepath),
+        gitRepo: "fake-placeholder", //MINIMAL_REPO - came from git
         uniqueId: await this.ide.getUniqueId(),
         timestamp: new Date().toISOString(),
         profileType: this.configHandler.currentProfile?.profileDescription.profileType,
