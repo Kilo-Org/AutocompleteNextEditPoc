@@ -112,5 +112,9 @@ export class AutocompleteLoggingService {
       numLines: restOfOutcome.numLines,
       profileType: restOfOutcome.profileType,
     };
+
+    if (!process.env.VITEST) {
+      console.log(toLog);
+    }
   }
 }
