@@ -135,12 +135,3 @@ export function rerank(options: {
     },
   };
 }
-
-function model(options: { id: string; owned_by?: string }): Model {
-  return {
-    id: options.id,
-    object: "model",
-    created: Date.now(),
-    owned_by: options.owned_by ?? "organization-owner",
-  };
-}
