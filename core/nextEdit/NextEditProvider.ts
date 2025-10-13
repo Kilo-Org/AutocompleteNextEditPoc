@@ -336,7 +336,7 @@ export class NextEditProvider {
 
     const helper = await HelperVars.create(input, options, llm.model, this.ide);
 
-    if (await shouldPrefilter(helper, this.ide)) {
+    if (await shouldPrefilter(helper, await this.ide.getWorkspaceDirs())) {
       return { token, startTime, helper: undefined };
     }
 

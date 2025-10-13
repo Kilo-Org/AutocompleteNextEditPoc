@@ -162,7 +162,7 @@ export class CompletionProvider {
 
       const helper = await HelperVars.create(input, options, llm.model, this.ide);
 
-      if (await shouldPrefilter(helper, this.ide)) {
+      if (await shouldPrefilter(helper, await this.ide.getWorkspaceDirs())) {
         return undefined;
       }
 
@@ -257,7 +257,6 @@ export class CompletionProvider {
       }
 
       //////////
-
       // Save to cache
       if (!outcome.cacheHit && helper.options.useCache) {
         (await this.autocompleteCache)

@@ -2,7 +2,6 @@ import ignore from "ignore";
 
 import path from "path";
 import { fileURLToPath } from "url";
-import { ContinueError, ContinueErrorReason } from "../util/errors";
 
 // Security-focused ignore patterns - these should always be excluded for security reasons
 export const DEFAULT_SECURITY_IGNORE_FILETYPES = [
@@ -94,148 +93,14 @@ export const DEFAULT_SECURITY_IGNORE_DIRS = [
   ".tmp/",
 ];
 
-// Additional non-security patterns for general indexing exclusion
-const ADDITIONAL_INDEXING_IGNORE_FILETYPES = [
-  "*.DS_Store",
-  "*-lock.json",
-  "*.lock",
-  "*.log",
-  "*.ttf",
-  "*.png",
-  "*.jpg",
-  "*.jpeg",
-  "*.gif",
-  "*.mp4",
-  "*.svg",
-  "*.ico",
-  "*.pdf",
-  "*.zip",
-  "*.gz",
-  "*.tar",
-  "*.dmg",
-  "*.tgz",
-  "*.rar",
-  "*.7z",
-  "*.exe",
-  "*.dll",
-  "*.obj",
-  "*.o",
-  "*.o.d",
-  "*.a",
-  "*.lib",
-  "*.so",
-  "*.dylib",
-  "*.ncb",
-  "*.sdf",
-  "*.woff",
-  "*.woff2",
-  "*.eot",
-  "*.cur",
-  "*.avi",
-  "*.mpg",
-  "*.mpeg",
-  "*.mov",
-  "*.mp3",
-  "*.mkv",
-  "*.webm",
-  "*.jar",
-  "*.onnx",
-  "*.parquet",
-  "*.pqt",
-  "*.wav",
-  "*.webp",
-  "*.wasm",
-  "*.plist",
-  "*.profraw",
-  "*.gcda",
-  "*.gcno",
-  "go.sum",
-  "*.gitignore",
-  "*.gitkeep",
-  "*.continueignore",
-  "*.csv",
-  "*.uasset",
-  "*.pdb",
-  "*.bin",
-  "*.pag",
-  "*.swp",
-  "*.jsonl",
-  // "*.prompt", // can be incredibly confusing for the LLM to have another set of instructions injected into the prompt
-  // Application specific
-  ".continue/",
-];
-
-const ADDITIONAL_INDEXING_IGNORE_DIRS = [
-  ".git/",
-  ".svn/",
-  "node_modules/",
-  "dist/",
-  "build/",
-  "Build/",
-  "target/",
-  "out/",
-  "bin/",
-  ".pytest_cache/",
-  ".vscode-test/",
-  "__pycache__/",
-  "site-packages/",
-  ".gradle/",
-  ".mvn/",
-  ".cache/",
-  "gems/",
-  "vendor/",
-
-  ".venv/",
-  "venv/",
-
-  ".vscode/",
-  ".idea/",
-  ".vs/",
-];
-
-// Combined patterns: security + additional
-const DEFAULT_IGNORE_FILETYPES = [
-  ...DEFAULT_SECURITY_IGNORE_FILETYPES,
-  ...ADDITIONAL_INDEXING_IGNORE_FILETYPES,
-];
-
-const DEFAULT_IGNORE_DIRS = [
-  ...DEFAULT_SECURITY_IGNORE_DIRS,
-  ...ADDITIONAL_INDEXING_IGNORE_DIRS,
-];
-
-export const DEFAULT_IGNORES = [
-  ...DEFAULT_IGNORE_FILETYPES,
-  ...DEFAULT_IGNORE_DIRS,
-];
-
-export const defaultIgnoresGlob = `!{${DEFAULT_IGNORES.join(",")}}`;
-
 // Create ignore instances
-const defaultSecurityIgnoreFile = ignore().add(
-  DEFAULT_SECURITY_IGNORE_FILETYPES,
-);
+const defaultSecurityIgnoreFile = ignore().add(DEFAULT_SECURITY_IGNORE_FILETYPES);
 const defaultSecurityIgnoreDir = ignore().add(DEFAULT_SECURITY_IGNORE_DIRS);
-const defaultIgnoreFile = ignore().add(DEFAULT_IGNORE_FILETYPES);
-const defaultIgnoreDir = ignore().add(DEFAULT_IGNORE_DIRS);
-
-// String representations
-const DEFAULT_SECURITY_IGNORE =
-  DEFAULT_SECURITY_IGNORE_FILETYPES.join("\n") +
-  "\n" +
-  DEFAULT_SECURITY_IGNORE_DIRS.join("\n");
-
-const DEFAULT_IGNORE =
-  DEFAULT_IGNORE_FILETYPES.join("\n") + "\n" + DEFAULT_IGNORE_DIRS.join("\n");
 
 // Combined ignore instances
 export const defaultFileAndFolderSecurityIgnores = ignore()
   .add(defaultSecurityIgnoreFile)
   .add(defaultSecurityIgnoreDir);
-
-const defaultIgnoreFileAndDir = ignore()
-  .add(defaultIgnoreFile)
-  .add(defaultIgnoreDir);
 
 export function isSecurityConcern(filePathOrUri: string) {
   if (!filePathOrUri) {
@@ -254,15 +119,6 @@ export function isSecurityConcern(filePathOrUri: string) {
     return false;
   }
   return defaultFileAndFolderSecurityIgnores.ignores(filepath);
-}
-
-function throwIfFileIsSecurityConcern(filepath: string) {
-  if (isSecurityConcern(filepath)) {
-    throw new ContinueError(
-      ContinueErrorReason.FileIsSecurityConcern,
-      `Reading or Editing ${filepath} is not allowed because it is a security concern. Do not attempt to read or edit this file in any way.`,
-    );
-  }
 }
 
 export function gitIgArrayFromFile(file: string) {

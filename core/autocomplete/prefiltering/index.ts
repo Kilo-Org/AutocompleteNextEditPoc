@@ -1,10 +1,6 @@
 import ignore from "ignore";
 
 import { IDE } from "../..";
-import {
-  getGlobalContinueIgArray,
-  getWorkspaceContinueIgArray,
-} from "../../indexing/continueignore";
 import { getConfigJsonPath } from "../../util/paths";
 import { findUriInDirs } from "../../util/uri";
 import { HelperVars } from "../util/HelperVars";
@@ -12,15 +8,11 @@ import { HelperVars } from "../util/HelperVars";
 async function isDisabledForFile(
   currentFilepath: string,
   disableInFiles: string[] | undefined,
-  ide: IDE,
+  workspaceDirs: string[]
 ) {
   if (disableInFiles) {
     // Relative path needed for `ignore`
-    const workspaceDirs = await ide.getWorkspaceDirs();
-    const { relativePathOrBasename } = findUriInDirs(
-      currentFilepath,
-      workspaceDirs,
-    );
+    const { relativePathOrBasename } = findUriInDirs(currentFilepath, workspaceDirs);
 
     // @ts-ignore
     const pattern = ignore.default().add(disableInFiles);
@@ -39,10 +31,7 @@ async function shouldLanguageSpecificPrefilter(helper: HelperVars) {
   }
 }
 
-export async function shouldPrefilter(
-  helper: HelperVars,
-  ide: IDE,
-): Promise<boolean> {
+export async function shouldPrefilter(helper: HelperVars, workspaceDirs: string[]): Promise<boolean> {
   // Allow disabling autocomplete from config.json
   if (helper.options.disable) {
     return true;
@@ -57,18 +46,14 @@ export async function shouldPrefilter(
   const disableInFiles = [
     ...(helper.options.disableInFiles ?? []),
     "*.prompt",
-    ...getGlobalContinueIgArray(),
-    ...(await getWorkspaceContinueIgArray(ide)),
+    // "some-example-ignored-file", //MINIMAL_REPO - was configurable
   ];
-  if (await isDisabledForFile(helper.filepath, disableInFiles, ide)) {
+  if (await isDisabledForFile(helper.filepath, disableInFiles, workspaceDirs)) {
     return true;
   }
 
   // Don't offer completions when we have no information (untitled file and no file contents)
-  if (
-    helper.filepath.includes("Untitled") &&
-    helper.fileContents.trim() === ""
-  ) {
+  if (helper.filepath.includes("Untitled") && helper.fileContents.trim() === "") {
     return true;
   }
 
