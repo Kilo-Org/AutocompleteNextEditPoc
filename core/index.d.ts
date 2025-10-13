@@ -751,8 +751,6 @@ export type FileStatsMap = {
 export interface IDE {
   getIdeInfo(): Promise<IdeInfo>;
 
-  getIdeSettings(): Promise<IdeSettings>;
-
   getDiff(includeUnstaged: boolean): Promise<string[]>;
 
   getClipboardContent(): Promise<{ text: string; copiedAt: string }>;
@@ -772,8 +770,6 @@ export interface IDE {
   fileExists(fileUri: string): Promise<boolean>;
 
   writeFile(path: string, contents: string): Promise<void>;
-
-  showVirtualFile(title: string, contents: string): Promise<void>;
 
   openFile(path: string): Promise<void>;
 

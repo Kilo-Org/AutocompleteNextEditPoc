@@ -2,7 +2,6 @@ import * as child_process from "node:child_process";
 import { exec } from "node:child_process";
 
 import { Range } from "core";
-import { EXTENSION_NAME } from "core/util/env";
 import { DEFAULT_IGNORES, defaultIgnoresGlob } from "core/indexing/ignore";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
@@ -229,8 +228,7 @@ class VsCodeIde implements IDE {
 
   async isTelemetryEnabled(): Promise<boolean> {
     const globalEnabled = vscode.env.isTelemetryEnabled;
-    const continueEnabled: boolean =
-      (await vscode.workspace.getConfiguration(EXTENSION_NAME).get("telemetryEnabled")) ?? true;
+    const continueEnabled = true; //MINIMAL_REPO - was configurable
     return globalEnabled && continueEnabled;
   }
 
@@ -267,10 +265,6 @@ class VsCodeIde implements IDE {
 
   async writeFile(fileUri: string, contents: string): Promise<void> {
     await vscode.workspace.fs.writeFile(vscode.Uri.parse(fileUri), new Uint8Array(Buffer.from(contents)));
-  }
-
-  async showVirtualFile(title: string, contents: string): Promise<void> {
-    this.ideUtils.showVirtualFile(title, contents);
   }
 
   async openFile(fileUri: string): Promise<void> {
@@ -595,24 +589,6 @@ class VsCodeIde implements IDE {
   async listDir(dir: string): Promise<[string, FileType][]> {
     const entries = await this.ideUtils.readDirectory(vscode.Uri.parse(dir));
     return entries === null ? [] : (entries as any);
-  }
-
-  private getIdeSettingsSync(): IdeSettings {
-    const settings = vscode.workspace.getConfiguration(EXTENSION_NAME);
-    const remoteConfigServerUrl = settings.get<string | undefined>("remoteConfigServerUrl", undefined);
-    const ideSettings: IdeSettings = {
-      remoteConfigServerUrl,
-      remoteConfigSyncPeriod: settings.get<number>("remoteConfigSyncPeriod", 60),
-      userToken: settings.get<string>("userToken", ""),
-      continueTestEnvironment: "production",
-      pauseCodebaseIndexOnStart: settings.get<boolean>("pauseCodebaseIndexOnStart", false),
-    };
-    return ideSettings;
-  }
-
-  async getIdeSettings(): Promise<IdeSettings> {
-    const ideSettings = this.getIdeSettingsSync();
-    return ideSettings;
   }
 }
 

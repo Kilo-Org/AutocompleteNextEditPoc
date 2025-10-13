@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { EXTENSION_NAME } from "core/util/env";
 // @ts-ignore
 import * as vscode from "vscode";
 
@@ -9,17 +8,14 @@ import { myersCharDiff } from "core/diff/myers";
 import { getOffsetPositionAtLastNewLine } from "core/nextEdit/diff/diff";
 import { NextEditLoggingService } from "core/nextEdit/NextEditLoggingService";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
-import {
-  HandlerPriority,
-  SelectionChangeManager,
-} from "./SelectionChangeManager";
+import { HandlerPriority, SelectionChangeManager } from "./SelectionChangeManager";
 
 interface TextApplier {
   applyText(
     editor: vscode.TextEditor,
     text: string,
     position: vscode.Position,
-    finalCursorPos: vscode.Position | null,
+    finalCursorPos: vscode.Position | null
   ): Promise<boolean>;
 }
 
@@ -52,15 +48,10 @@ const SVG_CONFIG = {
   cursorOffset: 4, // Spaces to offset from cursor
 
   get fontSize() {
-    return Math.ceil(
-      vscode.workspace.getConfiguration("editor").get<number>("fontSize") ?? 14,
-    );
+    return Math.ceil(vscode.workspace.getConfiguration("editor").get<number>("fontSize") ?? 14);
   },
   get fontFamily() {
-    return (
-      vscode.workspace.getConfiguration("editor").get<string>("fontFamily") ||
-      "helvetica"
-    );
+    return vscode.workspace.getConfiguration("editor").get<string>("fontFamily") || "helvetica";
   },
   get paddingX() {
     return Math.ceil(this.getEstimatedTextWidth(" "));
@@ -77,10 +68,7 @@ const SVG_CONFIG = {
   getTipWidth(text: string): number {
     // Find the longest line
     const lines = text.split("\n");
-    const longestLine = lines.reduce(
-      (longest, line) => (line.length > longest.length ? line : longest),
-      "",
-    );
+    const longestLine = lines.reduce((longest, line) => (line.length > longest.length ? line : longest), "");
 
     return this.getEstimatedTextWidth(longestLine) + this.paddingX * 2;
   },
@@ -92,10 +80,8 @@ const SVG_CONFIG = {
 } as const;
 
 // Command ID - can be used in package.json
-export const HIDE_NEXT_EDIT_SUGGESTION_COMMAND =
-  "continue.nextEditWindow.hideNextEditSuggestion";
-export const ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND =
-  "continue.nextEditWindow.acceptNextEditSuggestion";
+export const HIDE_NEXT_EDIT_SUGGESTION_COMMAND = "continue.nextEditWindow.hideNextEditSuggestion";
+export const ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND = "continue.nextEditWindow.acceptNextEditSuggestion";
 
 /**
  * This is where we create SVG windows and deletion decorations for non-FIM next edit suggestions.
@@ -181,10 +167,7 @@ export class NextEditWindowManager {
     const operationId = ++this.latestOperationId;
 
     // Return early when already in desired state.
-    if (
-      (reserve && this.keyReservationState === "reserved") ||
-      (!reserve && this.keyReservationState === "free")
-    ) {
+    if ((reserve && this.keyReservationState === "reserved") || (!reserve && this.keyReservationState === "free")) {
       return;
     }
 
@@ -221,11 +204,7 @@ export class NextEditWindowManager {
 
   private async performKeyReservation(reserve: boolean): Promise<void> {
     try {
-      await vscode.commands.executeCommand(
-        "setContext",
-        "nextEditWindowActive",
-        reserve,
-      );
+      await vscode.commands.executeCommand("setContext", "nextEditWindowActive", reserve);
     } catch (err) {
       console.error(`Failed to set nextEditWindowActive to ${reserve}: ${err}`);
       throw err;
@@ -248,10 +227,7 @@ export class NextEditWindowManager {
    * @param context The extension context.
    * @param textApplier Callback that lets us use external deps such as llms if needed.
    */
-  public async setupNextEditWindowManager(
-    context: vscode.ExtensionContext,
-    textApplier?: TextApplier,
-  ) {
+  public async setupNextEditWindowManager(context: vscode.ExtensionContext, textApplier?: TextApplier) {
     this.context = context;
 
     // Set nextEditWindowActive to false to free esc and tab,
@@ -264,10 +240,7 @@ export class NextEditWindowManager {
       NextEditProvider.getInstance().deleteChain();
       await this.hideAllNextEditWindowsAndResetCompletionId();
     });
-    this.registerCommandSafely(
-      ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND,
-      async () => await this.acceptNextEdit(),
-    );
+    this.registerCommandSafely(ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND, async () => await this.acceptNextEdit());
 
     // Add this class to context disposables.
     context.subscriptions.push(this);
@@ -293,10 +266,8 @@ export class NextEditWindowManager {
    * @param callback Function to run on command execution.
    */
   private registerCommandSafely(
-    commandId:
-      | "continue.nextEditWindow.hideNextEditSuggestion"
-      | "continue.nextEditWindow.acceptNextEditSuggestion",
-    callback: () => Promise<void>,
+    commandId: "continue.nextEditWindow.hideNextEditSuggestion" | "continue.nextEditWindow.acceptNextEditSuggestion",
+    callback: () => Promise<void>
   ) {
     if (!this.context) {
       console.log("Extension context is not yet set.");
@@ -308,10 +279,8 @@ export class NextEditWindowManager {
       this.context.subscriptions.push(command);
     } catch (error) {
       // Command already registered - skip silently in test environments
-      if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
-        console.log(
-          `Command ${commandId} already has an associated callback, skipping registration`,
-        );
+      if (process.env.NODE_ENV !== "test" && !process.env.VITEST) {
+        console.log(`Command ${commandId} already has an associated callback, skipping registration`);
       }
     }
   }
@@ -328,7 +297,7 @@ export class NextEditWindowManager {
     editableRegionEndLine: number,
     oldEditRangeSlice: string,
     newEditRangeSlice: string,
-    diffLines: DiffLine[],
+    diffLines: DiffLine[]
   ) {
     if (!this.shouldRenderTip(editor.document.uri)) {
       return;
@@ -349,14 +318,9 @@ export class NextEditWindowManager {
     // NOTE: A simpler approach might be to just delete the line when newEditRangeSlice is "".
     // But we opt for the below in case the above note is too naive.
     this.isLineDelete = false;
-    if (
-      newEditRangeSlice === "" &&
-      editableRegionStartLine === editableRegionEndLine
-    ) {
+    if (newEditRangeSlice === "" && editableRegionStartLine === editableRegionEndLine) {
       // Check if diffLines contains only deletions (no additions).
-      const onlyDeletions = diffLines.every(
-        (diff) => diff.type === "old" || diff.type === "same",
-      );
+      const onlyDeletions = diffLines.every((diff) => diff.type === "old" || diff.type === "same");
       const hasDeletedLine = diffLines.some((diff) => diff.type === "old");
 
       if (onlyDeletions && hasDeletedLine) {
@@ -370,40 +334,26 @@ export class NextEditWindowManager {
     }
 
     // How far away is the current line from the start of the editable region?
-    const lineOffsetAtCursorPos =
-      currCursorPos.line - this.editableRegionStartLine;
+    const lineOffsetAtCursorPos = currCursorPos.line - this.editableRegionStartLine;
 
     // How long is the line at the current cursor position?
-    const lineContentAtCursorPos =
-      newEditRangeSlice.split("\n")[lineOffsetAtCursorPos];
+    const lineContentAtCursorPos = newEditRangeSlice.split("\n")[lineOffsetAtCursorPos];
 
-    const offset = getOffsetPositionAtLastNewLine(
-      diffLines,
-      lineContentAtCursorPos,
-      lineOffsetAtCursorPos,
-    );
+    const offset = getOffsetPositionAtLastNewLine(diffLines, lineContentAtCursorPos, lineOffsetAtCursorPos);
 
     // Calculate the final cursor position.
     if (this.isLineDelete) {
       // For line deletion, position cursor at the end of the previous line.
       if (this.editableRegionStartLine > 0) {
-        const prevLine = editor.document.lineAt(
-          this.editableRegionStartLine - 1,
-        );
-        this.finalCursorPos = new vscode.Position(
-          this.editableRegionStartLine - 1,
-          prevLine.text.length,
-        );
+        const prevLine = editor.document.lineAt(this.editableRegionStartLine - 1);
+        this.finalCursorPos = new vscode.Position(this.editableRegionStartLine - 1, prevLine.text.length);
       } else {
         // If we're deleting the first line, position at the start of the document.
         this.finalCursorPos = new vscode.Position(0, 0);
       }
     } else {
       // For normal edits, use the standard calculation.
-      this.finalCursorPos = new vscode.Position(
-        this.editableRegionStartLine + offset.line,
-        offset.character,
-      );
+      this.finalCursorPos = new vscode.Position(this.editableRegionStartLine + offset.line, offset.character);
     }
 
     const diffChars = myersCharDiff(oldEditRangeSlice, newEditRangeSlice);
@@ -418,7 +368,7 @@ export class NextEditWindowManager {
           newEditRangeSlice,
           this.editableRegionStartLine,
           diffLines,
-          diffChars,
+          diffChars
         );
       } catch (error) {
         console.error("Failed to render window:", error);
@@ -434,9 +384,7 @@ export class NextEditWindowManager {
     try {
       await NextEditWindowManager.reserveTabAndEsc();
     } catch (err) {
-      console.error(
-        `Error reserving Tab/Esc after showing decorations: ${err}`,
-      );
+      console.error(`Error reserving Tab/Esc after showing decorations: ${err}`);
       await this.hideAllNextEditWindows();
       return;
     }
@@ -485,7 +433,7 @@ export class NextEditWindowManager {
     await vscode.commands.executeCommand(
       "continue.logNextEditOutcomeReject",
       this.mostRecentCompletionId,
-      this.loggingService,
+      this.loggingService
     );
 
     this.mostRecentCompletionId = null;
@@ -510,22 +458,13 @@ export class NextEditWindowManager {
     await this.hideAllNextEditWindows();
 
     if (this.textApplier) {
-      success = await this.textApplier.applyText(
-        editor,
-        text,
-        position,
-        this.finalCursorPos,
-      );
+      success = await this.textApplier.applyText(editor, text, position, this.finalCursorPos);
     } else {
       // Define the range to replace.
       const startPos = new vscode.Position(this.editableRegionStartLine, 0);
-      const endPosChar = editor.document.lineAt(this.editableRegionEndLine).text
-        .length;
+      const endPosChar = editor.document.lineAt(this.editableRegionEndLine).text.length;
 
-      const endPos = new vscode.Position(
-        this.editableRegionEndLine,
-        endPosChar,
-      );
+      const endPos = new vscode.Position(this.editableRegionEndLine, endPosChar);
       const editRange = new vscode.Range(startPos, endPos);
 
       if (this.isLineDelete) {
@@ -534,10 +473,7 @@ export class NextEditWindowManager {
 
         // If this isn't the last line, extend to include the newline character.
         if (this.editableRegionStartLine < editor.document.lineCount - 1) {
-          lineDeleteRange = new vscode.Range(
-            startPos,
-            new vscode.Position(this.editableRegionStartLine + 1, 0),
-          );
+          lineDeleteRange = new vscode.Range(startPos, new vscode.Position(this.editableRegionStartLine + 1, 0));
         }
 
         success = await editor.edit((editBuilder) => {
@@ -552,17 +488,14 @@ export class NextEditWindowManager {
 
     if (success && this.finalCursorPos) {
       // Move cursor to the final position if available.
-      editor.selection = new vscode.Selection(
-        this.finalCursorPos,
-        this.finalCursorPos,
-      );
+      editor.selection = new vscode.Selection(this.finalCursorPos, this.finalCursorPos);
     }
 
     // Log with accept = true.
     await vscode.commands.executeCommand(
       "continue.logNextEditOutcomeAccept",
       this.mostRecentCompletionId,
-      this.loggingService,
+      this.loggingService
     );
     this.mostRecentCompletionId = null;
 
@@ -574,9 +507,7 @@ export class NextEditWindowManager {
    * Dispose of the NextEditWindowManager.
    */
   public dispose() {
-    void this.resetKeyReservation().catch((err) =>
-      console.error(`Failed to reset keys on dispose: ${err}`),
-    );
+    void this.resetKeyReservation().catch((err) => console.error(`Failed to reset keys on dispose: ${err}`));
 
     // Dispose current decoration.
     if (this.currentDecoration) {
@@ -618,23 +549,15 @@ export class NextEditWindowManager {
     vscode.window.onDidChangeActiveColorTheme(async () => {
       this.theme = "Default Dark Modern";
       await this.codeRenderer.setTheme(this.theme);
-      console.debug(
-        "Active theme changed:",
-        this.theme ? "Theme exists" : "Theme is undefined",
-      );
+      console.debug("Active theme changed:", this.theme ? "Theme exists" : "Theme is undefined");
     });
 
     // Listen for editor changes to clean up decorations when editor closes.
     vscode.window.onDidChangeVisibleTextEditors(async () => {
       // If our active editor is no longer visible, clear decorations.
-      if (
-        this.activeEditor &&
-        !vscode.window.visibleTextEditors.includes(this.activeEditor)
-      ) {
+      if (this.activeEditor && !vscode.window.visibleTextEditors.includes(this.activeEditor)) {
         if (this.mostRecentCompletionId) {
-          this.loggingService.cancelRejectionTimeout(
-            this.mostRecentCompletionId,
-          );
+          this.loggingService.cancelRejectionTimeout(this.mostRecentCompletionId);
         }
         await this.hideAllNextEditWindows();
       }
@@ -646,9 +569,7 @@ export class NextEditWindowManager {
       if (this.activeEditor && e.textEditor === this.activeEditor) {
         // If the cursor moved because of something other than accepting next edit, stop logging it.
         if (!this.accepted && this.mostRecentCompletionId) {
-          this.loggingService.cancelRejectionTimeout(
-            this.mostRecentCompletionId,
-          );
+          this.loggingService.cancelRejectionTimeout(this.mostRecentCompletionId);
         }
         await this.hideAllNextEditWindows();
       }
@@ -657,14 +578,9 @@ export class NextEditWindowManager {
 
   private shouldRenderTip(uri: vscode.Uri): boolean {
     const isAllowedUri =
-      !this.excludedURIPrefixes.some((prefix) =>
-        uri.toString().startsWith(prefix),
-      ) && uri.scheme !== "comment";
+      !this.excludedURIPrefixes.some((prefix) => uri.toString().startsWith(prefix)) && uri.scheme !== "comment";
 
-    const isEnabled =
-      !!vscode.workspace
-        .getConfiguration(EXTENSION_NAME)
-        .get<boolean>("showInlineTip") === true;
+    const isEnabled = true; //MINIMAL_REPO - was configurable
 
     return isAllowedUri && isEnabled;
   }
@@ -676,11 +592,8 @@ export class NextEditWindowManager {
     text: string,
     currLineOffsetFromTop: number,
     newDiffLines: DiffLine[],
-    diffChars: DiffChar[],
-  ): Promise<
-    | { uri: vscode.Uri; dimensions: { width: number; height: number } }
-    | undefined
-  > {
+    diffChars: DiffChar[]
+  ): Promise<{ uri: vscode.Uri; dimensions: { width: number; height: number } } | undefined> {
     try {
       const tipWidth = SVG_CONFIG.getTipWidth(text);
       const tipHeight = SVG_CONFIG.getTipHeight(text);
@@ -701,7 +614,7 @@ export class NextEditWindowManager {
         },
         currLineOffsetFromTop,
         newDiffLines,
-        diffChars,
+        diffChars
       );
 
       return {
@@ -725,15 +638,10 @@ export class NextEditWindowManager {
     position: vscode.Position,
     editableRegionStartLine: number,
     newDiffLines: DiffLine[],
-    diffChars: DiffChar[],
+    diffChars: DiffChar[]
   ): Promise<vscode.TextEditorDecorationType | undefined> {
     const currLineOffsetFromTop = position.line - editableRegionStartLine;
-    const uriAndDimensions = await this.createCodeRender(
-      predictedCode,
-      currLineOffsetFromTop,
-      newDiffLines,
-      diffChars,
-    );
+    const uriAndDimensions = await this.createCodeRender(predictedCode, currLineOffsetFromTop, newDiffLines, diffChars);
     if (!uriAndDimensions) {
       return undefined;
     }
@@ -742,8 +650,7 @@ export class NextEditWindowManager {
     const tipWidth = dimensions.width;
     const tipHeight = dimensions.height;
 
-    const offsetFromTop =
-      (position.line - editableRegionStartLine) * SVG_CONFIG.lineHeight;
+    const offsetFromTop = (position.line - editableRegionStartLine) * SVG_CONFIG.lineHeight;
 
     // Position the decoration with minimal left margin since it's already at line end
     const marginLeft = SVG_CONFIG.paddingX; // Use consistent padding instead of complex calculation
@@ -764,7 +671,7 @@ export class NextEditWindowManager {
 
   private buildHideTooltipHoverMsg() {
     const hoverMarkdown = new vscode.MarkdownString(
-      `[Reject (Esc)](command:${HIDE_NEXT_EDIT_SUGGESTION_COMMAND}) | [Accept (Tab)](command:${ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND})`,
+      `[Reject (Esc)](command:${HIDE_NEXT_EDIT_SUGGESTION_COMMAND}) | [Accept (Tab)](command:${ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND})`
     );
 
     hoverMarkdown.isTrusted = true;
@@ -772,30 +679,17 @@ export class NextEditWindowManager {
     return hoverMarkdown;
   }
 
-  private isValidRange(
-    editor: vscode.TextEditor,
-    range: vscode.Range,
-  ): boolean {
+  private isValidRange(editor: vscode.TextEditor, range: vscode.Range): boolean {
     const doc = editor.document;
 
     // Check if line numbers are valid.
     if (range.start.line < 0 || range.start.line >= doc.lineCount) {
-      console.debug(
-        "Invalid start line:",
-        range.start.line,
-        "doc lines:",
-        doc.lineCount,
-      );
+      console.debug("Invalid start line:", range.start.line, "doc lines:", doc.lineCount);
       return false;
     }
 
     if (range.end.line < 0 || range.end.line >= doc.lineCount) {
-      console.debug(
-        "Invalid end line:",
-        range.end.line,
-        "doc lines:",
-        doc.lineCount,
-      );
+      console.debug("Invalid end line:", range.end.line, "doc lines:", doc.lineCount);
       return false;
     }
 
@@ -803,26 +697,13 @@ export class NextEditWindowManager {
     const startLine = doc.lineAt(range.start.line);
     const endLine = doc.lineAt(range.end.line);
 
-    if (
-      range.start.character < 0 ||
-      range.start.character > startLine.text.length
-    ) {
-      console.debug(
-        "Invalid start character:",
-        range.start.character,
-        "line length:",
-        startLine.text.length,
-      );
+    if (range.start.character < 0 || range.start.character > startLine.text.length) {
+      console.debug("Invalid start character:", range.start.character, "line length:", startLine.text.length);
       return false;
     }
 
     if (range.end.character < 0 || range.end.character > endLine.text.length) {
-      console.debug(
-        "Invalid end character:",
-        range.end.character,
-        "line length:",
-        endLine.text.length,
-      );
+      console.debug("Invalid end character:", range.end.character, "line length:", endLine.text.length);
       return false;
     }
 
@@ -832,10 +713,7 @@ export class NextEditWindowManager {
   /**
    * Calculate a position to the right of the cursor with the specified offset.
    */
-  private getDecorationOffsetPosition(
-    editor: vscode.TextEditor,
-    position: vscode.Position,
-  ): vscode.Position {
+  private getDecorationOffsetPosition(editor: vscode.TextEditor, position: vscode.Position): vscode.Position {
     // Place decoration at the end of the current line
     const line = editor.document.lineAt(position.line);
     return new vscode.Position(position.line, line.text.length);
@@ -851,7 +729,7 @@ export class NextEditWindowManager {
     predictedCode: string,
     editableRegionStartLine: number,
     newDiffLines: DiffLine[],
-    diffChars: DiffChar[],
+    diffChars: DiffChar[]
   ) {
     // Capture document version to detect changes.
     const docVersion = editor.document.version;
@@ -863,7 +741,7 @@ export class NextEditWindowManager {
       position,
       editableRegionStartLine,
       newDiffLines,
-      diffChars,
+      diffChars
     );
     if (!decoration) {
       console.error("Failed to create decoration for text:", predictedCode);
@@ -882,14 +760,8 @@ export class NextEditWindowManager {
     this.disposables.push(decoration);
 
     // Calculate how far off to the right of the cursor the decoration should be.
-    const decorationOffsetPosition = this.getDecorationOffsetPosition(
-      editor,
-      position,
-    );
-    const range = new vscode.Range(
-      decorationOffsetPosition,
-      decorationOffsetPosition,
-    );
+    const decorationOffsetPosition = this.getDecorationOffsetPosition(editor, position);
+    const range = new vscode.Range(decorationOffsetPosition, decorationOffsetPosition);
 
     // Validate the range before applying.
     if (!this.isValidRange(editor, range)) {
@@ -900,19 +772,14 @@ export class NextEditWindowManager {
     // Apply the decoration at the calculated position.
     editor.setDecorations(this.currentDecoration, [
       {
-        range: new vscode.Range(
-          decorationOffsetPosition,
-          decorationOffsetPosition,
-        ),
+        range: new vscode.Range(decorationOffsetPosition, decorationOffsetPosition),
         hoverMessage: [this.buildHideTooltipHoverMsg()],
       },
     ]);
 
     // Clear the timeout while SVG is on the editor.
     if (this.currentDecoration && this.mostRecentCompletionId)
-      this.loggingService.cancelRejectionTimeoutButKeepCompletionId(
-        this.mostRecentCompletionId,
-      );
+      this.loggingService.cancelRejectionTimeoutButKeepCompletionId(this.mostRecentCompletionId);
   }
 
   private renderDeletions(editor: vscode.TextEditor, oldDiffChars: DiffChar[]) {
@@ -925,14 +792,11 @@ export class NextEditWindowManager {
       if (diff.type === "old") {
         charsToDelete.push({
           range: new vscode.Range(
+            new vscode.Position(this.editableRegionStartLine + diff.oldLineIndex!, diff.oldCharIndexInLine!),
             new vscode.Position(
               this.editableRegionStartLine + diff.oldLineIndex!,
-              diff.oldCharIndexInLine!,
-            ),
-            new vscode.Position(
-              this.editableRegionStartLine + diff.oldLineIndex!,
-              diff.oldCharIndexInLine! + diff.char.length,
-            ),
+              diff.oldCharIndexInLine! + diff.char.length
+            )
           ),
         });
       }
@@ -957,10 +821,7 @@ export class NextEditWindowManager {
       const editorInstance = activeEditor as any;
       if (editorInstance._modelData && editorInstance._modelData.viewModel) {
         const viewModel = editorInstance._modelData.viewModel;
-        return (
-          viewModel.getLineWidth(0) /
-          activeEditor.document.lineAt(0).text.length
-        );
+        return viewModel.getLineWidth(0) / activeEditor.document.lineAt(0).text.length;
       }
     }
 
@@ -979,24 +840,16 @@ export class NextEditWindowManager {
       "nextEditWindowManager",
       async (e, state) => {
         if (state.nextEditWindowAccepted) {
-          console.debug(
-            "NextEditWindowManager: Edit was just accepted, preserving chain",
-          );
+          console.debug("NextEditWindowManager: Edit was just accepted, preserving chain");
           return true;
         }
         return false;
       },
-      HandlerPriority.CRITICAL,
+      HandlerPriority.CRITICAL
     );
   }
 }
 
-export async function setupNextEditWindowManager(
-  context: vscode.ExtensionContext,
-  textApplier?: TextApplier,
-) {
-  await NextEditWindowManager.getInstance().setupNextEditWindowManager(
-    context,
-    textApplier,
-  );
+export async function setupNextEditWindowManager(context: vscode.ExtensionContext, textApplier?: TextApplier) {
+  await NextEditWindowManager.getInstance().setupNextEditWindowManager(context, textApplier);
 }

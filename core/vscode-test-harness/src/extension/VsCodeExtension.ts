@@ -2,7 +2,6 @@ import fs from "fs";
 
 import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { EXTENSION_NAME } from "core/util/env";
 import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath } from "core/util/paths";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
@@ -52,19 +51,13 @@ export class VsCodeExtension {
   private async updateNextEditState(context: vscode.ExtensionContext): Promise<void> {
     const { config: continueConfig } = await this.configHandler.loadConfig();
     const autocompleteModel = continueConfig?.selectedModelByRole?.autocomplete;
-    const vscodeConfig = vscode.workspace.getConfiguration(EXTENSION_NAME);
 
     const modelSupportsNext =
       autocompleteModel &&
       modelSupportsNextEdit(autocompleteModel.capabilities, autocompleteModel.model, autocompleteModel.title);
 
     // Use smart defaults.
-    let nextEditEnabled = vscodeConfig.get<boolean>("enableNextEdit");
-    if (nextEditEnabled === undefined) {
-      // First time - set smart default.
-      nextEditEnabled = modelSupportsNext ?? false;
-      await vscodeConfig.update("enableNextEdit", nextEditEnabled, vscode.ConfigurationTarget.Global);
-    }
+    let nextEditEnabled = true; //MINIMAL_REPO - was configurable
 
     // Check if Next Edit is enabled but model doesn't support it.
     if (
@@ -73,19 +66,11 @@ export class VsCodeExtension {
       !isNextEditTest() &&
       process.env.CONTINUE_E2E_NON_NEXT_EDIT_TEST === "true"
     ) {
-      vscode.window
-        .showWarningMessage(
-          `The current autocomplete model (${autocompleteModel?.title || "unknown"}) does not support Next Edit.`,
-          "Disable Next Edit",
-          "Select different model"
-        )
-        .then((selection) => {
-          if (selection === "Disable Next Edit") {
-            vscodeConfig.update("enableNextEdit", false, vscode.ConfigurationTarget.Global);
-          } else if (selection === "Select different model") {
-            vscode.commands.executeCommand("continue.openTabAutocompleteConfigMenu");
-          }
-        });
+      vscode.window.showWarningMessage(
+        `The current autocomplete model (${autocompleteModel?.title || "unknown"}) does not support Next Edit.`,
+        "Disable Next Edit",
+        "Select different model"
+      );
     }
 
     const shouldEnableNextEdit = (modelSupportsNext && nextEditEnabled) || isNextEditTest();
@@ -211,8 +196,7 @@ export class VsCodeExtension {
     });
 
     // Tab autocomplete
-    const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
-    const enabled = config.get<boolean>("enableTabAutocomplete");
+    const enabled = true; //MINIMAL_REPO - was configurable
 
     // Register inline completion provider
     setupStatusBar(enabled ? StatusBarStatus.Enabled : StatusBarStatus.Disabled);
@@ -357,12 +341,6 @@ export class VsCodeExtension {
         return uri.query;
       }
     })();
-    context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        VsCodeExtension.continueVirtualDocumentScheme,
-        documentContentProvider
-      )
-    );
 
     this.ide.onDidChangeActiveTextEditor((filepath) => {
       void this.core.invoke("files/opened", { uris: [filepath] });
@@ -371,22 +349,7 @@ export class VsCodeExtension {
     // initializes openedFileLruCache with files that are already open when the extension is activated
     let initialOpenedFilePaths = this.ideUtils.getOpenFiles().map((uri) => uri.toString());
     this.core.invoke("files/opened", { uris: initialOpenedFilePaths });
-
-    // This is how you would enable/disable next edit in the autocomplete menu.
-    // See extensions/vscode/src/autocomplete/statusBar.ts.
-    vscode.workspace.onDidChangeConfiguration(async (event) => {
-      if (event.affectsConfiguration(EXTENSION_NAME)) {
-        const settings = await this.ide.getIdeSettings();
-        void this.core.invoke("config/ideSettingsUpdate", settings);
-
-        if (event.affectsConfiguration(`${EXTENSION_NAME}.enableNextEdit`)) {
-          await this.updateNextEditState(context);
-        }
-      }
-    });
   }
-
-  static continueVirtualDocumentScheme = EXTENSION_NAME;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private PREVIOUS_BRANCH_FOR_WORKSPACE_DIR: { [dir: string]: string } = {};
