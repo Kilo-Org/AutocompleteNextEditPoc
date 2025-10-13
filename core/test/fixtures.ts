@@ -1,22 +1,9 @@
 import { MinimalConfigProvider } from "../autocomplete/MinimalConfig";
-import { ControlPlaneClient } from "../util/controlPlaneClient";
-import Mock from "../llm/llms/Mock";
-import { LLMLogger } from "../llm/logger";
 import FileSystemIde from "../util/filesystem";
 
 import { TEST_DIR } from "./testDir";
 
 export const testIde = new FileSystemIde(TEST_DIR);
 
-const ideSettingsPromise = testIde.getIdeSettings();
-
-const testControlPlaneClient = new ControlPlaneClient();
-
 // For autocomplete/nextEdit tests, use MinimalConfigProvider
 export const testMinimalConfigProvider = new MinimalConfigProvider();
-
-const testLLM = new Mock({
-  model: "mock-model",
-  title: "Mock LLM",
-  uniqueId: "not-unique",
-});

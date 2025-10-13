@@ -1,6 +1,5 @@
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../util/parameters";
 
-import { fetchwithRequestOptions } from "../fetch";
 import { getControlPlaneEnvSync } from "../util/env";
 import { DataLogger } from "../util/log";
 import { Telemetry } from "../util/posthog";
@@ -23,8 +22,7 @@ export class NextEditLoggingService {
       filepath?: string;
     }
   >();
-  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined =
-    undefined;
+  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined = undefined;
 
   private constructor() {}
 
@@ -61,7 +59,7 @@ export class NextEditLoggingService {
       modelName?: string;
       modelProvider?: string;
       filepath?: string;
-    },
+    }
   ) {
     const pending = this._pendingCompletions.get(completionId);
     if (pending) {
@@ -161,13 +159,7 @@ export class NextEditLoggingService {
       const previousOutcome = this._outcomes.get(previous.id);
       const c1 = previousOutcome?.completion.split("\n")[0] ?? "";
       const c2 = outcome.completion.split("\n")[0];
-      if (
-        previousOutcome &&
-        (c1.endsWith(c2) ||
-          c2.endsWith(c1) ||
-          c1.startsWith(c2) ||
-          c2.startsWith(c1))
-      ) {
+      if (previousOutcome && (c1.endsWith(c2) || c2.endsWith(c1) || c1.startsWith(c2) || c2.startsWith(c1))) {
         this.cancelRejectionTimeout(previous.id);
       } else if (now - previous.displayedAt < 500) {
         // If a completion isn't shown for more than
@@ -220,13 +212,10 @@ export class NextEditLoggingService {
     if (outcome.requestId && outcome.accepted !== undefined) {
       void this.logAcceptReject(outcome.requestId, outcome.accepted);
     }
-    void Telemetry.capture("nextEditOutcome", outcome, true);
+    void Telemetry.capture("nextEditOutcome", outcome as unknown as Record<string, unknown>, true);
   }
 
-  private async logAcceptReject(
-    requestId: string,
-    accepted: boolean,
-  ): Promise<void> {
+  private async logAcceptReject(requestId: string, accepted: boolean): Promise<void> {
     try {
       if (!Telemetry.client) {
         return;
@@ -236,19 +225,16 @@ export class NextEditLoggingService {
       if (!controlPlaneEnv || !controlPlaneEnv.CONTROL_PLANE_URL) {
         return;
       }
-      const resp = await fetchwithRequestOptions(
-        new URL("model-proxy/v1/feedback", controlPlaneEnv.CONTROL_PLANE_URL),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            requestId,
-            accepted,
-          }),
+      const resp = await fetch(new URL("model-proxy/v1/feedback", controlPlaneEnv.CONTROL_PLANE_URL), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          requestId,
+          accepted,
+        }),
+      });
     } catch (error) {}
   }
 }

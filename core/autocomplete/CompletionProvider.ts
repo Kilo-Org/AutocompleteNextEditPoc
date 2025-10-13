@@ -90,8 +90,9 @@ export class CompletionProvider {
     }
 
     console.warn("Error generating autocompletion: ", e);
-    if (!this.errorsShown.has(e.message)) {
-      this.errorsShown.add(e.message);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    if (!this.errorsShown.has(errorMessage)) {
+      this.errorsShown.add(errorMessage);
       this._onError(e);
     }
   }

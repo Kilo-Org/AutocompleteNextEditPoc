@@ -38,7 +38,9 @@ export function mergeJson<T = Record<string, unknown>>(
         }
       } else if (
         typeof secondValue === "object" &&
-        typeof firstValue === "object"
+        secondValue !== null &&
+        typeof firstValue === "object" &&
+        firstValue !== null
       ) {
         // Object
         copyOfFirst[key] = mergeJson(firstValue, secondValue, mergeBehavior);

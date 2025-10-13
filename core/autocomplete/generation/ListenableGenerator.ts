@@ -60,7 +60,7 @@ export class ListenableGenerator<T> {
         yield this._buffer[i++];
       }
       while (!this._isEnded) {
-        let resolve: (value: IteratorResult<T>) => void;
+        let resolve: (value: T) => void;
         const promise = new Promise<T>((res) => {
           resolve = res;
           this._listeners.add(resolve!);

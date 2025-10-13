@@ -1,11 +1,4 @@
-import { RequestOptions } from "../../index.js";
-import { fetchwithRequestOptions, patchedFetch } from "../../fetch";
-import {
-  ChatCompletionChunk,
-  CompletionUsage,
-  CreateEmbeddingResponse,
-  Model,
-} from "openai/resources/index";
+import { ChatCompletionChunk, CompletionUsage, CreateEmbeddingResponse, Model } from "openai/resources/index";
 
 import { ChatCompletion } from "openai/resources/index.js";
 import { CreateRerankResponse } from "./apis/base.js";
@@ -149,20 +142,5 @@ function model(options: { id: string; owned_by?: string }): Model {
     object: "model",
     created: Date.now(),
     owned_by: options.owned_by ?? "organization-owner",
-  };
-}
-
-export function customFetch(
-  requestOptions: RequestOptions | undefined,
-): typeof patchedFetch {
-  if (process.env.FEATURE_FLAG_DISABLE_CUSTOM_FETCH) {
-    return patchedFetch;
-  }
-  return (req: URL | string | Request, init?: any) => {
-    if (typeof req === "string" || req instanceof URL) {
-      return fetchwithRequestOptions(req, init, requestOptions);
-    } else {
-      return fetchwithRequestOptions(req.url, init, requestOptions);
-    }
   };
 }

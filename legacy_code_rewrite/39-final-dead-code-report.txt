@@ -354,7 +354,6 @@ nextEdit/diff/diff.ts:12 - getOffsetPositionAtLastNewLine (used in module)
 nextEdit/diff/diff.ts:63 - getRenderableDiffWithGutterAnnotations
 nextEdit/diff/diff.ts:250 - applyCompletionToFile
 util/sentry/constants.ts:4 - SENTRY_DSN
-__mocks__/@continuedev/fetch/index.ts:3 - fetchwithRequestOptions
 __mocks__/@continuedev/fetch/index.ts:14 - streamSse
 autocomplete/context/ranking/index.ts:7 - getSymbolsForSnippet (used in module)
 autocomplete/context/ranking/index.ts:41 - rankAndOrderSnippets

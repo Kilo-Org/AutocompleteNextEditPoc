@@ -6,21 +6,9 @@ const ClientCertificateOptionsSchema = z.object({
   passphrase: z.string().optional(),
 });
 
-const RequestOptionsSchema = z.object({
-  timeout: z.number().optional(),
-  verifySsl: z.boolean().optional(),
-  caBundlePath: z.union([z.string(), z.array(z.string())]).optional(),
-  proxy: z.string().optional(),
-  headers: z.record(z.string()).optional(),
-  extraBodyProperties: z.record(z.unknown()).optional(),
-  noProxy: z.array(z.string()).optional(),
-  clientCertificate: z.lazy(() => ClientCertificateOptionsSchema).optional(),
-});
-
 // Base config objects
 const BaseConfig = z.object({
   provider: z.string(),
-  requestOptions: RequestOptionsSchema.optional(),
 });
 
 const BasePlusConfig = BaseConfig.extend({

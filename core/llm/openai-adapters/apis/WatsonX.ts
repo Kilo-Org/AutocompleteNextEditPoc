@@ -1,4 +1,4 @@
-import { streamSse } from "../../../fetch";
+import { streamSse } from "../../../fetch/stream.js";
 import { OpenAI } from "openai/index";
 import {
   ChatCompletion,
@@ -11,13 +11,8 @@ import {
 } from "openai/resources/index";
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
 import { WatsonXConfig } from "../types.js";
-import { chatCompletion, customFetch } from "../util.js";
-import {
-  BaseLlmApi,
-  CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
-} from "./base.js";
+import { chatCompletion } from "../util.js";
+import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
 
 export class WatsonXApi implements BaseLlmApi {
   apiBase: string;
@@ -39,7 +34,7 @@ export class WatsonXApi implements BaseLlmApi {
     if (this.apiBase?.includes("cloud.ibm.com")) {
       // watsonx SaaS
       const wxToken = (await (
-        await customFetch(this.config.requestOptions)(
+        await fetch(
           `https://iam.cloud.ibm.com/identity/token?apikey=${this.config.apiKey}&grant_type=urn:ibm:params:oauth:grant-type:apikey`,
           {
             method: "POST",
@@ -47,7 +42,7 @@ export class WatsonXApi implements BaseLlmApi {
               "Content-Type": "application/x-www-form-urlencoded",
               Accept: "application/json",
             },
-          },
+          }
         )
       ).json()) as any;
       return {
@@ -61,27 +56,21 @@ export class WatsonXApi implements BaseLlmApi {
       // and it's necessary to call this endpoint with username+api_key to get a bearer token.
       // See the docs: https://www.ibm.com/docs/en/watsonx/w-and-w/2.1.0?topic=keys-generating-bearer-token
       // Ask @sestinj why the rest is commented out.
-      const base64Decoded = Buffer.from(
-        this.config.apiKey ?? "",
-        "base64",
-      ).toString();
+      const base64Decoded = Buffer.from(this.config.apiKey ?? "", "base64").toString();
       const [username, api_key] = base64Decoded.split(":");
 
       const wxToken = (await (
-        await customFetch(this.config.requestOptions)(
-          new URL("icp4d-api/v1/authorize", this.apiBase),
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({
-              username: username?.trim(),
-              api_key: api_key?.trim(),
-            }),
+        await fetch(new URL("icp4d-api/v1/authorize", this.apiBase), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-        )
+          body: JSON.stringify({
+            username: username?.trim(),
+            api_key: api_key?.trim(),
+          }),
+        })
       ).json()) as any;
 
       return {
@@ -98,7 +87,7 @@ export class WatsonXApi implements BaseLlmApi {
       //   // Using username/password auth
       //   const userPass = this.config.apiKey?.split(":");
       //   const wxToken = (await (
-      //     await customFetch(this.config.requestOptions)(
+      //     await fetch(
       //       `${this.apiBase}/icp4d-api/v1/authorize`,
       //       {
       //         method: "POST",
@@ -114,7 +103,7 @@ export class WatsonXApi implements BaseLlmApi {
       //     )
       //   ).json()) as any;
       //   const wxTokenExpiry = (await (
-      //     await customFetch(this.config.requestOptions)(
+      //     await fetch(
       //       `${this.apiBase}/usermgmt/v1/user/tokenExpiry`,
       //       {
       //         method: "GET",
@@ -190,14 +179,14 @@ export class WatsonXApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): Promise<ChatCompletion> {
     const generator = this.chatCompletionStream(
       {
         ...body,
         stream: true,
       },
-      signal,
+      signal
     );
 
     let content = "";
@@ -212,7 +201,7 @@ export class WatsonXApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const url = this.getEndpoint("chat");
     const headers = await this.getHeaders();
@@ -221,7 +210,7 @@ export class WatsonXApi implements BaseLlmApi {
       ...this._convertBody(body),
       stream: true,
     });
-    const response = await customFetch(this.config.requestOptions)(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers,
       body: stringifiedBody,
@@ -229,9 +218,7 @@ export class WatsonXApi implements BaseLlmApi {
     });
 
     if (!response.ok || !response.body) {
-      throw new Error(
-        `Failed to stream chat completion: ${await response.text()}`,
-      );
+      throw new Error(`Failed to stream chat completion: ${await response.text()}`);
     }
 
     for await (const value of streamSse(response as any)) {
@@ -242,26 +229,19 @@ export class WatsonXApi implements BaseLlmApi {
     }
   }
 
-  async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
+  async completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
 
   async *completionStream(
     body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<Completion, any, unknown> {
     const params = {
       decoding_method: body.temperature ? "sample" : "greedy",
       max_new_tokens: body.max_tokens ?? 1024,
       min_new_tokens: 1,
-      stop_sequences: body.stop
-        ? Array.isArray(body.stop)
-          ? body.stop
-          : [body.stop]
-        : [],
+      stop_sequences: body.stop ? (Array.isArray(body.stop) ? body.stop : [body.stop]) : [],
       include_stop_sequence: false,
       repetition_penalty: body.frequency_penalty || 1,
       temperature: body.temperature,
@@ -280,7 +260,7 @@ export class WatsonXApi implements BaseLlmApi {
     }
 
     const url = this.getEndpoint("generation");
-    const response = await customFetch(this.config.requestOptions)(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers: await this.getHeaders(),
       body: JSON.stringify(payload),
@@ -332,14 +312,12 @@ export class WatsonXApi implements BaseLlmApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal,
+    signal: AbortSignal
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
 
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+  async embed(body: OpenAI.Embeddings.EmbeddingCreateParams): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 
