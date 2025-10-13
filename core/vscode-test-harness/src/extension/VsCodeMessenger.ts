@@ -71,14 +71,6 @@ export class VsCodeMessenger {
       this.ide.openFile(msg.data.filepath);
     });
 
-    this.onWebview("acceptDiff", async ({ data: { filepath, streamId } }) => {
-      await vscode.commands.executeCommand("continue.acceptDiff", filepath, streamId);
-    });
-
-    this.onWebview("rejectDiff", async ({ data: { filepath, streamId } }) => {
-      await vscode.commands.executeCommand("continue.rejectDiff", filepath, streamId);
-    });
-
     this.onWebview("overwriteFile", async ({ data: { prevFileContent, filepath } }) => {
       if (prevFileContent === null) {
         // TODO: Delete the file
