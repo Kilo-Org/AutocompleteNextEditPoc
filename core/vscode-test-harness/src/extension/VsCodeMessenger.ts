@@ -71,41 +71,6 @@ export class VsCodeMessenger {
       this.ide.openFile(msg.data.filepath);
     });
 
-    this.onWebview("overwriteFile", async ({ data: { prevFileContent, filepath } }) => {
-      if (prevFileContent === null) {
-        // TODO: Delete the file
-        return;
-      }
-
-      await this.ide.openFile(filepath);
-
-      // Get active text editor
-      const editor = vscode.window.activeTextEditor;
-
-      if (!editor) {
-        vscode.window.showErrorMessage("No active editor to apply edits to");
-        return;
-      }
-
-      editor.edit((builder) =>
-        builder.replace(
-          new vscode.Range(editor.document.positionAt(0), editor.document.positionAt(editor.document.getText().length)),
-          prevFileContent
-        )
-      );
-    });
-
-    this.onWebview("insertAtCursor", async (msg) => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor === undefined || !editor.selection) {
-        return;
-      }
-
-      editor.edit((editBuilder) => {
-        editBuilder.replace(new vscode.Range(editor.selection.start, editor.selection.end), msg.data.text);
-      });
-    });
-
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
     WEBVIEW_TO_CORE_PASS_THROUGH.forEach((messageType) => {
       this.onWebview(messageType as any, async (msg) => {
