@@ -1,5 +1,3 @@
-import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { DataLogger } from "core/util/log";
 import {
   FromCoreProtocol,
   FromWebviewProtocol,
@@ -12,18 +10,10 @@ import {
   CORE_TO_WEBVIEW_PASS_THROUGH,
   WEBVIEW_TO_CORE_PASS_THROUGH,
 } from "core";
-import { stripImages } from "core/util/messageContent";
-
-// Stub for EDIT_MODE_STREAM_ID
-const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
-import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
-import { handleLLMError } from "../util/errorHandling";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
-
-import { VsCodeExtension } from "./VsCodeExtension";
 
 type ToIdeOrWebviewFromCoreProtocol = ToIdeFromCoreProtocol & ToWebviewFromCoreProtocol;
 
@@ -109,9 +99,6 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("writeFile", async (msg) => {
       return ide.writeFile(msg.data.path, msg.data.contents);
     });
-    this.onWebviewOrCore("getProblems", async (msg) => {
-      return ide.getProblems(msg.data.filepath);
-    });
     this.onWebviewOrCore("getBranch", async (msg) => {
       const { dir } = msg.data;
       return ide.getBranch(dir);
@@ -152,32 +139,16 @@ export class VsCodeMessenger {
       return await ide.getGitRootPath(msg.data.dir);
     });
 
-    this.onWebviewOrCore("listDir", async (msg) => {
-      return await ide.listDir(msg.data.dir);
-    });
-
     this.onWebviewOrCore("getRepoName", async (msg) => {
       return await ide.getRepoName(msg.data.dir);
-    });
-
-    this.onWebviewOrCore("getTags", async (msg) => {
-      return await ide.getTags(msg.data);
     });
 
     this.onWebviewOrCore("getIdeInfo", async (msg) => {
       return await ide.getIdeInfo();
     });
 
-    this.onWebviewOrCore("isTelemetryEnabled", async (msg) => {
-      return await ide.isTelemetryEnabled();
-    });
-
     this.onWebviewOrCore("getUniqueId", async (msg) => {
       return await ide.getUniqueId();
-    });
-
-    this.onWebviewOrCore("reportError", async (msg) => {
-      await handleLLMError(msg.data);
     });
   }
 }

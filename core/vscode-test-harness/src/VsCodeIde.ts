@@ -1,64 +1,31 @@
-import { exec } from "node:child_process";
-
 import { Range } from "core";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
 import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvider } from "./autocomplete/lsp";
 import { Repository } from "./otherExtensions/git";
-import { SecretStorage } from "./stubs/SecretStorage";
 import { VsCodeIdeUtils } from "./util/ideUtils";
 import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
 import type {
   DocumentSymbol,
   FileStatsMap,
-  FileType,
   IDE,
   IdeInfo,
-  IdeSettings,
-  IndexTag,
   Location,
-  Problem,
   RangeInFile,
   SignatureHelp,
-  Thread,
 } from "core";
 import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
 
 class VsCodeIde implements IDE {
   ideUtils: VsCodeIdeUtils;
-  secretStorage: SecretStorage;
 
   constructor(
     private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
     private readonly context: vscode.ExtensionContext
   ) {
     this.ideUtils = new VsCodeIdeUtils();
-    this.secretStorage = new SecretStorage(context);
-  }
-
-  async readSecrets(keys: string[]): Promise<Record<string, string>> {
-    const secretValuePromises = keys.map((key) => this.secretStorage.get(key));
-    const secretValues = await Promise.all(secretValuePromises);
-
-    return keys.reduce(
-      (acc, key, index) => {
-        if (secretValues[index] === undefined) {
-          return acc;
-        }
-
-        acc[key] = secretValues[index];
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  }
-
-  async writeSecrets(secrets: { [key: string]: string }): Promise<void> {
-    for (const [key, value] of Object.entries(secrets)) {
-      await this.secretStorage.store(key, value);
-    }
   }
 
   async fileExists(uri: string): Promise<boolean> {
@@ -150,20 +117,6 @@ class VsCodeIde implements IDE {
     return ownerAndRepo?.join("/");
   }
 
-  async getTags(artifactId: string): Promise<IndexTag[]> {
-    const workspaceDirs = await this.getWorkspaceDirs();
-
-    const branches = await Promise.all(workspaceDirs.map((dir) => this.getBranch(dir)));
-
-    const tags: IndexTag[] = workspaceDirs.map((directory, i) => ({
-      directory,
-      branch: branches[i],
-      artifactId,
-    }));
-
-    return tags;
-  }
-
   getIdeInfo(): Promise<IdeInfo> {
     return Promise.resolve({
       ideType: "vscode",
@@ -202,16 +155,6 @@ class VsCodeIde implements IDE {
 
   async getRepo(dir: string): Promise<Repository | undefined> {
     return this.ideUtils.getRepo(vscode.Uri.parse(dir));
-  }
-
-  async isTelemetryEnabled(): Promise<boolean> {
-    const globalEnabled = vscode.env.isTelemetryEnabled;
-    const continueEnabled = true; //MINIMAL_REPO - was configurable
-    return globalEnabled && continueEnabled;
-  }
-
-  isWorkspaceRemote(): Promise<boolean> {
-    return Promise.resolve(vscode.env.remoteName !== undefined);
   }
 
   getUniqueId(): Promise<string> {
@@ -301,38 +244,6 @@ class VsCodeIde implements IDE {
     };
   }
 
-  async getProblems(fileUri?: string | undefined): Promise<Problem[]> {
-    const uri = fileUri ? vscode.Uri.parse(fileUri) : vscode.window.activeTextEditor?.document.uri;
-    if (!uri) {
-      return [];
-    }
-    return vscode.languages.getDiagnostics(uri).map((d) => {
-      return {
-        filepath: uri.toString(),
-        range: {
-          start: {
-            line: d.range.start.line,
-            character: d.range.start.character,
-          },
-          end: { line: d.range.end.line, character: d.range.end.character },
-        },
-        message: d.message,
-      };
-    });
-  }
-
-  async subprocess(command: string, cwd?: string): Promise<[string, string]> {
-    return new Promise((resolve, reject) => {
-      exec(command, { cwd }, (error, stdout, stderr) => {
-        if (error) {
-          console.warn(error);
-          reject(stderr);
-        }
-        resolve([stdout, stderr]);
-      });
-    });
-  }
-
   async getBranch(dir: string): Promise<string> {
     return this.ideUtils.getBranch(vscode.Uri.parse(dir));
   }
@@ -340,11 +251,6 @@ class VsCodeIde implements IDE {
   async getGitRootPath(dir: string): Promise<string | undefined> {
     const root = await this.ideUtils.getGitRoot(vscode.Uri.parse(dir));
     return root?.toString();
-  }
-
-  async listDir(dir: string): Promise<[string, FileType][]> {
-    const entries = await this.ideUtils.readDirectory(vscode.Uri.parse(dir));
-    return entries === null ? [] : (entries as any);
   }
 }
 
