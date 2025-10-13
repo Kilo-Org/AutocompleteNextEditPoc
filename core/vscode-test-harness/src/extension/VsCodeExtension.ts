@@ -10,7 +10,6 @@ import * as vscode from "vscode";
 
 import { ContinueCompletionProvider } from "../autocomplete/completionProvider";
 import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
-import { setupRemoteConfigSync } from "../stubs/activation";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
 
@@ -191,10 +190,6 @@ export class VsCodeExtension {
     resolveConfigHandler?.(this.configHandler);
 
     void this.configHandler.loadConfig();
-
-    void setupRemoteConfigSync(() =>
-      this.configHandler?.reloadConfig?.bind(this.configHandler)?.("Remote config sync")
-    );
 
     void this.configHandler.loadConfig().then(async ({ config }) => {
       const shouldUseFullFileDiff = await getUsingFullFileDiff();
