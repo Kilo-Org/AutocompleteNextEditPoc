@@ -129,9 +129,6 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getFileResults", async (msg) => {
       return ide.getFileResults(msg.data.pattern, msg.data.maxResults);
     });
-    this.onWebviewOrCore("subprocess", async (msg) => {
-      return ide.subprocess(msg.data.command, msg.data.cwd);
-    });
     this.onWebviewOrCore("getProblems", async (msg) => {
       return ide.getProblems(msg.data.filepath);
     });
