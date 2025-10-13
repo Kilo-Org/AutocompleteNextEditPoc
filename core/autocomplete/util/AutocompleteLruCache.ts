@@ -20,6 +20,8 @@ export class AutocompleteLruCache {
       driver: sqlite3.Database,
     });
 
+    // Enable WAL mode for better concurrency: allows concurrent readers with one writer
+    await db.exec("PRAGMA journal_mode = WAL;");
     await db.exec("PRAGMA busy_timeout = 3000;");
 
     await db.run(`
