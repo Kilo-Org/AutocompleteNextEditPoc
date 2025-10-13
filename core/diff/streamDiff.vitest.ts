@@ -20,7 +20,7 @@ const UNIFIED_DIFF_SYMBOLS = {
 
 async function collectDiffs(
   oldLines: string[],
-  newLines: string[],
+  newLines: string[]
 ): Promise<{ streamDiffs: DiffLine[]; myersDiffs: any }> {
   const streamDiffs: DiffLine[] = [];
 
@@ -50,9 +50,7 @@ function getMyersDiffType(diff: any): MyersDiffTypes | undefined {
 }
 
 function displayDiff(diff: DiffLine[]) {
-  return diff
-    .map(({ type, line }) => `${UNIFIED_DIFF_SYMBOLS[type]} ${line}`)
-    .join("\n");
+  return diff.map(({ type, line }) => `${UNIFIED_DIFF_SYMBOLS[type]} ${line}`).join("\n");
 }
 
 async function expectDiff(file: string) {
@@ -63,17 +61,12 @@ async function expectDiff(file: string) {
     .map((s) => s.replace(/^\n+/, "").trimEnd());
   const oldLines = oldText.split("\n");
   const newLines = newText.split("\n");
-  const { streamDiffs, myersDiffs } = await collectDiffs(oldLines, newLines);
+  const { streamDiffs } = await collectDiffs(oldLines, newLines);
   const displayedDiff = displayDiff(streamDiffs);
 
   if (!expectedDiff || expectedDiff.trim() === "") {
-    console.log(
-      "Expected diff was empty. Writing computed diff to the test file",
-    );
-    fs.writeFileSync(
-      testFilePath,
-      `${oldText}\n\n---\n\n${newText}\n\n---\n\n${displayedDiff}`,
-    );
+    console.log("Expected diff was empty. Writing computed diff to the test file");
+    fs.writeFileSync(testFilePath, `${oldText}\n\n---\n\n${newText}\n\n---\n\n${displayedDiff}`);
 
     throw new Error("Expected diff is empty");
   }
@@ -238,23 +231,9 @@ describe("streamDiff(", () => {
   test.each([false, true])(
     "ignores indentation changes for sufficiently long lines (trailingWhitespace: %s)",
     async (trailingWhitespace) => {
-      let oldLines = [
-        " short",
-        "   middle",
-        " a long enough line",
-        "  short2",
-        "indented line",
-        "final line",
-      ];
+      let oldLines = [" short", "   middle", " a long enough line", "  short2", "indented line", "final line"];
 
-      let newLines = [
-        "short",
-        "middle",
-        "a long enough line",
-        "short2",
-        " indented line",
-        "final line",
-      ];
+      let newLines = ["short", "middle", "a long enough line", "short2", " indented line", "final line"];
 
       if (trailingWhitespace) {
         oldLines = oldLines.map((line) => line + " ");
@@ -284,7 +263,7 @@ describe("streamDiff(", () => {
           ];
 
       expect(streamDiffs).toEqual(expected);
-    },
+    }
   );
 
   test("preserves original lines for minor reindentation in simple block", async () => {
