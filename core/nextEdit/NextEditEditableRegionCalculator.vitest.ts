@@ -29,9 +29,7 @@ describe("NextEditEditableRegionCalculator", () => {
     beforeEach(() => {
       // Reset mocks
       mockGetMostRecentAst = vi.fn();
-      (
-        DocumentHistoryTracker.getInstance as ReturnType<typeof vi.fn>
-      ).mockReturnValue({
+      (DocumentHistoryTracker.getInstance as ReturnType<typeof vi.fn>).mockReturnValue({
         getMostRecentAst: mockGetMostRecentAst,
       });
 
@@ -78,18 +76,13 @@ describe("NextEditEditableRegionCalculator", () => {
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       // Should return references excluding the first one (current position)
       expect(result).toBeTruthy();
@@ -141,18 +134,13 @@ describe("NextEditEditableRegionCalculator", () => {
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       // Should find references only to the inner-scoped value
       expect(result).toBeTruthy();
@@ -199,18 +187,13 @@ describe("NextEditEditableRegionCalculator", () => {
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       // Tree-sitter should identify this as Inner.process, not Outer.process
       expect(mockIde.getReferences).toHaveBeenCalledWith({
@@ -255,18 +238,13 @@ describe("NextEditEditableRegionCalculator", () => {
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeTruthy();
       expect(result).toHaveLength(1);
@@ -299,18 +277,13 @@ console.log(myVar);`;
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeTruthy();
       expect(mockIde.getReferences).toHaveBeenCalled();
@@ -348,18 +321,13 @@ console.log(myVar);`;
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeTruthy();
       expect(result).toHaveLength(1);
@@ -374,14 +342,11 @@ console.log(myVar);`;
       // Cursor on comment line with no identifier
       const cursorPosition: Position = { line: 1, character: 5 };
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeNull();
     });
@@ -397,14 +362,11 @@ console.log(myVar);`;
       // No references found by IDE
       (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeNull();
     });
@@ -452,18 +414,13 @@ count++;  // Refers to outer count`;
           },
         },
       ];
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockReferences,
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockResolvedValue(mockReferences);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       // Should only find references to inner scoped count
       expect(result).toBeTruthy();
@@ -471,14 +428,11 @@ count++;  // Refers to outer count`;
     });
 
     it("should handle missing context gracefully", async () => {
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition: null,
-          filepath: "test.ts",
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition: null,
+        filepath: "test.ts",
+        ide: mockIde,
+      });
 
       expect(result).toBeNull();
     });
@@ -486,14 +440,11 @@ count++;  // Refers to outer count`;
     it("should return null when AST cannot be retrieved", async () => {
       mockGetMostRecentAst.mockResolvedValue(null);
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition: { line: 0, character: 0 },
-          filepath: "test.ts",
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition: { line: 0, character: 0 },
+        filepath: "test.ts",
+        ide: mockIde,
+      });
 
       expect(result).toBeNull();
     });
@@ -506,18 +457,13 @@ count++;  // Refers to outer count`;
 
       const cursorPosition: Position = { line: 0, character: 6 };
 
-      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockRejectedValue(
-        new Error("IDE error"),
-      );
+      (mockIde.getReferences as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("IDE error"));
 
-      const result = await getNextEditableRegion(
-        EditableRegionStrategy.Static,
-        {
-          cursorPosition,
-          filepath,
-          ide: mockIde,
-        },
-      );
+      const result = await getNextEditableRegion(EditableRegionStrategy.Static, {
+        cursorPosition,
+        filepath,
+        ide: mockIde,
+      });
 
       expect(result).toBeNull();
     });
@@ -597,9 +543,7 @@ count++;  // Refers to outer count`;
         });
         expect(declNode).toBeTruthy();
         // Navigate to the actual declaration node
-        const lexicalDecl = tree?.rootNode.descendantsOfType(
-          "lexical_declaration",
-        )[0];
+        const lexicalDecl = tree?.rootNode.descendantsOfType("lexical_declaration")[0];
         expect(lexicalDecl).toBeTruthy();
         expect(isDeclarationNode(lexicalDecl!)).toBe(true);
       });
@@ -608,9 +552,7 @@ count++;  // Refers to outer count`;
         const code = `def my_function():\n    pass`;
         const tree = await getAst("test.py", code);
 
-        const funcDef = tree?.rootNode.descendantsOfType(
-          "function_definition",
-        )[0];
+        const funcDef = tree?.rootNode.descendantsOfType("function_definition")[0];
         expect(funcDef).toBeTruthy();
         expect(isDeclarationNode(funcDef!)).toBe(true);
       });
@@ -619,8 +561,7 @@ count++;  // Refers to outer count`;
         const code = `class MyClass:\n    pass`;
         const tree = await getAst("test.py", code);
 
-        const classDef =
-          tree?.rootNode.descendantsOfType("class_definition")[0];
+        const classDef = tree?.rootNode.descendantsOfType("class_definition")[0];
         expect(classDef).toBeTruthy();
         expect(isDeclarationNode(classDef!)).toBe(true);
       });
@@ -629,8 +570,7 @@ count++;  // Refers to outer count`;
         const code = `class C {\n  myMethod() {}\n}`;
         const tree = await getAst("test.ts", code);
 
-        const methodDef =
-          tree?.rootNode.descendantsOfType("method_definition")[0];
+        const methodDef = tree?.rootNode.descendantsOfType("method_definition")[0];
         expect(methodDef).toBeTruthy();
         expect(isDeclarationNode(methodDef!)).toBe(true);
       });
@@ -651,9 +591,7 @@ count++;  // Refers to outer count`;
         const code = `const myVar = 10;`;
         const tree = await getAst("test.ts", code);
 
-        const varDeclarator = tree?.rootNode.descendantsOfType(
-          "variable_declarator",
-        )[0];
+        const varDeclarator = tree?.rootNode.descendantsOfType("variable_declarator")[0];
         expect(varDeclarator).toBeTruthy();
 
         const leftmost = findLeftmostIdentifier(varDeclarator!);
@@ -665,9 +603,7 @@ count++;  // Refers to outer count`;
         const code = `const { first, second } = obj;`;
         const tree = await getAst("test.ts", code);
 
-        const varDeclarator = tree?.rootNode.descendantsOfType(
-          "variable_declarator",
-        )[0];
+        const varDeclarator = tree?.rootNode.descendantsOfType("variable_declarator")[0];
         expect(varDeclarator).toBeTruthy();
 
         const leftmost = findLeftmostIdentifier(varDeclarator!);
@@ -680,9 +616,7 @@ count++;  // Refers to outer count`;
         const code = `def my_function(param):\n    pass`;
         const tree = await getAst("test.py", code);
 
-        const funcDef = tree?.rootNode.descendantsOfType(
-          "function_definition",
-        )[0];
+        const funcDef = tree?.rootNode.descendantsOfType("function_definition")[0];
         expect(funcDef).toBeTruthy();
 
         const leftmost = findLeftmostIdentifier(funcDef!);
@@ -710,8 +644,7 @@ count++;  // Refers to outer count`;
         const tree = await getAst("test.ts", code);
 
         // Binary expression (10 + 20) has no identifiers
-        const binaryExpr =
-          tree?.rootNode.descendantsOfType("binary_expression")[0];
+        const binaryExpr = tree?.rootNode.descendantsOfType("binary_expression")[0];
         expect(binaryExpr).toBeTruthy();
 
         const result = findLeftmostIdentifier(binaryExpr!);
@@ -739,9 +672,7 @@ count++;  // Refers to outer count`;
         const code = `const myVar = 10;`;
         const tree = await getAst("test.ts", code);
 
-        const varDeclarator = tree?.rootNode.descendantsOfType(
-          "variable_declarator",
-        )[0];
+        const varDeclarator = tree?.rootNode.descendantsOfType("variable_declarator")[0];
         expect(varDeclarator).toBeTruthy();
 
         const result = findClosestIdentifierNode(varDeclarator!);
@@ -853,13 +784,11 @@ count++;  // Refers to outer count`;
         expect(tree?.rootNode.type).toBe("program");
 
         // Verify we can find specific node types
-        const classDecl =
-          tree?.rootNode.descendantsOfType("class_declaration")[0];
+        const classDecl = tree?.rootNode.descendantsOfType("class_declaration")[0];
         expect(classDecl).toBeTruthy();
         expect(isDeclarationNode(classDecl!)).toBe(true);
 
-        const methodDef =
-          tree?.rootNode.descendantsOfType("method_definition")[0];
+        const methodDef = tree?.rootNode.descendantsOfType("method_definition")[0];
         expect(methodDef).toBeTruthy();
         expect(isDeclarationNode(methodDef!)).toBe(true);
 
@@ -880,14 +809,11 @@ count++;  // Refers to outer count`;
         expect(tree).toBeTruthy();
         expect(tree?.rootNode.type).toBe("module");
 
-        const classDef =
-          tree?.rootNode.descendantsOfType("class_definition")[0];
+        const classDef = tree?.rootNode.descendantsOfType("class_definition")[0];
         expect(classDef).toBeTruthy();
         expect(isDeclarationNode(classDef!)).toBe(true);
 
-        const funcDefs = tree?.rootNode.descendantsOfType(
-          "function_definition",
-        );
+        const funcDefs = tree?.rootNode.descendantsOfType("function_definition");
         expect(funcDefs?.length).toBeGreaterThan(0);
 
         funcDefs?.forEach((funcDef) => {

@@ -1,8 +1,6 @@
 import { CompletionOptions } from "../..";
 import { AutocompleteLanguageInfo } from "../constants/AutocompleteLanguageInfo";
 
-const DOUBLE_NEWLINE = "\n\n";
-const WINDOWS_DOUBLE_NEWLINE = "\r\n\r\n";
 // TODO: Do we want to stop completions when reaching a `/src/` string?
 const SRC_DIRECTORY = "/src/";
 // Starcoder2 tends to output artifacts starting with the letter "t"
@@ -16,15 +14,13 @@ const commonStops = [SRC_DIRECTORY, PYTHON_ENCODING, CODE_BLOCK_END];
 export function getStopTokens(
   completionOptions: Partial<CompletionOptions> | undefined,
   lang: AutocompleteLanguageInfo,
-  model: string,
+  model: string
 ): string[] {
   const stopTokens = [
     ...(completionOptions?.stop || []),
     // ...multilineStops,
     ...commonStops,
-    ...(model.toLowerCase().includes("starcoder2")
-      ? STARCODER2_T_ARTIFACTS
-      : []),
+    ...(model.toLowerCase().includes("starcoder2") ? STARCODER2_T_ARTIFACTS : []),
     // ...lang.topLevelKeywords.map((word) => `\n${word}`),
   ];
 

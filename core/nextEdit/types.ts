@@ -1,12 +1,5 @@
-import {
-  DiffLine,
-  Position,
-  Range,
-  RangeInFile,
-  TabAutocompleteOptions,
-} from "../";
+import { DiffLine, RangeInFile, TabAutocompleteOptions } from "../";
 import { SnippetPayload } from "../autocomplete/snippets";
-import { AutocompleteCodeSnippet } from "../autocomplete/snippets/types";
 import { HelperVars } from "../autocomplete/util/HelperVars";
 
 export type RecentlyEditedRange = RangeInFile & {
@@ -14,24 +7,6 @@ export type RecentlyEditedRange = RangeInFile & {
   lines: string[];
   symbols: Set<string>;
 };
-
-interface AutocompleteInput {
-  isUntitledFile: boolean;
-  completionId: string;
-  filepath: string;
-  pos: Position;
-  recentlyVisitedRanges: AutocompleteCodeSnippet[];
-  recentlyEditedRanges: RecentlyEditedRange[];
-  // Used for notebook files
-  manuallyPassFileContents?: string;
-  // Used for VS Code git commit input box
-  manuallyPassPrefix?: string;
-  selectedCompletionInfo?: {
-    text: string;
-    range: Range;
-  };
-  injectDetails?: string;
-}
 
 export interface NextEditOutcome extends TabAutocompleteOptions {
   // Originally from Autocomplete.
@@ -95,21 +70,6 @@ export interface NextEditTemplate {
 
 export interface TemplateVars {}
 
-interface InstinctTemplateVars extends TemplateVars {
-  contextSnippets: string;
-  currentFileContent: string;
-  editDiffHistory: string; // could be a singe large unified diff
-  currentFilePath: string;
-  languageShorthand: string;
-}
-
-interface MercuryTemplateVars extends TemplateVars {
-  recentlyViewedCodeSnippets: string;
-  currentFileContent: string;
-  editDiffHistory: string; // could be a singe large unified diff
-  currentFilePath: string;
-}
-
 /**
  * Context object containing all necessary information for model-specific operations.
  */
@@ -122,23 +82,4 @@ export interface ModelSpecificContext {
   autocompleteContext: string;
   historyDiff?: string;
   workspaceDirs?: string[];
-}
-
-/**
- * Configuration for editable region calculation.
- */
-interface EditableRegionConfig {
-  usingFullFileDiff?: boolean;
-  maxTokens?: number;
-  topMargin?: number;
-  bottomMargin?: number;
-}
-
-/**
- * Configuration for prompt generation.
- */
-interface PromptConfig {
-  includeHistory?: boolean;
-  includeRecentEdits?: boolean;
-  maxContextSnippets?: number;
 }

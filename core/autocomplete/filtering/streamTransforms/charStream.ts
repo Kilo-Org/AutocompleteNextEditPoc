@@ -1,64 +1,4 @@
 /**
- * Asynchronous generator that yields characters from the input stream until it encounters
- * an end-of-line character followed by a non-whitespace character.
- *
- * @param {AsyncGenerator<string>} stream - The input stream of characters.
- * @param {string[]} endOfLine - An array of characters considered as end-of-line markers.
- * @param {() => void} fullStop - A function to be called when the generator stops.
- * @yields {string} Characters from the input stream.
- * @returns {AsyncGenerator<string>} An async generator that yields characters.
- */
-async function* onlyWhitespaceAfterEndOfLine(
-  stream: AsyncGenerator<string>,
-  endOfLine: string[],
-  fullStop: () => void,
-): AsyncGenerator<string> {
-  let pending = "";
-
-  for await (let chunk of stream) {
-    chunk = pending + chunk;
-    pending = "";
-
-    for (let i = 0; i < chunk.length - 1; i++) {
-      if (
-        endOfLine.includes(chunk[i]) &&
-        chunk[i + 1].trim() === chunk[i + 1]
-      ) {
-        yield chunk.slice(0, i + 1);
-        fullStop();
-        return;
-      }
-    }
-
-    if (endOfLine.includes(chunk[chunk.length - 1])) {
-      pending = chunk[chunk.length - 1];
-      yield chunk.slice(0, chunk.length - 1);
-    } else {
-      yield chunk;
-    }
-  }
-  yield pending;
-}
-
-/**
- * Yields characters from the stream, stopping if the first character is a newline.
- * @param {AsyncGenerator<string>} stream - The input character stream.
- * @yields {string} Characters from the stream.
- */
-async function* noFirstCharNewline(stream: AsyncGenerator<string>) {
-  let first = true;
-  for await (const char of stream) {
-    if (first) {
-      first = false;
-      if (char.startsWith("\n") || char.startsWith("\r")) {
-        return;
-      }
-    }
-    yield char;
-  }
-}
-
-/**
  * Asynchronously yields characters from the input stream, stopping if a stop token is encountered.
  *
  * @param {AsyncGenerator<string>} stream - The input stream of characters.
@@ -73,10 +13,7 @@ async function* noFirstCharNewline(stream: AsyncGenerator<string>) {
  * 5. After the stream ends, filters encountered stop tokens in remaining buffer.
  * 6. Yields any remaining buffered characters.
  */
-export async function* stopAtStopTokens(
-  stream: AsyncGenerator<string>,
-  stopTokens: string[],
-): AsyncGenerator<string> {
+export async function* stopAtStopTokens(stream: AsyncGenerator<string>, stopTokens: string[]): AsyncGenerator<string> {
   if (stopTokens.length === 0) {
     for await (const char of stream) {
       yield char;
@@ -84,9 +21,7 @@ export async function* stopAtStopTokens(
     return;
   }
 
-  const maxStopTokenLength = Math.max(
-    ...stopTokens.map((token) => token.length),
-  );
+  const maxStopTokenLength = Math.max(...stopTokens.map((token) => token.length));
   let buffer = "";
 
   for await (const chunk of stream) {
@@ -125,7 +60,7 @@ export async function* stopAtStopTokens(
 export async function* stopAtStartOf(
   stream: AsyncGenerator<string>,
   suffix: string,
-  sequenceLength: number = 20,
+  sequenceLength: number = 20
 ): AsyncGenerator<string> {
   if (suffix.length < sequenceLength) {
     for await (const chunk of stream) {
@@ -135,9 +70,7 @@ export async function* stopAtStartOf(
   }
   // We use sequenceLength * 1.5 as a heuristic to make sure we don't miss the sequence if the
   // stream is not perfectly aligned with the sequence (small whitespace differences etc).
-  const targetPart = suffix
-    .trimStart()
-    .slice(0, Math.floor(sequenceLength * 1.5));
+  const targetPart = suffix.trimStart().slice(0, Math.floor(sequenceLength * 1.5));
 
   let buffer = "";
 

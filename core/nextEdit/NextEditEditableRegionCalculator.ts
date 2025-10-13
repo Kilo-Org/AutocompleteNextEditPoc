@@ -17,10 +17,7 @@ export enum EditableRegionStrategy {
  * This was an attempt to find next edit locations deterministically.
  * I was intending to use this in tandem with the prefetching logic, but we are not using it anymore.
  */
-export async function getNextEditableRegion(
-  strategy: EditableRegionStrategy,
-  ctx: any,
-): Promise<RangeInFile[] | null> {
+export async function getNextEditableRegion(strategy: EditableRegionStrategy, ctx: any): Promise<RangeInFile[] | null> {
   switch (strategy) {
     case EditableRegionStrategy.Naive:
       return naiveJump(ctx);
@@ -69,8 +66,7 @@ function slidingJump(ctx: any): RangeInFile[] | null {
   }
 
   const topMargin = MODEL_WINDOW_SIZES[modelName as NEXT_EDIT_MODELS].topMargin;
-  const bottomMargin =
-    MODEL_WINDOW_SIZES[modelName as NEXT_EDIT_MODELS].bottomMargin;
+  const bottomMargin = MODEL_WINDOW_SIZES[modelName as NEXT_EDIT_MODELS].bottomMargin;
   const windowSize = topMargin + bottomMargin + 1; // 1 for current line
 
   if (fileLines.length <= windowSize) {
@@ -93,10 +89,7 @@ function slidingJump(ctx: any): RangeInFile[] | null {
 
   // Create the first window centered around the cursor position
   const firstWindowStart = Math.max(0, cursorLine - topMargin);
-  const firstWindowEnd = Math.min(
-    fileLines.length - 1,
-    cursorLine + bottomMargin,
-  );
+  const firstWindowEnd = Math.min(fileLines.length - 1, cursorLine + bottomMargin);
 
   ranges.push({
     filepath,
@@ -117,10 +110,7 @@ function slidingJump(ctx: any): RangeInFile[] | null {
     // Go down once
     if (currentStartDown < fileLines.length) {
       const windowStart = currentStartDown;
-      const windowEnd = Math.min(
-        windowStart + windowSize - 1,
-        fileLines.length - 1,
-      );
+      const windowEnd = Math.min(windowStart + windowSize - 1, fileLines.length - 1);
 
       ranges.push({
         filepath,
@@ -139,10 +129,7 @@ function slidingJump(ctx: any): RangeInFile[] | null {
     // Go up once
     if (currentStartUp >= 0) {
       const windowStart = Math.max(0, currentStartUp);
-      const windowEnd = Math.min(
-        windowStart + windowSize - 1,
-        fileLines.length - 1,
-      );
+      const windowEnd = Math.min(windowStart + windowSize - 1, fileLines.length - 1);
 
       ranges.push({
         filepath,
@@ -175,13 +162,7 @@ async function rerankJump(ctx: {
     const { fileContent, query, filepath, reranker, chunkSize = 5 } = ctx;
 
     if (!fileContent || !query || !filepath || !reranker) {
-      console.warn(
-        "Missing required context for rerank jump:",
-        !fileContent,
-        !query,
-        !filepath,
-        !reranker,
-      );
+      console.warn("Missing required context for rerank jump:", !fileContent, !query, !filepath, !reranker);
       return null;
     }
 
@@ -207,9 +188,7 @@ async function rerankJump(ctx: {
     const scores = await reranker.rerank(query, chunks);
 
     // Sort by score in descending order and get the highest scoring chunk.
-    chunks.sort(
-      (a, b) => scores[chunks.indexOf(b)] - scores[chunks.indexOf(a)],
-    );
+    chunks.sort((a, b) => scores[chunks.indexOf(b)] - scores[chunks.indexOf(a)]);
 
     // const mostRelevantChunk = chunks[0];
     // Get the third most relevant chunk if there are enough chunks,
@@ -254,23 +233,16 @@ async function staticRerankJump(ctx: {
   chunkSize?: number;
 }): Promise<RangeInFile[] | null> {
   try {
-    const { oldFileContent, newFileContent, completionRange, filepath, ide } =
-      ctx;
+    const { oldFileContent, newFileContent, completionRange, filepath, ide } = ctx;
 
-    if (
-      !oldFileContent ||
-      !newFileContent ||
-      !completionRange ||
-      !filepath ||
-      !ide
-    ) {
+    if (!oldFileContent || !newFileContent || !completionRange || !filepath || !ide) {
       console.warn(
         "Missing required context for static rerank jump:",
         !oldFileContent,
         !newFileContent,
         !completionRange,
         !filepath,
-        !ide,
+        !ide
       );
       return null;
     }
@@ -320,18 +292,14 @@ async function staticRerankJump(ctx: {
         oldType: node.oldNode?.type || "",
         newType: node.newNode?.type || "",
         depth: node.depth,
-      })),
+      }))
     );
 
     // Find the first item with a non-null old node.
     let targetNode = null;
     while (nodeQueue.length > 0 && !targetNode) {
       const candidate = nodeQueue.shift();
-      if (
-        candidate &&
-        candidate.oldNode &&
-        candidate.oldNode.type !== "program"
-      ) {
+      if (candidate && candidate.oldNode && candidate.oldNode.type !== "program") {
         targetNode = candidate.oldNode;
       }
     }
@@ -389,16 +357,13 @@ async function staticRerankJump(ctx: {
         }
 
         const scores = await ctx.reranker.rerank(nodeText, symbolChunks);
-        symbolChunks.sort(
-          (a, b) =>
-            scores[symbolChunks.indexOf(b)] - scores[symbolChunks.indexOf(a)],
-        );
+        symbolChunks.sort((a, b) => scores[symbolChunks.indexOf(b)] - scores[symbolChunks.indexOf(a)]);
 
         const mostRelevantSymbol = symbolChunks[0];
         const originalSymbol = filteredSymbols.find(
           (symbol) =>
             symbol.range.start.line === mostRelevantSymbol.startLine &&
-            symbol.range.end.line === mostRelevantSymbol.endLine,
+            symbol.range.end.line === mostRelevantSymbol.endLine
         );
 
         if (originalSymbol) {
@@ -420,23 +385,16 @@ async function staticRerankJump(ctx: {
         // }
       }
     } catch (e) {
-      console.warn(
-        "Failed to use IDE references, falling back to text search:",
-        e,
-      );
+      console.warn("Failed to use IDE references, falling back to text search:", e);
     }
 
     // If IDE reference finding failed or returned no results, fall back to text search.
     if (references.length === 0) {
-      references = findTextOccurrences(oldFileContent, nodeText).map(
-        (range) => ({ filepath, range }),
-      );
+      references = findTextOccurrences(oldFileContent, nodeText).map((range) => ({ filepath, range }));
     }
 
     // Filter out results from outside the current file.
-    const currentFileReferences = references.filter(
-      (ref) => ref.filepath === filepath,
-    );
+    const currentFileReferences = references.filter((ref) => ref.filepath === filepath);
 
     // Return the first reference if any found.
     if (currentFileReferences.length > 0) {
@@ -466,8 +424,7 @@ async function staticJump(ctx: {
 
     // Get the file's AST.
     // Getting this once helps us live-track the current node.
-    const tree =
-      await DocumentHistoryTracker.getInstance().getMostRecentAst(filepath);
+    const tree = await DocumentHistoryTracker.getInstance().getMostRecentAst(filepath);
     // const tree = await getAst(filepath, fileContent);
     if (!tree) return null;
 
@@ -526,9 +483,7 @@ async function staticJump(ctx: {
 
 // Helper function to find the closest identifier node.
 // Exported for testing
-export function findClosestIdentifierNode(
-  node: Parser.SyntaxNode | null,
-): Parser.SyntaxNode | null {
+export function findClosestIdentifierNode(node: Parser.SyntaxNode | null): Parser.SyntaxNode | null {
   if (!node) return null;
 
   if (isIdentifierNode(node)) return node;
@@ -560,9 +515,7 @@ export function findClosestIdentifierNode(
 }
 
 // Exported for testing
-export function findLeftmostIdentifier(
-  node: Parser.SyntaxNode,
-): Parser.SyntaxNode | null {
+export function findLeftmostIdentifier(node: Parser.SyntaxNode): Parser.SyntaxNode | null {
   if (isIdentifierNode(node)) return node;
 
   for (let i = 0; i < node.childCount; ++i) {
@@ -702,19 +655,11 @@ function compareAsts(oldAst: Parser.Tree, newAst: Parser.Tree) {
   // In practice, you would traverse both ASTs in parallel
   // and identify nodes that differ.
 
-  function traverse(
-    oldNode: Parser.SyntaxNode | null,
-    newNode: Parser.SyntaxNode | null,
-    depth: number = 0,
-  ) {
+  function traverse(oldNode: Parser.SyntaxNode | null, newNode: Parser.SyntaxNode | null, depth: number = 0) {
     if (!oldNode && !newNode) return;
 
     // If one node exists and the other doesn't, or they're different types.
-    if (
-      (!oldNode && newNode) ||
-      (oldNode && !newNode) ||
-      oldNode?.type !== newNode?.type
-    ) {
+    if ((!oldNode && newNode) || (oldNode && !newNode) || oldNode?.type !== newNode?.type) {
       changedNodes.push({ oldNode, newNode, depth });
       return;
     }
@@ -785,122 +730,17 @@ function findTextOccurrences(text: string, searchText: string): Range[] {
   return results;
 }
 
-// Helper function to check if a range is within another range.
-function isRangeWithin(innerRange: Range, outerRange: Range): boolean {
-  // Check if the inner range's start position is after or equal to the outer range's start.
-  const startWithin =
-    innerRange.start.line > outerRange.start.line ||
-    (innerRange.start.line === outerRange.start.line &&
-      innerRange.start.character >= outerRange.start.character);
-
-  // Check if the inner range's end position is before or equal to the outer range's end.
-  const endWithin =
-    innerRange.end.line < outerRange.end.line ||
-    (innerRange.end.line === outerRange.end.line &&
-      innerRange.end.character <= outerRange.end.character);
-
-  return startWithin && endWithin;
-}
-
 // Helper function to check if two ranges overlap.
 function doRangesOverlap(range1: Range, range2: Range): boolean {
   // Check if one range starts after the other ends
   const range1StartsAfterRange2Ends =
     range1.start.line > range2.end.line ||
-    (range1.start.line === range2.end.line &&
-      range1.start.character > range2.end.character);
+    (range1.start.line === range2.end.line && range1.start.character > range2.end.character);
 
   const range2StartsAfterRange1Ends =
     range2.start.line > range1.end.line ||
-    (range2.start.line === range1.end.line &&
-      range2.start.character > range1.end.character);
+    (range2.start.line === range1.end.line && range2.start.character > range1.end.character);
 
   // If either condition is true, the ranges don't overlap
   return !(range1StartsAfterRange2Ends || range2StartsAfterRange1Ends);
-}
-
-// Helper function to check if the upper part of range1 overlaps with range2.
-function doesUpperPartOverlap(range1: Range, range2: Range): boolean {
-  // Check if range1 starts before range2 ends
-  const range1StartsBeforeRange2Ends =
-    range1.start.line < range2.end.line ||
-    (range1.start.line === range2.end.line &&
-      range1.start.character <= range2.end.character);
-
-  // Check if range1 starts before range2 starts (meaning it's "upper" than range2)
-  const range1StartsBeforeRange2Starts =
-    range1.start.line < range2.start.line ||
-    (range1.start.line === range2.start.line &&
-      range1.start.character < range2.start.character);
-
-  // The upper part overlaps if range1 starts before range2 ends
-  // AND range1 starts before range2 starts
-  return range1StartsBeforeRange2Ends && range1StartsBeforeRange2Starts;
-}
-
-// Helper function to check if the lower part of range1 overlaps with range2.
-function doesLowerPartOverlap(range1: Range, range2: Range): boolean {
-  // Check if range1 starts inside range2
-  const range1StartsInsideRange2 =
-    (range1.start.line > range2.start.line ||
-      (range1.start.line === range2.start.line &&
-        range1.start.character >= range2.start.character)) &&
-    (range1.start.line < range2.end.line ||
-      (range1.start.line === range2.end.line &&
-        range1.start.character < range2.end.character));
-
-  // Check if range1 ends after range2 ends
-  const range1EndsAfterRange2 =
-    range1.end.line > range2.end.line ||
-    (range1.end.line === range2.end.line &&
-      range1.end.character > range2.end.character);
-
-  // The lower part overlaps if range1 starts inside range2
-  // AND range1 ends after range2 ends
-  return range1StartsInsideRange2 && range1EndsAfterRange2;
-}
-
-// Helper function to check if a range overlaps with another range from either end
-function doesRangePartiallyOverlap(range1: Range, range2: Range): boolean {
-  // Upper part overlap: range1 starts before range2 starts but ends inside range2
-  const upperPartOverlap =
-    (range1.start.line < range2.start.line ||
-      (range1.start.line === range2.start.line &&
-        range1.start.character < range2.start.character)) &&
-    (range1.end.line > range2.start.line ||
-      (range1.end.line === range2.start.line &&
-        range1.end.character > range2.start.character)) &&
-    (range1.end.line < range2.end.line ||
-      (range1.end.line === range2.end.line &&
-        range1.end.character <= range2.end.character));
-
-  // Lower part overlap: range1 starts inside range2 but ends after range2 ends
-  const lowerPartOverlap =
-    (range1.start.line > range2.start.line ||
-      (range1.start.line === range2.start.line &&
-        range1.start.character >= range2.start.character)) &&
-    (range1.start.line < range2.end.line ||
-      (range1.start.line === range2.end.line &&
-        range1.start.character < range2.end.character)) &&
-    (range1.end.line > range2.end.line ||
-      (range1.end.line === range2.end.line &&
-        range1.end.character > range2.end.character));
-
-  return upperPartOverlap || lowerPartOverlap;
-}
-
-// Utility function to print chunks.
-function printChunks(chunks: Chunk[]) {
-  console.log(
-    "chunks:",
-    JSON.stringify(
-      chunks.map((chunk) => ({
-        content: chunk.content,
-        startLine: chunk.startLine,
-        endLine: chunk.endLine,
-      })),
-      null,
-      2,
-    ),
-  );
 }

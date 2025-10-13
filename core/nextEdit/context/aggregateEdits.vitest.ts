@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EditAggregator, EditClusterConfig } from "./aggregateEdits";
+import { EditAggregator } from "./aggregateEdits";
 import { RangeInFileWithNextEditInfo } from "../..";
-import { BeforeAfterDiff } from "./diffFormatting";
 
 describe("aggregateEdits", () => {
   let mockCallback: ReturnType<typeof vi.fn>;
@@ -20,7 +19,7 @@ describe("aggregateEdits", () => {
     line: number,
     filePath: string = "test.ts",
     editText: string = "test",
-    fileContents: string = "line1\nline2\nline3\nline4\nline5",
+    fileContents: string = "line1\nline2\nline3\nline4\nline5"
   ): RangeInFileWithNextEditInfo => ({
     filepath: filePath,
     range: {
@@ -88,10 +87,7 @@ describe("aggregateEdits", () => {
       });
 
       it("should cluster edits on same line within time window", async () => {
-        const aggregator = EditAggregator.getInstance(
-          { deltaT: 1.0 },
-          mockCallback,
-        );
+        const aggregator = EditAggregator.getInstance({ deltaT: 1.0 }, mockCallback);
         const timestamp = Date.now();
 
         await aggregator.processEdit(createMockEdit(1), timestamp);
@@ -169,10 +165,7 @@ describe("aggregateEdits", () => {
       });
 
       it("should count clusters across multiple files", async () => {
-        const aggregator = EditAggregator.getInstance(
-          { deltaT: 10.0 },
-          mockCallback,
-        );
+        const aggregator = EditAggregator.getInstance({ deltaT: 10.0 }, mockCallback);
 
         await aggregator.processEdit(createMockEdit(1, "file1.ts"));
         await aggregator.processEdit(createMockEdit(5, "file1.ts"));
@@ -205,36 +198,21 @@ describe("aggregateEdits", () => {
 
     describe("cluster finalization conditions", () => {
       it("should finalize cluster when exceeding maxEdits", async () => {
-        const aggregator = EditAggregator.getInstance(
-          { maxEdits: 3, deltaT: 10.0 },
-          mockCallback,
-        );
+        const aggregator = EditAggregator.getInstance({ maxEdits: 3, deltaT: 10.0 }, mockCallback);
         const timestamp = Date.now();
 
         // Create edits with incremental content changes
         let content = "line1\nline2\nline3\nline4\nline5";
-        await aggregator.processEdit(
-          createMockEdit(1, "test.ts", "new1", content),
-          timestamp,
-        );
+        await aggregator.processEdit(createMockEdit(1, "test.ts", "new1", content), timestamp);
 
         content = "line1\nnew1\nline3\nline4\nline5";
-        await aggregator.processEdit(
-          createMockEdit(1, "test.ts", "new2", content),
-          timestamp + 100,
-        );
+        await aggregator.processEdit(createMockEdit(1, "test.ts", "new2", content), timestamp + 100);
 
         content = "line1\nnew1\nnew2\nline4\nline5";
-        await aggregator.processEdit(
-          createMockEdit(1, "test.ts", "new3", content),
-          timestamp + 200,
-        );
+        await aggregator.processEdit(createMockEdit(1, "test.ts", "new3", content), timestamp + 200);
 
         content = "line1\nnew1\nnew2\nnew3\nline5";
-        await aggregator.processEdit(
-          createMockEdit(1, "test.ts", "new4", content),
-          timestamp + 300,
-        );
+        await aggregator.processEdit(createMockEdit(1, "test.ts", "new4", content), timestamp + 300);
 
         // Wait for async processing to complete - queue processing has delays
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -246,9 +224,7 @@ describe("aggregateEdits", () => {
         const aggregator = EditAggregator.getInstance({}, mockCallback);
         const content = "const a = 1;";
 
-        await aggregator.processEdit(
-          createMockEdit(0, "test.ts", "  ", content),
-        );
+        await aggregator.processEdit(createMockEdit(0, "test.ts", "  ", content));
         await aggregator.finalizeAllClusters();
 
         // Whitespace-only diffs should not trigger callback
