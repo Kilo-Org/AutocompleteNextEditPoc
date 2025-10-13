@@ -19,7 +19,7 @@ class LlamaEncoding implements Encoding {
     return llamaTokenizer.decode(tokens);
   }
 }
-export interface AsyncEncoder {
+interface AsyncEncoder {
   encode(text: string): Promise<number[]>;
   decode(tokens: number[]): Promise<string>;
   close(): Promise<void>;
