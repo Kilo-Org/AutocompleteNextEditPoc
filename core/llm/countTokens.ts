@@ -1,24 +1,11 @@
 import { Tiktoken, encodingForModel as _encodingForModel } from "js-tiktoken";
-
-import {
-  ChatMessage,
-  CompiledMessagesResult,
-  MessageContent,
-  MessagePart,
-  Tool,
-} from "../index.js";
+import { ChatMessage, CompiledMessagesResult, MessageContent, MessagePart, Tool } from "../index.js";
 import { autodetectTemplateType } from "./autodetect.js";
-import {
-  addSpaceToAnyEmptyMessages,
-  chatMessageIsEmpty,
-  isUserOrToolMsg,
-  messageHasToolCallId,
-} from "./messages.js";
-
+import { addSpaceToAnyEmptyMessages, chatMessageIsEmpty, isUserOrToolMsg, messageHasToolCallId } from "./messages.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { AsyncEncoder, LlamaAsyncEncoder } from "./asyncEncoder.js";
 import { DEFAULT_PRUNING_LENGTH } from "./constants.js";
-import llamaTokenizer from "./llamaTokenizer.js";
+import { llamaTokenizer } from "./llamaTokenizer.js";
 interface Encoding {
   encode: Tiktoken["encode"];
   decode: Tiktoken["decode"];
@@ -93,7 +80,7 @@ function countImageTokens(content: MessagePart): number {
 async function countTokensAsync(
   content: MessageContent,
   // defaults to llama2 because the tokenizer tends to produce more tokens
-  modelName = "llama2",
+  modelName = "llama2"
 ): Promise<number> {
   const encoding = asyncEncoderForModel(modelName);
   if (Array.isArray(content)) {
@@ -111,17 +98,12 @@ async function countTokensAsync(
 function countTokens(
   content: MessageContent,
   // defaults to llama2 because the tokenizer tends to produce more tokens
-  modelName = "llama2",
+  modelName = "llama2"
 ): number {
   const encoding = encodingForModel(modelName);
   if (Array.isArray(content)) {
     return content.reduce((acc, part) => {
-      return (
-        acc +
-        (part.type === "text"
-          ? encoding.encode(part.text ?? "", "all", []).length
-          : countImageTokens(part))
-      );
+      return acc + (part.type === "text" ? encoding.encode(part.text ?? "", "all", []).length : countImageTokens(part));
     }, 0);
   } else {
     return encoding.encode(content ?? "", "all", []).length;
@@ -130,8 +112,7 @@ function countTokens(
 
 // https://community.openai.com/t/how-to-calculate-the-tokens-when-using-function-call/266573/10
 function countToolsTokens(tools: Tool[], modelName: string): number {
-  const count = (value: string) =>
-    encodingForModel(modelName).encode(value).length;
+  const count = (value: string) => encodingForModel(modelName).encode(value).length;
 
   let numTokens = 12;
 
@@ -173,10 +154,7 @@ function countToolsTokens(tools: Tool[], modelName: string): number {
   return numTokens + 12;
 }
 
-function countChatMessageTokens(
-  modelName: string,
-  chatMessage: ChatMessage,
-): number {
+function countChatMessageTokens(modelName: string, chatMessage: ChatMessage): number {
   // Doing simpler, safer version of what is here:
   // https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   // every message follows <|im_start|>{role/name}\n{content}<|end|>\n
@@ -234,10 +212,7 @@ function extractToolSequence(messages: ChatMessage[]): ChatMessage[] {
     toolSequence.push(lastMsg);
 
     // Collect all consecutive tool messages from the end
-    while (
-      messages.length > 0 &&
-      messages[messages.length - 1].role === "tool"
-    ) {
+    while (messages.length > 0 && messages[messages.length - 1].role === "tool") {
       toolSequence.unshift(messages.pop()!);
     }
 
@@ -249,12 +224,9 @@ function extractToolSequence(messages: ChatMessage[]): ChatMessage[] {
       // Validate that all tool messages have matching tool call IDs
       for (const toolMsg of toolSequence.slice(1)) {
         // Skip assistant message
-        if (
-          toolMsg.role === "tool" &&
-          !messageHasToolCallId(assistantMsg, toolMsg.toolCallId)
-        ) {
+        if (toolMsg.role === "tool" && !messageHasToolCallId(assistantMsg, toolMsg.toolCallId)) {
           throw new Error(
-            `Error parsing chat history: no tool call found to match tool output for id "${toolMsg.toolCallId}"`,
+            `Error parsing chat history: no tool call found to match tool output for id "${toolMsg.toolCallId}"`
           );
         }
       }
@@ -267,11 +239,7 @@ function extractToolSequence(messages: ChatMessage[]): ChatMessage[] {
   return toolSequence;
 }
 
-function pruneLinesFromTop(
-  prompt: string,
-  maxTokens: number,
-  modelName: string,
-): string {
+function pruneLinesFromTop(prompt: string, maxTokens: number, modelName: string): string {
   const lines = prompt.split("\n");
   // Preprocess tokens for all lines and cache them.
   const lineTokens = lines.map((line) => countTokens(line, modelName));
@@ -296,11 +264,7 @@ function pruneLinesFromTop(
   return lines.slice(start).join("\n");
 }
 
-function pruneLinesFromBottom(
-  prompt: string,
-  maxTokens: number,
-  modelName: string,
-): string {
+function pruneLinesFromBottom(prompt: string, maxTokens: number, modelName: string): string {
   const lines = prompt.split("\n");
   const lineTokens = lines.map((line) => countTokens(line, modelName));
   let totalTokens = lineTokens.reduce((sum, tokens) => sum + tokens, 0);
@@ -323,11 +287,7 @@ function pruneLinesFromBottom(
   return lines.slice(0, end).join("\n");
 }
 
-function pruneStringFromBottom(
-  modelName: string,
-  maxTokens: number,
-  prompt: string,
-): string {
+function pruneStringFromBottom(modelName: string, maxTokens: number, prompt: string): string {
   const encoding = encodingForModel(modelName);
 
   const tokens = encoding.encode(prompt, "all", []);
@@ -338,11 +298,7 @@ function pruneStringFromBottom(
   return encoding.decode(tokens.slice(0, maxTokens));
 }
 
-function pruneStringFromTop(
-  modelName: string,
-  maxTokens: number,
-  prompt: string,
-): string {
+function pruneStringFromTop(modelName: string, maxTokens: number, prompt: string): string {
   const encoding = encodingForModel(modelName);
 
   const tokens = encoding.encode(prompt, "all", []);
@@ -356,10 +312,7 @@ function pruneStringFromTop(
 const MAX_TOKEN_SAFETY_BUFFER = 1000;
 const TOKEN_SAFETY_PROPORTION = 0.02;
 export function getTokenCountingBufferSafety(contextLength: number) {
-  return Math.min(
-    MAX_TOKEN_SAFETY_BUFFER,
-    contextLength * TOKEN_SAFETY_PROPORTION,
-  );
+  return Math.min(MAX_TOKEN_SAFETY_BUFFER, contextLength * TOKEN_SAFETY_PROPORTION);
 }
 
 const MIN_RESPONSE_TOKENS = 1000;
@@ -368,12 +321,9 @@ function pruneRawPromptFromTop(
   modelName: string,
   contextLength: number,
   prompt: string,
-  tokensForCompletion: number,
+  tokensForCompletion: number
 ): string {
-  const maxTokens =
-    contextLength -
-    tokensForCompletion -
-    getTokenCountingBufferSafety(contextLength);
+  const maxTokens = contextLength - tokensForCompletion - getTokenCountingBufferSafety(contextLength);
   return pruneStringFromTop(modelName, maxTokens, prompt);
 }
 
@@ -491,7 +441,7 @@ function compileChatMessages({
         - counting safety buffer: ${countingSafetyBuffer}
         - tools: ~${toolTokens}
         - system message: ~${systemMsgTokens}
-        - max output tokens: ${maxTokens}`,
+        - max output tokens: ${maxTokens}`
     );
   }
 
@@ -526,10 +476,8 @@ function compileChatMessages({
   reassembled.push(...historyWithTokens.map(({ tokens, ...rest }) => rest));
   reassembled.push(...toolSequence);
 
-  const inputTokens =
-    currentTotal + systemMsgTokens + toolTokens + lastMessagesTokens;
-  const availableTokens =
-    contextLength - countingSafetyBuffer - minOutputTokens;
+  const inputTokens = currentTotal + systemMsgTokens + toolTokens + lastMessagesTokens;
+  const availableTokens = contextLength - countingSafetyBuffer - minOutputTokens;
   const contextPercentage = inputTokens / availableTokens;
   return {
     compiledChatMessages: reassembled,

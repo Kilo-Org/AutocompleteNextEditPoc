@@ -1,8 +1,6 @@
 import { DataLogger } from "../../util/log";
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../../util/parameters";
-import { Telemetry } from "../../util/posthog";
 import { getUriFileExtension } from "../../util/uri";
-
 import { AutocompleteOutcome } from "./types";
 
 export class AutocompleteLoggingService {
@@ -10,8 +8,7 @@ export class AutocompleteLoggingService {
   private _abortControllers = new Map<string, AbortController>();
   private _logRejectionTimeouts = new Map<string, NodeJS.Timeout>();
   private _outcomes = new Map<string, AutocompleteOutcome>();
-  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined =
-    undefined;
+  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined = undefined;
 
   public createAbortController(completionId: string): AbortController {
     const abortController = new AbortController();
@@ -75,13 +72,7 @@ export class AutocompleteLoggingService {
       const previousOutcome = this._outcomes.get(previous.id);
       const c1 = previousOutcome?.completion.split("\n")[0] ?? "";
       const c2 = outcome.completion.split("\n")[0];
-      if (
-        previousOutcome &&
-        (c1.endsWith(c2) ||
-          c2.endsWith(c1) ||
-          c1.startsWith(c2) ||
-          c2.startsWith(c1))
-      ) {
+      if (previousOutcome && (c1.endsWith(c2) || c2.endsWith(c1) || c1.startsWith(c2) || c2.startsWith(c1))) {
         this.cancelRejectionTimeout(previous.id);
       } else if (now - previous.displayedAt < 500) {
         // If a completion isn't shown for more than
@@ -121,12 +112,5 @@ export class AutocompleteLoggingService {
       numLines: restOfOutcome.numLines,
       profileType: restOfOutcome.profileType,
     };
-
-    outcome.enabledStaticContextualization
-      ? void Telemetry.capture("autocomplete", {
-          ...toLog,
-          enabledStaticContextualization: true,
-        })
-      : void Telemetry.capture("autocomplete", toLog);
   }
 }

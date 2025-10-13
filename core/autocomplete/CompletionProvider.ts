@@ -1,11 +1,9 @@
 import { MinimalConfigProvider } from "./MinimalConfig.js";
 import { IDE, ILLM } from "../index.js";
-import OpenAI from "../llm/llms/OpenAI.js";
+import { OpenAI } from "../llm/llms/OpenAI.js";
 import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
-
 import { shouldCompleteMultiline } from "./classification/shouldCompleteMultiline.js";
 import { ContextRetrievalService } from "./context/ContextRetrievalService.js";
-
 import { isSecurityConcern } from "../indexing/ignore.js";
 import { BracketMatchingService } from "./filtering/BracketMatchingService.js";
 import { CompletionStreamer } from "./generation/CompletionStreamer.js";
@@ -44,7 +42,7 @@ export class CompletionProvider {
     private readonly ide: IDE,
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: unknown) => void,
-    private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
+    private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction
   ) {
     this.completionStreamer = new CompletionStreamer(this.onError.bind(this));
     this.contextRetrievalService = new ContextRetrievalService(this.ide);
@@ -82,9 +80,7 @@ export class CompletionProvider {
 
   private onError(e: unknown) {
     if (
-      ERRORS_TO_IGNORE.some((err) =>
-        typeof e === "string" ? e.includes(err) : (e as Error)?.message?.includes(err),
-      )
+      ERRORS_TO_IGNORE.some((err) => (typeof e === "string" ? e.includes(err) : (e as Error)?.message?.includes(err)))
     ) {
       return;
     }
@@ -106,10 +102,7 @@ export class CompletionProvider {
     if (!outcome) {
       return;
     }
-    this.bracketMatchingService.handleAcceptedCompletion(
-      outcome.completion,
-      outcome.filepath,
-    );
+    this.bracketMatchingService.handleAcceptedCompletion(outcome.completion, outcome.filepath);
   }
 
   public markDisplayed(completionId: string, outcome: AutocompleteOutcome) {
@@ -135,14 +128,12 @@ export class CompletionProvider {
   public async provideInlineCompletionItems(
     input: AutocompleteInput,
     token: AbortSignal | undefined,
-    force?: boolean,
+    force?: boolean
   ): Promise<AutocompleteOutcome | undefined> {
     try {
       // Create abort signal if not given
       if (!token) {
-        const controller = this.loggingService.createAbortController(
-          input.completionId,
-        );
+        const controller = this.loggingService.createAbortController(input.completionId);
         token = controller.signal;
       }
       const startTime = Date.now();
@@ -160,9 +151,7 @@ export class CompletionProvider {
 
       // Debounce
       if (!force) {
-        if (
-          await this.debouncer.delayAndShouldDebounce(options.debounceDelay)
-        ) {
+        if (await this.debouncer.delayAndShouldDebounce(options.debounceDelay)) {
           return undefined;
         }
       }
@@ -171,12 +160,7 @@ export class CompletionProvider {
         options.template = llm.promptTemplates.autocomplete as string;
       }
 
-      const helper = await HelperVars.create(
-        input,
-        options,
-        llm.model,
-        this.ide,
-      );
+      const helper = await HelperVars.create(input, options, llm.model, this.ide);
 
       if (await shouldPrefilter(helper, this.ide)) {
         return undefined;
@@ -192,41 +176,36 @@ export class CompletionProvider {
         this.ide.getWorkspaceDirs(),
       ]);
 
-      const { prompt, prefix, suffix, completionOptions } =
-        renderPromptWithTokenLimit({
-          snippetPayload,
-          workspaceDirs,
-          helper,
-          llm,
-        });
+      const { prompt, prefix, suffix, completionOptions } = renderPromptWithTokenLimit({
+        snippetPayload,
+        workspaceDirs,
+        helper,
+        llm,
+      });
 
       // Completion
       let completion: string | undefined = "";
 
       const cache = await autocompleteCache;
-      const cachedCompletion = helper.options.useCache
-        ? await cache.get(helper.prunedPrefix)
-        : undefined;
+      const cachedCompletion = helper.options.useCache ? await cache.get(helper.prunedPrefix) : undefined;
       let cacheHit = false;
       if (cachedCompletion) {
         // Cache
         cacheHit = true;
         completion = cachedCompletion;
       } else {
-        const multiline =
-          !helper.options.transform || shouldCompleteMultiline(helper);
+        const multiline = !helper.options.transform || shouldCompleteMultiline(helper);
 
-        const completionStream =
-          this.completionStreamer.streamCompletionWithFilters(
-            token,
-            llm,
-            prefix,
-            suffix,
-            prompt,
-            multiline,
-            completionOptions,
-            helper,
-          );
+        const completionStream = this.completionStreamer.streamCompletionWithFilters(
+          token,
+          llm,
+          prefix,
+          suffix,
+          prompt,
+          multiline,
+          completionOptions,
+          helper
+        );
 
         for await (const update of completionStream) {
           completion += update;
@@ -269,8 +248,7 @@ export class CompletionProvider {
         gitRepo: await this.ide.getRepoName(helper.filepath),
         uniqueId: await this.ide.getUniqueId(),
         timestamp: new Date().toISOString(),
-        profileType:
-          this.configHandler.currentProfile?.profileDescription.profileType,
+        profileType: this.configHandler.currentProfile?.profileDescription.profileType,
         ...helper.options,
       };
 

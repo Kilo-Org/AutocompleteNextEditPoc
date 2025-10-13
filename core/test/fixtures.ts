@@ -1,5 +1,5 @@
 import { MinimalConfigProvider } from "../autocomplete/MinimalConfig";
-import FileSystemIde from "../util/filesystem";
+import { FileSystemIde } from "../util/filesystem";
 
 import { TEST_DIR } from "./testDir";
 

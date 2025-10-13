@@ -765,11 +765,7 @@ export interface IDE {
 
   getTerminalContents(): Promise<string>;
 
-  getDebugLocals(threadIndex: number): Promise<string>;
-
   getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]>;
-
-  getAvailableThreads(): Promise<Thread[]>;
 
   getWorkspaceDirs(): Promise<string[]>;
 

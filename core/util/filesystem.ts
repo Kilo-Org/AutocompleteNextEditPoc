@@ -272,4 +272,4 @@ class FileSystemIde implements IDE {
   }
 }
 
-export default FileSystemIde;
+export { FileSystemIde };

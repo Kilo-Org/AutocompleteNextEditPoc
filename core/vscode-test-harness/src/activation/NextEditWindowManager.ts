@@ -992,7 +992,7 @@ export class NextEditWindowManager {
   }
 }
 
-export default async function setupNextEditWindowManager(
+export async function setupNextEditWindowManager(
   context: vscode.ExtensionContext,
   textApplier?: TextApplier,
 ) {

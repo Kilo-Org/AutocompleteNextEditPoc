@@ -518,4 +518,4 @@ if (typeof window !== "undefined") {
   window.llamaTokenizer = llamaTokenizer;
 }
 
-export default llamaTokenizer;
+export { llamaTokenizer };
