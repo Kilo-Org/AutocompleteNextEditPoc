@@ -25,7 +25,6 @@ import type {
   Problem,
   RangeInFile,
   SignatureHelp,
-  TerminalOptions,
   Thread,
 } from "core";
 import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
@@ -251,10 +250,6 @@ class VsCodeIde implements IDE {
     };
   }
 
-  async getTerminalContents(): Promise<string> {
-    return await this.ideUtils.getTerminalContents(1);
-  }
-
   async getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]> {
     return await this.ideUtils.getTopLevelCallStackSources(threadIndex, stackDepth);
   }
@@ -277,23 +272,6 @@ class VsCodeIde implements IDE {
       // Select the lines
       editor.selection = new vscode.Selection(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
     });
-  }
-
-  async runCommand(command: string, options: TerminalOptions = { reuseTerminal: true }): Promise<void> {
-    let terminal: vscode.Terminal | undefined;
-    if (vscode.window.terminals.length && options.reuseTerminal) {
-      if (options.terminalName) {
-        terminal = vscode.window.terminals.find((t) => t?.name === options.terminalName);
-      } else {
-        terminal = vscode.window.activeTerminal ?? vscode.window.terminals[0];
-      }
-    }
-
-    if (!terminal) {
-      terminal = vscode.window.createTerminal(options?.terminalName);
-    }
-    terminal.show();
-    terminal.sendText(command, false);
   }
 
   async saveFile(fileUri: string): Promise<void> {

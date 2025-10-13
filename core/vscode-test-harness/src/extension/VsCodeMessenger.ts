@@ -105,9 +105,6 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getDiff", async (msg) => {
       return ide.getDiff(msg.data.includeUnstaged);
     });
-    this.onWebviewOrCore("getTerminalContents", async (msg) => {
-      return ide.getTerminalContents();
-    });
     this.onWebviewOrCore("getTopLevelCallStackSources", async (msg) => {
       return ide.getTopLevelCallStackSources(msg.data.threadIndex, msg.data.stackDepth);
     });
@@ -119,9 +116,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("openFile", async (msg) => {
       return ide.openFile(msg.data.path);
-    });
-    this.onWebviewOrCore("runCommand", async (msg) => {
-      await ide.runCommand(msg.data.command);
     });
     this.onWebviewOrCore("getSearchResults", async (msg) => {
       return ide.getSearchResults(msg.data.query, msg.data.maxResults);
