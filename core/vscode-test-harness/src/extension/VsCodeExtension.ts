@@ -10,10 +10,7 @@ import * as vscode from "vscode";
 
 import { ContinueCompletionProvider } from "../autocomplete/completionProvider";
 import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
-import { registerAllCodeLensProviders } from "../lang-server/codeLens";
-import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
 import { setupRemoteConfigSync } from "../stubs/activation";
-import { FileSearch } from "../util/FileSearch";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
 
@@ -45,7 +42,6 @@ export class VsCodeExtension {
   private windowId: string;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
-  private fileSearch: FileSearch;
   private completionProvider: ContinueCompletionProvider;
 
   private ARBITRARY_TYPING_DELAY = 2000;
@@ -204,8 +200,6 @@ export class VsCodeExtension {
       const shouldUseFullFileDiff = await getUsingFullFileDiff();
       this.completionProvider.updateUsingFullFileDiff(shouldUseFullFileDiff);
       selectionManager.updateUsingFullFileDiff(shouldUseFullFileDiff);
-
-      registerAllCodeLensProviders(context, config);
     });
 
     this.configHandler?.onConfigUpdate?.(async ({ config: newConfig, configLoadInterrupted }) => {
@@ -220,8 +214,6 @@ export class VsCodeExtension {
         setupStatusBar(undefined, undefined, true);
       } else if (newConfig) {
         setupStatusBar(undefined, undefined, false);
-
-        registerAllCodeLensProviders(context, newConfig);
       }
     });
 
@@ -240,10 +232,6 @@ export class VsCodeExtension {
     context.subscriptions.push(
       vscode.languages.registerInlineCompletionItemProvider([{ pattern: "**" }], this.completionProvider)
     );
-
-    // FileSearch
-    this.fileSearch = new FileSearch(this.ide);
-    registerAllPromptFilesCompletionProviders(context, this.fileSearch, this.ide);
 
     // Disabled due to performance issues
     // registerDebugTracker(this.sidebar.webviewProtocol, this.ide);
