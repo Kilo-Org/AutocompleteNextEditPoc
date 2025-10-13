@@ -1,10 +1,9 @@
 import fs from "fs";
-import path from "path";
 
 import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import { EXTENSION_NAME } from "core/util/env";
-import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath, getContinueGlobalPath } from "core/util/paths";
+import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath } from "core/util/paths";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 
@@ -252,16 +251,6 @@ export class VsCodeExtension {
       }
       void this.configHandler?.reloadConfig?.("config.ts updated - fs file watch");
     });
-
-    // watch global rules directory for changes
-    const globalRulesDir = path.join(getContinueGlobalPath(), "rules");
-    if (fs.existsSync(globalRulesDir)) {
-      fs.watch(globalRulesDir, { recursive: true }, (eventType, filename) => {
-        if (filename && filename.endsWith(".md")) {
-          void this.configHandler?.reloadConfig?.("Global rules directory updated - fs file watch");
-        }
-      });
-    }
 
     vscode.workspace.onDidChangeTextDocument(async (event) => {
       if (event.contentChanges.length > 0) {
