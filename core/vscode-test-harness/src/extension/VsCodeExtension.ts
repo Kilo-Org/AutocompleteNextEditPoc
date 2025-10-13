@@ -14,7 +14,7 @@ import { registerAllCodeLensProviders } from "../lang-server/codeLens";
 import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
 import { setupRemoteConfigSync } from "../stubs/activation";
 import { UriEventHandler } from "../stubs/uriHandler";
-import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
+import { getControlPlaneSessionInfo } from "../stubs/WorkOsAuthProvider";
 import { FileSearch } from "../util/FileSearch";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
@@ -47,7 +47,6 @@ export class VsCodeExtension {
   private windowId: string;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
-  private workOsAuthProvider: WorkOsAuthProvider;
   private fileSearch: FileSearch;
   private uriHandler = new UriEventHandler();
   private completionProvider: ContinueCompletionProvider;
@@ -125,12 +124,6 @@ export class VsCodeExtension {
   }
 
   constructor(context: vscode.ExtensionContext) {
-    // Register auth provider
-    this.workOsAuthProvider = new WorkOsAuthProvider(context, this.uriHandler);
-
-    void this.workOsAuthProvider.refreshSessions();
-    context.subscriptions.push(this.workOsAuthProvider);
-
     let resolveWebviewProtocol: any = undefined;
     this.webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>((resolve) => {
       resolveWebviewProtocol = resolve;
@@ -198,7 +191,7 @@ export class VsCodeExtension {
 
     const inProcessMessenger = new InProcessMessenger<ToCoreProtocol, FromCoreProtocol>();
 
-    new VsCodeMessenger(inProcessMessenger, stubWebviewProtocol, this.ide, this.workOsAuthProvider);
+    new VsCodeMessenger(inProcessMessenger, stubWebviewProtocol, this.ide);
 
     this.core = new Core(inProcessMessenger, this.ide);
     this.configHandler = this.core.configHandler;

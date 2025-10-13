@@ -19,7 +19,7 @@ const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
 import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
-import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
+import { getControlPlaneSessionInfo } from "../stubs/WorkOsAuthProvider";
 import { handleLLMError } from "../util/errorHandling";
 import { getExtensionUri } from "../util/vscode";
 import { VsCodeIde } from "../VsCodeIde";
@@ -65,8 +65,7 @@ export class VsCodeMessenger {
   constructor(
     private readonly inProcessMessenger: InProcessMessenger<ToCoreProtocol, FromCoreProtocol>,
     private readonly webviewProtocol: VsCodeWebviewProtocol,
-    private readonly ide: VsCodeIde,
-    private readonly workOsAuthProvider: WorkOsAuthProvider
+    private readonly ide: VsCodeIde
   ) {
     /** WEBVIEW ONLY LISTENERS **/
     this.onWebview("showFile", (msg) => {
@@ -230,11 +229,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("getControlPlaneSessionInfo", async (msg) => {
       return getControlPlaneSessionInfo(msg.data.silent, msg.data.useOnboarding);
-    });
-    this.onWebviewOrCore("logoutOfControlPlane", async (msg) => {
-      const sessions = await this.workOsAuthProvider.getSessions();
-      await Promise.all(sessions.map((session) => workOsAuthProvider.removeSession(session.id)));
-      vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", false);
     });
     this.onWebviewOrCore("saveFile", async (msg) => {
       return await ide.saveFile(msg.data.filepath);
