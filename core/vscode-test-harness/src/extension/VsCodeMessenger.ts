@@ -21,7 +21,6 @@ import * as vscode from "vscode";
 import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
 import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
 import { handleLLMError } from "../util/errorHandling";
-import { showTutorial } from "../util/tutorial";
 import { getExtensionUri } from "../util/vscode";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
@@ -101,10 +100,6 @@ export class VsCodeMessenger {
 
     this.onWebview("rejectDiff", async ({ data: { filepath, streamId } }) => {
       await vscode.commands.executeCommand("continue.rejectDiff", filepath, streamId);
-    });
-
-    this.onWebview("showTutorial", async (msg) => {
-      await showTutorial(this.ide);
     });
 
     this.onWebview("overwriteFile", async ({ data: { prevFileContent, filepath } }) => {
