@@ -13,7 +13,6 @@ import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
 
-import { ConfigYamlDocumentLinkProvider } from "./ConfigYamlDocumentLinkProvider";
 import { VsCodeMessenger } from "./VsCodeMessenger";
 
 import { getAst } from "core/autocomplete/util/ast";
@@ -375,12 +374,6 @@ export class VsCodeExtension {
         documentContentProvider
       )
     );
-
-    const linkProvider = vscode.languages.registerDocumentLinkProvider(
-      { language: "yaml" },
-      new ConfigYamlDocumentLinkProvider()
-    );
-    context.subscriptions.push(linkProvider);
 
     this.ide.onDidChangeActiveTextEditor((filepath) => {
       void this.core.invoke("files/opened", { uris: [filepath] });
