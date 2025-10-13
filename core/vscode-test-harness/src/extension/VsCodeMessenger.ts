@@ -1,5 +1,3 @@
-import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { DataLogger } from "core/util/log";
 import {
   FromCoreProtocol,
   FromWebviewProtocol,
@@ -12,18 +10,10 @@ import {
   CORE_TO_WEBVIEW_PASS_THROUGH,
   WEBVIEW_TO_CORE_PASS_THROUGH,
 } from "core";
-import { stripImages } from "core/util/messageContent";
-
-// Stub for EDIT_MODE_STREAM_ID
-const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
-import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
-import { handleLLMError } from "../util/errorHandling";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
-
-import { VsCodeExtension } from "./VsCodeExtension";
 
 type ToIdeOrWebviewFromCoreProtocol = ToIdeFromCoreProtocol & ToWebviewFromCoreProtocol;
 
@@ -66,9 +56,7 @@ export class VsCodeMessenger {
     private readonly ide: VsCodeIde
   ) {
     /** WEBVIEW ONLY LISTENERS **/
-    this.onWebview("showFile", (msg) => {
-      this.ide.openFile(msg.data.filepath);
-    });
+    // None right now
 
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
     WEBVIEW_TO_CORE_PASS_THROUGH.forEach((messageType) => {
@@ -105,35 +93,11 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getDiff", async (msg) => {
       return ide.getDiff(msg.data.includeUnstaged);
     });
-    this.onWebviewOrCore("getTerminalContents", async (msg) => {
-      return ide.getTerminalContents();
-    });
-    this.onWebviewOrCore("getTopLevelCallStackSources", async (msg) => {
-      return ide.getTopLevelCallStackSources(msg.data.threadIndex, msg.data.stackDepth);
-    });
     this.onWebviewOrCore("getWorkspaceDirs", async (msg) => {
       return ide.getWorkspaceDirs();
     });
     this.onWebviewOrCore("writeFile", async (msg) => {
       return ide.writeFile(msg.data.path, msg.data.contents);
-    });
-    this.onWebviewOrCore("openFile", async (msg) => {
-      return ide.openFile(msg.data.path);
-    });
-    this.onWebviewOrCore("runCommand", async (msg) => {
-      await ide.runCommand(msg.data.command);
-    });
-    this.onWebviewOrCore("getSearchResults", async (msg) => {
-      return ide.getSearchResults(msg.data.query, msg.data.maxResults);
-    });
-    this.onWebviewOrCore("getFileResults", async (msg) => {
-      return ide.getFileResults(msg.data.pattern, msg.data.maxResults);
-    });
-    this.onWebviewOrCore("subprocess", async (msg) => {
-      return ide.subprocess(msg.data.command, msg.data.cwd);
-    });
-    this.onWebviewOrCore("getProblems", async (msg) => {
-      return ide.getProblems(msg.data.filepath);
     });
     this.onWebviewOrCore("getBranch", async (msg) => {
       const { dir } = msg.data;
@@ -145,26 +109,12 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getCurrentFile", async () => {
       return ide.getCurrentFile();
     });
-    this.onWebviewOrCore("getPinnedFiles", async (msg) => {
-      return ide.getPinnedFiles();
-    });
-    this.onWebviewOrCore("showLines", async (msg) => {
-      const { filepath, startLine, endLine } = msg.data;
-      return ide.showLines(filepath, startLine, endLine);
-    });
-    this.onWebviewOrCore("showToast", (msg) => {
-      this.ide.showToast(...(msg.data as [any, any, ...any[]]));
-    });
     this.onWebviewOrCore("saveFile", async (msg) => {
       return await ide.saveFile(msg.data.filepath);
     });
     this.onWebviewOrCore("readFile", async (msg) => {
       return await ide.readFile(msg.data.filepath);
     });
-    this.onWebviewOrCore("openUrl", (msg) => {
-      vscode.env.openExternal(vscode.Uri.parse(msg.data));
-    });
-
     this.onWebviewOrCore("fileExists", async (msg) => {
       return await ide.fileExists(msg.data.filepath);
     });
@@ -189,32 +139,16 @@ export class VsCodeMessenger {
       return await ide.getGitRootPath(msg.data.dir);
     });
 
-    this.onWebviewOrCore("listDir", async (msg) => {
-      return await ide.listDir(msg.data.dir);
-    });
-
     this.onWebviewOrCore("getRepoName", async (msg) => {
       return await ide.getRepoName(msg.data.dir);
-    });
-
-    this.onWebviewOrCore("getTags", async (msg) => {
-      return await ide.getTags(msg.data);
     });
 
     this.onWebviewOrCore("getIdeInfo", async (msg) => {
       return await ide.getIdeInfo();
     });
 
-    this.onWebviewOrCore("isTelemetryEnabled", async (msg) => {
-      return await ide.isTelemetryEnabled();
-    });
-
     this.onWebviewOrCore("getUniqueId", async (msg) => {
       return await ide.getUniqueId();
-    });
-
-    this.onWebviewOrCore("reportError", async (msg) => {
-      await handleLLMError(msg.data);
     });
   }
 }

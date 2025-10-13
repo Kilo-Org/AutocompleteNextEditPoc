@@ -14,7 +14,6 @@ import {
   Range,
   RangeInFile,
   SignatureHelp,
-  TerminalOptions,
   Thread,
   ToastType,
 } from "../index.js";
@@ -161,10 +160,6 @@ class FileSystemIde implements IDE {
     return Promise.resolve({ text: "", copiedAt: new Date().toISOString() });
   }
 
-  getTerminalContents(): Promise<string> {
-    return Promise.resolve("");
-  }
-
   async getDebugLocals(threadIndex: number): Promise<string> {
     return Promise.resolve("");
   }
@@ -213,10 +208,6 @@ class FileSystemIde implements IDE {
   }
 
   openUrl(url: string): Promise<void> {
-    return Promise.resolve();
-  }
-
-  runCommand(command: string, options?: TerminalOptions): Promise<void> {
     return Promise.resolve();
   }
 

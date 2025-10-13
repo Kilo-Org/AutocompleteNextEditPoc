@@ -755,15 +755,7 @@ export interface IDE {
 
   getClipboardContent(): Promise<{ text: string; copiedAt: string }>;
 
-  isTelemetryEnabled(): Promise<boolean>;
-
-  isWorkspaceRemote(): Promise<boolean>;
-
   getUniqueId(): Promise<string>;
-
-  getTerminalContents(): Promise<string>;
-
-  getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]>;
 
   getWorkspaceDirs(): Promise<string[]>;
 
@@ -771,21 +763,11 @@ export interface IDE {
 
   writeFile(path: string, contents: string): Promise<void>;
 
-  openFile(path: string): Promise<void>;
-
-  openUrl(url: string): Promise<void>;
-
-  getExternalUri?(uri: string): Promise<string>;
-
-  runCommand(command: string, options?: TerminalOptions): Promise<void>;
-
   saveFile(fileUri: string): Promise<void>;
 
   readFile(fileUri: string): Promise<string>;
 
   readRangeInFile(fileUri: string, range: Range): Promise<string>;
-
-  showLines(fileUri: string, startLine: number, endLine: number): Promise<void>;
 
   getOpenFiles(): Promise<string[]>;
 
@@ -798,34 +780,13 @@ export interface IDE {
       }
   >;
 
-  getPinnedFiles(): Promise<string[]>;
-
-  getSearchResults(query: string, maxResults?: number): Promise<string>;
-
-  getFileResults(pattern: string, maxResults?: number): Promise<string[]>;
-
-  subprocess(command: string, cwd?: string): Promise<[string, string]>;
-
-  getProblems(fileUri?: string | undefined): Promise<Problem[]>;
-
   getBranch(dir: string): Promise<string>;
-
-  getTags(artifactId: string): Promise<IndexTag[]>;
 
   getRepoName(dir: string): Promise<string | undefined>;
 
-  showToast(type: ToastType, message: string, ...otherParams: any[]): Promise<any>;
-
   getGitRootPath(dir: string): Promise<string | undefined>;
 
-  listDir(dir: string): Promise<[string, FileType][]>;
-
   getFileStats(files: string[]): Promise<FileStatsMap>;
-
-  // Secret Storage
-  readSecrets(keys: string[]): Promise<Record<string, string>>;
-
-  writeSecrets(secrets: { [key: string]: string }): Promise<void>;
 
   // LSP
   gotoDefinition(location: Location): Promise<RangeInFile[]>;

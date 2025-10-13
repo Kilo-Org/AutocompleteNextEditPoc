@@ -27,33 +27,3 @@ export async function isLemonadeInstalled(): Promise<boolean> {
     return false;
   }
 }
-
-async function startLocalLemonade(ide: IDE): Promise<any> {
-  let startCommand: string | undefined;
-
-  switch (process.platform) {
-    case "linux": // Linux
-      // On Linux, direct users to start Lemonade manually
-      return ide.showToast(
-        "info",
-        "Please start Lemonade manually. Visit https://lemonade-server.ai for instructions.",
-      );
-
-    case "win32": // Windows
-      startCommand = "lemonade-server serve\n";
-      break;
-
-    default:
-      return ide.showToast(
-        "error",
-        "Cannot start Lemonade: platform not supported!",
-      );
-  }
-
-  if (startCommand) {
-    return ide.runCommand(startCommand, {
-      reuseTerminal: true,
-      terminalName: "Start Lemonade",
-    });
-  }
-}

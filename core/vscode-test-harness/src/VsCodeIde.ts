@@ -1,68 +1,31 @@
-import * as child_process from "node:child_process";
-import { exec } from "node:child_process";
-
 import { Range } from "core";
-import { DEFAULT_IGNORES, defaultIgnoresGlob } from "core/indexing/ignore";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
 import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvider } from "./autocomplete/lsp";
 import { Repository } from "./otherExtensions/git";
-import { SecretStorage } from "./stubs/SecretStorage";
 import { VsCodeIdeUtils } from "./util/ideUtils";
-import { getExtensionUri, openEditorAndRevealRange } from "./util/vscode";
 import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
 import type {
   DocumentSymbol,
   FileStatsMap,
-  FileType,
   IDE,
   IdeInfo,
-  IdeSettings,
-  IndexTag,
   Location,
-  Problem,
   RangeInFile,
   SignatureHelp,
-  TerminalOptions,
-  Thread,
 } from "core";
 import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
 
 class VsCodeIde implements IDE {
   ideUtils: VsCodeIdeUtils;
-  secretStorage: SecretStorage;
 
   constructor(
     private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
     private readonly context: vscode.ExtensionContext
   ) {
     this.ideUtils = new VsCodeIdeUtils();
-    this.secretStorage = new SecretStorage(context);
-  }
-
-  async readSecrets(keys: string[]): Promise<Record<string, string>> {
-    const secretValuePromises = keys.map((key) => this.secretStorage.get(key));
-    const secretValues = await Promise.all(secretValuePromises);
-
-    return keys.reduce(
-      (acc, key, index) => {
-        if (secretValues[index] === undefined) {
-          return acc;
-        }
-
-        acc[key] = secretValues[index];
-        return acc;
-      },
-      {} as Record<string, string>
-    );
-  }
-
-  async writeSecrets(secrets: { [key: string]: string }): Promise<void> {
-    for (const [key, value] of Object.entries(secrets)) {
-      await this.secretStorage.store(key, value);
-    }
   }
 
   async fileExists(uri: string): Promise<boolean> {
@@ -140,24 +103,6 @@ class VsCodeIde implements IDE {
     });
   }
 
-  showToast: IDE["showToast"] = async (...params) => {
-    const [type, message, ...otherParams] = params;
-    const { showErrorMessage, showWarningMessage, showInformationMessage } = vscode.window;
-
-    switch (type) {
-      case "error":
-        return showErrorMessage(message, "Show logs").then((selection) => {
-          if (selection === "Show logs") {
-            vscode.commands.executeCommand("workbench.action.toggleDevTools");
-          }
-        });
-      case "info":
-        return showInformationMessage(message, ...otherParams);
-      case "warning":
-        return showWarningMessage(message, ...otherParams);
-    }
-  };
-
   async getRepoName(dir: string): Promise<string | undefined> {
     const repo = await this.getRepo(dir);
     const remotes = repo?.state.remotes;
@@ -170,20 +115,6 @@ class VsCodeIde implements IDE {
     }
     const ownerAndRepo = remote.fetchUrl?.replace(".git", "").split("/").slice(-2);
     return ownerAndRepo?.join("/");
-  }
-
-  async getTags(artifactId: string): Promise<IndexTag[]> {
-    const workspaceDirs = await this.getWorkspaceDirs();
-
-    const branches = await Promise.all(workspaceDirs.map((dir) => this.getBranch(dir)));
-
-    const tags: IndexTag[] = workspaceDirs.map((directory, i) => ({
-      directory,
-      branch: branches[i],
-      artifactId,
-    }));
-
-    return tags;
   }
 
   getIdeInfo(): Promise<IdeInfo> {
@@ -226,16 +157,6 @@ class VsCodeIde implements IDE {
     return this.ideUtils.getRepo(vscode.Uri.parse(dir));
   }
 
-  async isTelemetryEnabled(): Promise<boolean> {
-    const globalEnabled = vscode.env.isTelemetryEnabled;
-    const continueEnabled = true; //MINIMAL_REPO - was configurable
-    return globalEnabled && continueEnabled;
-  }
-
-  isWorkspaceRemote(): Promise<boolean> {
-    return Promise.resolve(vscode.env.remoteName !== undefined);
-  }
-
   getUniqueId(): Promise<string> {
     return Promise.resolve(vscode.env.machineId);
   }
@@ -251,49 +172,12 @@ class VsCodeIde implements IDE {
     };
   }
 
-  async getTerminalContents(): Promise<string> {
-    return await this.ideUtils.getTerminalContents(1);
-  }
-
-  async getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]> {
-    return await this.ideUtils.getTopLevelCallStackSources(threadIndex, stackDepth);
-  }
-
   async getWorkspaceDirs(): Promise<string[]> {
     return this.ideUtils.getWorkspaceDirectories().map((uri) => uri.toString());
   }
 
   async writeFile(fileUri: string, contents: string): Promise<void> {
     await vscode.workspace.fs.writeFile(vscode.Uri.parse(fileUri), new Uint8Array(Buffer.from(contents)));
-  }
-
-  async openFile(fileUri: string): Promise<void> {
-    await this.ideUtils.openFile(vscode.Uri.parse(fileUri));
-  }
-
-  async showLines(fileUri: string, startLine: number, endLine: number): Promise<void> {
-    const range = new vscode.Range(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
-    openEditorAndRevealRange(vscode.Uri.parse(fileUri), range).then((editor) => {
-      // Select the lines
-      editor.selection = new vscode.Selection(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
-    });
-  }
-
-  async runCommand(command: string, options: TerminalOptions = { reuseTerminal: true }): Promise<void> {
-    let terminal: vscode.Terminal | undefined;
-    if (vscode.window.terminals.length && options.reuseTerminal) {
-      if (options.terminalName) {
-        terminal = vscode.window.terminals.find((t) => t?.name === options.terminalName);
-      } else {
-        terminal = vscode.window.activeTerminal ?? vscode.window.terminals[0];
-      }
-    }
-
-    if (!terminal) {
-      terminal = vscode.window.createTerminal(options?.terminalName);
-    }
-    terminal.show();
-    terminal.sendText(command, false);
   }
 
   async saveFile(fileUri: string): Promise<void> {
@@ -345,16 +229,6 @@ class VsCodeIde implements IDE {
     }
   }
 
-  async openUrl(url: string): Promise<void> {
-    await vscode.env.openExternal(vscode.Uri.parse(url));
-  }
-
-  async getExternalUri(uri: string): Promise<string> {
-    const vsCodeUri = vscode.Uri.parse(uri);
-    const externalUri = await vscode.env.asExternalUri(vsCodeUri);
-    return externalUri.toString(true);
-  }
-
   async getOpenFiles(): Promise<string[]> {
     return this.ideUtils.getOpenFiles().map((uri) => uri.toString());
   }
@@ -370,213 +244,6 @@ class VsCodeIde implements IDE {
     };
   }
 
-  async getPinnedFiles(): Promise<string[]> {
-    const tabArray = vscode.window.tabGroups.all[0].tabs;
-
-    return tabArray.filter((t) => t.isPinned).map((t) => (t.input as vscode.TabInputText).uri.toString());
-  }
-
-  runRipgrepQuery(dirUri: string, args: string[]) {
-    const relativeDir = vscode.Uri.parse(dirUri).fsPath;
-    const ripGrepUri = vscode.Uri.joinPath(getExtensionUri(), "out/node_modules/@vscode/ripgrep/bin/rg");
-    const p = child_process.spawn(ripGrepUri.fsPath, args, {
-      cwd: relativeDir,
-    });
-    let output = "";
-
-    p.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    return new Promise<string>((resolve, reject) => {
-      p.on("error", reject);
-      p.on("close", (code) => {
-        if (code === 0) {
-          resolve(output);
-        } else if (code === 1) {
-          // No matches
-          resolve("No matches found. Build, secrets, etc. dirs and files are not included.");
-        } else {
-          reject(new Error(`Process exited with code ${code}`));
-        }
-      });
-    });
-  }
-
-  async getFileResults(pattern: string, maxResults?: number): Promise<string[]> {
-    // Create a single combined ignore pattern for ripgrep (calculated once)
-
-    if (vscode.env.remoteName) {
-      // TODO better tests for this remote search implementation
-      // throw new Error("Ripgrep not supported, this workspace is remote");
-
-      // IMPORTANT: findFiles automatically accounts for .gitignore
-      const ignoreFiles = await vscode.workspace.findFiles("**/.continueignore", null);
-
-      const ignoreGlobs: Set<string> = new Set();
-      // Add default ignores from core
-      for (const pattern of DEFAULT_IGNORES) {
-        ignoreGlobs.add(pattern);
-      }
-
-      for (const file of ignoreFiles) {
-        const content = await this.ideUtils.readFile(file);
-        if (content === null) {
-          continue;
-        }
-        const filePath = vscode.workspace.asRelativePath(file);
-        const fileDir = filePath.replace(/\\/g, "/").replace(/\/$/, "").split("/").slice(0, -1).join("/");
-
-        const patterns = Buffer.from(content)
-          .toString()
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line && !line.startsWith("#") && !pattern.startsWith("!"));
-        // VSCode does not support negations
-
-        patterns
-          // Handle prefix
-          .map((pattern) => {
-            const normalizedPattern = pattern.replace(/\\/g, "/");
-
-            if (normalizedPattern.startsWith("/")) {
-              if (fileDir) {
-                return `{/,}${normalizedPattern}`;
-              } else {
-                return `${fileDir}/${normalizedPattern.substring(1)}`;
-              }
-            } else {
-              if (fileDir) {
-                return `${fileDir}/${normalizedPattern}`;
-              } else {
-                return `**/${normalizedPattern}`;
-              }
-            }
-          })
-          // Handle suffix
-          .map((pattern) => {
-            return pattern.endsWith("/") ? `${pattern}**/*` : pattern;
-          })
-          .forEach((pattern) => {
-            ignoreGlobs.add(pattern);
-          });
-      }
-
-      const ignoreGlobsArray = Array.from(ignoreGlobs);
-
-      const results = await vscode.workspace.findFiles(
-        pattern,
-        ignoreGlobs.size ? `{${ignoreGlobsArray.join(",")}}` : null,
-        maxResults
-      );
-      return results.map((result) => vscode.workspace.asRelativePath(result));
-    } else {
-      const results: string[] = [];
-      // Create a single combined ignore pattern using glob brace expansion
-      for (const dir of await this.getWorkspaceDirs()) {
-        const dirResults = await this.runRipgrepQuery(dir, [
-          "--files",
-          "--iglob",
-          pattern,
-          "--ignore-file",
-          ".continueignore",
-          "--ignore-file",
-          ".gitignore",
-          "--glob",
-          defaultIgnoresGlob,
-          ...(maxResults ? ["--max-count", String(maxResults)] : []),
-        ]);
-
-        results.push(dirResults);
-      }
-
-      const allResults = results.join("\n").split("\n");
-      if (maxResults) {
-        // In the case of multiple workspaces, maxResults will be applied to each workspace
-        // And then the combined results will also be truncated
-        return allResults.slice(0, maxResults);
-      } else {
-        return allResults;
-      }
-    }
-  }
-
-  async getSearchResults(query: string, maxResults?: number): Promise<string> {
-    if (vscode.env.remoteName) {
-      throw new Error("Ripgrep not supported, this workspace is remote");
-    }
-    const results: string[] = [];
-
-    for (const dir of await this.getWorkspaceDirs()) {
-      const dirResults = await this.runRipgrepQuery(dir, [
-        "-i", // Case-insensitive search
-        "--ignore-file",
-        ".continueignore",
-        "--ignore-file",
-        ".gitignore",
-        "-C",
-        "2", // Show 2 lines of context
-        "--heading", // Only show filepath once per result
-        // Use a single glob with all default ignores
-        "--glob",
-        defaultIgnoresGlob,
-        ...(maxResults ? ["-m", maxResults.toString()] : []),
-        "-e",
-        query, // Pattern to search for
-        ".", // Directory to search in
-      ]);
-
-      results.push(dirResults);
-    }
-
-    const allResults = results.join("\n");
-    if (maxResults) {
-      // In case of multiple workspaces, do max results per workspace and then truncate to maxResults
-      // Will prioritize first workspace results, fine for now
-      // Results are separated by either ./ or --
-      const matches = Array.from(allResults.matchAll(/(\n--|\n\.\/)/g));
-      if (matches.length > maxResults) {
-        return allResults.substring(0, matches[maxResults].index);
-      } else {
-        return allResults;
-      }
-    } else {
-      return allResults;
-    }
-  }
-
-  async getProblems(fileUri?: string | undefined): Promise<Problem[]> {
-    const uri = fileUri ? vscode.Uri.parse(fileUri) : vscode.window.activeTextEditor?.document.uri;
-    if (!uri) {
-      return [];
-    }
-    return vscode.languages.getDiagnostics(uri).map((d) => {
-      return {
-        filepath: uri.toString(),
-        range: {
-          start: {
-            line: d.range.start.line,
-            character: d.range.start.character,
-          },
-          end: { line: d.range.end.line, character: d.range.end.character },
-        },
-        message: d.message,
-      };
-    });
-  }
-
-  async subprocess(command: string, cwd?: string): Promise<[string, string]> {
-    return new Promise((resolve, reject) => {
-      exec(command, { cwd }, (error, stdout, stderr) => {
-        if (error) {
-          console.warn(error);
-          reject(stderr);
-        }
-        resolve([stdout, stderr]);
-      });
-    });
-  }
-
   async getBranch(dir: string): Promise<string> {
     return this.ideUtils.getBranch(vscode.Uri.parse(dir));
   }
@@ -584,11 +251,6 @@ class VsCodeIde implements IDE {
   async getGitRootPath(dir: string): Promise<string | undefined> {
     const root = await this.ideUtils.getGitRoot(vscode.Uri.parse(dir));
     return root?.toString();
-  }
-
-  async listDir(dir: string): Promise<[string, FileType][]> {
-    const entries = await this.ideUtils.readDirectory(vscode.Uri.parse(dir));
-    return entries === null ? [] : (entries as any);
   }
 }
 
