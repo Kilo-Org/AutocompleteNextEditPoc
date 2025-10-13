@@ -1,15 +1,7 @@
 import { AutocompleteLanguageInfo } from "../constants/AutocompleteLanguageInfo";
 import { HelperVars } from "../util/HelperVars";
 
-function isMidlineCompletion(prefix: string, suffix: string): boolean {
-  return !suffix.startsWith("\n");
-}
-
-function shouldCompleteMultilineBasedOnLanguage(
-  language: AutocompleteLanguageInfo,
-  prefix: string,
-  suffix: string,
-) {
+function shouldCompleteMultilineBasedOnLanguage(language: AutocompleteLanguageInfo, prefix: string, suffix: string) {
   return language.useMultiline?.({ prefix, suffix }) ?? true;
 }
 
@@ -36,18 +28,10 @@ export function shouldCompleteMultiline(helper: HelperVars) {
   // Don't complete multi-line for single-line comments
   if (
     helper.lang.singleLineComment &&
-    helper.fullPrefix
-      .split("\n")
-      .slice(-1)[0]
-      ?.trimStart()
-      .startsWith(helper.lang.singleLineComment)
+    helper.fullPrefix.split("\n").slice(-1)[0]?.trimStart().startsWith(helper.lang.singleLineComment)
   ) {
     return false;
   }
 
-  return shouldCompleteMultilineBasedOnLanguage(
-    helper.lang,
-    helper.prunedPrefix,
-    helper.prunedSuffix,
-  );
+  return shouldCompleteMultilineBasedOnLanguage(helper.lang, helper.prunedPrefix, helper.prunedSuffix);
 }

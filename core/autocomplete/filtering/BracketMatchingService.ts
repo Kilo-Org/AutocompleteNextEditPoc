@@ -43,7 +43,7 @@ export class BracketMatchingService {
     prefix: string,
     suffix: string,
     filepath: string,
-    multiline: boolean, // Whether this is a multiline completion or not
+    multiline: boolean // Whether this is a multiline completion or not
   ): AsyncGenerator<string> {
     let stack: string[] = [];
     if (multiline) {
@@ -57,8 +57,7 @@ export class BracketMatchingService {
       // If single line completion, then allow completing bracket pairs that are
       // started on the current line but not finished on the current line
       if (!multiline) {
-        const currentLine =
-          (prefix.split("\n").pop() ?? "") + (suffix.split("\n")[0] ?? "");
+        const currentLine = (prefix.split("\n").pop() ?? "") + (suffix.split("\n")[0] ?? "");
         for (let i = 0; i < currentLine.length; i++) {
           const char = currentLine[i];
           if (Object.keys(BRACKETS).includes(char)) {
@@ -92,8 +91,7 @@ export class BracketMatchingService {
     for await (let chunk of stream) {
       // Allow closing brackets before any non-whitespace characters
       if (!seenNonWhitespaceOrClosingBracket) {
-        const firstNonWhitespaceOrClosingBracketIndex =
-          chunk.search(/[^\s\)\}\]]/);
+        const firstNonWhitespaceOrClosingBracketIndex = chunk.search(/[^\s\)\}\]]/);
         if (firstNonWhitespaceOrClosingBracketIndex !== -1) {
           yield chunk.slice(0, firstNonWhitespaceOrClosingBracketIndex);
           chunk = chunk.slice(firstNonWhitespaceOrClosingBracketIndex);
@@ -105,7 +103,6 @@ export class BracketMatchingService {
       }
 
       all += chunk;
-      const allLines = all.split("\n");
       for (let i = 0; i < chunk.length; i++) {
         const char = chunk[i];
         if (Object.values(BRACKETS).includes(char)) {
