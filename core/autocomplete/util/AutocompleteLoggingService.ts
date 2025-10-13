@@ -21,7 +21,7 @@ export class AutocompleteLoggingService {
   }
 
   public cancel() {
-    this._abortControllers.forEach((abortController, id) => {
+    this._abortControllers.forEach((abortController) => {
       abortController.abort();
     });
     this._abortControllers.clear();
