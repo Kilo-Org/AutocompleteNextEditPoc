@@ -2,7 +2,7 @@
   "name": "continue",
   "version": "1.1.0",
   "private": true,
-  "description": "The Continue Core contains functionality that can be shared across web, VS Code, or Node.js",
+  "description": "Autocomplete and NextEdit only - streamlined Continue with GUI, chat, and other features removed",
   "author": "Continue Dev, Inc",
   "license": "Apache-2.0",
   "scripts": {

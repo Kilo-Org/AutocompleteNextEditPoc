@@ -1,6 +1,8 @@
 # Architecture Documentation
 
-Technical architecture documentation for the Autocomplete & NextEdit library.
+Technical architecture documentation for Continue (Autocomplete & NextEdit Only version).
+
+> **Note**: This is a streamlined version of Continue with only autocomplete and NextEdit functionality. All GUI, chat, agents, and other features have been removed.
 
 ## Table of Contents
 
