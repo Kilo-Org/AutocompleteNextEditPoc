@@ -18,7 +18,12 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { streamResponse } from "../../../fetch/stream.js";
 import { GeminiConfig } from "../types.js";
-import { chatChunk, chatChunkFromDelta, embedding, usageChatChunk } from "../util.js";
+import {
+  chatChunk,
+  chatChunkFromDelta,
+  embedding,
+  usageChatChunk,
+} from "../util.js";
 import {
   convertOpenAIToolToGeminiFunction,
   GeminiChatContent,
@@ -26,9 +31,17 @@ import {
   GeminiToolFunctionDeclaration,
 } from "../util/gemini-types.js";
 import { safeParseArgs } from "../util/parseArgs.js";
-import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
+import {
+  BaseLlmApi,
+  CreateRerankResponse,
+  FimCreateParamsStreaming,
+  RerankCreateParams,
+} from "./base.js";
 
-type UsageInfo = Pick<CompletionUsage, "total_tokens" | "completion_tokens" | "prompt_tokens">;
+type UsageInfo = Pick<
+  CompletionUsage,
+  "total_tokens" | "completion_tokens" | "prompt_tokens"
+>;
 
 export class GeminiApi implements BaseLlmApi {
   apiBase: string = "https://generativelanguage.googleapis.com/v1beta/";
@@ -38,7 +51,9 @@ export class GeminiApi implements BaseLlmApi {
   }
 
   private _oaiPartToGeminiPart(
-    part: OpenAI.Chat.Completions.ChatCompletionContentPart | OpenAI.Chat.Completions.ChatCompletionContentPartRefusal
+    part:
+      | OpenAI.Chat.Completions.ChatCompletionContentPart
+      | OpenAI.Chat.Completions.ChatCompletionContentPartRefusal,
   ): GeminiChatContentPart {
     switch (part.type) {
       case "refusal":
@@ -56,7 +71,9 @@ export class GeminiApi implements BaseLlmApi {
         return {
           inlineData: {
             mimeType: "image/jpeg",
-            data: (part as ChatCompletionContentPartImage).image_url?.url.split(",")[1],
+            data: (part as ChatCompletionContentPartImage).image_url?.url.split(
+              ",",
+            )[1],
           },
         };
     }
@@ -66,7 +83,7 @@ export class GeminiApi implements BaseLlmApi {
     oaiBody: ChatCompletionCreateParams,
     url: string,
     includeToolCallIds: boolean,
-    overrideIsV1?: boolean
+    overrideIsV1?: boolean,
   ) {
     const generationConfig: any = {};
 
@@ -121,11 +138,16 @@ export class GeminiApi implements BaseLlmApi {
                   functionCall: {
                     id: includeToolCallIds ? toolCall.id : undefined,
                     name: toolCall.function.name,
-                    args: safeParseArgs(toolCall.function.arguments, `Call: ${toolCall.function.name} ${toolCall.id}`),
+                    args: safeParseArgs(
+                      toolCall.function.arguments,
+                      `Call: ${toolCall.function.name} ${toolCall.id}`,
+                    ),
                   },
                 };
               } else {
-                throw new Error(`Unsupported tool call type in Gemini: ${toolCall.type}`);
+                throw new Error(
+                  `Unsupported tool call type in Gemini: ${toolCall.type}`,
+                );
               }
             }),
           };
@@ -142,7 +164,9 @@ export class GeminiApi implements BaseLlmApi {
                   name: functionName ?? "unknown",
                   response: {
                     content:
-                      typeof msg.content === "string" ? msg.content : msg.content.map((part) => part.text).join(""),
+                      typeof msg.content === "string"
+                        ? msg.content
+                        : msg.content.map((part) => part.text).join(""),
                   },
                 },
               },
@@ -155,8 +179,12 @@ export class GeminiApi implements BaseLlmApi {
         }
 
         return {
-          role: msg.role === "assistant" ? ("model" as const) : ("user" as const),
-          parts: typeof msg.content === "string" ? [{ text: msg.content }] : msg.content.map(this._oaiPartToGeminiPart),
+          role:
+            msg.role === "assistant" ? ("model" as const) : ("user" as const),
+          parts:
+            typeof msg.content === "string"
+              ? [{ text: msg.content }]
+              : msg.content.map(this._oaiPartToGeminiPart),
         };
       })
       .filter((c) => c !== null);
@@ -184,7 +212,7 @@ export class GeminiApi implements BaseLlmApi {
             functions.push(convertOpenAIToolToGeminiFunction(tool));
           } catch (e) {
             console.warn(
-              `Failed to convert tool to gemini function definition. Skipping: ${JSON.stringify(tool, null, 2)}`
+              `Failed to convert tool to gemini function definition. Skipping: ${JSON.stringify(tool, null, 2)}`,
             );
           }
         });
@@ -204,7 +232,7 @@ export class GeminiApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     let completion = "";
     let usage: UsageInfo | undefined = undefined;
@@ -213,7 +241,7 @@ export class GeminiApi implements BaseLlmApi {
         ...body,
         stream: true,
       },
-      signal
+      signal,
     )) {
       if (chunk.choices.length > 0) {
         completion += chunk.choices[0].delta.content || "";
@@ -333,11 +361,11 @@ export class GeminiApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
     const apiURL = new URL(
       `models/${body.model}:streamGenerateContent?key=${this.config.apiKey}`,
-      this.apiBase
+      this.apiBase,
     ).toString();
     const convertedBody = this._convertBody(body, apiURL, true);
     const resp = await fetch(apiURL, {
@@ -347,13 +375,19 @@ export class GeminiApi implements BaseLlmApi {
     });
     yield* this.handleStreamResponse(resp, body.model);
   }
-  completionNonStream(body: CompletionCreateParamsNonStreaming): Promise<Completion> {
+  completionNonStream(
+    body: CompletionCreateParamsNonStreaming,
+  ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
-  completionStream(body: CompletionCreateParamsStreaming): AsyncGenerator<Completion> {
+  completionStream(
+    body: CompletionCreateParamsStreaming,
+  ): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
-  fimStream(body: FimCreateParamsStreaming): AsyncGenerator<ChatCompletionChunk> {
+  fimStream(
+    body: FimCreateParamsStreaming,
+  ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
@@ -362,24 +396,27 @@ export class GeminiApi implements BaseLlmApi {
 
   async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
     const inputs = Array.isArray(body.input) ? body.input : [body.input];
-    const response = await fetch(new URL(`${body.model}:batchEmbedContents`, this.apiBase), {
-      method: "POST",
-      body: JSON.stringify({
-        requests: inputs.map((input) => ({
-          model: body.model,
-          content: {
-            role: "user",
-            parts: [{ text: input }],
-          },
-        })),
-      }),
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        "x-goog-api-key": this.config.apiKey,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        "Content-Type": "application/json",
+    const response = await fetch(
+      new URL(`${body.model}:batchEmbedContents`, this.apiBase),
+      {
+        method: "POST",
+        body: JSON.stringify({
+          requests: inputs.map((input) => ({
+            model: body.model,
+            content: {
+              role: "user",
+              parts: [{ text: input }],
+            },
+          })),
+        }),
+        headers: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "x-goog-api-key": this.config.apiKey,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     const data = (await response.json()) as any;
     return embedding({

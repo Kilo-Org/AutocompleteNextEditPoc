@@ -1,8 +1,15 @@
 // Fill in the middle prompts
 
 import { CompletionOptions } from "../../index.js";
-import { getLastNUriRelativePathParts, getShortestUniqueRelativeUriPaths } from "../../util/uri.js";
-import { AutocompleteCodeSnippet, AutocompleteSnippet, AutocompleteSnippetType } from "../snippets/types.js";
+import {
+  getLastNUriRelativePathParts,
+  getShortestUniqueRelativeUriPaths,
+} from "../../util/uri.js";
+import {
+  AutocompleteCodeSnippet,
+  AutocompleteSnippet,
+  AutocompleteSnippetType,
+} from "../snippets/types.js";
 
 export interface AutocompleteTemplate {
   compilePrefixSuffix?: (
@@ -11,7 +18,7 @@ export interface AutocompleteTemplate {
     filepath: string,
     reponame: string,
     snippets: AutocompleteSnippet[],
-    workspaceUris: string[]
+    workspaceUris: string[],
   ) => [string, string];
   template:
     | string
@@ -22,7 +29,7 @@ export interface AutocompleteTemplate {
         reponame: string,
         language: string,
         snippets: AutocompleteSnippet[],
-        workspaceUris: string[]
+        workspaceUris: string[],
       ) => string);
   completionOptions?: Partial<CompletionOptions>;
 }
@@ -31,7 +38,15 @@ export interface AutocompleteTemplate {
 const stableCodeFimTemplate: AutocompleteTemplate = {
   template: "<fim_prefix>{{{prefix}}}<fim_suffix>{{{suffix}}}<fim_middle>",
   completionOptions: {
-    stop: ["<fim_prefix>", "<fim_suffix>", "<fim_middle>", "<file_sep>", "<|endoftext|>", "</fim_middle>", "</code>"],
+    stop: [
+      "<fim_prefix>",
+      "<fim_suffix>",
+      "<fim_middle>",
+      "<file_sep>",
+      "<|endoftext|>",
+      "</fim_middle>",
+      "</code>",
+    ],
   },
 };
 
@@ -39,7 +54,8 @@ const stableCodeFimTemplate: AutocompleteTemplate = {
 // This issue asks about the use of <|repo_name|> and <|file_sep|> together with <|fim_prefix|>, <|fim_suffix|> and <|fim_middle|>
 // https://github.com/QwenLM/Qwen2.5-Coder/issues/343
 const qwenCoderFimTemplate: AutocompleteTemplate = {
-  template: "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
+  template:
+    "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
   completionOptions: {
     stop: [
       "<|endoftext|>",
@@ -56,7 +72,8 @@ const qwenCoderFimTemplate: AutocompleteTemplate = {
 };
 
 const seedCoderFimTemplate: AutocompleteTemplate = {
-  template: "<[fim-prefix]>{{{prefix}}}<[fim-suffix]>{{{suffix}}}<[fim-middle]>",
+  template:
+    "<[fim-prefix]>{{{prefix}}}<[fim-suffix]>{{{suffix}}}<[fim-middle]>",
   completionOptions: {
     stop: [
       "<[end▁of▁sentence]>",
@@ -71,21 +88,38 @@ const seedCoderFimTemplate: AutocompleteTemplate = {
 };
 
 const codestralMultifileFimTemplate: AutocompleteTemplate = {
-  compilePrefixSuffix: (prefix, suffix, filepath, _reponame, snippets, workspaceUris): [string, string] => {
+  compilePrefixSuffix: (
+    prefix,
+    suffix,
+    filepath,
+    _reponame,
+    snippets,
+    workspaceUris,
+  ): [string, string] => {
     function getFileName(snippet: { uri: string; uniquePath: string }) {
-      return snippet.uri.startsWith("file://") ? snippet.uniquePath : snippet.uri;
+      return snippet.uri.startsWith("file://")
+        ? snippet.uniquePath
+        : snippet.uri;
     }
 
     if (snippets.length === 0) {
       if (suffix.trim().length === 0 && prefix.trim().length === 0) {
-        return [`+++++ ${getLastNUriRelativePathParts(workspaceUris, filepath, 2)}\n${prefix}`, suffix];
+        return [
+          `+++++ ${getLastNUriRelativePathParts(workspaceUris, filepath, 2)}\n${prefix}`,
+          suffix,
+        ];
       }
       return [prefix, suffix];
     }
 
     const relativePaths = getShortestUniqueRelativeUriPaths(
-      [...snippets.map((snippet) => ("filepath" in snippet ? snippet.filepath : "file:///Untitled.txt")), filepath],
-      workspaceUris
+      [
+        ...snippets.map((snippet) =>
+          "filepath" in snippet ? snippet.filepath : "file:///Untitled.txt",
+        ),
+        filepath,
+      ],
+      workspaceUris,
     );
 
     const otherFiles = snippets
@@ -98,7 +132,10 @@ const codestralMultifileFimTemplate: AutocompleteTemplate = {
       })
       .join("\n\n");
 
-    return [`${otherFiles}\n\n+++++ ${getFileName(relativePaths[relativePaths.length - 1])}\n${prefix}`, suffix];
+    return [
+      `${otherFiles}\n\n+++++ ${getFileName(relativePaths[relativePaths.length - 1])}\n${prefix}`,
+      suffix,
+    ];
   },
   template: (prefix: string, suffix: string): string => {
     return `[SUFFIX]${suffix}[PREFIX]${prefix}`;
@@ -109,9 +146,18 @@ const codestralMultifileFimTemplate: AutocompleteTemplate = {
 };
 
 const mercuryMultifileFimTemplate: AutocompleteTemplate = {
-  compilePrefixSuffix: (prefix, suffix, filepath, _reponame, snippets, workspaceUris): [string, string] => {
+  compilePrefixSuffix: (
+    prefix,
+    suffix,
+    filepath,
+    _reponame,
+    snippets,
+    workspaceUris,
+  ): [string, string] => {
     function getFileName(snippet: { uri: string; uniquePath: string }) {
-      return snippet.uri.startsWith("file://") ? snippet.uniquePath : snippet.uri;
+      return snippet.uri.startsWith("file://")
+        ? snippet.uniquePath
+        : snippet.uri;
     }
 
     // Our current snippet format doesn't work well with mercury. We need to clean this up
@@ -128,8 +174,13 @@ const mercuryMultifileFimTemplate: AutocompleteTemplate = {
     }
 
     const relativePaths = getShortestUniqueRelativeUriPaths(
-      [...snippets.map((snippet) => ("filepath" in snippet ? snippet.filepath : "file:///Untitled.txt")), filepath],
-      workspaceUris
+      [
+        ...snippets.map((snippet) =>
+          "filepath" in snippet ? snippet.filepath : "file:///Untitled.txt",
+        ),
+        filepath,
+      ],
+      workspaceUris,
     );
 
     const otherFiles = snippets
@@ -153,9 +204,17 @@ const mercuryMultifileFimTemplate: AutocompleteTemplate = {
 };
 
 const codegemmaFimTemplate: AutocompleteTemplate = {
-  template: "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
+  template:
+    "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
   completionOptions: {
-    stop: ["<|fim_prefix|>", "<|fim_suffix|>", "<|fim_middle|>", "<|file_separator|>", "<end_of_turn>", "<eos>"],
+    stop: [
+      "<|fim_prefix|>",
+      "<|fim_suffix|>",
+      "<|fim_middle|>",
+      "<|file_separator|>",
+      "<end_of_turn>",
+      "<eos>",
+    ],
   },
 };
 
@@ -166,22 +225,37 @@ const codeLlamaFimTemplate: AutocompleteTemplate = {
 
 // https://huggingface.co/deepseek-ai/deepseek-coder-1.3b-base
 const deepseekFimTemplate: AutocompleteTemplate = {
-  template: "<｜fim▁begin｜>{{{prefix}}}<｜fim▁hole｜>{{{suffix}}}<｜fim▁end｜>",
+  template:
+    "<｜fim▁begin｜>{{{prefix}}}<｜fim▁hole｜>{{{suffix}}}<｜fim▁end｜>",
   completionOptions: {
-    stop: ["<｜fim▁begin｜>", "<｜fim▁hole｜>", "<｜fim▁end｜>", "//", "<｜end▁of▁sentence｜>"],
+    stop: [
+      "<｜fim▁begin｜>",
+      "<｜fim▁hole｜>",
+      "<｜fim▁end｜>",
+      "//",
+      "<｜end▁of▁sentence｜>",
+    ],
   },
 };
 
 // https://github.com/THUDM/CodeGeeX4/blob/main/guides/Infilling_guideline.md
 const codegeexFimTemplate: AutocompleteTemplate = {
-  template: (prefix, suffix, filepath, _reponame, language, allSnippets, workspaceUris): string => {
+  template: (
+    prefix,
+    suffix,
+    filepath,
+    _reponame,
+    language,
+    allSnippets,
+    workspaceUris,
+  ): string => {
     const snippets = allSnippets.filter(
-      (snippet) => snippet.type === AutocompleteSnippetType.Code
+      (snippet) => snippet.type === AutocompleteSnippetType.Code,
     ) as AutocompleteCodeSnippet[];
 
     const relativePaths = getShortestUniqueRelativeUriPaths(
       [...snippets.map((snippet) => snippet.filepath), filepath],
-      workspaceUris
+      workspaceUris,
     );
     const baseTemplate = `###PATH:${
       relativePaths[relativePaths.length - 1]
@@ -196,7 +270,14 @@ const codegeexFimTemplate: AutocompleteTemplate = {
     return prompt;
   },
   completionOptions: {
-    stop: ["<|user|>", "<|code_suffix|>", "<|code_prefix|>", "<|code_middle|>", "<|assistant|>", "<|endoftext|>"],
+    stop: [
+      "<|user|>",
+      "<|code_suffix|>",
+      "<|code_prefix|>",
+      "<|code_middle|>",
+      "<|assistant|>",
+      "<|endoftext|>",
+    ],
   },
 };
 

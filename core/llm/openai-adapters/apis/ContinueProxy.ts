@@ -66,7 +66,9 @@ export class ContinueProxyApi extends OpenAIApi {
     };
   }
 
-  private modifyBodyWithContinueProperties<T extends Record<string, any>>(body: T): T {
+  private modifyBodyWithContinueProperties<T extends Record<string, any>>(
+    body: T,
+  ): T {
     return {
       ...body,
       ...this.extraBodyProperties(),
@@ -80,7 +82,11 @@ export class ContinueProxyApi extends OpenAIApi {
     return this.modifyBodyWithContinueProperties(modifiedBody);
   }
 
-  modifyCompletionBody<T extends CompletionCreateParamsNonStreaming | CompletionCreateParamsStreaming>(body: T): T {
+  modifyCompletionBody<
+    T extends
+      | CompletionCreateParamsNonStreaming
+      | CompletionCreateParamsStreaming,
+  >(body: T): T {
     return this.modifyBodyWithContinueProperties(body);
   }
 
@@ -98,7 +104,9 @@ export class ContinueProxyApi extends OpenAIApi {
     };
   }
 
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(body: T): T {
+  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
+    body: T,
+  ): T {
     return this.modifyBodyWithContinueProperties(body);
   }
 

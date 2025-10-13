@@ -201,7 +201,9 @@ const configProvider = new MinimalConfigProvider({
 
 // 2. Implement IDE interface (see core/vscode-test-harness/src/VsCodeIde.ts for full example)
 const ide: IDE = {
-  readFile: async (filepath) => { /* read file */ },
+  readFile: async (filepath) => {
+    /* read file */
+  },
   getWorkspaceDirs: async () => ["/path/to/workspace"],
   // ... other required methods
 };
@@ -234,10 +236,10 @@ const outcome = await completionProvider.provideInlineCompletionItems(
 
 if (outcome) {
   console.log("Completion:", outcome.completion);
-  
+
   // Mark as displayed
   completionProvider.markDisplayed("unique-id", outcome);
-  
+
   // On user acceptance
   completionProvider.accept("unique-id");
 }

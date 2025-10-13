@@ -16,7 +16,7 @@ export class MoonshotApi extends OpenAIApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL("v1/chat/completions", this.apiBase);
     const resp = await fetch(endpoint, {

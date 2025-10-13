@@ -11,31 +11,48 @@ const UNSUPPORTED_SCHEMES: Set<string> = new Set();
 export class VsCodeIdeUtils {
   visibleMessages: Set<string> = new Set();
 
-  async gotoDefinition(uri: vscode.Uri, position: vscode.Position): Promise<vscode.Location[]> {
+  async gotoDefinition(
+    uri: vscode.Uri,
+    position: vscode.Position,
+  ): Promise<vscode.Location[]> {
     const locations: vscode.Location[] = await vscode.commands.executeCommand(
       "vscode.executeDefinitionProvider",
       uri,
-      position
+      position,
     );
     return locations;
   }
 
   async documentSymbol(uri: vscode.Uri): Promise<vscode.DocumentSymbol[]> {
-    return await vscode.commands.executeCommand("vscode.executeDocumentSymbolProvider", uri);
+    return await vscode.commands.executeCommand(
+      "vscode.executeDocumentSymbolProvider",
+      uri,
+    );
   }
 
-  async references(uri: vscode.Uri, position: vscode.Position): Promise<vscode.Location[]> {
-    return await vscode.commands.executeCommand("vscode.executeReferenceProvider", uri, position);
+  async references(
+    uri: vscode.Uri,
+    position: vscode.Position,
+  ): Promise<vscode.Location[]> {
+    return await vscode.commands.executeCommand(
+      "vscode.executeReferenceProvider",
+      uri,
+      position,
+    );
   }
 
   async foldingRanges(uri: vscode.Uri): Promise<vscode.FoldingRange[]> {
-    return await vscode.commands.executeCommand("vscode.executeFoldingRangeProvider", uri);
+    return await vscode.commands.executeCommand(
+      "vscode.executeFoldingRangeProvider",
+      uri,
+    );
   }
 
   private _workspaceDirectories: vscode.Uri[] | undefined = undefined;
   getWorkspaceDirectories(): vscode.Uri[] {
     if (this._workspaceDirectories === undefined) {
-      this._workspaceDirectories = vscode.workspace.workspaceFolders?.map((folder) => folder.uri) || [];
+      this._workspaceDirectories =
+        vscode.workspace.workspaceFolders?.map((folder) => folder.uri) || [];
     }
 
     return this._workspaceDirectories;
@@ -51,7 +68,12 @@ export class VsCodeIdeUtils {
 
   async openFile(uri: vscode.Uri, range?: vscode.Range) {
     // vscode has a builtin open/get open files
-    return await openEditorAndRevealRange(uri, range, vscode.ViewColumn.One, false);
+    return await openEditorAndRevealRange(
+      uri,
+      range,
+      vscode.ViewColumn.One,
+      false,
+    );
   }
 
   async fileExists(uri: vscode.Uri): Promise<boolean> {
@@ -74,7 +96,10 @@ export class VsCodeIdeUtils {
    *          If `ignoreMissingProviders` is `false`, it will throw an error for unsupported schemes or missing providers.
    * @throws Will rethrow any error that is not related to missing providers or unsupported schemes.
    */
-  async readFile(uri: vscode.Uri, ignoreMissingProviders: boolean = true): Promise<Uint8Array | null> {
+  async readFile(
+    uri: vscode.Uri,
+    ignoreMissingProviders: boolean = true,
+  ): Promise<Uint8Array | null> {
     // First check if there's an open document with this URI that might have unsaved changes.
     const openDocuments = vscode.workspace.textDocuments;
     for (const document of openDocuments) {
@@ -92,7 +117,7 @@ export class VsCodeIdeUtils {
       async (u) => {
         return await vscode.workspace.fs.readFile(u);
       },
-      ignoreMissingProviders
+      ignoreMissingProviders,
     );
   }
 
@@ -104,13 +129,16 @@ export class VsCodeIdeUtils {
    * @returns A promise that resolves to a `vscode.FileStat` object containing the file metadata,
    *          or `null` if the scheme is unsupported or the provider is missing and `ignoreMissingProviders` is `true`.
    */
-  async stat(uri: vscode.Uri, ignoreMissingProviders: boolean = true): Promise<vscode.FileStat | null> {
+  async stat(
+    uri: vscode.Uri,
+    ignoreMissingProviders: boolean = true,
+  ): Promise<vscode.FileStat | null> {
     return await this.fsOperation(
       uri,
       async (u) => {
         return await vscode.workspace.fs.stat(uri);
       },
-      ignoreMissingProviders
+      ignoreMissingProviders,
     );
   }
 
@@ -124,14 +152,14 @@ export class VsCodeIdeUtils {
    */
   async readDirectory(
     uri: vscode.Uri,
-    ignoreMissingProviders: boolean = true
+    ignoreMissingProviders: boolean = true,
   ): Promise<[string, vscode.FileType][] | null> {
     return await this.fsOperation(
       uri,
       async (u) => {
         return await vscode.workspace.fs.readDirectory(uri);
       },
-      ignoreMissingProviders
+      ignoreMissingProviders,
     );
   }
 
@@ -148,7 +176,7 @@ export class VsCodeIdeUtils {
   private async fsOperation<T>(
     uri: vscode.Uri,
     delegate: (uri: vscode.Uri) => T,
-    ignoreMissingProviders: boolean = true
+    ignoreMissingProviders: boolean = true,
   ): Promise<T | null> {
     const scheme = uri.scheme;
     if (ignoreMissingProviders && UNSUPPORTED_SCHEMES.has(scheme)) {
@@ -160,7 +188,8 @@ export class VsCodeIdeUtils {
       if (
         ignoreMissingProviders &&
         //see https://github.com/microsoft/vscode/blob/c9c54f9e775e5f57d97bef796797b5bc670c8150/src/vs/workbench/api/common/extHostFileSystemConsumer.ts#L230
-        (err.name === NO_FS_PROVIDER_ERROR || err.message?.includes(NO_FS_PROVIDER_ERROR))
+        (err.name === NO_FS_PROVIDER_ERROR ||
+          err.message?.includes(NO_FS_PROVIDER_ERROR))
       ) {
         UNSUPPORTED_SCHEMES.add(scheme);
         console.log(`Ignoring missing provider error:`, err.message);
@@ -184,7 +213,9 @@ export class VsCodeIdeUtils {
     return vscode.window.tabGroups.all
       .flatMap((group) => group.tabs)
       .filter(
-        (tab) => tab.input instanceof vscode.TabInputText && this.documentIsCode((tab.input as vscode.TabInputText).uri)
+        (tab) =>
+          tab.input instanceof vscode.TabInputText &&
+          this.documentIsCode((tab.input as vscode.TabInputText).uri),
       )
       .map((tab) => (tab.input as vscode.TabInputText).uri);
   }

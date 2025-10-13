@@ -24,7 +24,9 @@ const CONTINUE_GLOBAL_DIR = (() => {
   const configPath = process.env.CONTINUE_GLOBAL_DIR;
   if (configPath) {
     // Convert relative path to absolute paths based on current working directory
-    return path.isAbsolute(configPath) ? configPath : path.resolve(process.cwd(), configPath);
+    return path.isAbsolute(configPath)
+      ? configPath
+      : path.resolve(process.cwd(), configPath);
   }
   return path.join(os.homedir(), ".continue");
 })();
@@ -42,7 +44,10 @@ function getContinueUtilsPath(): string {
 }
 
 export function getGlobalContinueIgnorePath(): string {
-  const continueIgnorePath = path.join(getContinueGlobalPath(), ".continueignore");
+  const continueIgnorePath = path.join(
+    getContinueGlobalPath(),
+    ".continueignore",
+  );
   if (!fs.existsSync(continueIgnorePath)) {
     fs.writeFileSync(continueIgnorePath, "");
   }
@@ -137,7 +142,7 @@ export function getConfigTsPath(): string {
         version: "1.0.0",
         description: "My Continue Configuration",
         main: "config.js",
-      })
+      }),
     );
   }
 
@@ -177,8 +182,8 @@ function getTsConfigPath(): string {
           include: ["./config.ts"],
         },
         null,
-        2
-      )
+        2,
+      ),
     );
   }
   return tsConfigPath;
@@ -195,8 +200,8 @@ function getContinueRcPath(): string {
           disableIndexing: true,
         },
         null,
-        2
-      )
+        2,
+      ),
     );
   }
   return continuercPath;
@@ -214,7 +219,10 @@ export function getDevDataSqlitePath(): string {
   return path.join(getDevDataPath(), "devdata.sqlite");
 }
 
-export function getDevDataFilePath(eventName: DevEventName, schema: string): string {
+export function getDevDataFilePath(
+  eventName: DevEventName,
+  schema: string,
+): string {
   const versionPath = path.join(getDevDataPath(), schema);
   if (!fs.existsSync(versionPath)) {
     fs.mkdirSync(versionPath);
@@ -222,7 +230,9 @@ export function getDevDataFilePath(eventName: DevEventName, schema: string): str
   return path.join(versionPath, `${String(eventName)}.jsonl`);
 }
 
-function editConfigJson(callback: (config: SerializedContinueConfig) => SerializedContinueConfig): void {
+function editConfigJson(
+  callback: (config: SerializedContinueConfig) => SerializedContinueConfig,
+): void {
   const config = fs.readFileSync(getConfigJsonPath(), "utf8");
   let configJson = JSONC.parse(config);
   // Check if it's an object
@@ -247,8 +257,10 @@ function editConfigYaml(callback: (config: ConfigYaml) => ConfigYaml): void {
 }
 
 function editConfigFile(
-  configJsonCallback: (config: SerializedContinueConfig) => SerializedContinueConfig,
-  configYamlCallback: (config: ConfigYaml) => ConfigYaml
+  configJsonCallback: (
+    config: SerializedContinueConfig,
+  ) => SerializedContinueConfig,
+  configYamlCallback: (config: ConfigYaml) => ConfigYaml,
 ): void {
   if (fs.existsSync(getConfigYamlPath())) {
     editConfigYaml(configYamlCallback);
@@ -265,7 +277,11 @@ function getMigrationsFolderPath(): string {
   return migrationsPath;
 }
 
-async function migrate(id: string, callback: () => void | Promise<void>, onAlreadyComplete?: () => void) {
+async function migrate(
+  id: string,
+  callback: () => void | Promise<void>,
+  onAlreadyComplete?: () => void,
+) {
   if (process.env.NODE_ENV === "test") {
     return await Promise.resolve(callback());
   }
@@ -366,7 +382,9 @@ function getGlobalPromptsPath(): string {
   return getGlobalFolderWithName("prompts");
 }
 
-function readAllGlobalPromptFiles(folderPath: string = getGlobalPromptsPath()): { path: string; content: string }[] {
+function readAllGlobalPromptFiles(
+  folderPath: string = getGlobalPromptsPath(),
+): { path: string; content: string }[] {
   if (!fs.existsSync(folderPath)) {
     return [];
   }
@@ -398,7 +416,10 @@ function getEsbuildBinaryPath(): string {
 
 function migrateV1DevDataFiles() {
   const devDataPath = getDevDataPath();
-  function moveToV1FolderIfExists(oldFileName: string, newFileName: DevEventName) {
+  function moveToV1FolderIfExists(
+    oldFileName: string,
+    newFileName: DevEventName,
+  ) {
     const oldFilePath = path.join(devDataPath, `${oldFileName}.jsonl`);
     if (fs.existsSync(oldFilePath)) {
       const newFilePath = getDevDataFilePath(newFileName, "0.1.0");
@@ -455,7 +476,9 @@ const isFileWithinFolder = (fileUri: string, folderPath: string): boolean => {
     filePath = filePath.replace(/\/$/, "");
     folderPathClean = folderPathClean.replace(/\/$/, "");
 
-    return filePath === folderPathClean || filePath.startsWith(`${folderPathClean}/`);
+    return (
+      filePath === folderPathClean || filePath.startsWith(`${folderPathClean}/`)
+    );
   } catch (error) {
     console.error("Error in isFileWithinFolder:", error);
     return false;

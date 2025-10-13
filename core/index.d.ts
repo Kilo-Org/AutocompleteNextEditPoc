@@ -1,7 +1,12 @@
 import Parser from "web-tree-sitter";
 
 // Stub types that were in yaml-package (no longer needed for minimal autocomplete)
-export type ModelRole = "chat" | "edit" | "autocomplete" | "apply" | "repoMapFileSelection";
+export type ModelRole =
+  | "chat"
+  | "edit"
+  | "autocomplete"
+  | "apply"
+  | "repoMapFileSelection";
 export type DataDestination = any;
 export type PromptTemplates = Record<string, any>;
 export enum SecretType {
@@ -41,7 +46,11 @@ declare global {
     };
     colorThemeName?: string;
     workspacePaths?: string[];
-    postIntellijMessage?: (messageType: string, data: any, messageIde: string) => void;
+    postIntellijMessage?: (
+      messageType: string,
+      data: any,
+      messageIde: string,
+    ) => void;
   }
 }
 
@@ -63,7 +72,15 @@ export interface IndexingProgressUpdate {
   progress: number;
   desc: string;
   shouldClearIndexes?: boolean;
-  status: "loading" | "waiting" | "indexing" | "done" | "failed" | "paused" | "disabled" | "cancelled";
+  status:
+    | "loading"
+    | "waiting"
+    | "indexing"
+    | "done"
+    | "failed"
+    | "paused"
+    | "disabled"
+    | "cancelled";
   debugInfo?: string;
   warnings?: string[];
 }
@@ -85,7 +102,7 @@ export interface IndexingStatus {
 
 export type PromptTemplateFunction = (
   history: ChatMessage[],
-  otherData: Record<string, string>
+  otherData: Record<string, string>,
 ) => string | ChatMessage[];
 
 export type PromptTemplate = string | PromptTemplateFunction;
@@ -98,7 +115,9 @@ type RequiredLLMOptions =
   | "maxEmbeddingBatchSize"
   | "completionOptions";
 
-export interface ILLM extends Omit<LLMOptions, RequiredLLMOptions>, Required<Pick<LLMOptions, RequiredLLMOptions>> {
+export interface ILLM
+  extends Omit<LLMOptions, RequiredLLMOptions>,
+    Required<Pick<LLMOptions, RequiredLLMOptions>> {
   get providerName(): string;
   get underlyingProviderName(): string;
 
@@ -106,31 +125,42 @@ export interface ILLM extends Omit<LLMOptions, RequiredLLMOptions>, Required<Pic
 
   lastRequestId?: string;
 
-  complete(prompt: string, signal: AbortSignal, options?: LLMFullCompletionOptions): Promise<string>;
+  complete(
+    prompt: string,
+    signal: AbortSignal,
+    options?: LLMFullCompletionOptions,
+  ): Promise<string>;
 
   streamComplete(
     prompt: string,
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): AsyncGenerator<string, PromptLog>;
 
   streamFim(
     prefix: string,
     suffix: string,
     signal: AbortSignal,
-    options?: LLMFullCompletionOptions
+    options?: LLMFullCompletionOptions,
   ): AsyncGenerator<string, PromptLog>;
 
   streamChat(
     messages: ChatMessage[],
     signal: AbortSignal,
     options?: LLMFullCompletionOptions,
-    messageOptions?: MessageOption
+    messageOptions?: MessageOption,
   ): AsyncGenerator<ChatMessage, PromptLog>;
 
-  chat(messages: ChatMessage[], signal: AbortSignal, options?: LLMFullCompletionOptions): Promise<ChatMessage>;
+  chat(
+    messages: ChatMessage[],
+    signal: AbortSignal,
+    options?: LLMFullCompletionOptions,
+  ): Promise<ChatMessage>;
 
-  compileChatMessages(messages: ChatMessage[], options: LLMFullCompletionOpeions): CompiledChatMessagesReport;
+  compileChatMessages(
+    messages: ChatMessage[],
+    options: LLMFullCompletionOpeions,
+  ): CompiledChatMessagesReport;
 
   embed(chunks: string[]): Promise<number[][]>;
 
@@ -152,7 +182,7 @@ export interface ILLM extends Omit<LLMOptions, RequiredLLMOptions>, Required<Pic
     template: PromptTemplate,
     history: ChatMessage[],
     otherData: Record<string, string>,
-    canPutWordsInModelsMouth?: boolean
+    canPutWordsInModelsMouth?: boolean,
   ): string | ChatMessage[];
 
   getConfigurationStatus(): LLMConfigurationStatuses;
@@ -162,14 +192,18 @@ export interface ModelInstaller {
   installModel(
     modelName: string,
     signal: AbortSignal,
-    progressReporter?: (task: string, increment: number, total: number) => void
+    progressReporter?: (task: string, increment: number, total: number) => void,
   ): Promise<any>;
 
   isInstallingModel(modelName: string): Promise<boolean>;
 }
 
 export type ContextProviderType = "normal" | "query" | "submenu";
-export type ContextIndexingType = "chunk" | "embeddings" | "fullTextSearch" | "codeSnippets";
+export type ContextIndexingType =
+  | "chunk"
+  | "embeddings"
+  | "fullTextSearch"
+  | "codeSnippets";
 
 export interface ContextProviderDescription {
   title: ContextProviderName;
@@ -206,9 +240,14 @@ export interface CustomContextProvider {
   description?: string;
   renderInlineAs?: string;
   type?: ContextProviderType;
-  loadSubmenuItems?: (args: LoadSubmenuItemsArgs) => Promise<ContextSubmenuItem[]>;
+  loadSubmenuItems?: (
+    args: LoadSubmenuItemsArgs,
+  ) => Promise<ContextSubmenuItem[]>;
 
-  getContextItems(query: string, extras: ContextProviderExtras): Promise<ContextItem[]>;
+  getContextItems(
+    query: string,
+    extras: ContextProviderExtras,
+  ): Promise<ContextItem[]>;
 }
 
 export interface ContextSubmenuItem {
@@ -242,7 +281,10 @@ export interface DocsIndexingDetails {
 export interface IContextProvider {
   get description(): ContextProviderDescription;
 
-  getContextItems(query: string, extras: ContextProviderExtras): Promise<ContextItem[]>;
+  getContextItems(
+    query: string,
+    extras: ContextProviderExtras,
+  ): Promise<ContextItem[]>;
 
   loadSubmenuItems(args: LoadSubmenuItemsArgs): Promise<ContextSubmenuItem[]>;
 
@@ -298,7 +340,12 @@ export interface CompletionOptions extends BaseCompletionOptions {
   model: string;
 }
 
-export type ChatMessageRole = "user" | "assistant" | "thinking" | "system" | "tool";
+export type ChatMessageRole =
+  | "user"
+  | "assistant"
+  | "thinking"
+  | "system"
+  | "tool";
 
 export type TextMessagePart = {
   type: "text";
@@ -562,9 +609,14 @@ export type LLMInteractionItem =
 //
 // www.typescriptlang.org/docs/handbook/2/conditional-types.html#distributive-conditional-types
 // https://stackoverflow.com/questions/57103834/typescript-omit-a-property-from-all-interfaces-in-a-union-but-keep-the-union-s
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
 
-export type LLMInteractionItemDetails = DistributiveOmit<LLMInteractionItem, "interactionId" | "timestamp">;
+export type LLMInteractionItemDetails = DistributiveOmit<
+  LLMInteractionItem,
+  "interactionId" | "timestamp"
+>;
 
 export interface ILLMInteractionLog {
   logItem(item: LLMInteractionItemDetails): void;
@@ -643,7 +695,10 @@ export interface LLMOptions {
   isFromAutoDetect?: boolean;
 }
 
-type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
+type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
+  T,
+  Exclude<keyof T, Keys>
+> &
   {
     [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
   }[Keys];
@@ -654,21 +709,26 @@ export interface CustomLLMWithOptionals {
     prompt: string,
     signal: AbortSignal,
     options: CompletionOptions,
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   ) => AsyncGenerator<string>;
   streamChat?: (
     messages: ChatMessage[],
     signal: AbortSignal,
     options: CompletionOptions,
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   ) => AsyncGenerator<ChatMessage | string>;
-  listModels?: (fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) => Promise<string[]>;
+  listModels?: (
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+  ) => Promise<string[]>;
 }
 
 /**
  * The LLM interface requires you to specify either `streamCompletion` or `streamChat` (or both).
  */
-export type CustomLLM = RequireAtLeastOne<CustomLLMWithOptionals, "streamCompletion" | "streamChat">;
+export type CustomLLM = RequireAtLeastOne<
+  CustomLLMWithOptionals,
+  "streamCompletion" | "streamChat"
+>;
 
 // IDE
 
@@ -960,7 +1020,10 @@ export interface ToolExtras {
   fetch: FetchFunction;
   tool: Tool;
   toolCallId?: string;
-  onPartialOutput?: (params: { toolCallId: string; contextItems: ContextItem[] }) => void;
+  onPartialOutput?: (params: {
+    toolCallId: string;
+    contextItems: ContextItem[];
+  }) => void;
   config: ContinueConfig;
   codeBaseIndexer?: any; // TODO: Type properly when CodebaseIndexer is implemented
 }
@@ -993,9 +1056,12 @@ export interface Tool {
     args: Record<string, unknown>,
     extras: {
       ide: IDE;
-    }
+    },
   ) => Promise<Record<string, unknown>>;
-  evaluateToolCallPolicy?: (basePolicy: ToolPolicy, parsedArgs: Record<string, unknown>) => ToolPolicy;
+  evaluateToolCallPolicy?: (
+    basePolicy: ToolPolicy,
+    parsedArgs: Record<string, unknown>,
+  ) => ToolPolicy;
 }
 
 interface ToolChoice {
@@ -1156,7 +1222,11 @@ export interface StreamableHTTPOptions {
   url: string;
 }
 
-export type TransportOptions = StdioOptions | WebSocketOptions | SSEOptions | StreamableHTTPOptions;
+export type TransportOptions =
+  | StdioOptions
+  | WebSocketOptions
+  | SSEOptions
+  | StreamableHTTPOptions;
 
 export type MCPConnectionStatus =
   | "disabled"
@@ -1327,7 +1397,9 @@ interface StreamDiffLinesOptionsApply extends StreamDiffLinesOptionsBase {
   newCode: string;
 }
 
-type StreamDiffLinesPayload = StreamDiffLinesOptionsApply | StreamDiffLinesOptionsEdit;
+type StreamDiffLinesPayload =
+  | StreamDiffLinesOptionsApply
+  | StreamDiffLinesOptionsEdit;
 
 export interface HighlightedCodePayload {
   rangeInFileWithContents: RangeInFileWithContents;
@@ -1603,7 +1675,10 @@ export interface Config {
   /** The provider used to calculate embeddings. If left empty, Continue will use transformers.js to calculate the embeddings with all-MiniLM-L6-v2 */
   embeddingsProvider?: EmbeddingsProviderDescription | ILLM;
   /** The model that Continue will use for tab autocompletions. */
-  tabAutocompleteModel?: CustomLLM | JSONModelDescription | (CustomLLM | JSONModelDescription)[];
+  tabAutocompleteModel?:
+    | CustomLLM
+    | JSONModelDescription
+    | (CustomLLM | JSONModelDescription)[];
   /** Options for tab autocomplete */
   tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
   /** UI styles customization */
@@ -1695,7 +1770,10 @@ export type PackageDetailsSuccess = PackageDetails & {
 
 export type PackageDocsResult = {
   packageInfo: ParsedPackageInfo;
-} & ({ error: string; details?: never } | { details: PackageDetailsSuccess; error?: never });
+} & (
+  | { error: string; details?: never }
+  | { details: PackageDetailsSuccess; error?: never }
+);
 
 export interface TerminalOptions {
   reuseTerminal?: boolean;
@@ -1829,15 +1907,26 @@ export interface ListHistoryOptions {
 
 export interface IMessenger<TFrom = any, TTo = any> {
   send(messageType: string, data: any, messageId?: string): string;
-  on<T extends keyof TFrom>(messageType: T, handler: (message: Message<any>) => Promise<any> | any): void;
+  on<T extends keyof TFrom>(
+    messageType: T,
+    handler: (message: Message<any>) => Promise<any> | any,
+  ): void;
   request?(messageType: string, data: any): Promise<any>;
 }
 
-export class InProcessMessenger<TFrom = any, TTo = any> implements IMessenger<TFrom, TTo> {
+export class InProcessMessenger<TFrom = any, TTo = any>
+  implements IMessenger<TFrom, TTo>
+{
   send(messageType: string, data: any, messageId?: string): string;
-  on<T extends keyof TFrom>(messageType: T, handler: (message: Message<any>) => void): void;
+  on<T extends keyof TFrom>(
+    messageType: T,
+    handler: (message: Message<any>) => void,
+  ): void;
   request(messageType: string, data: any): Promise<any>;
-  externalOn?(messageType: string, handler: (message: Message<any>) => void): void;
+  externalOn?(
+    messageType: string,
+    handler: (message: Message<any>) => void,
+  ): void;
   externalRequest?(messageType: string, data: any): Promise<any>;
 }
 
@@ -1866,7 +1955,9 @@ export interface MinimalConfig {
 declare module "core/autocomplete/MinimalConfig" {
   export interface MinimalConfigProvider {
     reloadConfig?(): Promise<void>;
-    onConfigUpdate?(handler: (newConfig: any, configLoadInterrupted: boolean) => void): void;
+    onConfigUpdate?(
+      handler: (newConfig: any, configLoadInterrupted: boolean) => void,
+    ): void;
     registerCustomContextProvider?(provider: any): void;
   }
 }

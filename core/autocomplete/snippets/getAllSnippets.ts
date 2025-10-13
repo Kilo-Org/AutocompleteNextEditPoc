@@ -40,28 +40,32 @@ function racePromise<T>(promise: Promise<T[]>, timeout = 100): Promise<T[]> {
 async function getIdeSnippets(
   helper: HelperVars,
   ide: IDE,
-  getDefinitionsFromLsp: GetLspDefinitionsFunction
+  getDefinitionsFromLsp: GetLspDefinitionsFunction,
 ): Promise<AutocompleteCodeSnippet[]> {
   const ideSnippets = await getDefinitionsFromLsp(
     helper.input.filepath,
     helper.fullPrefix + helper.fullSuffix,
     helper.fullPrefix.length,
     ide,
-    helper.lang
+    helper.lang,
   );
 
   if (helper.options.onlyMyCode) {
     const workspaceDirs = await ide.getWorkspaceDirs();
 
     return ideSnippets.filter((snippet) =>
-      workspaceDirs.some((dir) => !!findUriInDirs(snippet.filepath, [dir]).foundInDir)
+      workspaceDirs.some(
+        (dir) => !!findUriInDirs(snippet.filepath, [dir]).foundInDir,
+      ),
     );
   }
 
   return ideSnippets;
 }
 
-function getSnippetsFromRecentlyEditedRanges(helper: HelperVars): AutocompleteCodeSnippet[] {
+function getSnippetsFromRecentlyEditedRanges(
+  helper: HelperVars,
+): AutocompleteCodeSnippet[] {
   if (helper.options.useRecentlyEdited === false) {
     return [];
   }
@@ -75,7 +79,9 @@ function getSnippetsFromRecentlyEditedRanges(helper: HelperVars): AutocompleteCo
   });
 }
 
-const getClipboardSnippets = async (ide: IDE): Promise<AutocompleteClipboardSnippet[]> => {
+const getClipboardSnippets = async (
+  ide: IDE,
+): Promise<AutocompleteClipboardSnippet[]> => {
   const content = await ide.getClipboardContent();
 
   return [content].map((item) => {
@@ -87,7 +93,10 @@ const getClipboardSnippets = async (ide: IDE): Promise<AutocompleteClipboardSnip
   });
 };
 
-const getSnippetsFromRecentlyOpenedFiles = async (helper: HelperVars, ide: IDE): Promise<AutocompleteCodeSnippet[]> => {
+const getSnippetsFromRecentlyOpenedFiles = async (
+  helper: HelperVars,
+  ide: IDE,
+): Promise<AutocompleteCodeSnippet[]> => {
   if (helper.options.useRecentlyOpened === false) {
     return [];
   }
@@ -103,28 +112,33 @@ const getSnippetsFromRecentlyOpenedFiles = async (helper: HelperVars, ide: IDE):
     // Create an array of promises that each read a file with timeout
     const fileReadPromises = fileUrisToRead.map((fileUri) => {
       // Create a promise that resolves to a snippet or null
-      const readPromise = new Promise<AutocompleteCodeSnippet | null>((resolve) => {
-        ide
-          .readFile(fileUri)
-          .then((fileContent) => {
-            if (!fileContent || fileContent.trim() === "") {
-              resolve(null);
-              return;
-            }
+      const readPromise = new Promise<AutocompleteCodeSnippet | null>(
+        (resolve) => {
+          ide
+            .readFile(fileUri)
+            .then((fileContent) => {
+              if (!fileContent || fileContent.trim() === "") {
+                resolve(null);
+                return;
+              }
 
-            resolve({
-              filepath: fileUri,
-              content: fileContent,
-              type: AutocompleteSnippetType.Code,
+              resolve({
+                filepath: fileUri,
+                content: fileContent,
+                type: AutocompleteSnippetType.Code,
+              });
+            })
+            .catch((e) => {
+              console.error(`Failed to read file ${fileUri}:`, e);
+              resolve(null);
             });
-          })
-          .catch((e) => {
-            console.error(`Failed to read file ${fileUri}:`, e);
-            resolve(null);
-          });
-      });
+        },
+      );
       // Cut off at 80ms via racing promises
-      return Promise.race([readPromise, new Promise<null>((resolve) => setTimeout(() => resolve(null), 80))]);
+      return Promise.race([
+        readPromise,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 80)),
+      ]);
     });
 
     // Execute all file reads in parallel
@@ -149,7 +163,8 @@ export const getAllSnippets = async ({
   getDefinitionsFromLsp: GetLspDefinitionsFunction;
   contextRetrievalService: ContextRetrievalService;
 }): Promise<SnippetPayload> => {
-  const recentlyEditedRangeSnippets = getSnippetsFromRecentlyEditedRanges(helper);
+  const recentlyEditedRangeSnippets =
+    getSnippetsFromRecentlyEditedRanges(helper);
 
   const [
     rootPathSnippets,
@@ -161,8 +176,12 @@ export const getAllSnippets = async ({
     staticSnippet,
   ] = await Promise.all([
     racePromise(contextRetrievalService.getRootPathSnippets(helper)),
-    racePromise(contextRetrievalService.getSnippetsFromImportDefinitions(helper)),
-    IDE_SNIPPETS_ENABLED ? racePromise(getIdeSnippets(helper, ide, getDefinitionsFromLsp)) : [],
+    racePromise(
+      contextRetrievalService.getSnippetsFromImportDefinitions(helper),
+    ),
+    IDE_SNIPPETS_ENABLED
+      ? racePromise(getIdeSnippets(helper, ide, getDefinitionsFromLsp))
+      : [],
     [], // racePromise(getDiffSnippets(ide)) // temporarily disabled, see https://github.com/continuedev/continue/pull/5882,
     racePromise(getClipboardSnippets(ide)),
     racePromise(getSnippetsFromRecentlyOpenedFiles(helper, ide)), // giving this one a little more time to complete
@@ -195,7 +214,8 @@ export const getAllSnippetsWithoutRace = async ({
   getDefinitionsFromLsp: GetLspDefinitionsFunction;
   contextRetrievalService: ContextRetrievalService;
 }): Promise<SnippetPayload> => {
-  const recentlyEditedRangeSnippets = getSnippetsFromRecentlyEditedRanges(helper);
+  const recentlyEditedRangeSnippets =
+    getSnippetsFromRecentlyEditedRanges(helper);
 
   const [
     rootPathSnippets,
@@ -208,7 +228,9 @@ export const getAllSnippetsWithoutRace = async ({
   ] = await Promise.all([
     contextRetrievalService.getRootPathSnippets(helper),
     contextRetrievalService.getSnippetsFromImportDefinitions(helper),
-    IDE_SNIPPETS_ENABLED ? getIdeSnippets(helper, ide, getDefinitionsFromLsp) : [],
+    IDE_SNIPPETS_ENABLED
+      ? getIdeSnippets(helper, ide, getDefinitionsFromLsp)
+      : [],
     [], // racePromise(getDiffSnippets(ide)) // temporarily disabled, see https://github.com/continuedev/continue/pull/5882,
     getClipboardSnippets(ide),
     getSnippetsFromRecentlyOpenedFiles(helper, ide),

@@ -124,10 +124,7 @@ export function joinPathsToUri(uri: string, ...pathSegments: string[]) {
   return URI.resolve(baseUri, segments.join("/"));
 }
 
-function joinEncodedUriPathSegmentToUri(
-  uri: string,
-  pathSegment: string,
-) {
+function joinEncodedUriPathSegmentToUri(uri: string, pathSegment: string) {
   let baseUri = uri;
   if (baseUri.at(-1) !== "/") {
     baseUri += "/";

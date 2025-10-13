@@ -6,8 +6,5 @@
     "core/**/*.vitest.ts"
   ],
   "ignoreDependencies": ["@types/*"],
-  "ignore": [
-    "**/__fixtures__/**",
-    "**/__test-cases__/**"
-  ]
+  "ignore": ["**/__fixtures__/**", "**/__test-cases__/**"]
 }

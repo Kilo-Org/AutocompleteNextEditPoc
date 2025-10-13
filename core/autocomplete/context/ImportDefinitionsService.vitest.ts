@@ -39,8 +39,10 @@ import sys`;
       expect(ast?.rootNode.type).toBe("module");
 
       // Mock IDE operations (NOT tree-sitter)
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
-      
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
+
       const mockDefinition: RangeInFileWithContents = {
         filepath: "/workspace/os/path.py",
         range: {
@@ -49,7 +51,7 @@ import sys`;
         },
         contents: "def join(*args): ...",
       };
-      
+
       (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([
         {
           filepath: mockDefinition.filepath,
@@ -57,7 +59,7 @@ import sys`;
         },
       ]);
       (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
-        mockDefinition.contents
+        mockDefinition.contents,
       );
 
       const result = await (service as any)._getFileInfo(filepath);
@@ -86,12 +88,14 @@ from another import FakeImport
       // Verify tree-sitter parses this correctly
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
-      
+
       // Find string nodes - tree-sitter should NOT match imports inside them
       const stringNodes = ast?.rootNode.descendantsOfType("string");
       expect(stringNodes?.length).toBeGreaterThan(0);
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
       (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([
         {
           filepath: "/workspace/mymodule.py",
@@ -102,7 +106,7 @@ from another import FakeImport
         },
       ]);
       (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
-        "class MyClass: ..."
+        "class MyClass: ...",
       );
 
       const result = await (service as any)._getFileInfo(filepath);
@@ -123,18 +127,26 @@ import json`;
       // Verify tree-sitter creates proper AST
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
-      
+
       // Verify we can find import_from_statement nodes
-      const importNodes = ast?.rootNode.descendantsOfType("import_from_statement");
+      const importNodes = ast?.rootNode.descendantsOfType(
+        "import_from_statement",
+      );
       expect(importNodes?.length).toBe(1);
-      
+
       // Verify import_statement nodes
       const importStmts = ast?.rootNode.descendantsOfType("import_statement");
       expect(importStmts?.length).toBe(1);
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -168,7 +180,7 @@ import defaultExport from './module';`;
         },
       ]);
       (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
-        "export const Component = ..."
+        "export const Component = ...",
       );
 
       const result = await (service as any)._getFileInfo(filepath);
@@ -194,10 +206,12 @@ const template = \`
       // Verify tree-sitter correctly identifies string nodes
       const ast = await getAst(filepath, tsCode);
       expect(ast).toBeTruthy();
-      
+
       const stringNodes = ast?.rootNode.descendantsOfType("string");
       const templateNodes = ast?.rootNode.descendantsOfType("template_string");
-      expect((stringNodes?.length || 0) + (templateNodes?.length || 0)).toBeGreaterThan(0);
+      expect(
+        (stringNodes?.length || 0) + (templateNodes?.length || 0),
+      ).toBeGreaterThan(0);
 
       (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(tsCode);
       (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([
@@ -210,7 +224,7 @@ const template = \`
         },
       ]);
       (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
-        "export const realImport = ..."
+        "export const realImport = ...",
       );
 
       const result = await (service as any)._getFileInfo(filepath);
@@ -231,14 +245,19 @@ import defaultExport from './module';`;
       // Verify tree-sitter parses TypeScript imports correctly
       const ast = await getAst(filepath, tsCode);
       expect(ast).toBeTruthy();
-      
+
       // Should find import_statement nodes
-      const importStatements = ast?.rootNode.descendantsOfType("import_statement");
+      const importStatements =
+        ast?.rootNode.descendantsOfType("import_statement");
       expect(importStatements?.length).toBe(3);
 
       (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(tsCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -267,7 +286,9 @@ import defaultExport from './module';`;
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -305,9 +326,15 @@ def func():
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -342,9 +369,11 @@ def func():
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
       expect(ast?.rootNode.type).toBe("module");
-      
+
       // Verify we get actual Python syntax nodes
-      const importFrom = ast?.rootNode.descendantsOfType("import_from_statement");
+      const importFrom = ast?.rootNode.descendantsOfType(
+        "import_from_statement",
+      );
       expect(importFrom?.length).toBeGreaterThan(0);
     });
 
@@ -356,7 +385,7 @@ def func():
       const ast = await getAst(filepath, tsCode);
       expect(ast).toBeTruthy();
       expect(ast?.rootNode.type).toBe("program");
-      
+
       // Verify we get actual TypeScript import nodes
       const imports = ast?.rootNode.descendantsOfType("import_statement");
       expect(imports?.length).toBeGreaterThan(0);
@@ -368,53 +397,61 @@ def func():
       it("should find dotted_name nodes in from imports", async () => {
         const code = `from os.path import join`;
         const tree = await getAst("test.py", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Tree-sitter should parse dotted names correctly
         const dottedNames = tree.rootNode.descendantsOfType("dotted_name");
         expect(dottedNames.length).toBeGreaterThan(0);
-        
+
         // Verify the dotted name structure
-        const osPath = dottedNames.find(n => n.text === "os.path");
+        const osPath = dottedNames.find((n) => n.text === "os.path");
         expect(osPath).toBeTruthy();
       });
 
       it("should distinguish import names from module paths", async () => {
         const code = `from collections import defaultdict, Counter`;
         const tree = await getAst("test.py", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // The imported names should be captured separately from the module
-        const importFromStmt = tree.rootNode.descendantsOfType("import_from_statement")[0];
+        const importFromStmt = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        )[0];
         expect(importFromStmt).toBeTruthy();
-        
+
         // Find the actual imported names (not the module name)
         const allIdentifiers = importFromStmt.descendantsOfType("dotted_name");
-        const texts = allIdentifiers.map(n => n.text);
-        
+        const texts = allIdentifiers.map((n) => n.text);
+
         // Should include the imported names
-        expect(texts.some(t => t === "defaultdict" || t.includes("defaultdict"))).toBe(true);
-        expect(texts.some(t => t === "Counter" || t.includes("Counter"))).toBe(true);
+        expect(
+          texts.some((t) => t === "defaultdict" || t.includes("defaultdict")),
+        ).toBe(true);
+        expect(
+          texts.some((t) => t === "Counter" || t.includes("Counter")),
+        ).toBe(true);
       });
 
       it("should handle aliased imports", async () => {
         const code = `import numpy as np\nfrom typing import List as ListType`;
         const tree = await getAst("test.py", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Should find both import types
         const importStmts = tree.rootNode.descendantsOfType("import_statement");
-        const importFromStmts = tree.rootNode.descendantsOfType("import_from_statement");
-        
+        const importFromStmts = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        );
+
         expect(importStmts.length).toBeGreaterThan(0);
         expect(importFromStmts.length).toBeGreaterThan(0);
-        
+
         // Verify alias nodes exist
         const aliasedImport = tree.rootNode.descendantsOfType("aliased_import");
         expect(aliasedImport.length).toBeGreaterThan(0);
@@ -423,30 +460,36 @@ def func():
       it("should find wildcard imports", async () => {
         const code = `from module import *`;
         const tree = await getAst("test.py", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importFromStmt = tree.rootNode.descendantsOfType("import_from_statement")[0];
+
+        const importFromStmt = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        )[0];
         expect(importFromStmt).toBeTruthy();
-        
+
         // Should have a wildcard import node
-        const wildcardImport = tree.rootNode.descendantsOfType("wildcard_import");
+        const wildcardImport =
+          tree.rootNode.descendantsOfType("wildcard_import");
         expect(wildcardImport.length).toBeGreaterThan(0);
       });
 
       it("should handle relative imports", async () => {
         const code = `from . import helper\nfrom ..utils import config`;
         const tree = await getAst("test.py", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importFromStmts = tree.rootNode.descendantsOfType("import_from_statement");
+
+        const importFromStmts = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        );
         expect(importFromStmts.length).toBe(2);
-        
+
         // Verify relative import prefix
-        const relativeImport = tree.rootNode.descendantsOfType("relative_import");
+        const relativeImport =
+          tree.rootNode.descendantsOfType("relative_import");
         expect(relativeImport.length).toBeGreaterThan(0);
       });
     });
@@ -455,16 +498,17 @@ def func():
       it("should find named imports in import specifiers", async () => {
         const code = `import { useState, useEffect } from 'react';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Should find import specifier nodes
-        const importSpecifiers = tree.rootNode.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          tree.rootNode.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(2);
-        
+
         // Verify the names
-        const names = importSpecifiers.map(spec => {
+        const names = importSpecifiers.map((spec) => {
           const identifier = spec.childForFieldName("name");
           return identifier?.text;
         });
@@ -475,47 +519,51 @@ def func():
       it("should handle default imports", async () => {
         const code = `import React from 'react';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
-        
+
         // Should find identifier for default import
         const identifiers = importStatement.descendantsOfType("identifier");
-        expect(identifiers.some(id => id.text === "React")).toBe(true);
+        expect(identifiers.some((id) => id.text === "React")).toBe(true);
       });
 
       it("should handle namespace imports", async () => {
         const code = `import * as Utils from './utils';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
-        
+
         // Should find namespace import
-        const namespaceImport = tree.rootNode.descendantsOfType("namespace_import");
+        const namespaceImport =
+          tree.rootNode.descendantsOfType("namespace_import");
         expect(namespaceImport.length).toBeGreaterThan(0);
-        
+
         // Verify the alias name
         const identifiers = namespaceImport[0].descendantsOfType("identifier");
-        expect(identifiers.some(id => id.text === "Utils")).toBe(true);
+        expect(identifiers.some((id) => id.text === "Utils")).toBe(true);
       });
 
       it("should handle side-effect imports", async () => {
         const code = `import './styles.css';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
-        
+
         // Should have string literal for the path
         const strings = importStatement.descendantsOfType("string");
         expect(strings.length).toBeGreaterThan(0);
@@ -524,36 +572,39 @@ def func():
       it("should handle mixed imports", async () => {
         const code = `import React, { Component, useState } from 'react';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
-        
+
         // Should have both default and named imports
-        const importSpecifiers = importStatement.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          importStatement.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(2); // Component and useState
-        
+
         // Should also have the default import identifier
         const allIdentifiers = importStatement.descendantsOfType("identifier");
-        expect(allIdentifiers.some(id => id.text === "React")).toBe(true);
+        expect(allIdentifiers.some((id) => id.text === "React")).toBe(true);
       });
 
       it("should handle import aliases", async () => {
         const code = `import { LongName as Short } from './module';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importSpecifier = tree.rootNode.descendantsOfType("import_specifier")[0];
+
+        const importSpecifier =
+          tree.rootNode.descendantsOfType("import_specifier")[0];
         expect(importSpecifier).toBeTruthy();
-        
+
         // Should find both the original and alias names
         const nameField = importSpecifier.childForFieldName("name");
         const aliasField = importSpecifier.childForFieldName("alias");
-        
+
         expect(nameField?.text).toBe("LongName");
         expect(aliasField?.text).toBe("Short");
       });
@@ -565,17 +616,18 @@ def func():
 import java.util.ArrayList;
 import static java.lang.Math.PI;`;
         const tree = await getAst("test.java", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Should find import declarations
-        const importDecls = tree.rootNode.descendantsOfType("import_declaration");
+        const importDecls =
+          tree.rootNode.descendantsOfType("import_declaration");
         expect(importDecls.length).toBe(3);
-        
+
         // Check for static import
-        const staticImports = importDecls.filter(decl =>
-          decl.text.includes("static")
+        const staticImports = importDecls.filter((decl) =>
+          decl.text.includes("static"),
         );
         expect(staticImports.length).toBe(1);
       });
@@ -583,13 +635,14 @@ import static java.lang.Math.PI;`;
       it("should find scoped identifiers in Java imports", async () => {
         const code = `import com.example.project.MyClass;`;
         const tree = await getAst("test.java", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importDecl = tree.rootNode.descendantsOfType("import_declaration")[0];
+
+        const importDecl =
+          tree.rootNode.descendantsOfType("import_declaration")[0];
         expect(importDecl).toBeTruthy();
-        
+
         // Should have scoped identifier for the full path
         const scopedId = importDecl.descendantsOfType("scoped_identifier");
         expect(scopedId.length).toBeGreaterThan(0);
@@ -598,13 +651,14 @@ import static java.lang.Math.PI;`;
       it("should handle wildcard Java imports", async () => {
         const code = `import java.util.*;`;
         const tree = await getAst("test.java", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importDecl = tree.rootNode.descendantsOfType("import_declaration")[0];
+
+        const importDecl =
+          tree.rootNode.descendantsOfType("import_declaration")[0];
         expect(importDecl).toBeTruthy();
-        
+
         // Should contain asterisk for wildcard
         const asterisk = importDecl.descendantsOfType("asterisk");
         expect(asterisk.length).toBeGreaterThan(0);
@@ -616,10 +670,10 @@ import static java.lang.Math.PI;`;
         const code = `#include <iostream>
 #include "myheader.h"`;
         const tree = await getAst("test.cpp", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Should find preproc_include nodes
         const includes = tree.rootNode.descendantsOfType("preproc_include");
         expect(includes.length).toBe(2);
@@ -629,20 +683,20 @@ import static java.lang.Math.PI;`;
         const code = `#include <vector>
 #include "local.h"`;
         const tree = await getAst("test.cpp", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         const includes = tree.rootNode.descendantsOfType("preproc_include");
         expect(includes.length).toBe(2);
-        
+
         // System include uses <>
-        const systemInclude = includes.find(inc => inc.text.includes("<"));
+        const systemInclude = includes.find((inc) => inc.text.includes("<"));
         expect(systemInclude).toBeTruthy();
         expect(systemInclude?.text).toContain("vector");
-        
+
         // Local include uses ""
-        const localInclude = includes.find(inc => inc.text.includes('"'));
+        const localInclude = includes.find((inc) => inc.text.includes('"'));
         expect(localInclude).toBeTruthy();
         expect(localInclude?.text).toContain("local.h");
       });
@@ -652,10 +706,10 @@ import static java.lang.Math.PI;`;
       it("should handle empty files", async () => {
         const code = ``;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Should parse successfully with no import statements
         const imports = tree.rootNode.descendantsOfType("import_statement");
         expect(imports.length).toBe(0);
@@ -666,13 +720,13 @@ import static java.lang.Math.PI;`;
 /* Multi-line
    comment */`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         const imports = tree.rootNode.descendantsOfType("import_statement");
         expect(imports.length).toBe(0);
-        
+
         // Should parse comments
         const comments = tree.rootNode.descendantsOfType("comment");
         expect(comments.length).toBeGreaterThan(0);
@@ -681,29 +735,34 @@ import static java.lang.Math.PI;`;
       it("should handle syntax errors in imports gracefully", async () => {
         const code = `import { incomplete`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
+
         // Tree-sitter is resilient and should still create a tree
         // It may contain ERROR nodes
-        const hasErrorNodes = tree.rootNode.descendantsOfType("ERROR").length > 0;
+        const hasErrorNodes =
+          tree.rootNode.descendantsOfType("ERROR").length > 0;
         // Either has errors or parsed what it could - both are acceptable
         expect(tree).toBeTruthy();
       });
 
       it("should handle very long import statements", async () => {
-        const imports = Array.from({ length: 50 }, (_, i) => `import${i}`).join(", ");
+        const imports = Array.from({ length: 50 }, (_, i) => `import${i}`).join(
+          ", ",
+        );
         const code = `import { ${imports} } from 'large-module';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
-        
-        const importSpecifiers = importStatement.descendantsOfType("import_specifier");
+
+        const importSpecifiers =
+          importStatement.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(50);
       });
 
@@ -714,11 +773,12 @@ import static java.lang.Math.PI;`;
   useEffect
 } from 'react';`;
         const tree = await getAst("test.ts", code);
-        
+
         expect(tree).toBeTruthy();
         if (!tree) return;
-        
-        const importSpecifiers = tree.rootNode.descendantsOfType("import_specifier");
+
+        const importSpecifiers =
+          tree.rootNode.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(3);
       });
     });

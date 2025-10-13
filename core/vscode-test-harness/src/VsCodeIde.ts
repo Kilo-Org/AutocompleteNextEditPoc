@@ -2,11 +2,23 @@ import { Range } from "core";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
-import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvider } from "./autocomplete/lsp";
+import {
+  executeGotoProvider,
+  executeSignatureHelpProvider,
+  executeSymbolProvider,
+} from "./autocomplete/lsp";
 import { VsCodeIdeUtils } from "./util/ideUtils";
 import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
-import type { DocumentSymbol, FileStatsMap, IDE, IdeInfo, Location, RangeInFile, SignatureHelp } from "core";
+import type {
+  DocumentSymbol,
+  FileStatsMap,
+  IDE,
+  IdeInfo,
+  Location,
+  RangeInFile,
+  SignatureHelp,
+} from "core";
 import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
 
 class VsCodeIde implements IDE {
@@ -14,7 +26,7 @@ class VsCodeIde implements IDE {
 
   constructor(
     private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
-    private readonly context: vscode.ExtensionContext
+    private readonly context: vscode.ExtensionContext,
   ) {
     this.ideUtils = new VsCodeIdeUtils();
   }
@@ -76,7 +88,7 @@ class VsCodeIde implements IDE {
   }
 
   async getDocumentSymbols(
-    textDocumentIdentifier: string // uri
+    textDocumentIdentifier: string, // uri
   ): Promise<DocumentSymbol[]> {
     const result = await executeSymbolProvider({
       uri: vscode.Uri.parse(textDocumentIdentifier),
@@ -110,8 +122,8 @@ class VsCodeIde implements IDE {
       vscode.Uri.parse(fileUri),
       new vscode.Range(
         new vscode.Position(range.start.line, range.start.character),
-        new vscode.Position(range.end.line, range.end.character)
-      )
+        new vscode.Position(range.end.line, range.end.character),
+      ),
     );
   }
 
@@ -119,12 +131,15 @@ class VsCodeIde implements IDE {
     const pathToLastModified: FileStatsMap = {};
     await Promise.all(
       files.map(async (file) => {
-        const stat = await this.ideUtils.stat(vscode.Uri.parse(file), false /* No need to catch ENOPRO exceptions */);
+        const stat = await this.ideUtils.stat(
+          vscode.Uri.parse(file),
+          false /* No need to catch ENOPRO exceptions */,
+        );
         pathToLastModified[file] = {
           lastModified: stat!.mtime,
           size: stat!.size,
         };
-      })
+      }),
     );
 
     return pathToLastModified;
@@ -146,7 +161,10 @@ class VsCodeIde implements IDE {
   }
 
   async writeFile(fileUri: string, contents: string): Promise<void> {
-    await vscode.workspace.fs.writeFile(vscode.Uri.parse(fileUri), new Uint8Array(Buffer.from(contents)));
+    await vscode.workspace.fs.writeFile(
+      vscode.Uri.parse(fileUri),
+      new Uint8Array(Buffer.from(contents)),
+    );
   }
 
   async saveFile(fileUri: string): Promise<void> {
@@ -162,8 +180,12 @@ class VsCodeIde implements IDE {
       // First, check whether it's a notebook document
       // Need to iterate over the cells to get full contents
       const notebook =
-        vscode.workspace.notebookDocuments.find((doc) => URI.equal(doc.uri.toString(), uri.toString())) ??
-        (uri.path.endsWith("ipynb") ? await vscode.workspace.openNotebookDocument(uri) : undefined);
+        vscode.workspace.notebookDocuments.find((doc) =>
+          URI.equal(doc.uri.toString(), uri.toString()),
+        ) ??
+        (uri.path.endsWith("ipynb")
+          ? await vscode.workspace.openNotebookDocument(uri)
+          : undefined);
       if (notebook) {
         return notebook
           .getCells()
@@ -173,7 +195,7 @@ class VsCodeIde implements IDE {
 
       // Check whether it's an open document
       const openTextDocument = vscode.workspace.textDocuments.find((doc) =>
-        URI.equal(doc.uri.toString(), uri.toString())
+        URI.equal(doc.uri.toString(), uri.toString()),
       );
       if (openTextDocument !== undefined) {
         return openTextDocument.getText();

@@ -26,7 +26,12 @@ export class TokensBatchingService {
     this.startFlushTimer();
   }
 
-  addTokens(model: string, provider: string, promptTokens: number, generatedTokens: number): void {
+  addTokens(
+    model: string,
+    provider: string,
+    promptTokens: number,
+    generatedTokens: number,
+  ): void {
     const key = `${provider}:${model}`;
 
     if (!this.batches.has(key)) {

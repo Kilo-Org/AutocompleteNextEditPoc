@@ -68,17 +68,20 @@ export class PrefetchQueue {
     ) {
       const location = this.dequeueUnprocessed();
       console.log("processing:");
-      console.log(location?.range.start.line + " to " + location?.range.end.line);
+      console.log(
+        location?.range.start.line + " to " + location?.range.end.line,
+      );
 
       if (!location) break;
 
       try {
-        const outcome = await NextEditProvider.getInstance().provideInlineCompletionItemsWithChain(
-          ctx,
-          location,
-          this.abortController.signal,
-          this.usingFullFileDiff
-        );
+        const outcome =
+          await NextEditProvider.getInstance().provideInlineCompletionItemsWithChain(
+            ctx,
+            location,
+            this.abortController.signal,
+            this.usingFullFileDiff,
+          );
 
         if (!outcome) {
           console.log("outcome is undefined");
@@ -90,7 +93,10 @@ export class PrefetchQueue {
           outcome,
         });
 
-        console.log("the length of processed queue after processing is:", this.processedQueue.length);
+        console.log(
+          "the length of processed queue after processing is:",
+          this.processedQueue.length,
+        );
       } catch (error) {
         if (!this.abortController.signal.aborted) {
           // Handle error
@@ -134,7 +140,9 @@ export class PrefetchQueue {
     const count = Math.min(3, this.processedQueue.length);
     const firstThree = this.processedQueue.slice(0, count);
     firstThree.forEach((item, index) => {
-      console.debug(`Item ${index + 1}: ${item.location.range.start.line} to ${item.location.range.end.line}`);
+      console.debug(
+        `Item ${index + 1}: ${item.location.range.start.line} to ${item.location.range.end.line}`,
+      );
     });
   }
 
@@ -144,7 +152,9 @@ export class PrefetchQueue {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockPrefetchQueueInstance(mockInstance: PrefetchQueue | null) {
+export function __setMockPrefetchQueueInstance(
+  mockInstance: PrefetchQueue | null,
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (PrefetchQueue as any)._instance = mockInstance;
 }
