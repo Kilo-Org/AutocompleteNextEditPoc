@@ -3,7 +3,6 @@ import { ChatMessage, CompiledMessagesResult, MessageContent, MessagePart, Tool 
 import { autodetectTemplateType } from "./autodetect.js";
 import { addSpaceToAnyEmptyMessages, chatMessageIsEmpty, isUserOrToolMsg, messageHasToolCallId } from "./messages.js";
 import { renderChatMessage } from "../util/messageContent.js";
-import { AsyncEncoder, LlamaAsyncEncoder } from "./asyncEncoder.js";
 import { DEFAULT_PRUNING_LENGTH } from "./constants.js";
 import { llamaTokenizer } from "./llamaTokenizer.js";
 interface Encoding {
@@ -19,6 +18,11 @@ class LlamaEncoding implements Encoding {
   decode(tokens: number[]): string {
     return llamaTokenizer.decode(tokens);
   }
+}
+export interface AsyncEncoder {
+  encode(text: string): Promise<number[]>;
+  decode(tokens: number[]): Promise<string>;
+  close(): Promise<void>;
 }
 
 class NonWorkerAsyncEncoder implements AsyncEncoder {
@@ -37,23 +41,12 @@ class NonWorkerAsyncEncoder implements AsyncEncoder {
 
 let gptEncoding: Encoding | null = null;
 const llamaEncoding = new LlamaEncoding();
-const llamaAsyncEncoder = new LlamaAsyncEncoder();
 
 function asyncEncoderForModel(modelName: string): AsyncEncoder {
   // Temporary due to issues packaging the worker files
-  if (process.env.IS_BINARY) {
-    const encoding = encodingForModel(modelName);
-    return new NonWorkerAsyncEncoder(encoding);
-  }
-
-  const modelType = autodetectTemplateType(modelName);
-  if (!modelType || modelType === "none") {
-    // Right now there is a problem packaging js-tiktoken in workers. Until then falling back
-    // Cannot find package 'js-tiktoken' imported from /Users/nate/gh/continuedev/continue/extensions/vscode/out/tiktokenWorkerPool.mjs
-    // return gptAsyncEncoder;
-    return llamaAsyncEncoder;
-  }
-  return llamaAsyncEncoder;
+  const encoding = encodingForModel(modelName);
+  return new NonWorkerAsyncEncoder(encoding);
+  //MINIMAL_REPO - more fully implemented functionality removed
 }
 
 function encodingForModel(modelName: string): Encoding {
@@ -484,12 +477,6 @@ function compileChatMessages({
     didPrune,
     contextPercentage,
   };
-}
-
-async function cleanupAsyncEncoders(): Promise<void> {
-  try {
-    await llamaAsyncEncoder.close();
-  } catch (e) {}
 }
 
 export {
