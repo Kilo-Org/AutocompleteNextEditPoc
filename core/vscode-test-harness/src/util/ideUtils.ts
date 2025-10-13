@@ -1,5 +1,4 @@
 import { findUriInDirs } from "core/util/uri";
-import _ from "lodash";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
@@ -264,67 +263,6 @@ export class VsCodeIdeUtils {
     }
 
     return terminalContents;
-  }
-
-  async getTopLevelCallStackSources(threadIndex: number, stackDepth = 3): Promise<string[]> {
-    const session = vscode.debug.activeDebugSession;
-    if (!session) {
-      return [];
-    }
-
-    const sourcesPromises = await session
-      .customRequest("stackTrace", {
-        threadId: threadIndex,
-        startFrame: 0,
-      })
-      .then((traceResponse) =>
-        traceResponse.stackFrames.slice(0, stackDepth).map(async (stackFrame: any) => {
-          const scopeResponse = await session.customRequest("scopes", {
-            frameId: stackFrame.id,
-          });
-
-          const scope = scopeResponse.scopes[0];
-
-          return await this.retrieveSource(scope.source && !_.isEmpty(scope.source) ? scope : stackFrame);
-        })
-      );
-
-    return Promise.all(sourcesPromises);
-  }
-
-  private async retrieveSource(sourceContainer: any): Promise<string> {
-    if (!sourceContainer.source) {
-      return "";
-    }
-
-    const sourceRef = sourceContainer.source.sourceReference;
-    if (sourceRef && sourceRef > 0) {
-      // according to the spec, source might be ony available in a debug session
-      // not yet able to test this branch
-      const sourceResponse = await vscode.debug.activeDebugSession?.customRequest("source", {
-        source: sourceContainer.source,
-        sourceReference: sourceRef,
-      });
-      return sourceResponse.content;
-    } else if (sourceContainer.line && sourceContainer.endLine) {
-      return await this.readRangeInFile(
-        sourceContainer.source.path,
-        new vscode.Range(
-          sourceContainer.line - 1, // The line number from scope response starts from 1
-          sourceContainer.column,
-          sourceContainer.endLine - 1,
-          sourceContainer.endColumn
-        )
-      );
-    } else if (sourceContainer.line) {
-      // fall back to 5 line of context
-      return await this.readRangeInFile(
-        sourceContainer.source.path,
-        new vscode.Range(Math.max(0, sourceContainer.line - 3), 0, sourceContainer.line + 2, 0)
-      );
-    } else {
-      return "unavailable";
-    }
   }
 
   private async _getRepo(forDirectory: vscode.Uri): Promise<Repository | undefined> {

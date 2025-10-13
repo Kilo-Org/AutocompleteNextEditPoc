@@ -1,8 +1,6 @@
-import * as child_process from "node:child_process";
 import { exec } from "node:child_process";
 
 import { Range } from "core";
-import { DEFAULT_IGNORES, defaultIgnoresGlob } from "core/indexing/ignore";
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
@@ -250,10 +248,6 @@ class VsCodeIde implements IDE {
     };
   }
 
-  async getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]> {
-    return await this.ideUtils.getTopLevelCallStackSources(threadIndex, stackDepth);
-  }
-
   async getWorkspaceDirs(): Promise<string[]> {
     return this.ideUtils.getWorkspaceDirectories().map((uri) => uri.toString());
   }
@@ -352,175 +346,6 @@ class VsCodeIde implements IDE {
     const tabArray = vscode.window.tabGroups.all[0].tabs;
 
     return tabArray.filter((t) => t.isPinned).map((t) => (t.input as vscode.TabInputText).uri.toString());
-  }
-
-  runRipgrepQuery(dirUri: string, args: string[]) {
-    const relativeDir = vscode.Uri.parse(dirUri).fsPath;
-    const ripGrepUri = vscode.Uri.joinPath(getExtensionUri(), "out/node_modules/@vscode/ripgrep/bin/rg");
-    const p = child_process.spawn(ripGrepUri.fsPath, args, {
-      cwd: relativeDir,
-    });
-    let output = "";
-
-    p.stdout.on("data", (data) => {
-      output += data.toString();
-    });
-
-    return new Promise<string>((resolve, reject) => {
-      p.on("error", reject);
-      p.on("close", (code) => {
-        if (code === 0) {
-          resolve(output);
-        } else if (code === 1) {
-          // No matches
-          resolve("No matches found. Build, secrets, etc. dirs and files are not included.");
-        } else {
-          reject(new Error(`Process exited with code ${code}`));
-        }
-      });
-    });
-  }
-
-  async getFileResults(pattern: string, maxResults?: number): Promise<string[]> {
-    // Create a single combined ignore pattern for ripgrep (calculated once)
-
-    if (vscode.env.remoteName) {
-      // TODO better tests for this remote search implementation
-      // throw new Error("Ripgrep not supported, this workspace is remote");
-
-      // IMPORTANT: findFiles automatically accounts for .gitignore
-      const ignoreFiles = await vscode.workspace.findFiles("**/.continueignore", null);
-
-      const ignoreGlobs: Set<string> = new Set();
-      // Add default ignores from core
-      for (const pattern of DEFAULT_IGNORES) {
-        ignoreGlobs.add(pattern);
-      }
-
-      for (const file of ignoreFiles) {
-        const content = await this.ideUtils.readFile(file);
-        if (content === null) {
-          continue;
-        }
-        const filePath = vscode.workspace.asRelativePath(file);
-        const fileDir = filePath.replace(/\\/g, "/").replace(/\/$/, "").split("/").slice(0, -1).join("/");
-
-        const patterns = Buffer.from(content)
-          .toString()
-          .split("\n")
-          .map((line) => line.trim())
-          .filter((line) => line && !line.startsWith("#") && !pattern.startsWith("!"));
-        // VSCode does not support negations
-
-        patterns
-          // Handle prefix
-          .map((pattern) => {
-            const normalizedPattern = pattern.replace(/\\/g, "/");
-
-            if (normalizedPattern.startsWith("/")) {
-              if (fileDir) {
-                return `{/,}${normalizedPattern}`;
-              } else {
-                return `${fileDir}/${normalizedPattern.substring(1)}`;
-              }
-            } else {
-              if (fileDir) {
-                return `${fileDir}/${normalizedPattern}`;
-              } else {
-                return `**/${normalizedPattern}`;
-              }
-            }
-          })
-          // Handle suffix
-          .map((pattern) => {
-            return pattern.endsWith("/") ? `${pattern}**/*` : pattern;
-          })
-          .forEach((pattern) => {
-            ignoreGlobs.add(pattern);
-          });
-      }
-
-      const ignoreGlobsArray = Array.from(ignoreGlobs);
-
-      const results = await vscode.workspace.findFiles(
-        pattern,
-        ignoreGlobs.size ? `{${ignoreGlobsArray.join(",")}}` : null,
-        maxResults
-      );
-      return results.map((result) => vscode.workspace.asRelativePath(result));
-    } else {
-      const results: string[] = [];
-      // Create a single combined ignore pattern using glob brace expansion
-      for (const dir of await this.getWorkspaceDirs()) {
-        const dirResults = await this.runRipgrepQuery(dir, [
-          "--files",
-          "--iglob",
-          pattern,
-          "--ignore-file",
-          ".continueignore",
-          "--ignore-file",
-          ".gitignore",
-          "--glob",
-          defaultIgnoresGlob,
-          ...(maxResults ? ["--max-count", String(maxResults)] : []),
-        ]);
-
-        results.push(dirResults);
-      }
-
-      const allResults = results.join("\n").split("\n");
-      if (maxResults) {
-        // In the case of multiple workspaces, maxResults will be applied to each workspace
-        // And then the combined results will also be truncated
-        return allResults.slice(0, maxResults);
-      } else {
-        return allResults;
-      }
-    }
-  }
-
-  async getSearchResults(query: string, maxResults?: number): Promise<string> {
-    if (vscode.env.remoteName) {
-      throw new Error("Ripgrep not supported, this workspace is remote");
-    }
-    const results: string[] = [];
-
-    for (const dir of await this.getWorkspaceDirs()) {
-      const dirResults = await this.runRipgrepQuery(dir, [
-        "-i", // Case-insensitive search
-        "--ignore-file",
-        ".continueignore",
-        "--ignore-file",
-        ".gitignore",
-        "-C",
-        "2", // Show 2 lines of context
-        "--heading", // Only show filepath once per result
-        // Use a single glob with all default ignores
-        "--glob",
-        defaultIgnoresGlob,
-        ...(maxResults ? ["-m", maxResults.toString()] : []),
-        "-e",
-        query, // Pattern to search for
-        ".", // Directory to search in
-      ]);
-
-      results.push(dirResults);
-    }
-
-    const allResults = results.join("\n");
-    if (maxResults) {
-      // In case of multiple workspaces, do max results per workspace and then truncate to maxResults
-      // Will prioritize first workspace results, fine for now
-      // Results are separated by either ./ or --
-      const matches = Array.from(allResults.matchAll(/(\n--|\n\.\/)/g));
-      if (matches.length > maxResults) {
-        return allResults.substring(0, matches[maxResults].index);
-      } else {
-        return allResults;
-      }
-    } else {
-      return allResults;
-    }
   }
 
   async getProblems(fileUri?: string | undefined): Promise<Problem[]> {

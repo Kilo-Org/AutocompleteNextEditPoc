@@ -105,9 +105,6 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getDiff", async (msg) => {
       return ide.getDiff(msg.data.includeUnstaged);
     });
-    this.onWebviewOrCore("getTopLevelCallStackSources", async (msg) => {
-      return ide.getTopLevelCallStackSources(msg.data.threadIndex, msg.data.stackDepth);
-    });
     this.onWebviewOrCore("getWorkspaceDirs", async (msg) => {
       return ide.getWorkspaceDirs();
     });
@@ -116,12 +113,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("openFile", async (msg) => {
       return ide.openFile(msg.data.path);
-    });
-    this.onWebviewOrCore("getSearchResults", async (msg) => {
-      return ide.getSearchResults(msg.data.query, msg.data.maxResults);
-    });
-    this.onWebviewOrCore("getFileResults", async (msg) => {
-      return ide.getFileResults(msg.data.pattern, msg.data.maxResults);
     });
     this.onWebviewOrCore("getProblems", async (msg) => {
       return ide.getProblems(msg.data.filepath);

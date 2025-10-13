@@ -761,8 +761,6 @@ export interface IDE {
 
   getUniqueId(): Promise<string>;
 
-  getTopLevelCallStackSources(threadIndex: number, stackDepth: number): Promise<string[]>;
-
   getWorkspaceDirs(): Promise<string[]>;
 
   fileExists(fileUri: string): Promise<boolean>;
@@ -795,10 +793,6 @@ export interface IDE {
   >;
 
   getPinnedFiles(): Promise<string[]>;
-
-  getSearchResults(query: string, maxResults?: number): Promise<string>;
-
-  getFileResults(pattern: string, maxResults?: number): Promise<string[]>;
 
   subprocess(command: string, cwd?: string): Promise<[string, string]>;
 
