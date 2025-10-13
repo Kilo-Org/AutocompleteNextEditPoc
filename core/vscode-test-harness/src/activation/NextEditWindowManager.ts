@@ -849,7 +849,3 @@ export class NextEditWindowManager {
     );
   }
 }
-
-export async function setupNextEditWindowManager(context: vscode.ExtensionContext, textApplier?: TextApplier) {
-  await NextEditWindowManager.getInstance().setupNextEditWindowManager(context, textApplier);
-}
