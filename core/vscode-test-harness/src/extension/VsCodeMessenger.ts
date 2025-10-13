@@ -21,7 +21,6 @@ import * as vscode from "vscode";
 import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
 import { getControlPlaneSessionInfo } from "../stubs/WorkOsAuthProvider";
 import { handleLLMError } from "../util/errorHandling";
-import { getExtensionUri } from "../util/vscode";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
 
@@ -70,27 +69,6 @@ export class VsCodeMessenger {
     /** WEBVIEW ONLY LISTENERS **/
     this.onWebview("showFile", (msg) => {
       this.ide.openFile(msg.data.filepath);
-    });
-
-    this.onWebview("vscode/openMoveRightMarkdown", (msg) => {
-      vscode.commands.executeCommand(
-        "markdown.showPreview",
-        vscode.Uri.joinPath(getExtensionUri(), "media", "move-chat-panel-right.md")
-      );
-    });
-
-    this.onWebview("toggleDevTools", (msg) => {
-      vscode.commands.executeCommand("continue.viewLogs");
-    });
-
-    this.onWebview("reloadWindow", (msg) => {
-      vscode.commands.executeCommand("workbench.action.reloadWindow");
-    });
-    this.onWebview("focusEditor", (msg) => {
-      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    });
-    this.onWebview("toggleFullScreen", (msg) => {
-      vscode.commands.executeCommand("continue.openInNewWindow");
     });
 
     this.onWebview("acceptDiff", async ({ data: { filepath, streamId } }) => {
