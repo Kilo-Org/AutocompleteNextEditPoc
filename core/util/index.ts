@@ -119,10 +119,7 @@ function copyOf<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function deduplicateArray<T>(
-  array: T[],
-  equal: (a: T, b: T) => boolean,
-): T[] {
+function deduplicateArray<T>(array: T[], equal: (a: T, b: T) => boolean): T[] {
   const result: T[] = [];
 
   for (const item of array) {

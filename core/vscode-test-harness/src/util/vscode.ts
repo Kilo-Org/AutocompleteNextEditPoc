@@ -8,7 +8,8 @@ import * as vscode from "vscode";
 
 function getNonce() {
   let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const possible =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
@@ -22,7 +23,10 @@ export function getExtensionUri(): vscode.Uri {
 function getViewColumnOfFile(uri: vscode.Uri): vscode.ViewColumn | undefined {
   for (const tabGroup of vscode.window.tabGroups.all) {
     for (const tab of tabGroup.tabs) {
-      if ((tab?.input as any)?.uri && URI.equal((tab.input as any).uri, uri.toString())) {
+      if (
+        (tab?.input as any)?.uri &&
+        URI.equal((tab.input as any).uri, uri.toString())
+      ) {
         return tabGroup.viewColumn;
       }
     }
@@ -36,7 +40,7 @@ export function openEditorAndRevealRange(
   uri: vscode.Uri,
   range?: vscode.Range,
   viewColumn?: vscode.ViewColumn,
-  preview?: boolean
+  preview?: boolean,
 ): Promise<vscode.TextEditor> {
   return new Promise((resolve, _) => {
     vscode.workspace.openTextDocument(uri).then(async (doc) => {

@@ -5,9 +5,18 @@ import { HelperVars } from "../../autocomplete/util/HelperVars.js";
 import { myersDiff } from "../../diff/myers.js";
 import { DiffLine, IDE, ILLM, Position, RangeInFile } from "../../index.js";
 import { countTokens } from "../../llm/countTokens.js";
-import { calculateFinalCursorPosition, DiffGroup, groupDiffLines } from "../diff/diff.js";
+import {
+  calculateFinalCursorPosition,
+  DiffGroup,
+  groupDiffLines,
+} from "../diff/diff.js";
 import { PrefetchQueue } from "../NextEditPrefetchQueue.js";
-import { ModelSpecificContext, NextEditOutcome, Prompt, PromptMetadata } from "../types.js";
+import {
+  ModelSpecificContext,
+  NextEditOutcome,
+  Prompt,
+  PromptMetadata,
+} from "../types.js";
 import { isWhitespaceOnlyDeletion } from "../utils.js";
 
 /**
@@ -31,7 +40,7 @@ export abstract class BaseNextEditModelProvider {
   abstract getWindowSize(): { topMargin: number; bottomMargin: number };
   abstract calculateEditableRegion(
     helper: HelperVars,
-    usingFullFileDiff: boolean
+    usingFullFileDiff: boolean,
   ): {
     editableRegionStartLine: number;
     editableRegionEndLine: number;
@@ -69,7 +78,7 @@ export abstract class BaseNextEditModelProvider {
       helper.pos,
       editableRegionStartLine,
       oldEditRangeSlice,
-      nextCompletion
+      nextCompletion,
     );
 
     const outcome = await this.createNextEditOutcome({
@@ -114,12 +123,16 @@ export abstract class BaseNextEditModelProvider {
       ide,
       profileType,
     } = params;
-    const fileSlice = helper.fileLines.slice(editableRegionStartLine, editableRegionEndLine + 1).join("\n");
+    const fileSlice = helper.fileLines
+      .slice(editableRegionStartLine, editableRegionEndLine + 1)
+      .join("\n");
 
     const diffLines = myersDiff(fileSlice, nextCompletion);
-    const diffGroups = groupDiffLines(diffLines, editableRegionStartLine, 5).filter(
-      (group) => !isWhitespaceOnlyDeletion(group.lines)
-    );
+    const diffGroups = groupDiffLines(
+      diffLines,
+      editableRegionStartLine,
+      5,
+    ).filter((group) => !isWhitespaceOnlyDeletion(group.lines));
     const currentLine = helper.pos.line;
     const prefetchQueue = PrefetchQueue.getInstance();
 
@@ -166,7 +179,17 @@ export abstract class BaseNextEditModelProvider {
     ide: IDE;
     profileType?: "local" | "platform" | "control-plane";
   }): Promise<DiffGroup | undefined> {
-    const { diffGroups, currentLine, helper, startTime, llm, prefetchQueue, promptMetadata, ide, profileType } = params;
+    const {
+      diffGroups,
+      currentLine,
+      helper,
+      startTime,
+      llm,
+      prefetchQueue,
+      promptMetadata,
+      ide,
+      profileType,
+    } = params;
     let cursorGroup: DiffGroup | undefined;
 
     for (const group of diffGroups) {
@@ -199,7 +222,16 @@ export abstract class BaseNextEditModelProvider {
     ide: IDE;
     profileType?: "local" | "platform" | "control-plane";
   }): Promise<void> {
-    const { group, helper, startTime, llm, prefetchQueue, promptMetadata, ide, profileType } = params;
+    const {
+      group,
+      helper,
+      startTime,
+      llm,
+      prefetchQueue,
+      promptMetadata,
+      ide,
+      profileType,
+    } = params;
     // Extract lines that are not old.
     const groupContent = group.lines
       .filter((l) => l.type !== "old")
@@ -262,8 +294,17 @@ export abstract class BaseNextEditModelProvider {
     ide: IDE;
     profileType?: "local" | "platform" | "control-plane";
   }): Promise<NextEditOutcome> {
-    const { diffGroup, helper, startTime, llm, completionId, isCurrentCursorGroup, promptMetadata, ide, profileType } =
-      params;
+    const {
+      diffGroup,
+      helper,
+      startTime,
+      llm,
+      completionId,
+      isCurrentCursorGroup,
+      promptMetadata,
+      ide,
+      profileType,
+    } = params;
     const groupContent = diffGroup.lines
       .filter((l) => l.type !== "old")
       .map((l) => l.line)
@@ -274,9 +315,16 @@ export abstract class BaseNextEditModelProvider {
       .map((l) => l.line)
       .join("\n");
 
-    const cursorPos = isCurrentCursorGroup ? helper.pos : { line: diffGroup.startLine, character: 0 };
+    const cursorPos = isCurrentCursorGroup
+      ? helper.pos
+      : { line: diffGroup.startLine, character: 0 };
 
-    const finalCursorPos = calculateFinalCursorPosition(cursorPos, diffGroup.startLine, originalContent, groupContent);
+    const finalCursorPos = calculateFinalCursorPosition(
+      cursorPos,
+      diffGroup.startLine,
+      originalContent,
+      groupContent,
+    );
 
     const outcomeNext = await this.createNextEditOutcome({
       helper,
@@ -323,13 +371,16 @@ export abstract class BaseNextEditModelProvider {
       modelProvider: outcomeCtx.llm.underlyingProviderName,
       modelName: outcomeCtx.llm.model,
       completionOptions: null,
-      completionId: outcomeCtx.completionId || outcomeCtx.helper.input.completionId,
+      completionId:
+        outcomeCtx.completionId || outcomeCtx.helper.input.completionId,
       gitRepo: "placeholder", //MINIMAL_REPO - came from git, probably
       uniqueId: await outcomeCtx.ide.getUniqueId(),
       requestId: outcomeCtx.llm.lastRequestId,
       timestamp: Date.now(),
       fileUri: outcomeCtx.helper.filepath,
-      workspaceDirUri: outcomeCtx.helper.workspaceUris[0] ?? path.dirname(outcomeCtx.helper.filepath),
+      workspaceDirUri:
+        outcomeCtx.helper.workspaceUris[0] ??
+        path.dirname(outcomeCtx.helper.filepath),
       prompt: outcomeCtx.promptContent,
       userEdits: outcomeCtx.userEdits ?? "",
       userExcerpts: outcomeCtx.userExcerpts ?? "",
@@ -349,7 +400,7 @@ export abstract class BaseNextEditModelProvider {
   protected calculateOptimalEditableRegion(
     helper: HelperVars,
     maxTokens: number = 512,
-    heuristic: "fourChars" | "tokenizer" = "tokenizer"
+    heuristic: "fourChars" | "tokenizer" = "tokenizer",
   ): {
     editableRegionStartLine: number;
     editableRegionEndLine: number;
@@ -362,7 +413,9 @@ export abstract class BaseNextEditModelProvider {
 
     let currentContent = fileLines[cursorLine];
     let totalTokens =
-      heuristic === "tokenizer" ? countTokens(currentContent, helper.modelName) : Math.ceil(currentContent.length / 4);
+      heuristic === "tokenizer"
+        ? countTokens(currentContent, helper.modelName)
+        : Math.ceil(currentContent.length / 4);
 
     let addingAbove = true;
 
@@ -374,7 +427,9 @@ export abstract class BaseNextEditModelProvider {
           editableRegionStartLine--;
           const lineContent = fileLines[editableRegionStartLine];
           const lineTokens =
-            heuristic === "tokenizer" ? countTokens(lineContent, helper.modelName) : Math.ceil(lineContent.length / 4);
+            heuristic === "tokenizer"
+              ? countTokens(lineContent, helper.modelName)
+              : Math.ceil(lineContent.length / 4);
 
           totalTokens += lineTokens;
           addedLine = true;
@@ -384,7 +439,9 @@ export abstract class BaseNextEditModelProvider {
           editableRegionEndLine++;
           const lineContent = fileLines[editableRegionEndLine];
           const lineTokens =
-            heuristic === "tokenizer" ? countTokens(lineContent, helper.modelName) : Math.ceil(lineContent.length / 4);
+            heuristic === "tokenizer"
+              ? countTokens(lineContent, helper.modelName)
+              : Math.ceil(lineContent.length / 4);
 
           totalTokens += lineTokens;
           addedLine = true;
@@ -392,7 +449,10 @@ export abstract class BaseNextEditModelProvider {
       }
 
       if (!addedLine) {
-        if (editableRegionStartLine === 0 && editableRegionEndLine === fileLines.length - 1) {
+        if (
+          editableRegionStartLine === 0 &&
+          editableRegionEndLine === fileLines.length - 1
+        ) {
           break;
         }
         addingAbove = !addingAbove;

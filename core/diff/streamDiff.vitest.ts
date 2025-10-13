@@ -63,7 +63,7 @@ async function expectDiff(file: string) {
     .map((s) => s.replace(/^\n+/, "").trimEnd());
   const oldLines = oldText.split("\n");
   const newLines = newText.split("\n");
-  const { streamDiffs, myersDiffs } = await collectDiffs(oldLines, newLines);
+  const { streamDiffs } = await collectDiffs(oldLines, newLines);
   const displayedDiff = displayDiff(streamDiffs);
 
   if (!expectedDiff || expectedDiff.trim() === "") {

@@ -34,7 +34,7 @@ export class DataLogger {
     body: Record<string, any>,
     eventName: string,
     schema: string,
-    zodSchema: any
+    zodSchema: any,
   ): Promise<Record<string, any>> {
     const newBody = { ...body };
     const ideSettings = await this.ideSettingsPromise;
@@ -43,7 +43,11 @@ export class DataLogger {
     if (zodSchema.shape && "eventName" in zodSchema.shape) {
       newBody.eventName = eventName;
     }
-    if (!newBody.timestamp && zodSchema.shape && "timestamp" in zodSchema.shape) {
+    if (
+      !newBody.timestamp &&
+      zodSchema.shape &&
+      "timestamp" in zodSchema.shape
+    ) {
       newBody.timestamp = new Date().toISOString();
     }
     if (zodSchema.shape && "schema" in zodSchema.shape) {
@@ -55,7 +59,8 @@ export class DataLogger {
         : "Unknown/Unknown (Continue/Unknown)";
     }
     if (zodSchema.shape && "selectedProfileId" in zodSchema.shape) {
-      newBody.selectedProfileId = this.core?.configHandler.currentProfile?.profileDescription.id ?? "";
+      newBody.selectedProfileId =
+        this.core?.configHandler.currentProfile?.profileDescription.id ?? "";
     }
     if (zodSchema.shape && "userId" in zodSchema.shape) {
       newBody.userId = ideSettings?.userToken ?? "";
@@ -71,8 +76,12 @@ export class DataLogger {
         return;
       }
 
-      const filepath: string = getDevDataFilePath(event.name, LOCAL_DEV_DATA_VERSION);
-      const localSchema = devDataVersionedSchemas[LOCAL_DEV_DATA_VERSION]["all"][event.name];
+      const filepath: string = getDevDataFilePath(
+        event.name,
+        LOCAL_DEV_DATA_VERSION,
+      );
+      const localSchema =
+        devDataVersionedSchemas[LOCAL_DEV_DATA_VERSION]["all"][event.name];
 
       if (!localSchema) {
         return; // Silently skip if schema doesn't exist
@@ -82,7 +91,7 @@ export class DataLogger {
         event.data,
         event.name,
         LOCAL_DEV_DATA_VERSION,
-        localSchema
+        localSchema,
       );
 
       const parsed = localSchema?.safeParse(eventDataWithBaseValues);
@@ -103,41 +112,61 @@ export class DataLogger {
     // Remote logs
     const config = (await this.core?.configHandler.loadConfig())?.config;
     if (config?.data?.length) {
-      await Promise.allSettled(config.data.map((dataConfig: any) => this.logToOneDestination(dataConfig, event)));
+      await Promise.allSettled(
+        config.data.map((dataConfig: any) =>
+          this.logToOneDestination(dataConfig, event),
+        ),
+      );
     }
   }
 
-  async parseEventData(event: DevDataLogEvent, schema: string, level: "all" | "noCode") {
+  async parseEventData(
+    event: DevDataLogEvent,
+    schema: string,
+    level: "all" | "noCode",
+  ) {
     const versionSchemas = devDataVersionedSchemas[schema];
     if (!versionSchemas) {
-      throw new Error(`Attempting to log dev data to non-existent version ${schema}`);
+      throw new Error(
+        `Attempting to log dev data to non-existent version ${schema}`,
+      );
     }
 
     const levelSchemas = versionSchemas[level];
     if (!levelSchemas) {
-      throw new Error(`Attempting to log dev data at level ${level} for version ${schema} which does not exist`);
+      throw new Error(
+        `Attempting to log dev data at level ${level} for version ${schema} which does not exist`,
+      );
     }
 
     const zodSchema = levelSchemas[event.name];
     if (!zodSchema) {
       throw new Error(
-        `Attempting to log dev data for event ${event.name} at level ${level} for version ${schema}: no schema found`
+        `Attempting to log dev data for event ${event.name} at level ${level} for version ${schema}: no schema found`,
       );
     }
 
-    const eventDataWithBaseValues = await this.addBaseValues(event.data, event.name, schema, zodSchema);
+    const eventDataWithBaseValues = await this.addBaseValues(
+      event.data,
+      event.name,
+      schema,
+      zodSchema,
+    );
 
     const parsed = zodSchema.safeParse(eventDataWithBaseValues);
     if (!parsed.success) {
       throw new Error(
-        `Failed to parse event data for event ${event.name} and schema ${schema}\n:${parsed.error.toString()}`
+        `Failed to parse event data for event ${event.name} and schema ${schema}\n:${parsed.error.toString()}`,
       );
     }
 
     return parsed.data;
   }
 
-  async logToOneDestination(dataConfig: NonNullable<ContinueConfig["data"]>[number], event: DevDataLogEvent) {
+  async logToOneDestination(
+    dataConfig: NonNullable<ContinueConfig["data"]>[number],
+    event: DevDataLogEvent,
+  ) {
     try {
       if (!dataConfig) {
         return;
@@ -168,11 +197,13 @@ export class DataLogger {
         if (dataConfig.apiKey) {
           headers["Authorization"] = `Bearer ${dataConfig.apiKey}`;
         } else {
-          const accessToken = await this.core?.configHandler.controlPlaneClient.getAccessToken();
+          const accessToken =
+            await this.core?.configHandler.controlPlaneClient.getAccessToken();
           headers["Authorization"] = `Bearer ${accessToken}`;
         }
 
-        const profileId = this.core?.configHandler.currentProfile?.profileDescription.id ?? "";
+        const profileId =
+          this.core?.configHandler.currentProfile?.profileDescription.id ?? "";
         const response = await fetch(dataConfig.destination, {
           method: "POST",
           headers,
@@ -185,7 +216,9 @@ export class DataLogger {
           }),
         });
         if (!response.ok) {
-          throw new Error(`Post request failed. ${response.status}: ${response.statusText}`);
+          throw new Error(
+            `Post request failed. ${response.status}: ${response.statusText}`,
+          );
         }
       } else if (uriComponents.scheme === "file") {
         // Write to jsonc file for local file URIs
@@ -203,7 +236,7 @@ export class DataLogger {
       }
     } catch (error) {
       console.error(
-        `Error logging data to ${dataConfig.destination}: ${error instanceof Error ? error.message : error}`
+        `Error logging data to ${dataConfig.destination}: ${error instanceof Error ? error.message : error}`,
       );
     }
   }

@@ -12,7 +12,12 @@ import {
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
 import { WatsonXConfig } from "../types.js";
 import { chatCompletion } from "../util.js";
-import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
+import {
+  BaseLlmApi,
+  CreateRerankResponse,
+  FimCreateParamsStreaming,
+  RerankCreateParams,
+} from "./base.js";
 
 export class WatsonXApi implements BaseLlmApi {
   apiBase: string;
@@ -42,7 +47,7 @@ export class WatsonXApi implements BaseLlmApi {
               "Content-Type": "application/x-www-form-urlencoded",
               Accept: "application/json",
             },
-          }
+          },
         )
       ).json()) as any;
       return {
@@ -56,7 +61,10 @@ export class WatsonXApi implements BaseLlmApi {
       // and it's necessary to call this endpoint with username+api_key to get a bearer token.
       // See the docs: https://www.ibm.com/docs/en/watsonx/w-and-w/2.1.0?topic=keys-generating-bearer-token
       // Ask @sestinj why the rest is commented out.
-      const base64Decoded = Buffer.from(this.config.apiKey ?? "", "base64").toString();
+      const base64Decoded = Buffer.from(
+        this.config.apiKey ?? "",
+        "base64",
+      ).toString();
       const [username, api_key] = base64Decoded.split(":");
 
       const wxToken = (await (
@@ -179,14 +187,14 @@ export class WatsonXApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     const generator = this.chatCompletionStream(
       {
         ...body,
         stream: true,
       },
-      signal
+      signal,
     );
 
     let content = "";
@@ -201,7 +209,7 @@ export class WatsonXApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const url = this.getEndpoint("chat");
     const headers = await this.getHeaders();
@@ -218,7 +226,9 @@ export class WatsonXApi implements BaseLlmApi {
     });
 
     if (!response.ok || !response.body) {
-      throw new Error(`Failed to stream chat completion: ${await response.text()}`);
+      throw new Error(
+        `Failed to stream chat completion: ${await response.text()}`,
+      );
     }
 
     for await (const value of streamSse(response as any)) {
@@ -229,19 +239,26 @@ export class WatsonXApi implements BaseLlmApi {
     }
   }
 
-  async completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
+  async completionNonStream(
+    body: CompletionCreateParamsNonStreaming,
+    signal: AbortSignal,
+  ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
 
   async *completionStream(
     body: CompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<Completion, any, unknown> {
     const params = {
       decoding_method: body.temperature ? "sample" : "greedy",
       max_new_tokens: body.max_tokens ?? 1024,
       min_new_tokens: 1,
-      stop_sequences: body.stop ? (Array.isArray(body.stop) ? body.stop : [body.stop]) : [],
+      stop_sequences: body.stop
+        ? Array.isArray(body.stop)
+          ? body.stop
+          : [body.stop]
+        : [],
       include_stop_sequence: false,
       repetition_penalty: body.frequency_penalty || 1,
       temperature: body.temperature,
@@ -312,12 +329,14 @@ export class WatsonXApi implements BaseLlmApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
 
-  async embed(body: OpenAI.Embeddings.EmbeddingCreateParams): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+  async embed(
+    body: OpenAI.Embeddings.EmbeddingCreateParams,
+  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 

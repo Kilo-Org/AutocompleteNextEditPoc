@@ -19,7 +19,8 @@ export class NextEditLoggingService {
       filepath?: string;
     }
   >();
-  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined = undefined;
+  _lastDisplayedCompletion: { id: string; displayedAt: number } | undefined =
+    undefined;
 
   public static getInstance(): NextEditLoggingService {
     if (!NextEditLoggingService.instance) {
@@ -54,7 +55,7 @@ export class NextEditLoggingService {
       modelName?: string;
       modelProvider?: string;
       filepath?: string;
-    }
+    },
   ) {
     const pending = this._pendingCompletions.get(completionId);
     if (pending) {
@@ -154,7 +155,13 @@ export class NextEditLoggingService {
       const previousOutcome = this._outcomes.get(previous.id);
       const c1 = previousOutcome?.completion.split("\n")[0] ?? "";
       const c2 = outcome.completion.split("\n")[0];
-      if (previousOutcome && (c1.endsWith(c2) || c2.endsWith(c1) || c1.startsWith(c2) || c2.startsWith(c1))) {
+      if (
+        previousOutcome &&
+        (c1.endsWith(c2) ||
+          c2.endsWith(c1) ||
+          c1.startsWith(c2) ||
+          c2.startsWith(c1))
+      ) {
         this.cancelRejectionTimeout(previous.id);
       } else if (now - previous.displayedAt < 500) {
         // If a completion isn't shown for more than
@@ -206,7 +213,9 @@ export class NextEditLoggingService {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockNextEditLoggingServiceInstance(mockInstance: NextEditLoggingService | null) {
+export function __setMockNextEditLoggingServiceInstance(
+  mockInstance: NextEditLoggingService | null,
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditLoggingService as any)._instance = mockInstance;
 }

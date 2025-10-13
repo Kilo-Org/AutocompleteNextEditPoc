@@ -292,9 +292,7 @@ interface GeminiChatResponseError {
   };
 }
 
-type GeminiChatResponse =
-  | GeminiChatResponseError
-  | GeminiChatResponseSuccess;
+type GeminiChatResponse = GeminiChatResponseError | GeminiChatResponseSuccess;
 
 interface PromptFeedback {
   blockReason?: BlockReason;

@@ -7,9 +7,13 @@ export declare class LlamaTokenizer {
     prompt: string,
     add_bos_token?: boolean,
     add_preceding_space?: boolean,
-    log_performance?: boolean
+    log_performance?: boolean,
   ): number[];
-  public decode(tokenIds: number[], add_bos_token?: boolean, add_preceding_space?: boolean): string;
+  public decode(
+    tokenIds: number[],
+    add_bos_token?: boolean,
+    add_preceding_space?: boolean,
+  ): string;
   runTests(tests?: (tokenizer: LlamaTokenizer) => boolean): void;
 }
 export declare const llamaTokenizer: LlamaTokenizer;

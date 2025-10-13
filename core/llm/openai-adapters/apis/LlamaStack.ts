@@ -18,7 +18,7 @@ export class LlamastackApi extends OpenAIApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL("completions", this.apiBase);
     const resp = await fetch(endpoint, {

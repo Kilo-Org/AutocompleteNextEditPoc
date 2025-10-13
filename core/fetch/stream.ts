@@ -25,7 +25,9 @@ function parseSseLine(line: string): { done: boolean; data: unknown } {
  * Modern implementation using native ReadableStream and TextDecoderStream APIs.
  * Requires Node.js 18+ or modern browsers.
  */
-export async function* streamResponse(response: Response): AsyncGenerator<string> {
+export async function* streamResponse(
+  response: Response,
+): AsyncGenerator<string> {
   // Handle client-side cancellation
   if (response.status === 499) {
     return;
@@ -44,7 +46,9 @@ export async function* streamResponse(response: Response): AsyncGenerator<string
 
   try {
     // Modern API: Use TextDecoderStream to decode the response body
-    const textStream = response.body.pipeThrough(new TextDecoderStream("utf-8"));
+    const textStream = response.body.pipeThrough(
+      new TextDecoderStream("utf-8"),
+    );
     const reader = textStream.getReader();
 
     try {
@@ -67,9 +71,13 @@ export async function* streamResponse(response: Response): AsyncGenerator<string
       // Handle premature close errors
       if (e.message.toLowerCase().includes("premature close")) {
         if (chunks === 0) {
-          throw new Error("Stream was closed before any data was received. Try again. (Premature Close)");
+          throw new Error(
+            "Stream was closed before any data was received. Try again. (Premature Close)",
+          );
         } else {
-          throw new Error("The response was cancelled mid-stream. Try again. (Premature Close).");
+          throw new Error(
+            "The response was cancelled mid-stream. Try again. (Premature Close).",
+          );
         }
       }
     }

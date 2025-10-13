@@ -20,10 +20,12 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 ## What Remains ✅
 
 ### Core Features (2)
+
 - [`core/autocomplete/`](core/autocomplete/) - Tab autocomplete with context-aware completions (~400 tests)
 - [`core/nextEdit/`](core/nextEdit/) - Multi-location edit predictions (~210 tests)
 
 ### Supporting Infrastructure
+
 - [`core/llm/`](core/llm/) - 15+ LLM provider integrations (OpenAI, Anthropic, Gemini, Azure, Bedrock, etc.)
 - [`core/diff/`](core/diff/) - Myers diff algorithm for change tracking
 - [`core/util/`](core/util/) - Shared utilities (logging, paths, caching, analytics)
@@ -32,6 +34,7 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 - [`core/vscode-test-harness/`](core/vscode-test-harness/) - VSCode integration example (86 tests)
 
 ### Supporting Files
+
 - [`tree-sitter/`](tree-sitter/) - Query files for syntax parsing (36 files, 15+ languages)
 - [`legacy_code_rewrite/`](legacy_code_rewrite/) - Documentation of cleanup process (40 analysis files)
 
@@ -40,6 +43,7 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 ## What Was Removed ❌
 
 ### Major Components
+
 - ❌ **GUI** (`gui/`) - React-based web interface
 - ❌ **Chat functionality** - All chat/conversation features
 - ❌ **Agent system** - Tool calling, agent orchestration
@@ -54,6 +58,7 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 - ❌ **Package monorepo** (`packages/`) - Merged into `core/`
 
 ### Configuration & Infrastructure
+
 - ❌ Complex YAML configuration system → Replaced with [`MinimalConfig`](core/autocomplete/MinimalConfig.ts)
 - ❌ Separate packages → Consolidated into single `core/` directory
 - ❌ Jest test framework → Migrated to Vitest only
@@ -64,11 +69,13 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 ## Statistics
 
 ### Code Reduction
+
 - **Lines removed**: ~111,000 lines
 - **Files removed**: ~876 files
 - **Code remaining**: ~50,000 lines (55% reduction)
 
 ### Test Suite
+
 - **Before**: 532 tests (Jest + Vitest mixed)
 - **After**: 778 tests (Vitest only, more comprehensive)
 - **Test files**: 41 test files
@@ -76,6 +83,7 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 - **TypeScript**: ✅ Zero errors (fixed 2025-10-13)
 
 ### Repository Structure
+
 - **Before**: Multi-package monorepo (gui/, extensions/, packages/, core/)
 - **After**: Single directory (core/ + supporting files)
 - **Complexity**: Significantly simplified
@@ -85,6 +93,7 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 ## Recent Fixes (2025-10-13)
 
 ### TypeScript Errors Fixed ✅
+
 - **Issue**: 25 compilation errors from incorrect type signatures
 - **Files affected**: `core/llm/llms/OpenAI.ts`, various openai-adapters
 - **Root cause**: `streamSse()` and `streamJSON()` typed as returning `{}` and `string` instead of `any`
@@ -98,28 +107,33 @@ This repository now contains **only** autocomplete and NextEdit from Continue:
 Full documentation in [`legacy_code_rewrite/`](legacy_code_rewrite/):
 
 ### Phase 1: Remove Top-Level Directories
+
 - Removed GUI, IntelliJ extension, binary packaging
 - Removed testing sandbox, eval scripts, GitHub actions
 - Removed sync functionality and documentation
 - Removed media assets
 
 ### Phase 2: Clean Up Core Directory
+
 - Removed non-autocomplete features (commands, context providers, edit, tools)
 - Removed protocol definitions and main orchestrator
 - Kept only autocomplete, nextEdit, and dependencies
 
-### Phase 3: Clean Up VSCode Extension  
+### Phase 3: Clean Up VSCode Extension
+
 - Removed GUI webview and chat features
 - Removed non-autocomplete commands
 - Migrated to [`core/vscode-test-harness/`](core/vscode-test-harness/)
 
 ### Phase 4: Remove Unused Code
+
 - Knip analysis for dead code detection
 - Removed unused LLM files, utilities, test infrastructure
 - Consolidated Jest → Vitest (14 test files migrated)
 - Removed 14+ unused files
 
 ### Phase 5-7: Final Cleanup
+
 - Merged internal packages (`@continuedev/*`) into `core/`
 - Removed package boundaries
 - Updated test infrastructure
@@ -137,8 +151,9 @@ npm run lint          # Linting
 ```
 
 **Test breakdown**:
+
 - Autocomplete: ~400 tests
-- NextEdit: ~210 tests  
+- NextEdit: ~210 tests
 - Infrastructure: ~80 tests (diff, cache, tree-sitter, security)
 - Integration: 86 tests (VSCode test harness)
 
@@ -170,6 +185,7 @@ To integrate into your IDE:
 Based on Knip analysis ([`legacy_code_rewrite/knip-current-analysis.txt`](legacy_code_rewrite/knip-current-analysis.txt)):
 
 ### Further Cleanup (Optional)
+
 1. Remove unused files (29 files identified)
 2. Remove unused exports (130 exports, mostly language constants)
 3. Fix unlisted dependencies (192 imports should be in package.json)

@@ -94,7 +94,9 @@ export const DEFAULT_SECURITY_IGNORE_DIRS = [
 ];
 
 // Create ignore instances
-const defaultSecurityIgnoreFile = ignore().add(DEFAULT_SECURITY_IGNORE_FILETYPES);
+const defaultSecurityIgnoreFile = ignore().add(
+  DEFAULT_SECURITY_IGNORE_FILETYPES,
+);
 const defaultSecurityIgnoreDir = ignore().add(DEFAULT_SECURITY_IGNORE_DIRS);
 
 // Combined ignore instances

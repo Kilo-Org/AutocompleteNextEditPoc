@@ -16,7 +16,12 @@ import {
 import { VertexAIConfig } from "../types.js";
 import { chatChunk, chatCompletion, embedding } from "../util.js";
 import { AnthropicApi } from "./Anthropic.js";
-import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
+import {
+  BaseLlmApi,
+  CreateRerankResponse,
+  FimCreateParamsStreaming,
+  RerankCreateParams,
+} from "./base.js";
 import { GeminiApi } from "./Gemini.js";
 import { OpenAIApi } from "./OpenAI.js";
 
@@ -55,16 +60,20 @@ export class VertexAIApi implements BaseLlmApi {
       // Express mode validation
       if (region || projectId || keyFile || keyJson) {
         throw new Error(
-          "VertexAI in express mode (apiKey only) cannot be configured with region, projectId, keyFile, or keyJson"
+          "VertexAI in express mode (apiKey only) cannot be configured with region, projectId, keyFile, or keyJson",
         );
       }
     } else {
       // Standard mode validation
       if (!region || !projectId) {
-        throw new Error("region and projectId are required for VertexAI (when not using express/apiKey mode)");
+        throw new Error(
+          "region and projectId are required for VertexAI (when not using express/apiKey mode)",
+        );
       }
       if (keyFile && keyJson) {
-        throw new Error("VertexAI credentials can be configured with either keyFile or keyJson but not both");
+        throw new Error(
+          "VertexAI credentials can be configured with either keyFile or keyJson but not both",
+        );
       }
     }
 
@@ -96,7 +105,9 @@ export class VertexAIApi implements BaseLlmApi {
       })
         .getClient()
         .catch((e: Error) => {
-          console.warn(`Failed to load credentials for Vertex AI: ${e.message}`);
+          console.warn(
+            `Failed to load credentials for Vertex AI: ${e.message}`,
+          );
         });
     } else if (!apiKey) {
       // Application Default Credentials
@@ -105,7 +116,9 @@ export class VertexAIApi implements BaseLlmApi {
       })
         .getClient()
         .catch((e: Error) => {
-          console.warn(`Failed to load credentials for Vertex AI: ${e.message}`);
+          console.warn(
+            `Failed to load credentials for Vertex AI: ${e.message}`,
+          );
         });
     }
   }
@@ -127,8 +140,14 @@ export class VertexAIApi implements BaseLlmApi {
     }
   }
 
-  private determineVertexProvider(model: string): "mistral" | "anthropic" | "gemini" | "unknown" {
-    if (model.includes("mistral") || model.includes("codestral") || model.includes("mixtral")) {
+  private determineVertexProvider(
+    model: string,
+  ): "mistral" | "anthropic" | "gemini" | "unknown" {
+    if (
+      model.includes("mistral") ||
+      model.includes("codestral") ||
+      model.includes("mixtral")
+    ) {
       return "mistral";
     } else if (model.includes("claude")) {
       return "anthropic";
@@ -154,7 +173,9 @@ export class VertexAIApi implements BaseLlmApi {
       const client = await this.clientPromise;
       const result = await client?.getAccessToken();
       if (!result?.token) {
-        throw new Error("Could not get an access token. Set up your Google Application Default Credentials.");
+        throw new Error(
+          "Could not get an access token. Set up your Google Application Default Credentials.",
+        );
       }
       headers.Authorization = `Bearer ${result.token}`;
       return headers;
@@ -181,18 +202,28 @@ export class VertexAIApi implements BaseLlmApi {
     };
   }
 
-  private convertGeminiBody(oaiBody: ChatCompletionCreateParams, url: URL): object {
-    return this.geminiInstance._convertBody(oaiBody, url.toString(), false, false);
+  private convertGeminiBody(
+    oaiBody: ChatCompletionCreateParams,
+    url: URL,
+  ): object {
+    return this.geminiInstance._convertBody(
+      oaiBody,
+      url.toString(),
+      false,
+      false,
+    );
   }
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     const vertexProvider = this.determineVertexProvider(body.model);
 
     if (this.config.apiKey && vertexProvider !== "gemini") {
-      throw new Error("VertexAI: only gemini models are supported in express (apiKey) mode");
+      throw new Error(
+        "VertexAI: only gemini models are supported in express (apiKey) mode",
+      );
     }
 
     const headers = await this.getAuthHeaders();
@@ -201,15 +232,21 @@ export class VertexAIApi implements BaseLlmApi {
 
     switch (vertexProvider) {
       case "anthropic":
-        url = this.buildUrl(`publishers/anthropic/models/${body.model}:rawPredict`);
+        url = this.buildUrl(
+          `publishers/anthropic/models/${body.model}:rawPredict`,
+        );
         requestBody = this.convertAnthropicBody(body);
         break;
       case "gemini":
-        url = this.buildUrl(`publishers/google/models/${body.model}:generateContent`);
+        url = this.buildUrl(
+          `publishers/google/models/${body.model}:generateContent`,
+        );
         requestBody = this.convertGeminiBody(body, url);
         break;
       case "mistral":
-        url = this.buildUrl(`publishers/mistralai/models/${body.model}:rawPredict`);
+        url = this.buildUrl(
+          `publishers/mistralai/models/${body.model}:rawPredict`,
+        );
         requestBody = body;
         break;
       default:
@@ -226,7 +263,9 @@ export class VertexAIApi implements BaseLlmApi {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(`VertexAI API error: ${response.status} ${response.statusText}\n${JSON.stringify(data)}`);
+      throw new Error(
+        `VertexAI API error: ${response.status} ${response.statusText}\n${JSON.stringify(data)}`,
+      );
     }
 
     // Convert response to OpenAI format
@@ -253,12 +292,14 @@ export class VertexAIApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
     const vertexProvider = this.determineVertexProvider(body.model);
 
     if (this.config.apiKey && vertexProvider !== "gemini") {
-      throw new Error("VertexAI: only gemini models are supported in express (apiKey) mode");
+      throw new Error(
+        "VertexAI: only gemini models are supported in express (apiKey) mode",
+      );
     }
 
     const headers = await this.getAuthHeaders();
@@ -267,15 +308,21 @@ export class VertexAIApi implements BaseLlmApi {
 
     switch (vertexProvider) {
       case "anthropic":
-        url = this.buildUrl(`publishers/anthropic/models/${body.model}:streamRawPredict`);
+        url = this.buildUrl(
+          `publishers/anthropic/models/${body.model}:streamRawPredict`,
+        );
         requestBody = this.convertAnthropicBody(body);
         break;
       case "gemini":
-        url = this.buildUrl(`publishers/google/models/${body.model}:streamGenerateContent`);
+        url = this.buildUrl(
+          `publishers/google/models/${body.model}:streamGenerateContent`,
+        );
         requestBody = this.convertGeminiBody(body, url);
         break;
       case "mistral":
-        url = this.buildUrl(`publishers/mistralai/models/${body.model}:streamRawPredict`);
+        url = this.buildUrl(
+          `publishers/mistralai/models/${body.model}:streamRawPredict`,
+        );
         requestBody = body;
         break;
       default:
@@ -284,13 +331,14 @@ export class VertexAIApi implements BaseLlmApi {
 
     switch (vertexProvider) {
       case "mistral":
-        const mistralResponse = await this.mistralInstance.openai.chat.completions.create(
-          this.mistralInstance.modifyChatBody(body),
-          {
-            signal,
-            headers,
-          }
-        );
+        const mistralResponse =
+          await this.mistralInstance.openai.chat.completions.create(
+            this.mistralInstance.modifyChatBody(body),
+            {
+              signal,
+              headers,
+            },
+          );
         for await (const result of mistralResponse) {
           yield result;
         }
@@ -306,7 +354,9 @@ export class VertexAIApi implements BaseLlmApi {
 
         if (!response.ok) {
           const data = await response.json();
-          throw new Error(`VertexAI API error: ${response.status} ${response.statusText}\n${JSON.stringify(data)}`);
+          throw new Error(
+            `VertexAI API error: ${response.status} ${response.statusText}\n${JSON.stringify(data)}`,
+          );
         }
 
         if (response.status === 499) {
@@ -315,16 +365,26 @@ export class VertexAIApi implements BaseLlmApi {
         if (vertexProvider === "gemini") {
           yield* this.geminiInstance.handleStreamResponse(response, body.model);
         } else {
-          yield* this.anthropicInstance.handleStreamResponse(response, body.model);
+          yield* this.anthropicInstance.handleStreamResponse(
+            response,
+            body.model,
+          );
         }
         break;
     }
   }
 
-  async completionNonStream(body: CompletionCreateParamsNonStreaming, signal: AbortSignal): Promise<Completion> {
+  async completionNonStream(
+    body: CompletionCreateParamsNonStreaming,
+    signal: AbortSignal,
+  ): Promise<Completion> {
     // Convert completion to chat completion and back
     const promptText =
-      typeof body.prompt === "string" ? body.prompt : Array.isArray(body.prompt) ? body.prompt.join("") : "";
+      typeof body.prompt === "string"
+        ? body.prompt
+        : Array.isArray(body.prompt)
+          ? body.prompt.join("")
+          : "";
 
     const chatBody: ChatCompletionCreateParamsNonStreaming = {
       model: body.model,
@@ -355,10 +415,17 @@ export class VertexAIApi implements BaseLlmApi {
     } as Completion;
   }
 
-  async *completionStream(body: CompletionCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<Completion> {
+  async *completionStream(
+    body: CompletionCreateParamsStreaming,
+    signal: AbortSignal,
+  ): AsyncGenerator<Completion> {
     // Convert completion to chat completion and back
     const promptText =
-      typeof body.prompt === "string" ? body.prompt : Array.isArray(body.prompt) ? body.prompt.join("") : "";
+      typeof body.prompt === "string"
+        ? body.prompt
+        : Array.isArray(body.prompt)
+          ? body.prompt.join("")
+          : "";
 
     const chatBody: ChatCompletionCreateParamsStreaming = {
       model: body.model,
@@ -388,14 +455,21 @@ export class VertexAIApi implements BaseLlmApi {
     }
   }
 
-  async *fimStream(body: FimCreateParamsStreaming, signal: AbortSignal): AsyncGenerator<ChatCompletionChunk> {
+  async *fimStream(
+    body: FimCreateParamsStreaming,
+    signal: AbortSignal,
+  ): AsyncGenerator<ChatCompletionChunk> {
     // Only Codestral (Mistral) supports FIM in VertexAI
     if (!body.model.includes("codestral")) {
-      throw new Error(`FIM is only supported for Codestral models, got: ${body.model}`);
+      throw new Error(
+        `FIM is only supported for Codestral models, got: ${body.model}`,
+      );
     }
 
     const headers = await this.getAuthHeaders();
-    const url = this.buildUrl(`publishers/mistralai/models/${body.model}:streamRawPredict`);
+    const url = this.buildUrl(
+      `publishers/mistralai/models/${body.model}:streamRawPredict`,
+    );
 
     const requestBody = {
       model: body.model,
@@ -416,7 +490,9 @@ export class VertexAIApi implements BaseLlmApi {
     });
 
     if (!response.ok) {
-      throw new Error(`VertexAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `VertexAI API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     for await (const chunk of streamSse(response)) {
@@ -435,8 +511,14 @@ export class VertexAIApi implements BaseLlmApi {
 
     // Convert input to text strings
     const textInputs = Array.isArray(body.input)
-      ? body.input.map((item) => (typeof item === "string" ? item : JSON.stringify(item)))
-      : [typeof body.input === "string" ? body.input : JSON.stringify(body.input)];
+      ? body.input.map((item) =>
+          typeof item === "string" ? item : JSON.stringify(item),
+        )
+      : [
+          typeof body.input === "string"
+            ? body.input
+            : JSON.stringify(body.input),
+        ];
 
     const requestBody = {
       instances: textInputs.map((text) => ({ content: text })),
@@ -449,11 +531,15 @@ export class VertexAIApi implements BaseLlmApi {
     });
 
     if (!response.ok) {
-      throw new Error(`VertexAI API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `VertexAI API error: ${response.status} ${response.statusText}`,
+      );
     }
 
     const data = await response.json();
-    const embeddings = data.predictions.map((prediction: any) => prediction.embeddings.values);
+    const embeddings = data.predictions.map(
+      (prediction: any) => prediction.embeddings.values,
+    );
 
     return embedding({
       data: embeddings,

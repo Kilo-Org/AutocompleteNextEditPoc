@@ -1,4 +1,9 @@
-import { ChatCompletionChunk, CompletionUsage, CreateEmbeddingResponse, Model } from "openai/resources/index";
+import {
+  ChatCompletionChunk,
+  CompletionUsage,
+  CreateEmbeddingResponse,
+  Model,
+} from "openai/resources/index";
 
 import { ChatCompletion } from "openai/resources/index.js";
 import { CreateRerankResponse } from "./apis/base.js";

@@ -11,7 +11,12 @@ import {
 } from "openai/resources/index";
 import { JinaConfig } from "../types.js";
 import { rerank } from "../util.js";
-import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
+import {
+  BaseLlmApi,
+  CreateRerankResponse,
+  FimCreateParamsStreaming,
+  RerankCreateParams,
+} from "./base.js";
 
 export class JinaApi implements BaseLlmApi {
   apiBase: string = "https://api.jina.ai/v1/";
@@ -20,25 +25,35 @@ export class JinaApi implements BaseLlmApi {
     this.apiBase = config.apiBase ?? this.apiBase;
   }
 
-  async chatCompletionNonStream(body: ChatCompletionCreateParamsNonStreaming): Promise<ChatCompletion> {
+  async chatCompletionNonStream(
+    body: ChatCompletionCreateParamsNonStreaming,
+  ): Promise<ChatCompletion> {
     throw new Error("Method not implemented.");
   }
   async *chatCompletionStream(
-    body: ChatCompletionCreateParamsStreaming
+    body: ChatCompletionCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
-  async completionNonStream(body: CompletionCreateParamsNonStreaming): Promise<Completion> {
+  async completionNonStream(
+    body: CompletionCreateParamsNonStreaming,
+  ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
-  async *completionStream(body: CompletionCreateParamsStreaming): AsyncGenerator<Completion, any, unknown> {
+  async *completionStream(
+    body: CompletionCreateParamsStreaming,
+  ): AsyncGenerator<Completion, any, unknown> {
     throw new Error("Method not implemented.");
   }
-  async *fimStream(body: FimCreateParamsStreaming): AsyncGenerator<ChatCompletionChunk, any, unknown> {
+  async *fimStream(
+    body: FimCreateParamsStreaming,
+  ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
 
-  async embed(body: OpenAI.Embeddings.EmbeddingCreateParams): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+  async embed(
+    body: OpenAI.Embeddings.EmbeddingCreateParams,
+  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 

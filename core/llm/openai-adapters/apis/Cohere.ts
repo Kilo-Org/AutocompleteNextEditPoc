@@ -16,7 +16,12 @@ import {
 import { CohereConfig } from "../types.js";
 import { chatCompletion, embedding } from "../util.js";
 import { EMPTY_CHAT_COMPLETION } from "../util/emptyChatCompletion.js";
-import { BaseLlmApi, CreateRerankResponse, FimCreateParamsStreaming, RerankCreateParams } from "./base.js";
+import {
+  BaseLlmApi,
+  CreateRerankResponse,
+  FimCreateParamsStreaming,
+  RerankCreateParams,
+} from "./base.js";
 
 export class CohereApi implements BaseLlmApi {
   apiBase: string = "https://api.cohere.com/v1";
@@ -27,7 +32,9 @@ export class CohereApi implements BaseLlmApi {
     this.apiBase = config.apiBase ?? this.apiBase;
   }
 
-  private _convertMessages(msgs: OpenAI.Chat.Completions.ChatCompletionMessageParam[]): any[] {
+  private _convertMessages(
+    msgs: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
+  ): any[] {
     return msgs.map((m) => ({
       role: m.role === "assistant" ? "CHATBOT" : "USER",
       message: m.content,
@@ -37,7 +44,9 @@ export class CohereApi implements BaseLlmApi {
   private _convertBody(oaiBody: ChatCompletionCreateParams) {
     return {
       message: oaiBody.messages.pop()?.content,
-      chat_history: this._convertMessages(oaiBody.messages.filter((msg) => msg.role !== "system")),
+      chat_history: this._convertMessages(
+        oaiBody.messages.filter((msg) => msg.role !== "system"),
+      ),
       preamble: oaiBody.messages.find((msg) => msg.role === "system")?.content,
       model: oaiBody.model,
       stream: oaiBody.stream,
@@ -52,7 +61,7 @@ export class CohereApi implements BaseLlmApi {
 
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     const headers = {
       "Content-Type": "application/json",
@@ -86,7 +95,7 @@ export class CohereApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
     const headers = {
       "Content-Type": "application/json",
@@ -123,13 +132,19 @@ export class CohereApi implements BaseLlmApi {
       }
     }
   }
-  completionNonStream(body: CompletionCreateParamsNonStreaming): Promise<Completion> {
+  completionNonStream(
+    body: CompletionCreateParamsNonStreaming,
+  ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
-  completionStream(body: CompletionCreateParamsStreaming): AsyncGenerator<Completion> {
+  completionStream(
+    body: CompletionCreateParamsStreaming,
+  ): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
-  fimStream(body: FimCreateParamsStreaming): AsyncGenerator<ChatCompletionChunk> {
+  fimStream(
+    body: FimCreateParamsStreaming,
+  ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {

@@ -242,22 +242,3 @@ async function* getSmartCollapsedChunks(
     yield* generator;
   }
 }
-
-async function* codeChunker(
-  filepath: string,
-  contents: string,
-  maxChunkSize: number,
-): AsyncGenerator<ChunkWithoutID> {
-  if (contents.trim().length === 0) {
-    return;
-  }
-
-  const parser = await getParserForFile(filepath);
-  if (parser === undefined) {
-    throw new Error(`Failed to load parser for file ${filepath}: `);
-  }
-
-  const tree = parser.parse(contents);
-
-  yield* getSmartCollapsedChunks(tree.rootNode, contents, maxChunkSize);
-}

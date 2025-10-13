@@ -3,9 +3,8 @@ import { LlmInfoWithProvider, ModelProvider, UseCase } from "./types.js";
 
 const allModelProviders: ModelProvider[] = [OpenAi];
 
-const allLlms: LlmInfoWithProvider[] = allModelProviders.flatMap(
-  (provider) =>
-    provider.models.map((model) => ({ ...model, provider: provider.id })),
+const allLlms: LlmInfoWithProvider[] = allModelProviders.flatMap((provider) =>
+  provider.models.map((model) => ({ ...model, provider: provider.id })),
 );
 
 export function findLlmInfo(

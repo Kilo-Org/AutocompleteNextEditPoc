@@ -37,7 +37,7 @@ export class InceptionApi extends OpenAIApi {
   // Add custom edit completions method.
   async *editCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     yield* this.streamCustomEndpoint("edit/completions", body, signal);
   }
@@ -45,7 +45,7 @@ export class InceptionApi extends OpenAIApi {
   // Add custom edit completions method (non-streaming).
   async editCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     return this.nonStreamCustomEndpoint("edit/completions", body, signal);
   }
@@ -53,7 +53,7 @@ export class InceptionApi extends OpenAIApi {
   // Override the regular chat stream method to route to edit endpoint for next edit requests.
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     if (this.isNextEdit(body.messages)) {
       body.messages = this.removeToken(body.messages, UNIQUE_TOKEN);
@@ -69,7 +69,7 @@ export class InceptionApi extends OpenAIApi {
   // Override the regular chat non stream method to route to edit endpoint for next edit requests.
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     if (this.isNextEdit(body.messages)) {
       body.messages = this.removeToken(body.messages, UNIQUE_TOKEN);
@@ -84,21 +84,21 @@ export class InceptionApi extends OpenAIApi {
 
   async *applyCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     yield* this.streamCustomEndpoint("apply/completions", body, signal);
   }
 
   async applyCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     return this.nonStreamCustomEndpoint("apply/completions", body, signal);
   }
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL("completions", this.apiBase);
     const resp = await fetch(endpoint, {
@@ -140,20 +140,32 @@ export class InceptionApi extends OpenAIApi {
 
   // Check if any message contains the unique next edit token.
   private isNextEdit(messages: ChatCompletionMessageParam[]): boolean {
-    return messages.some((message) => typeof message.content === "string" && message.content.endsWith(UNIQUE_TOKEN));
+    return messages.some(
+      (message) =>
+        typeof message.content === "string" &&
+        message.content.endsWith(UNIQUE_TOKEN),
+    );
   }
 
   private isApply(messages: ChatCompletionMessageParam[]): boolean {
     return messages.some(
-      (message) => typeof message.content === "string" && message.content.endsWith(APPLY_UNIQUE_TOKEN)
+      (message) =>
+        typeof message.content === "string" &&
+        message.content.endsWith(APPLY_UNIQUE_TOKEN),
     );
   }
 
   // Remove the unique token from messages.
-  private removeToken(messages: ChatCompletionMessageParam[], token: string): ChatCompletionMessageParam[] {
+  private removeToken(
+    messages: ChatCompletionMessageParam[],
+    token: string,
+  ): ChatCompletionMessageParam[] {
     const lastMessage = messages[messages.length - 1];
 
-    if (typeof lastMessage?.content === "string" && lastMessage.content.endsWith(token)) {
+    if (
+      typeof lastMessage?.content === "string" &&
+      lastMessage.content.endsWith(token)
+    ) {
       const cleanedMessages = [...messages];
       cleanedMessages[cleanedMessages.length - 1] = {
         ...lastMessage,
@@ -168,7 +180,7 @@ export class InceptionApi extends OpenAIApi {
   private async *streamCustomEndpoint(
     path: string,
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const endpoint = new URL(path, this.apiBase);
     const resp = await fetch(endpoint, {
@@ -207,7 +219,7 @@ export class InceptionApi extends OpenAIApi {
   private async nonStreamCustomEndpoint(
     path: string,
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal
+    signal: AbortSignal,
   ): Promise<ChatCompletion> {
     const endpoint = new URL(path, this.apiBase);
     const resp = await fetch(endpoint, {

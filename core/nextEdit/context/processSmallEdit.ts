@@ -15,8 +15,7 @@ export const processSmallEdit = async (
   ide: IDE,
 ) => {
   // Get the current context data from the most recent message
-  const currentData = EditAggregator.getInstance()
-    .latestContextData || {
+  const currentData = EditAggregator.getInstance().latestContextData || {
     configHandler: configHandler,
     getDefsFromLspFunction: getDefsFromLspFunction,
     recentlyEditedRanges: [],

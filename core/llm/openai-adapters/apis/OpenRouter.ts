@@ -33,7 +33,7 @@ export class OpenRouterApi extends OpenAIApi {
 
     applyAnthropicCachingToOpenRouterBody(
       modifiedBody as unknown as ChatCompletionCreateParams,
-      (this.config as OpenRouterConfig).cachingStrategy ?? "systemAndTools"
+      (this.config as OpenRouterConfig).cachingStrategy ?? "systemAndTools",
     );
 
     return modifiedBody;
