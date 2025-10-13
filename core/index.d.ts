@@ -767,19 +767,11 @@ export interface IDE {
 
   writeFile(path: string, contents: string): Promise<void>;
 
-  openFile(path: string): Promise<void>;
-
-  openUrl(url: string): Promise<void>;
-
-  getExternalUri?(uri: string): Promise<string>;
-
   saveFile(fileUri: string): Promise<void>;
 
   readFile(fileUri: string): Promise<string>;
 
   readRangeInFile(fileUri: string, range: Range): Promise<string>;
-
-  showLines(fileUri: string, startLine: number, endLine: number): Promise<void>;
 
   getOpenFiles(): Promise<string[]>;
 
@@ -792,8 +784,6 @@ export interface IDE {
       }
   >;
 
-  getPinnedFiles(): Promise<string[]>;
-
   subprocess(command: string, cwd?: string): Promise<[string, string]>;
 
   getProblems(fileUri?: string | undefined): Promise<Problem[]>;
@@ -803,8 +793,6 @@ export interface IDE {
   getTags(artifactId: string): Promise<IndexTag[]>;
 
   getRepoName(dir: string): Promise<string | undefined>;
-
-  showToast(type: ToastType, message: string, ...otherParams: any[]): Promise<any>;
 
   getGitRootPath(dir: string): Promise<string | undefined>;
 

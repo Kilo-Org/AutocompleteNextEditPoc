@@ -66,9 +66,7 @@ export class VsCodeMessenger {
     private readonly ide: VsCodeIde
   ) {
     /** WEBVIEW ONLY LISTENERS **/
-    this.onWebview("showFile", (msg) => {
-      this.ide.openFile(msg.data.filepath);
-    });
+    // None right now
 
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
     WEBVIEW_TO_CORE_PASS_THROUGH.forEach((messageType) => {
@@ -111,9 +109,6 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("writeFile", async (msg) => {
       return ide.writeFile(msg.data.path, msg.data.contents);
     });
-    this.onWebviewOrCore("openFile", async (msg) => {
-      return ide.openFile(msg.data.path);
-    });
     this.onWebviewOrCore("getProblems", async (msg) => {
       return ide.getProblems(msg.data.filepath);
     });
@@ -127,26 +122,12 @@ export class VsCodeMessenger {
     this.onWebviewOrCore("getCurrentFile", async () => {
       return ide.getCurrentFile();
     });
-    this.onWebviewOrCore("getPinnedFiles", async (msg) => {
-      return ide.getPinnedFiles();
-    });
-    this.onWebviewOrCore("showLines", async (msg) => {
-      const { filepath, startLine, endLine } = msg.data;
-      return ide.showLines(filepath, startLine, endLine);
-    });
-    this.onWebviewOrCore("showToast", (msg) => {
-      this.ide.showToast(...(msg.data as [any, any, ...any[]]));
-    });
     this.onWebviewOrCore("saveFile", async (msg) => {
       return await ide.saveFile(msg.data.filepath);
     });
     this.onWebviewOrCore("readFile", async (msg) => {
       return await ide.readFile(msg.data.filepath);
     });
-    this.onWebviewOrCore("openUrl", (msg) => {
-      vscode.env.openExternal(vscode.Uri.parse(msg.data));
-    });
-
     this.onWebviewOrCore("fileExists", async (msg) => {
       return await ide.fileExists(msg.data.filepath);
     });

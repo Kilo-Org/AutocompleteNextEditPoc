@@ -8,7 +8,6 @@ import { executeGotoProvider, executeSignatureHelpProvider, executeSymbolProvide
 import { Repository } from "./otherExtensions/git";
 import { SecretStorage } from "./stubs/SecretStorage";
 import { VsCodeIdeUtils } from "./util/ideUtils";
-import { getExtensionUri, openEditorAndRevealRange } from "./util/vscode";
 import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
 import type {
@@ -137,24 +136,6 @@ class VsCodeIde implements IDE {
     });
   }
 
-  showToast: IDE["showToast"] = async (...params) => {
-    const [type, message, ...otherParams] = params;
-    const { showErrorMessage, showWarningMessage, showInformationMessage } = vscode.window;
-
-    switch (type) {
-      case "error":
-        return showErrorMessage(message, "Show logs").then((selection) => {
-          if (selection === "Show logs") {
-            vscode.commands.executeCommand("workbench.action.toggleDevTools");
-          }
-        });
-      case "info":
-        return showInformationMessage(message, ...otherParams);
-      case "warning":
-        return showWarningMessage(message, ...otherParams);
-    }
-  };
-
   async getRepoName(dir: string): Promise<string | undefined> {
     const repo = await this.getRepo(dir);
     const remotes = repo?.state.remotes;
@@ -256,18 +237,6 @@ class VsCodeIde implements IDE {
     await vscode.workspace.fs.writeFile(vscode.Uri.parse(fileUri), new Uint8Array(Buffer.from(contents)));
   }
 
-  async openFile(fileUri: string): Promise<void> {
-    await this.ideUtils.openFile(vscode.Uri.parse(fileUri));
-  }
-
-  async showLines(fileUri: string, startLine: number, endLine: number): Promise<void> {
-    const range = new vscode.Range(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
-    openEditorAndRevealRange(vscode.Uri.parse(fileUri), range).then((editor) => {
-      // Select the lines
-      editor.selection = new vscode.Selection(new vscode.Position(startLine, 0), new vscode.Position(endLine, 0));
-    });
-  }
-
   async saveFile(fileUri: string): Promise<void> {
     await this.ideUtils.saveFile(vscode.Uri.parse(fileUri));
   }
@@ -317,16 +286,6 @@ class VsCodeIde implements IDE {
     }
   }
 
-  async openUrl(url: string): Promise<void> {
-    await vscode.env.openExternal(vscode.Uri.parse(url));
-  }
-
-  async getExternalUri(uri: string): Promise<string> {
-    const vsCodeUri = vscode.Uri.parse(uri);
-    const externalUri = await vscode.env.asExternalUri(vsCodeUri);
-    return externalUri.toString(true);
-  }
-
   async getOpenFiles(): Promise<string[]> {
     return this.ideUtils.getOpenFiles().map((uri) => uri.toString());
   }
@@ -340,12 +299,6 @@ class VsCodeIde implements IDE {
       path: vscode.window.activeTextEditor.document.uri.toString(),
       contents: vscode.window.activeTextEditor.document.getText(),
     };
-  }
-
-  async getPinnedFiles(): Promise<string[]> {
-    const tabArray = vscode.window.tabGroups.all[0].tabs;
-
-    return tabArray.filter((t) => t.isPinned).map((t) => (t.input as vscode.TabInputText).uri.toString());
   }
 
   async getProblems(fileUri?: string | undefined): Promise<Problem[]> {
