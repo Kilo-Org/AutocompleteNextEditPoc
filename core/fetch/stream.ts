@@ -80,7 +80,7 @@ export async function* streamResponse(response: Response): AsyncGenerator<string
  * Streams Server-Sent Events (SSE) from a Response.
  * Parses SSE format and yields parsed data objects.
  */
-export async function* streamSse(response: Response): AsyncGenerator<{}> {
+export async function* streamSse(response: Response): AsyncGenerator<any> {
   let buffer = "";
 
   for await (const value of streamResponse(response)) {
@@ -114,7 +114,7 @@ export async function* streamSse(response: Response): AsyncGenerator<{}> {
  * Streams newline-delimited JSON from a Response.
  * Each line should be a complete JSON object.
  */
-export async function* streamJSON(response: Response): AsyncGenerator<string> {
+export async function* streamJSON(response: Response): AsyncGenerator<any> {
   let buffer = "";
 
   for await (const value of streamResponse(response)) {
