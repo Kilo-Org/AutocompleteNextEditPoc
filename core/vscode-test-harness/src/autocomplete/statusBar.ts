@@ -2,7 +2,6 @@ import { ILLM } from "core";
 import { EXTENSION_NAME } from "core/util/env";
 import * as vscode from "vscode";
 
-import { Battery } from "../util/battery";
 import { getMetaKeyLabel } from "../util/util";
 import {
   CONTINUE_WORKSPACE_KEY,
@@ -170,23 +169,6 @@ export function setupStatusBar(
 
 export function getStatusBarStatus(): StatusBarStatus | undefined {
   return statusBarStatus;
-}
-
-export function monitorBatteryChanges(battery: Battery): vscode.Disposable {
-  return battery.onChangeAC((acConnected: boolean) => {
-    const config = vscode.workspace.getConfiguration(EXTENSION_NAME);
-    const enabled = config.get<boolean>("enableTabAutocomplete");
-    if (!!enabled) {
-      const pauseOnBattery = config.get<boolean>(
-        "pauseTabAutocompleteOnBattery",
-      );
-      setupStatusBar(
-        acConnected || !pauseOnBattery
-          ? StatusBarStatus.Enabled
-          : StatusBarStatus.Paused,
-      );
-    }
-  });
 }
 
 function getAutocompleteStatusBarDescription(

@@ -9,13 +9,12 @@ import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 
 import { ContinueCompletionProvider } from "../autocomplete/completionProvider";
-import { monitorBatteryChanges, setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
+import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
 import { registerAllCodeLensProviders } from "../lang-server/codeLens";
 import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
 import { setupRemoteConfigSync } from "../stubs/activation";
 import { UriEventHandler } from "../stubs/uriHandler";
 import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
-import { Battery } from "../util/battery";
 import { FileSearch } from "../util/FileSearch";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
@@ -48,7 +47,6 @@ export class VsCodeExtension {
   private windowId: string;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
-  private battery: Battery;
   private workOsAuthProvider: WorkOsAuthProvider;
   private fileSearch: FileSearch;
   private uriHandler = new UriEventHandler();
@@ -265,11 +263,6 @@ export class VsCodeExtension {
         selectProfileId: profileId === "null" ? undefined : (profileId ?? undefined),
       });
     });
-
-    // Battery
-    this.battery = new Battery();
-    context.subscriptions.push(this.battery);
-    context.subscriptions.push(monitorBatteryChanges(this.battery));
 
     // FileSearch
     this.fileSearch = new FileSearch(this.ide);
