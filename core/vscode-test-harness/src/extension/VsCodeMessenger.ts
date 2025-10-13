@@ -142,10 +142,6 @@ export class VsCodeMessenger {
       });
     });
 
-    this.onWebview("session/share", async (msg) => {
-      await vscode.commands.executeCommand("continue.shareSession", msg.data.sessionId);
-    });
-
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
     WEBVIEW_TO_CORE_PASS_THROUGH.forEach((messageType) => {
       this.onWebview(messageType as any, async (msg) => {
