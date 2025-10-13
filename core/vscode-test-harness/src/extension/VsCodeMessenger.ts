@@ -21,7 +21,7 @@ import * as vscode from "vscode";
 import { ApplyManager } from "../apply";
 import { VerticalDiffManager } from "../diff/vertical/manager";
 import { addCurrentSelectionToEdit } from "../quickEdit/AddCurrentSelection";
-import EditDecorationManager from "../quickEdit/EditDecorationManager";
+import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
 import {
   getControlPlaneSessionInfo,
   WorkOsAuthProvider,

@@ -2,7 +2,6 @@ import { COUNT_COMPLETION_REJECTED_AFTER } from "../util/parameters";
 
 import { getControlPlaneEnvSync } from "../util/env";
 import { DataLogger } from "../util/log";
-import { Telemetry } from "../util/posthog";
 import { NextEditOutcome } from "./types";
 
 export class NextEditLoggingService {
@@ -207,35 +206,6 @@ export class NextEditLoggingService {
       //   ...outcome, // TODO: this is somehow getting messed up with autocomplete schema.
       // },
     });
-
-    // const { prompt, completion, prefix, suffix, ...restOfOutcome } = outcome;
-    if (outcome.requestId && outcome.accepted !== undefined) {
-      void this.logAcceptReject(outcome.requestId, outcome.accepted);
-    }
-    void Telemetry.capture("nextEditOutcome", outcome as unknown as Record<string, unknown>, true);
-  }
-
-  private async logAcceptReject(requestId: string, accepted: boolean): Promise<void> {
-    try {
-      if (!Telemetry.client) {
-        return;
-      }
-
-      const controlPlaneEnv = getControlPlaneEnvSync();
-      if (!controlPlaneEnv || !controlPlaneEnv.CONTROL_PLANE_URL) {
-        return;
-      }
-      const resp = await fetch(new URL("model-proxy/v1/feedback", controlPlaneEnv.CONTROL_PLANE_URL), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          requestId,
-          accepted,
-        }),
-      });
-    } catch (error) {}
   }
 }
 

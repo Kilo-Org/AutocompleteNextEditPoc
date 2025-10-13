@@ -50,7 +50,8 @@ import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { isNextEditTest } from "core/nextEdit/utils";
 import { localPathOrUriToPath } from "core/util/pathToUri";
 import { JumpManager } from "../activation/JumpManager";
-import setupNextEditWindowManager, {
+import {
+  setupNextEditWindowManager,
   NextEditWindowManager,
 } from "../activation/NextEditWindowManager";
 import {

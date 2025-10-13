@@ -1,23 +1,12 @@
-import {
-  FromWebviewProtocol,
-  ToWebviewProtocol,
-  Message,
-  IMessenger,
-} from "core";
+import { FromWebviewProtocol, ToWebviewProtocol, Message, IMessenger } from "core";
 import { extractMinimalStackTraceInfo } from "core/util/extractMinimalStackTraceInfo";
-import { Telemetry } from "core/util/posthog";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 
 import { handleLLMError } from "./util/errorHandling";
 
-export class VsCodeWebviewProtocol
-  implements IMessenger<FromWebviewProtocol, ToWebviewProtocol>
-{
-  listeners = new Map<
-    keyof FromWebviewProtocol,
-    ((message: Message) => any)[]
-  >();
+export class VsCodeWebviewProtocol implements IMessenger<FromWebviewProtocol, ToWebviewProtocol> {
+  listeners = new Map<keyof FromWebviewProtocol, ((message: Message) => any)[]>();
 
   send(messageType: string, data: any, messageId?: string): string {
     const id = messageId ?? uuidv4();
@@ -32,8 +21,8 @@ export class VsCodeWebviewProtocol
   on<T extends keyof FromWebviewProtocol>(
     messageType: T,
     handler: (
-      message: Message<FromWebviewProtocol[T][0]>,
-    ) => Promise<FromWebviewProtocol[T][1]> | FromWebviewProtocol[T][1],
+      message: Message<FromWebviewProtocol[T][0]>
+    ) => Promise<FromWebviewProtocol[T][1]> | FromWebviewProtocol[T][1]
   ): void {
     if (!this.listeners.has(messageType)) {
       this.listeners.set(messageType, []);
@@ -57,19 +46,14 @@ export class VsCodeWebviewProtocol
         throw new Error(`Invalid webview protocol msg: ${JSON.stringify(msg)}`);
       }
 
-      const respond = (message: any) =>
-        this.send(msg.messageType, message, msg.messageId);
+      const respond = (message: any) => this.send(msg.messageType, message, msg.messageId);
 
-      const handlers =
-        this.listeners.get(msg.messageType as keyof FromWebviewProtocol) || [];
+      const handlers = this.listeners.get(msg.messageType as keyof FromWebviewProtocol) || [];
       for (const handler of handlers) {
         try {
           const response = await handler(msg);
           // For generator types e.g. llm/streamChat
-          if (
-            response &&
-            typeof response[Symbol.asyncIterator] === "function"
-          ) {
+          if (response && typeof response[Symbol.asyncIterator] === "function") {
             let next = await response.next();
             while (!next.done) {
               respond({
@@ -96,14 +80,9 @@ export class VsCodeWebviewProtocol
           respond({ done: true, error: message, status: "error" });
 
           const stringified = JSON.stringify({ msg }, null, 2);
-          console.error(
-            `Error handling webview message: ${stringified}\n\n${e}`,
-          );
+          console.error(`Error handling webview message: ${stringified}\n\n${e}`);
 
-          if (
-            stringified.includes("llm/streamChat") ||
-            stringified.includes("chatDescriber/describe")
-          ) {
+          if (stringified.includes("llm/streamChat") || stringified.includes("chatDescriber/describe")) {
             return;
           }
 
@@ -123,29 +102,16 @@ export class VsCodeWebviewProtocol
               message = JSON.parse(message).message;
             } catch {}
             if (message.includes("exceeded")) {
-              message +=
-                " To keep using Continue, you can set up a local model or use your own API key.";
+              message += " To keep using Continue, you can set up a local model or use your own API key.";
             }
 
-            vscode.window
-              .showInformationMessage(message, "Add API Key", "Use Local Model")
-              .then((selection) => {
-                if (selection === "Add API Key") {
-                  this.request("setupApiKey", undefined);
-                } else if (selection === "Use Local Model") {
-                  this.request("setupLocalConfig", undefined);
-                }
-              });
-          } else {
-            Telemetry.capture(
-              "webview_protocol_error",
-              {
-                messageType: msg.messageType,
-                errorMsg: message.split("\n\n")[0],
-                stack: extractMinimalStackTraceInfo(e.stack),
-              },
-              false,
-            );
+            vscode.window.showInformationMessage(message, "Add API Key", "Use Local Model").then((selection) => {
+              if (selection === "Add API Key") {
+                this.request("setupApiKey", undefined);
+              } else if (selection === "Use Local Model") {
+                this.request("setupLocalConfig", undefined);
+              }
+            });
           }
         }
       }
@@ -159,7 +125,7 @@ export class VsCodeWebviewProtocol
   invoke<T extends keyof FromWebviewProtocol>(
     messageType: T,
     data: FromWebviewProtocol[T][0],
-    messageId?: string,
+    messageId?: string
   ): FromWebviewProtocol[T][1] {
     throw new Error("Method not implemented.");
   }
@@ -171,7 +137,7 @@ export class VsCodeWebviewProtocol
   public request<T extends keyof ToWebviewProtocol>(
     messageType: T,
     data: ToWebviewProtocol[T][0],
-    retry: boolean = true,
+    retry: boolean = true
   ): Promise<ToWebviewProtocol[T][1]> {
     const messageId = uuidv4();
     return new Promise(async (resolve) => {
@@ -191,14 +157,12 @@ export class VsCodeWebviewProtocol
       this.send(String(messageType), data, messageId);
 
       if (this.webview) {
-        const disposable = this.webview.onDidReceiveMessage(
-          (msg: Message<ToWebviewProtocol[T][1]>) => {
-            if (msg.messageId === messageId) {
-              resolve(msg.data);
-              disposable?.dispose();
-            }
-          },
-        );
+        const disposable = this.webview.onDidReceiveMessage((msg: Message<ToWebviewProtocol[T][1]>) => {
+          if (msg.messageId === messageId) {
+            resolve(msg.data);
+            disposable?.dispose();
+          }
+        });
       } else if (!retry) {
         resolve(undefined);
       }

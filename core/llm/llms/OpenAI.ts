@@ -405,4 +405,4 @@ class OpenAI extends BaseLLM {
   }
 }
 
-export default OpenAI;
+export { OpenAI };

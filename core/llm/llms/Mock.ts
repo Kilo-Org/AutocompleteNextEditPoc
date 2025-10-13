@@ -73,4 +73,4 @@ class MockLLM extends BaseLLM {
   }
 }
 
-export default MockLLM;
+export { MockLLM };
