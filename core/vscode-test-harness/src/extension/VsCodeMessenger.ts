@@ -19,10 +19,7 @@ const EDIT_MODE_STREAM_ID = "edit-mode-stream";
 import * as vscode from "vscode";
 
 import { EditDecorationManager } from "../quickEdit/EditDecorationManager";
-import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
 import { handleLLMError } from "../util/errorHandling";
-import { showTutorial } from "../util/tutorial";
-import { getExtensionUri } from "../util/vscode";
 import { VsCodeIde } from "../VsCodeIde";
 import { VsCodeWebviewProtocol } from "../webviewProtocol";
 
@@ -66,84 +63,11 @@ export class VsCodeMessenger {
   constructor(
     private readonly inProcessMessenger: InProcessMessenger<ToCoreProtocol, FromCoreProtocol>,
     private readonly webviewProtocol: VsCodeWebviewProtocol,
-    private readonly ide: VsCodeIde,
-    private readonly workOsAuthProvider: WorkOsAuthProvider
+    private readonly ide: VsCodeIde
   ) {
     /** WEBVIEW ONLY LISTENERS **/
     this.onWebview("showFile", (msg) => {
       this.ide.openFile(msg.data.filepath);
-    });
-
-    this.onWebview("vscode/openMoveRightMarkdown", (msg) => {
-      vscode.commands.executeCommand(
-        "markdown.showPreview",
-        vscode.Uri.joinPath(getExtensionUri(), "media", "move-chat-panel-right.md")
-      );
-    });
-
-    this.onWebview("toggleDevTools", (msg) => {
-      vscode.commands.executeCommand("continue.viewLogs");
-    });
-
-    this.onWebview("reloadWindow", (msg) => {
-      vscode.commands.executeCommand("workbench.action.reloadWindow");
-    });
-    this.onWebview("focusEditor", (msg) => {
-      vscode.commands.executeCommand("workbench.action.focusActiveEditorGroup");
-    });
-    this.onWebview("toggleFullScreen", (msg) => {
-      vscode.commands.executeCommand("continue.openInNewWindow");
-    });
-
-    this.onWebview("acceptDiff", async ({ data: { filepath, streamId } }) => {
-      await vscode.commands.executeCommand("continue.acceptDiff", filepath, streamId);
-    });
-
-    this.onWebview("rejectDiff", async ({ data: { filepath, streamId } }) => {
-      await vscode.commands.executeCommand("continue.rejectDiff", filepath, streamId);
-    });
-
-    this.onWebview("showTutorial", async (msg) => {
-      await showTutorial(this.ide);
-    });
-
-    this.onWebview("overwriteFile", async ({ data: { prevFileContent, filepath } }) => {
-      if (prevFileContent === null) {
-        // TODO: Delete the file
-        return;
-      }
-
-      await this.ide.openFile(filepath);
-
-      // Get active text editor
-      const editor = vscode.window.activeTextEditor;
-
-      if (!editor) {
-        vscode.window.showErrorMessage("No active editor to apply edits to");
-        return;
-      }
-
-      editor.edit((builder) =>
-        builder.replace(
-          new vscode.Range(editor.document.positionAt(0), editor.document.positionAt(editor.document.getText().length)),
-          prevFileContent
-        )
-      );
-    });
-
-    this.onWebview("insertAtCursor", async (msg) => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor === undefined || !editor.selection) {
-        return;
-      }
-
-      editor.edit((editBuilder) => {
-        editBuilder.replace(new vscode.Range(editor.selection.start, editor.selection.end), msg.data.text);
-      });
-    });
-
-    this.onWebview("session/share", async (msg) => {
-      await vscode.commands.executeCommand("continue.shareSession", msg.data.sessionId);
     });
 
     /** PASS THROUGH FROM WEBVIEW TO CORE AND BACK **/
@@ -236,14 +160,6 @@ export class VsCodeMessenger {
     });
     this.onWebviewOrCore("showToast", (msg) => {
       this.ide.showToast(...(msg.data as [any, any, ...any[]]));
-    });
-    this.onWebviewOrCore("getControlPlaneSessionInfo", async (msg) => {
-      return getControlPlaneSessionInfo(msg.data.silent, msg.data.useOnboarding);
-    });
-    this.onWebviewOrCore("logoutOfControlPlane", async (msg) => {
-      const sessions = await this.workOsAuthProvider.getSessions();
-      await Promise.all(sessions.map((session) => workOsAuthProvider.removeSession(session.id)));
-      vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", false);
     });
     this.onWebviewOrCore("saveFile", async (msg) => {
       return await ide.saveFile(msg.data.filepath);

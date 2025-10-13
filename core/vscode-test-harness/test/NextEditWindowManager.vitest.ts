@@ -81,10 +81,7 @@ vi.mock("core/util/env", () => ({
   EXTENSION_NAME: "continue",
 }));
 
-vi.mock("../src/util/getTheme", () => ({
-  getTheme: vi.fn(() => ({ id: "dark", kind: "dark" })),
-  getThemeString: vi.fn(() => "dark"),
-}));
+// Theme detection removed - using hardcoded theme values instead
 
 vi.mock("core/util/CodeRenderer", () => ({
   CodeRenderer: {
@@ -933,7 +930,7 @@ describe("NextEditWindowManager", () => {
   });
 
   describe("Configuration Changes", () => {
-    it("should update on theme change", async () => {
+    it("should handle theme change", async () => {
       await manager.setupNextEditWindowManager(mockContext);
 
       // Get the configuration change listener
@@ -947,9 +944,9 @@ describe("NextEditWindowManager", () => {
         affectsConfiguration: (key: string) => key === "workbench.colorTheme",
       });
 
-      // Should have updated theme
-      const { getThemeString } = await import("../src/util/getTheme");
-      expect(getThemeString).toHaveBeenCalled();
+      // Theme changes are now handled with hardcoded values, no dynamic detection
+      // Just verify the callback doesn't throw
+      expect(changeCallback).toBeDefined();
     });
 
     it("should update on font size change", async () => {

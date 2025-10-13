@@ -99,16 +99,6 @@ vi.mock("vscode", () => {
   };
 });
 
-// Mock getTheme utility
-vi.mock("../util/getTheme", () => ({
-  getTheme: vi.fn().mockReturnValue({
-    colors: {
-      "editor.foreground": "#ffffff",
-      "editor.background": "#1e1e1e",
-    },
-  }),
-}));
-
 // Mock svg-builder
 vi.mock("svg-builder", () => {
   const mockSvgBuilder = {

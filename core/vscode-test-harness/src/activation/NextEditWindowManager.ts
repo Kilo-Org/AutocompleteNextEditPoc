@@ -9,7 +9,6 @@ import { myersCharDiff } from "core/diff/myers";
 import { getOffsetPositionAtLastNewLine } from "core/nextEdit/diff/diff";
 import { NextEditLoggingService } from "core/nextEdit/NextEditLoggingService";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
-import { getThemeString } from "../util/getTheme";
 import {
   HandlerPriority,
   SelectionChangeManager,
@@ -163,7 +162,7 @@ export class NextEditWindowManager {
   }
 
   private constructor() {
-    this.theme = getThemeString();
+    this.theme = "Default Dark Modern";
     this.setupListeners();
     this.codeRenderer = CodeRenderer.getInstance();
 
@@ -607,7 +606,7 @@ export class NextEditWindowManager {
         e.affectsConfiguration("workbench.preferredHighContrastColorTheme") ||
         e.affectsConfiguration("workbench.preferredHighContrastLightColorTheme")
       ) {
-        this.theme = getThemeString();
+        this.theme = "Default Dark Modern";
         await this.codeRenderer.setTheme(this.theme);
         const editorConfig = vscode.workspace.getConfiguration("editor");
         this.fontSize = editorConfig.get<number>("fontSize") ?? 14;
@@ -617,7 +616,7 @@ export class NextEditWindowManager {
 
     // Listen for active color theme changes.
     vscode.window.onDidChangeActiveColorTheme(async () => {
-      this.theme = getThemeString();
+      this.theme = "Default Dark Modern";
       await this.codeRenderer.setTheme(this.theme);
       console.debug(
         "Active theme changed:",

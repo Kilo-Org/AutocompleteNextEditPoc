@@ -1,26 +1,17 @@
 import fs from "fs";
-import path from "path";
 
 import { IContextProvider, Core, FromCoreProtocol, ToCoreProtocol, InProcessMessenger } from "core";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import { EXTENSION_NAME, getControlPlaneEnv } from "core/util/env";
-import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath, getContinueGlobalPath } from "core/util/paths";
+import { EXTENSION_NAME } from "core/util/env";
+import { getConfigJsonPath, getConfigTsPath, getConfigYamlPath } from "core/util/paths";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 
 import { ContinueCompletionProvider } from "../autocomplete/completionProvider";
-import { monitorBatteryChanges, setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
-import { registerAllCodeLensProviders } from "../lang-server/codeLens";
-import { registerAllPromptFilesCompletionProviders } from "../lang-server/promptFileCompletions";
-import { setupRemoteConfigSync } from "../stubs/activation";
-import { UriEventHandler } from "../stubs/uriHandler";
-import { getControlPlaneSessionInfo, WorkOsAuthProvider } from "../stubs/WorkOsAuthProvider";
-import { Battery } from "../util/battery";
-import { FileSearch } from "../util/FileSearch";
+import { setupStatusBar, StatusBarStatus } from "../autocomplete/statusBar";
 import { VsCodeIdeUtils } from "../util/ideUtils";
 import { VsCodeIde } from "../VsCodeIde";
 
-import { ConfigYamlDocumentLinkProvider } from "./ConfigYamlDocumentLinkProvider";
 import { VsCodeMessenger } from "./VsCodeMessenger";
 
 import { getAst } from "core/autocomplete/util/ast";
@@ -48,10 +39,6 @@ export class VsCodeExtension {
   private windowId: string;
   webviewProtocolPromise: Promise<VsCodeWebviewProtocol>;
   private core: Core;
-  private battery: Battery;
-  private workOsAuthProvider: WorkOsAuthProvider;
-  private fileSearch: FileSearch;
-  private uriHandler = new UriEventHandler();
   private completionProvider: ContinueCompletionProvider;
 
   private ARBITRARY_TYPING_DELAY = 2000;
@@ -127,12 +114,6 @@ export class VsCodeExtension {
   }
 
   constructor(context: vscode.ExtensionContext) {
-    // Register auth provider
-    this.workOsAuthProvider = new WorkOsAuthProvider(context, this.uriHandler);
-
-    void this.workOsAuthProvider.refreshSessions();
-    context.subscriptions.push(this.workOsAuthProvider);
-
     let resolveWebviewProtocol: any = undefined;
     this.webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>((resolve) => {
       resolveWebviewProtocol = resolve;
@@ -200,7 +181,7 @@ export class VsCodeExtension {
 
     const inProcessMessenger = new InProcessMessenger<ToCoreProtocol, FromCoreProtocol>();
 
-    new VsCodeMessenger(inProcessMessenger, stubWebviewProtocol, this.ide, this.workOsAuthProvider);
+    new VsCodeMessenger(inProcessMessenger, stubWebviewProtocol, this.ide);
 
     this.core = new Core(inProcessMessenger, this.ide);
     this.configHandler = this.core.configHandler;
@@ -208,16 +189,10 @@ export class VsCodeExtension {
 
     void this.configHandler.loadConfig();
 
-    void setupRemoteConfigSync(() =>
-      this.configHandler?.reloadConfig?.bind(this.configHandler)?.("Remote config sync")
-    );
-
     void this.configHandler.loadConfig().then(async ({ config }) => {
       const shouldUseFullFileDiff = await getUsingFullFileDiff();
       this.completionProvider.updateUsingFullFileDiff(shouldUseFullFileDiff);
       selectionManager.updateUsingFullFileDiff(shouldUseFullFileDiff);
-
-      registerAllCodeLensProviders(context, config);
     });
 
     this.configHandler?.onConfigUpdate?.(async ({ config: newConfig, configLoadInterrupted }) => {
@@ -232,8 +207,6 @@ export class VsCodeExtension {
         setupStatusBar(undefined, undefined, true);
       } else if (newConfig) {
         setupStatusBar(undefined, undefined, false);
-
-        registerAllCodeLensProviders(context, newConfig);
       }
     });
 
@@ -252,28 +225,6 @@ export class VsCodeExtension {
     context.subscriptions.push(
       vscode.languages.registerInlineCompletionItemProvider([{ pattern: "**" }], this.completionProvider)
     );
-
-    // Handle uri events
-    this.uriHandler.event((uri: any) => {
-      const queryParams = new URLSearchParams(uri.query);
-      let profileId = queryParams.get("profile_id");
-      let orgId = queryParams.get("org_id");
-
-      this.core.invoke("config/refreshProfiles", {
-        reason: "VS Code deep link",
-        selectOrgId: orgId === "null" ? undefined : (orgId ?? undefined),
-        selectProfileId: profileId === "null" ? undefined : (profileId ?? undefined),
-      });
-    });
-
-    // Battery
-    this.battery = new Battery();
-    context.subscriptions.push(this.battery);
-    context.subscriptions.push(monitorBatteryChanges(this.battery));
-
-    // FileSearch
-    this.fileSearch = new FileSearch(this.ide);
-    registerAllPromptFilesCompletionProviders(context, this.fileSearch, this.ide);
 
     // Disabled due to performance issues
     // registerDebugTracker(this.sidebar.webviewProtocol, this.ide);
@@ -300,16 +251,6 @@ export class VsCodeExtension {
       }
       void this.configHandler?.reloadConfig?.("config.ts updated - fs file watch");
     });
-
-    // watch global rules directory for changes
-    const globalRulesDir = path.join(getContinueGlobalPath(), "rules");
-    if (fs.existsSync(globalRulesDir)) {
-      fs.watch(globalRulesDir, { recursive: true }, (eventType, filename) => {
-        if (filename && filename.endsWith(".md")) {
-          void this.configHandler?.reloadConfig?.("Global rules directory updated - fs file watch");
-        }
-      });
-    }
 
     vscode.workspace.onDidChangeTextDocument(async (event) => {
       if (event.contentChanges.length > 0) {
@@ -371,28 +312,6 @@ export class VsCodeExtension {
       }
     });
 
-    // When GitHub sign-in status changes, reload config
-    vscode.authentication.onDidChangeSessions(async (e) => {
-      const env = await getControlPlaneEnv();
-      if (!env || !env.AUTH_TYPE) {
-        return;
-      }
-      if (e.provider.id === env.AUTH_TYPE) {
-        void vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", true);
-
-        const sessionInfo = await getControlPlaneSessionInfo(true, false);
-        void this.core.invoke("didChangeControlPlaneSessionInfo", {
-          sessionInfo,
-        });
-      } else {
-        void vscode.commands.executeCommand("setContext", "continue.isSignedInToControlPlane", false);
-
-        if (e.provider.id === "github") {
-          this.configHandler?.reloadConfig?.("Github sign-in status changed");
-        }
-      }
-    });
-
     // Listen for editor changes to clean up decorations when editor closes.
     vscode.window.onDidChangeVisibleTextEditors(async () => {
       // If our active editor is no longer visible, clear decorations.
@@ -444,12 +363,6 @@ export class VsCodeExtension {
         documentContentProvider
       )
     );
-
-    const linkProvider = vscode.languages.registerDocumentLinkProvider(
-      { language: "yaml" },
-      new ConfigYamlDocumentLinkProvider()
-    );
-    context.subscriptions.push(linkProvider);
 
     this.ide.onDidChangeActiveTextEditor((filepath) => {
       void this.core.invoke("files/opened", { uris: [filepath] });
