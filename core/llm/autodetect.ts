@@ -1,9 +1,4 @@
-import {
-  ChatMessage,
-  ModelCapability,
-  ModelDescription,
-  TemplateType,
-} from "../index.js";
+import { ChatMessage, ModelCapability, ModelDescription, TemplateType } from "../index.js";
 import { NEXT_EDIT_MODELS } from "./constants.js";
 
 import {
@@ -111,7 +106,7 @@ function modelSupportsImages(
   provider: string,
   model: string,
   title: string | undefined,
-  capabilities: ModelCapability | undefined,
+  capabilities: ModelCapability | undefined
 ): boolean {
   if (capabilities?.uploadImage !== undefined) {
     return capabilities.uploadImage;
@@ -126,32 +121,11 @@ function modelSupportsImages(
   if (
     lowerModel.includes("vision") ||
     lowerTitle.includes("vision") ||
-    MODEL_SUPPORTS_IMAGES.some(
-      (modelrx) => modelrx.test(lowerModel) || modelrx.test(lowerTitle),
-    )
+    MODEL_SUPPORTS_IMAGES.some((modelrx) => modelrx.test(lowerModel) || modelrx.test(lowerTitle))
   ) {
     return true;
   }
 
-  return false;
-}
-
-function modelSupportsReasoning(
-  model: ModelDescription | null | undefined,
-): boolean {
-  if (!model) {
-    return false;
-  }
-  if ("anthropic" === model.underlyingProviderName) {
-    return true;
-  }
-  if (model.model.includes("deepseek-r")) {
-    return true;
-  }
-  if (model.completionOptions?.reasoning) {
-    // Reasoning support is forced at the config level. Model might not necessarily support it though!
-    return true;
-  }
   return false;
 }
 
@@ -177,17 +151,7 @@ const PARALLEL_PROVIDERS: string[] = [
   "scaleway",
 ];
 
-function llmCanGenerateInParallel(provider: string, model: string): boolean {
-  if (provider === "openai") {
-    return model.includes("gpt");
-  }
-
-  return PARALLEL_PROVIDERS.includes(provider);
-}
-
-function isProviderHandlesTemplatingOrNoTemplateTypeRequired(
-  modelName: string,
-): boolean {
+function isProviderHandlesTemplatingOrNoTemplateTypeRequired(modelName: string): boolean {
   return (
     modelName.includes("gpt") ||
     modelName.includes("command") ||
@@ -205,26 +169,19 @@ function isProviderHandlesTemplatingOrNoTemplateTypeRequired(
 
 // NOTE: When updating this list,
 // update core/nextEdit/templating/NextEditPromptEngine.ts as well.
-const MODEL_SUPPORTS_NEXT_EDIT: string[] = [
-  NEXT_EDIT_MODELS.MERCURY_CODER,
-  NEXT_EDIT_MODELS.INSTINCT,
-];
+const MODEL_SUPPORTS_NEXT_EDIT: string[] = [NEXT_EDIT_MODELS.MERCURY_CODER, NEXT_EDIT_MODELS.INSTINCT];
 
 function modelSupportsNextEdit(
   capabilities: ModelCapability | undefined,
   model: string,
-  title: string | undefined,
+  title: string | undefined
 ): boolean {
   if (capabilities?.nextEdit !== undefined) {
     return capabilities.nextEdit;
   }
 
   const lower = model.toLowerCase();
-  if (
-    MODEL_SUPPORTS_NEXT_EDIT.some(
-      (modelName) => lower.includes(modelName) || title?.includes(modelName),
-    )
-  ) {
+  if (MODEL_SUPPORTS_NEXT_EDIT.some((modelName) => lower.includes(modelName) || title?.includes(modelName))) {
     return true;
   }
 
@@ -326,22 +283,16 @@ function autodetectTemplateType(model: string): TemplateType | undefined {
 function autodetectTemplateFunction(
   model: string,
   provider: string,
-  explicitTemplate: TemplateType | undefined = undefined,
+  explicitTemplate: TemplateType | undefined = undefined
 ) {
-  if (
-    explicitTemplate === undefined &&
-    PROVIDER_HANDLES_TEMPLATING.includes(provider)
-  ) {
+  if (explicitTemplate === undefined && PROVIDER_HANDLES_TEMPLATING.includes(provider)) {
     return null;
   }
 
   const templateType = explicitTemplate ?? autodetectTemplateType(model);
 
   if (templateType) {
-    const mapping: Record<
-      TemplateType,
-      null | ((msg: ChatMessage[]) => string)
-    > = {
+    const mapping: Record<TemplateType, null | ((msg: ChatMessage[]) => string)> = {
       llama2: llama2TemplateMessages,
       alpaca: templateAlpacaMessages,
       phi2: phi2TemplateMessages,
@@ -385,10 +336,7 @@ const USES_OS_MODELS_EDIT_PROMPT: TemplateType[] = [
   "llama3",
 ];
 
-function autodetectPromptTemplates(
-  model: string,
-  explicitTemplate: TemplateType | undefined = undefined,
-) {
+function autodetectPromptTemplates(model: string, explicitTemplate: TemplateType | undefined = undefined) {
   const templateType = explicitTemplate ?? autodetectTemplateType(model);
   const templates: Record<string, any> = {};
 
