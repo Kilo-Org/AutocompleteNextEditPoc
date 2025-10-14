@@ -613,6 +613,5 @@ export class NextEditProvider {
 export function __setMockNextEditProviderInstance(
   mockInstance: NextEditProvider | null,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditProvider as any)._instance = mockInstance;
 }

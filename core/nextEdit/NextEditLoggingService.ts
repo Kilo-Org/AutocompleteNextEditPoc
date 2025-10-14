@@ -207,6 +207,5 @@ export class NextEditLoggingService {
 export function __setMockNextEditLoggingServiceInstance(
   mockInstance: NextEditLoggingService | null,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditLoggingService as any)._instance = mockInstance;
 }
