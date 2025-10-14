@@ -468,10 +468,10 @@ export abstract class BaseLLM implements ILLM {
   }
 
   protected async *_streamFim(
-    prefix: string,
-    suffix: string,
-    signal: AbortSignal,
-    options: CompletionOptions,
+    _prefix: string,
+    _suffix: string,
+    _signal: AbortSignal,
+    _options: CompletionOptions,
   ): AsyncGenerator<string, PromptLog> {
     throw new Error("Not implemented");
   }
@@ -1150,9 +1150,9 @@ export abstract class BaseLLM implements ILLM {
   }
 
   protected async *_streamComplete(
-    prompt: string,
-    signal: AbortSignal,
-    options: CompletionOptions,
+    _prompt: string,
+    _signal: AbortSignal,
+    _options: CompletionOptions,
   ): AsyncGenerator<string> {
     throw new Error("Not implemented");
   }
@@ -1189,7 +1189,7 @@ export abstract class BaseLLM implements ILLM {
     return completion;
   }
 
-  protected async _embed(chunks: string[]): Promise<number[][]> {
+  protected async _embed(_chunks: string[]): Promise<number[][]> {
     throw new Error(
       `Embedding is not supported for provider type ${this.providerName}`,
     );

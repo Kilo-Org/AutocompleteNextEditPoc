@@ -19,17 +19,17 @@ class MockLLM extends BaseLLM {
   }
 
   protected async *_streamComplete(
-    prompt: string,
-    signal: AbortSignal,
-    options: CompletionOptions,
+    _prompt: string,
+    _signal: AbortSignal,
+    _options: CompletionOptions,
   ): AsyncGenerator<string> {
     yield this.completion;
   }
 
   protected async *_streamChat(
     messages: ChatMessage[],
-    signal: AbortSignal,
-    options: CompletionOptions,
+    _signal: AbortSignal,
+    _options: CompletionOptions,
   ): AsyncGenerator<ChatMessage> {
     if (this.chatStreams) {
       const chatStream =
