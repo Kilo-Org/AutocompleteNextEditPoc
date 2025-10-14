@@ -2,9 +2,6 @@ import * as URI from "uri-js";
 import * as vscode from "vscode";
 import { getUniqueId, openEditorAndRevealRange } from "./vscode";
 
-const util = require("node:util");
-const asyncExec = util.promisify(require("node:child_process").exec);
-
 const NO_FS_PROVIDER_ERROR = "ENOPRO";
 const UNSUPPORTED_SCHEMES: Set<string> = new Set();
 
