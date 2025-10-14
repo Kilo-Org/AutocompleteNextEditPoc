@@ -27,14 +27,6 @@ export interface SnippetPayload {
   staticSnippet: AutocompleteStaticSnippet[];
 }
 
-function racePromise<T>(promise: Promise<T[]>, timeout = 100): Promise<T[]> {
-  const timeoutPromise = new Promise<T[]>((resolve) => {
-    setTimeout(() => resolve([]), timeout);
-  });
-
-  return Promise.race([promise, timeoutPromise]);
-}
-
 // Some IDEs might have special ways of finding snippets (e.g. JetBrains and VS Code have different "LSP-equivalent" systems,
 // or they might separately track recently edited ranges)
 async function getIdeSnippets(
@@ -150,57 +142,6 @@ const getSnippetsFromRecentlyOpenedFiles = async (
     console.error("Error processing opened files cache:", e);
     return [];
   }
-};
-
-export const getAllSnippets = async ({
-  helper,
-  ide,
-  getDefinitionsFromLsp,
-  contextRetrievalService,
-}: {
-  helper: HelperVars;
-  ide: IDE;
-  getDefinitionsFromLsp: GetLspDefinitionsFunction;
-  contextRetrievalService: ContextRetrievalService;
-}): Promise<SnippetPayload> => {
-  const recentlyEditedRangeSnippets =
-    getSnippetsFromRecentlyEditedRanges(helper);
-
-  const [
-    rootPathSnippets,
-    importDefinitionSnippets,
-    ideSnippets,
-    diffSnippets,
-    clipboardSnippets,
-    recentlyOpenedFileSnippets,
-    staticSnippet,
-  ] = await Promise.all([
-    racePromise(contextRetrievalService.getRootPathSnippets(helper)),
-    racePromise(
-      contextRetrievalService.getSnippetsFromImportDefinitions(helper),
-    ),
-    IDE_SNIPPETS_ENABLED
-      ? racePromise(getIdeSnippets(helper, ide, getDefinitionsFromLsp))
-      : [],
-    [], // racePromise(getDiffSnippets(ide)) // temporarily disabled, see https://github.com/continuedev/continue/pull/5882,
-    racePromise(getClipboardSnippets(ide)),
-    racePromise(getSnippetsFromRecentlyOpenedFiles(helper, ide)), // giving this one a little more time to complete
-    helper.options.experimental_enableStaticContextualization
-      ? racePromise(contextRetrievalService.getStaticContextSnippets(helper))
-      : [],
-  ]);
-
-  return {
-    rootPathSnippets,
-    importDefinitionSnippets,
-    ideSnippets,
-    recentlyEditedRangeSnippets,
-    diffSnippets,
-    clipboardSnippets,
-    recentlyVisitedRangesSnippets: helper.input.recentlyVisitedRanges,
-    recentlyOpenedFileSnippets,
-    staticSnippet,
-  };
 };
 
 export const getAllSnippetsWithoutRace = async ({

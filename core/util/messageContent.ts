@@ -6,7 +6,7 @@ import {
   TextMessagePart,
 } from "../index";
 
-export function stripImages(messageContent: MessageContent): string {
+function stripImages(messageContent: MessageContent): string {
   if (typeof messageContent === "string") {
     return messageContent;
   }

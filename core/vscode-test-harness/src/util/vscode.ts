@@ -6,20 +6,6 @@ function machineIdSync(): string {
 import * as URI from "uri-js";
 import * as vscode from "vscode";
 
-function getNonce() {
-  let text = "";
-  const possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
-export function getExtensionUri(): vscode.Uri {
-  return vscode.extensions.getExtension("Continue.continue")!.extensionUri;
-}
-
 function getViewColumnOfFile(uri: vscode.Uri): vscode.ViewColumn | undefined {
   for (const tabGroup of vscode.window.tabGroups.all) {
     for (const tab of tabGroup.tabs) {
