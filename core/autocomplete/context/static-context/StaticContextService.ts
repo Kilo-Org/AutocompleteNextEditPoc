@@ -433,7 +433,7 @@ export class StaticContextService {
           let funcType = "";
           try {
             funcType = extractFunctionTypeFromDecl(tld);
-          } catch (err) {
+          } catch {
             // Most likely is the case that there is no explicit return type annotation.
             const sigHelp = await this.ide.getSignatureHelp({
               filepath: source,

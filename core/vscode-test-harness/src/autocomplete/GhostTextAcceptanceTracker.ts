@@ -111,7 +111,7 @@ export class GhostTextAcceptanceTracker {
           this.expectedAcceptance = null;
           return true;
         }
-      } catch (error) {
+      } catch {
         // Range might be invalid, just fall through.
       }
     }

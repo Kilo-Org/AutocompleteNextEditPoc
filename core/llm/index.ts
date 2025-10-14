@@ -18,18 +18,15 @@ import {
   LLMOptions,
   MessageOption,
   ModelCapability,
-  ModelInstaller,
   PromptLog,
   PromptTemplate,
   TabAutocompleteOptions,
   TemplateType,
   Usage,
 } from "../index.js";
-import { isLemonadeInstalled } from "../util/lemonadeHelper.js";
 import { Logger } from "../util/Logger.js";
 import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
-import { isOllamaInstalled } from "../util/ollamaHelper.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
 import { withExponentialBackoff } from "../util/withExponentialBackoff.js";
 

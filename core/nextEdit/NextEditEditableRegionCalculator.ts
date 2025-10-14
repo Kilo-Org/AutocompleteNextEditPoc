@@ -517,7 +517,7 @@ async function staticJump(ctx: {
     // );
 
     return references.length > 1 ? references.slice(1) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

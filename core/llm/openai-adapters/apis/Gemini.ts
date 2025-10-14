@@ -210,7 +210,7 @@ export class GeminiApi implements BaseLlmApi {
         oaiBody.tools.forEach((tool) => {
           try {
             functions.push(convertOpenAIToolToGeminiFunction(tool));
-          } catch (e) {
+          } catch {
             console.warn(
               `Failed to convert tool to gemini function definition. Skipping: ${JSON.stringify(tool, null, 2)}`,
             );
@@ -294,7 +294,7 @@ export class GeminiApi implements BaseLlmApi {
         let data;
         try {
           data = JSON.parse(part);
-        } catch (e) {
+        } catch {
           foundIncomplete = true;
           continue; // yo!
         }

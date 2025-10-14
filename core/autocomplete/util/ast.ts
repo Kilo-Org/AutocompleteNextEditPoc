@@ -17,7 +17,7 @@ export async function getAst(
   try {
     const ast = parser.parse(fileContents);
     return ast;
-  } catch (e) {
+  } catch {
     return undefined;
   }
 }

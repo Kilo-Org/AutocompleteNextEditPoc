@@ -92,7 +92,7 @@ export class VertexAIApi implements BaseLlmApi {
           throw new Error("VertexAI: keyJson must be a valid JWT");
         }
         this.clientPromise = Promise.resolve(jsonClient);
-      } catch (e) {
+      } catch {
         throw new Error("VertexAI: Failed to parse keyJson");
       }
     } else if (keyFile) {

@@ -301,7 +301,7 @@ export class WatsonXApi implements BaseLlmApi {
             data.results.forEach((result: any) => {
               generatedChunk += result.generated_text || "";
             });
-          } catch (e) {
+          } catch {
             // parsing error is expected with streaming response
           }
         }

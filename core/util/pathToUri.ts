@@ -18,7 +18,7 @@ export function localPathToUri(path: string) {
 export function localPathOrUriToPath(localPathOrUri: string): string {
   try {
     return fileURLToPath(localPathOrUri);
-  } catch (e) {
+  } catch {
     // console.log("Received local filepath", localPathOrUri);
 
     return localPathOrUri;

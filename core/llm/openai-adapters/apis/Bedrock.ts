@@ -89,7 +89,7 @@ export class BedrockApi implements BaseLlmApi {
         profile: profile,
         ignoreCache: true,
       })();
-    } catch (e) {
+    } catch {
       console.warn(
         `AWS profile with name ${profile} not found in ~/.aws/credentials, using default profile`,
       );
