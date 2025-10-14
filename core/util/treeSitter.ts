@@ -278,3 +278,70 @@ const GET_SYMBOLS_FOR_NODE_TYPES: Parser.SyntaxNode["type"][] = [
   // field_declaration
   // "arrow_function",
 ];
+
+async function getSymbolsForFile(
+  filepath: string,
+  contents: string,
+): Promise<SymbolWithRange[] | undefined> {
+  const parser = await getParserForFile(filepath);
+  if (!parser) {
+    return;
+  }
+
+  let tree: Parser.Tree;
+  try {
+    tree = parser.parse(contents);
+  } catch {
+    console.log(`Error parsing file: ${filepath}`);
+    return;
+  }
+  // console.log(`file: ${filepath}`);
+
+  // Function to recursively find all named nodes (classes and functions)
+  const symbols: SymbolWithRange[] = [];
+  function findNamedNodesRecursive(node: Parser.SyntaxNode) {
+    // console.log(`node: ${node.type}, ${node.text}`);
+    if (GET_SYMBOLS_FOR_NODE_TYPES.includes(node.type)) {
+      // console.log(`parent: ${node.type}, ${node.text.substring(0, 200)}`);
+      // node.children.forEach((child) => {
+      //   console.log(`child: ${child.type}, ${child.text}`);
+      // });
+
+      // Empirically, the actual name is the last identifier in the node
+      // Especially with languages where return type is declared before the name
+      // TODO use findLast in newer version of node target
+      let identifier: Parser.SyntaxNode | undefined = undefined;
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        if (
+          node.children[i].type === "identifier" ||
+          node.children[i].type === "property_identifier"
+        ) {
+          identifier = node.children[i];
+          break;
+        }
+      }
+
+      if (identifier?.text) {
+        symbols.push({
+          filepath,
+          type: node.type,
+          name: identifier.text,
+          range: {
+            start: {
+              character: node.startPosition.column,
+              line: node.startPosition.row,
+            },
+            end: {
+              character: node.endPosition.column + 1,
+              line: node.endPosition.row + 1,
+            },
+          },
+          content: node.text,
+        });
+      }
+    }
+    node.children.forEach(findNamedNodesRecursive);
+  }
+  findNamedNodesRecursive(tree.rootNode);
+  return symbols;
+}
