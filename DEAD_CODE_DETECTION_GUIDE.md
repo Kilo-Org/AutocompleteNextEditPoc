@@ -1,122 +1,234 @@
-# Dead Code Detection Strategy
+# Dead Code Detection Guide
 
-## Problem Analysis
+This guide explains how to **FIND** unused/dead code in the codebase. The aim is to iteratively and in small steps delete dead code.
+There's no need to find ALL dead code up front. Once you've identified any dead code dead code, delegate removal (in small batches) to a [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md) following subtask to safely remove it.
 
-The `getNonce()` function in [`core/vscode-test-harness/src/util/vscode.ts:9-16`](core/vscode-test-harness/src/util/vscode.ts:9) is not detected by knip even though the file IS being analyzed.
+## Quick Start: How to Find Dead Code
 
-### Why Knip Misses It
+### Step 1: Find Unused Internal Code
 
-**The Import Chain (knip IS analyzing this code):**
+Run these commands to find unused functions, variables, and parameters within files:
+
+```bash
+npm run typecheck  # TypeScript compiler reports unused locals
+npm run lint       # ESLint reports same issues with real-time feedback
+```
+
+**Example output:**
+
+```
+core/vscode-test-harness/src/util/vscode.ts(9,16): error TS6133: 'getNonce' is declared but its value is never read.
+```
+
+This tells you:
+
+- **File**: `core/vscode-test-harness/src/util/vscode.ts`
+- **Line**: 9, Column 16
+- **What's unused**: `getNonce` function
+- **Action**: Can be safely removed (see CODE_CLEANUP_INSTRUCTIONS.md)
+
+### Step 2: Find Unused Exports and Dependencies
+
+Run this command to find unused exports, dependencies, and unreachable files:
+
+```bash
+npx knip  # Analyzes module graph for unused exports
+```
+
+Knip will list:
+
+- Exported functions/classes/types that nothing imports
+- Files not reachable from entry points
+- Dependencies in package.json that aren't used
+
+### Step 3: Remove Found Code Safely
+
+Once you've identified unused code, follow [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md) for the safe removal process.
+
+---
+
+## Detailed Workflows
+
+### For Daily Development
+
+Catch unused code as you work:
+
+```bash
+npm run lint          # Real-time in editor + command line
+npm run typecheck     # Catches unused locals, functions, parameters
+```
+
+Both commands show warnings for unused code. Fix them before committing.
+
+### For Systematic Cleanup
+
+Find ALL dead code in the project:
+
+```bash
+# Step 1: Find unused internal code
+npm run typecheck     # Lists all unused locals, functions, parameters
+npm run lint          # Confirms same issues
+
+# Step 2: Find unused exports and dependencies
+npx knip              # Lists unused exports, unreachable files, unused dependencies
+```
+
+### For Weekly/Monthly Audits
+
+Run a comprehensive scan:
+
+```bash
+npm run typecheck && npm run lint && npx knip
+```
+
+Review all warnings and create a list of removal candidates.
+
+## Understanding Tool Output
+
+### TypeCheck/Lint Warnings
+
+**Format:**
+
+```
+<file>(<line>,<column>): error TS6133: '<name>' is declared but its value is never read.
+```
+
+**Meaning:**
+
+- `'functionName' is declared but its value is never read` → Unused internal function
+- `'variableName' is declared but its value is never read` → Unused local variable
+- `'_paramName' is declared but its value is never read` → Unused parameter (prefixed with `_` to intentionally ignore)
+
+**Examples:**
+
+```
+core/util/helpers.ts(42,10): error TS6133: 'formatData' is declared but its value is never read.
+```
+
+→ Function `formatData` at line 42 in `core/util/helpers.ts` is unused
+
+```
+core/autocomplete/util.ts(15,7): error TS6133: 'tempVar' is declared but its value is never read.
+```
+
+→ Variable `tempVar` at line 15 in `core/autocomplete/util.ts` is unused
+
+### Knip Output
+
+Knip groups results by category:
+
+**Unused exports:**
+
+```
+Unused exports (2)
+  core/util/helpers.ts
+    - formatData
+    - processItem
+```
+
+→ These exported functions aren't imported anywhere
+
+**Unused files:**
+
+```
+Unused files (1)
+  core/old-feature/handler.ts
+```
+
+→ This file isn't imported from any entry point
+
+**Unused dependencies:**
+
+```
+Unused dependencies (1)
+  package.json
+    - old-library
+```
+
+→ This package.json dependency isn't used in code
+
+## Tool Comparison
+
+| Tool                    | Detects                                           | Command             | Best For                                                    |
+| ----------------------- | ------------------------------------------------- | ------------------- | ----------------------------------------------------------- |
+| **TypeScript Compiler** | Unused locals, functions, parameters within files | `npm run typecheck` | Internal unused code; Parameter usage; Local variables      |
+| **ESLint**              | Unused variables, functions, parameters           | `npm run lint`      | Real-time editor feedback; Same detection as TypeScript     |
+| **Knip**                | Unused exports, dependencies, unreachable files   | `npx knip`          | Module-level analysis; Unused exports; Package.json cleanup |
+
+**Key Point:** These tools are complementary:
+
+- **TypeScript/ESLint**: Internal code within files (what knip CAN'T detect)
+- **Knip**: Module-level exports and dependencies (different scope)
+
+Use ALL THREE for complete coverage.
+
+## Why Knip Misses Internal Unused Functions
+
+**Example Problem:**
+
+In [`core/vscode-test-harness/src/util/vscode.ts`](core/vscode-test-harness/src/util/vscode.ts):
+
+```typescript
+// Exported - USED elsewhere
+export function getExtensionUri() { ... }
+export function getUniqueId() { ... }
+
+// Internal - NOT USED anywhere
+function getNonce() { ... }  // ← Knip doesn't detect this!
+```
+
+**Why:**
+
+Knip analyzes the module graph: "Is this FILE imported?" Since the file IS imported (for the exported functions), knip considers it "in use" and doesn't analyze internal function usage.
+
+**The Import Chain:**
 
 ```
 core/**/*.vitest.ts (entry point)
-  → SelectionChangeManager.vitest.ts
-    → VsCodeIde.ts
-      → ideUtils.ts
-        → vscode.ts ✓ (File IS analyzed!)
+  → VsCodeIde.ts
+    → ideUtils.ts
+      → vscode.ts ✓ (File IS analyzed by knip!)
+        → getExtensionUri() ✓ (Used)
+        → getUniqueId() ✓ (Used)
+        → getNonce() ❌ (Knip can't detect internal unused functions)
 ```
 
-**But knip still doesn't catch `getNonce()` because:**
+**Solution:** Use TypeScript compiler or ESLint, which analyze function-level usage within files.
 
-Knip has a **fundamental limitation**: it cannot detect **internal** (non-exported) unused functions within files that ARE imported.
+## What Each Tool Detects
 
-In [`vscode.ts`](core/vscode-test-harness/src/util/vscode.ts:1), the file exports:
+### TypeScript Compiler (`noUnusedLocals`, `noUnusedParameters`)
 
-- ✅ `getExtensionUri()` - USED by other code
-- ✅ `openEditorAndRevealRange()` - USED by ideUtils.ts
-- ✅ `getUniqueId()` - USED by ideUtils.ts
-- ❌ `getNonce()` - **NOT exported, NOT used** ← Knip can't detect this!
+**✅ DOES Detect:**
 
-Since the file is imported (for the exported functions that ARE used), knip considers the entire file "in use" and doesn't analyze internal function usage.
+- Unused local variables
+- Unused parameters
+- **Unused internal functions** (like `getNonce()`)
+- Unused private class members
 
-## Knip's Capabilities and Limitations
+**❌ DOES NOT Detect:**
 
-### What Knip DOES Detect:
+- Unused exports (use Knip)
+- Unused dependencies (use Knip)
+- Dead code after return statements
+- Unreachable conditional branches
 
-- ✅ Unused exported functions, classes, and variables
-- ✅ Unused dependencies in package.json
-- ✅ Unreachable files (not imported from any entry point)
-- ✅ Unused exports from modules
+### ESLint (`@typescript-eslint/no-unused-vars`)
 
-### What Knip DOES NOT Detect:
+**✅ DOES Detect:**
 
-- ❌ **Internal (non-exported) unused functions within imported files** ← Your issue
-- ❌ Unused code within a function body
-- ❌ Dead code after return statements
-- ❌ Unreachable conditional branches
+- Unused variables, functions, and parameters
+- Real-time warnings during development
+- Same as TypeScript compiler
 
-## The Solution: Multi-Tool Approach
+**❌ DOES NOT Detect:**
 
-To catch ALL types of dead code, you need complementary tools:
+- Unused exports (use Knip)
+- Unused dependencies (use Knip)
 
-### 1. TypeScript Compiler with `noUnusedLocals` ⭐ **BEST FOR YOUR CASE**
+**Configuration:**
 
-**This will catch `getNonce()` immediately!**
-
-Add to your `tsconfig.json`:
-
-```json
-{
-  "compilerOptions": {
-    "noUnusedLocals": true, // ✅ Catches getNonce() and similar
-    "noUnusedParameters": true, // Catches unused function parameters
-    "noUnusedPrivateMembers": true // TypeScript 5.0+ - unused private class members
-  }
-}
-```
-
-**Run:**
-
-```bash
-npm run typecheck
-# or
-tsc --noEmit
-```
-
-**What it detects:**
-
-- ✅ Unused local variables
-- ✅ Unused parameters
-- ✅ **Unused internal functions** (like `getNonce()`)
-- ✅ Unused private class members
-
-This is the ONLY tool that will reliably catch internal unused functions.
-
-### 2. Knip (For Unused Exports & Dependencies)
-
-Your current [`knip.json`](knip.json:1) is already correctly configured:
-
-```json
-{
-  "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": [
-    "core/autocomplete/CompletionProvider.ts",
-    "core/nextEdit/NextEditProvider.ts",
-    "core/**/*.vitest.ts" // ✅ This already covers VsCodeIde.ts via tests
-  ],
-  "ignoreDependencies": ["@types/*"],
-  "ignore": ["**/__fixtures__/**", "**/__test-cases__/**"]
-}
-```
-
-**No changes needed** - the test entry points already analyze VsCodeIde and its imports.
-
-**Run:**
-
-```bash
-npx knip
-```
-
-**What it detects:**
-
-- ✅ Unused exported functions, classes, types
-- ✅ Unreachable files
-- ✅ Unused dependencies
-- ❌ Internal unused functions (not its purpose)
-
-### 3. ESLint with `@typescript-eslint/no-unused-vars`
-
-Add to `.eslintrc.shared.json`:
+Already configured in `.eslintrc.shared.json`:
 
 ```json
 {
@@ -133,124 +245,56 @@ Add to `.eslintrc.shared.json`:
 }
 ```
 
-**Run:**
+### Knip
 
-```bash
-npm run lint
-```
+**✅ DOES Detect:**
 
-**What it detects:**
+- Unused exported functions, classes, types
+- Unreachable files
+- Unused dependencies in package.json
+- Unused exports from modules
 
-- Unused variables, functions, and parameters
-- Real-time warnings during development
+**❌ DOES NOT Detect:**
 
-### 4. ts-prune (Alternative Export Checker)
+- Internal (non-exported) unused functions
+- Unused local variables
+- Unused parameters
 
-**Install:**
+**Configuration:**
 
-```bash
-npm install -D ts-prune
-```
-
-**Add to package.json:**
+Already configured in `knip.json`:
 
 ```json
 {
-  "scripts": {
-    "deadcode:exports": "ts-prune"
-  }
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": ["core/autocomplete/CompletionProvider.ts", "core/nextEdit/NextEditProvider.ts", "core/**/*.vitest.ts"],
+  "ignoreDependencies": ["@types/*"],
+  "ignore": ["**/__fixtures__/**", "**/__test-cases__/**"]
 }
 ```
 
-**What it detects:**
+## Summary: Complete Dead Code Detection
 
-- All unused exports across the codebase
-- Complementary to knip for export-focused analysis
-- ❌ Cannot detect internal unused functions
+**Use all three tools for comprehensive coverage:**
 
-## Recommended Workflow
+| What You Want to Find                           | Tool to Use         | Command                              |
+| ----------------------------------------------- | ------------------- | ------------------------------------ |
+| Unused internal functions, locals, parameters   | TypeScript + ESLint | `npm run typecheck` + `npm run lint` |
+| Unused exports, dependencies, unreachable files | Knip                | `npx knip`                           |
+| Everything                                      | All three           | Run all commands                     |
 
-### Immediate Action (Catches getNonce())
+## Next Steps: Removing Dead Code
 
-1. **Add TypeScript unused checks** to your existing tsconfig:
+Once you've identified unused code with these tools, it should be removed.
+Do so bit by bit; i.e. don't try to remove everything at once, but small chunks at a time,
+so that unforeseen implicit usages can be granularly caught by trial and error. To remove dead code,
+start a subprocess that follows [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md)
+That document explains:
 
-```json
-{
-  "compilerOptions": {
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-  }
-}
-```
+- How to safely remove code without breaking tests
+- How to handle cascading deletions (removing one thing makes others unused)
+- How to verify removals are safe
+- What to include in each removal (implementations, interfaces, types, helpers)
+- How to commit removals properly
 
-2. **Run typecheck**:
-
-```bash
-npm run typecheck
-```
-
-This will immediately flag `getNonce()` as unused!
-
-### Daily Development
-
-```bash
-npm run lint          # ESLint catches unused vars/functions
-npm run typecheck     # TypeScript catches unused locals
-```
-
-### Pre-commit Hooks
-
-Your `.husky/pre-commit` should include:
-
-```bash
-#!/bin/sh
-npm run lint
-npm run typecheck
-```
-
-### Weekly/Monthly Maintenance
-
-```bash
-# Comprehensive dead code scan
-npx knip                  # Unused exports & dependencies
-npm run deadcode:exports  # ts-prune for exports (optional)
-npm run typecheck         # TypeScript unused checks
-```
-
-## Tool Comparison
-
-| Tool                              | Detects Internal Unused Functions | Best For                                        |
-| --------------------------------- | --------------------------------- | ----------------------------------------------- |
-| **TypeScript (`noUnusedLocals`)** | ✅ **YES**                        | Internal functions, local variables, parameters |
-| **Knip**                          | ❌ No                             | Unused exports, dependencies, unreachable files |
-| **ESLint**                        | ✅ Yes                            | Development-time warnings                       |
-| **ts-prune**                      | ❌ No                             | Alternative to knip for exports                 |
-
-## Summary
-
-**Your knip configuration is already correct** - the test entry points ensure all code is analyzed. The issue is that **knip cannot detect internal unused functions by design**.
-
-**The solution**: Use TypeScript's `noUnusedLocals` compiler option. This is the standard tool for catching internal unused code and will immediately flag `getNonce()` and similar functions.
-
-### Quick Fix
-
-```bash
-# 1. Enable in tsconfig.json
-{
-  "compilerOptions": {
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-  }
-}
-
-# 2. Run typecheck
-npm run typecheck
-
-# 3. Fix all unused code warnings
-```
-
-This combination gives you complete dead code coverage:
-
-- **Knip**: Unused exports and dependencies
-- **TypeScript**: Internal unused functions (your case)
-- **ESLint**: Real-time development warnings
+**The detection tools (this guide) tell you WHAT to remove. The cleanup instructions tell you HOW to remove it safely.**
