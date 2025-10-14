@@ -1,6 +1,4 @@
-import { DataLogger } from "../../util/log";
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../../util/parameters";
-import { getUriFileExtension } from "../../util/uri";
 import { AutocompleteOutcome } from "./types";
 
 export class AutocompleteLoggingService {
@@ -94,34 +92,8 @@ export class AutocompleteLoggingService {
   }
 
   private logAutocompleteOutcome(outcome: AutocompleteOutcome) {
-    void DataLogger.getInstance().logDevData({
-      name: "autocomplete",
-      data: {
-        ...outcome,
-        useFileSuffix: true, // from outdated schema
-      },
-    });
-
-    const { prompt, completion, prefix, suffix, ...restOfOutcome } = outcome;
-    const toLog = {
-      accepted: restOfOutcome.accepted,
-      cacheHit: restOfOutcome.cacheHit,
-      completionId: restOfOutcome.completionId,
-      completionOptions: restOfOutcome.completionOptions,
-      debounceDelay: restOfOutcome.debounceDelay,
-      fileExtension: getUriFileExtension(restOfOutcome.filepath),
-      maxPromptTokens: restOfOutcome.maxPromptTokens,
-      modelName: restOfOutcome.modelName,
-      modelProvider: restOfOutcome.modelProvider,
-      multilineCompletions: restOfOutcome.multilineCompletions,
-      time: restOfOutcome.time,
-      useRecentlyEdited: restOfOutcome.useRecentlyEdited,
-      numLines: restOfOutcome.numLines,
-      profileType: restOfOutcome.profileType,
-    };
-
     if (!process.env.VITEST) {
-      console.log(toLog);
+      console.log(outcome);
     }
   }
 }

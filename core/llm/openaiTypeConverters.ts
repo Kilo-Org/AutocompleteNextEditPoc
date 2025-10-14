@@ -41,7 +41,7 @@ function toChatMessage(message: ChatMessage): ChatCompletionMessageParam {
         id: toolCall.id!,
         type: toolCall.type!,
         function: {
-          name: toolCall.function?.name!,
+          name: toolCall.function.name,
           arguments: toolCall.function?.arguments || "{}",
         },
       }));

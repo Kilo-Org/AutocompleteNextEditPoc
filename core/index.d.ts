@@ -373,8 +373,8 @@ export interface ToolCall {
 export interface ToolCallDelta {
   id?: string;
   type?: "function";
-  function?: {
-    name?: string;
+  function: {
+    name: string;
     arguments?: string;
   };
 }
@@ -1938,50 +1938,4 @@ export class Core {
   constructor(messenger: InProcessMessenger, ide: IDE, configProvider?: any);
   configHandler: any;
   invoke(method: string, ...args: any[]): Promise<any>;
-}
-
-// MinimalConfig interface with all required properties
-export interface MinimalConfig {
-  selectedModelByRole?: {
-    autocomplete?: ILLM;
-    edit?: ILLM;
-    chat?: ILLM;
-    rerank?: ILLM;
-  };
-  rules?: any[];
-}
-
-// Stub for MinimalConfigProvider additions
-declare module "core/autocomplete/MinimalConfig" {
-  export interface MinimalConfigProvider {
-    reloadConfig?(): Promise<void>;
-    onConfigUpdate?(
-      handler: (newConfig: any, configLoadInterrupted: boolean) => void,
-    ): void;
-    registerCustomContextProvider?(provider: any): void;
-  }
-}
-
-// Stubs for missing external modules
-declare module "@sentry/node" {
-  export function startSpan<T>(options: any, callback: () => T): T;
-  export const spanToJSON: any;
-}
-
-declare module "@sentry/core" {
-  export function startInactiveSpan(options: any): any;
-}
-
-declare module "@modelcontextprotocol/sdk/shared/auth.js" {
-  export const OAuthClientFactory: any;
-}
-
-declare module "node-machine-id" {
-  export function machineId(): Promise<string>;
-  export function machineIdSync(): string;
-}
-
-// Stub for missing Types in paths.ts
-export namespace Types {
-  export const FileSystemProvider: any;
 }

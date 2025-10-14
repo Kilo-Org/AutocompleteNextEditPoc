@@ -2,7 +2,6 @@ import { IDE, Position } from "../..";
 import { AutocompleteCodeSnippet } from "../../autocomplete/snippets/types";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
 import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
-import { DataLogger } from "../../util/log";
 import { NextEditProvider } from "../NextEditProvider";
 import { RecentlyEditedRange } from "../types";
 import { getAutocompleteContext } from "./autocompleteContextFetching";
@@ -114,21 +113,18 @@ export const processNextEditData = async ({
 
   if (filenamesAndDiffs.length > 0) {
     // if there are previous edits, log
-    void DataLogger.getInstance().logDevData({
-      name: "nextEditWithHistory",
-      data: {
-        previousEdits: filenamesAndDiffs,
-        fileURI: filePath,
-        workspaceDirURI: workspaceDir,
-        beforeContent,
-        afterContent,
-        beforeCursorPos: cursorPosBeforeEdit,
-        afterCursorPos: cursorPosAfterPrevEdit,
-        context: autocompleteContext,
-        modelProvider,
-        modelName,
-        modelTitle: modelName,
-      },
+    console.log("nextEditWithHistory", {
+      previousEdits: filenamesAndDiffs,
+      fileURI: filePath,
+      workspaceDirURI: workspaceDir,
+      beforeContent,
+      afterContent,
+      beforeCursorPos: cursorPosBeforeEdit,
+      afterCursorPos: cursorPosAfterPrevEdit,
+      context: autocompleteContext,
+      modelProvider,
+      modelName,
+      modelTitle: modelName,
     });
   }
 

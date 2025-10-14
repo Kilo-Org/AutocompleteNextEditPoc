@@ -1,5 +1,4 @@
 import { COUNT_COMPLETION_REJECTED_AFTER } from "../util/parameters";
-import { DataLogger } from "../util/log";
 import { NextEditOutcome } from "./types";
 
 export class NextEditLoggingService {
@@ -201,14 +200,6 @@ export class NextEditLoggingService {
     if (outcome.aborted === undefined) {
       outcome.aborted = false;
     }
-
-    void DataLogger.getInstance().logDevData({
-      name: "nextEditOutcome",
-      data: outcome,
-      // data: {
-      //   ...outcome, // TODO: this is somehow getting messed up with autocomplete schema.
-      // },
-    });
   }
 }
 
