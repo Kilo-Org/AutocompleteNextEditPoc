@@ -1,12 +1,9 @@
 import {
   Completion,
-  CompletionCreateParamsNonStreaming,
-  CompletionCreateParamsStreaming,
   CompletionUsage,
 } from "openai/resources/completions.mjs";
 import {
   CreateEmbeddingResponse,
-  EmbeddingCreateParams,
 } from "openai/resources/embeddings.mjs";
 import {
   ChatCompletion,
@@ -21,8 +18,6 @@ import { chatChunk, chatCompletion, usageChatChunk } from "../util.js";
 import {
   BaseLlmApi,
   CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
 } from "./base.js";
 
 type UsageInfo = Pick<
@@ -139,32 +134,23 @@ export class RelaceApi implements BaseLlmApi {
     });
   }
 
-  completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
+  completionNonStream(): Promise<Completion> {
     throw new Error(
       "Relace provider does not support non-streaming completion.",
     );
   }
-  completionStream(
-    body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<Completion> {
+  completionStream(): AsyncGenerator<Completion> {
     throw new Error("Relace provider does not support streaming completion.");
   }
-  fimStream(
-    body: FimCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<ChatCompletionChunk> {
+  fimStream(): AsyncGenerator<ChatCompletionChunk> {
     throw new Error(
       "Relace provider does not support streaming FIM completion.",
     );
   }
-  embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
+  embed(): Promise<CreateEmbeddingResponse> {
     throw new Error("Relace provider does not support embeddings.");
   }
-  rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  rerank(): Promise<CreateRerankResponse> {
     throw new Error("Relace provider does not support reranking.");
   }
   list(): Promise<Model[]> {

@@ -20,7 +20,6 @@ import {
   BaseLlmApi,
   CreateRerankResponse,
   FimCreateParamsStreaming,
-  RerankCreateParams,
 } from "./base.js";
 import { GeminiApi } from "./Gemini.js";
 import { OpenAIApi } from "./OpenAI.js";
@@ -182,7 +181,7 @@ export class VertexAIApi implements BaseLlmApi {
     }
   }
 
-  private buildUrl(endpoint: string, model?: string): URL {
+  private buildUrl(endpoint: string): URL {
     const apiBase = this.getApiBase();
     const url = new URL(endpoint, apiBase);
 
@@ -549,7 +548,7 @@ export class VertexAIApi implements BaseLlmApi {
     });
   }
 
-  async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  async rerank(): Promise<CreateRerankResponse> {
     throw new Error("Reranking is not supported by VertexAI");
   }
 
