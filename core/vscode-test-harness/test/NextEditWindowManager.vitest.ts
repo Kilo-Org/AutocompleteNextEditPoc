@@ -368,7 +368,7 @@ describe("NextEditWindowManager", () => {
 
       // Create deferred promises with guaranteed resolvers
       const createDeferred = () => {
-        let resolve: Function;
+        let resolve: (value: unknown) => void;
         const promise = new Promise((res) => {
           resolve = res;
         });
