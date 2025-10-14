@@ -8,8 +8,8 @@
   "scripts": {
     "test": "vitest run --config core/vitest.config.ts",
     "test:watch": "vitest --config core/vitest.config.ts",
-    "lint": "eslint core --ext ts",
-    "lint:fix": "eslint core --ext ts --fix",
+    "lint": "eslint core",
+    "lint:fix": "eslint core --fix",
     "typecheck": "tsgo --noEmit",
     "tsc:watch": "tsgo --watch --noEmit --pretty",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .gitignore --ignore-path .prettierignore",
