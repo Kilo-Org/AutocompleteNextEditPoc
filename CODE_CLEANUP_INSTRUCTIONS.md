@@ -12,7 +12,7 @@ You have found dead code. These instructions assume you have already found dead 
 
 ## Process for Each Removal
 
-You will be given a specific code location (file path and line numbers) containing a method, function, or feature that is confirmed to be unnecessary.
+You will be given a specific code location (file path and line numbers) containing a method, function, or feature that is confirmed to be unnecessary. You'll check which warnings currently exist, and then try removing the code, and that no new warnings have appeared; finally, assuming everything went well, you will "git commit" your changes.
 
 ### Steps to Follow:
 
@@ -44,8 +44,8 @@ Write down these counts. Your removal must NOT increase them.
 Run verification commands:
 
 ```bash
-npm run typecheck    # Must NOT increase warnings/errors
-npm run lint         # Must NOT increase warnings/errors
+npm run typecheck    # Must NOT increase warnings/errors (other than warnings about unused code)
+npm run lint         # Must NOT increase warnings/errors (other than warnings about unused code)
 npm test             # Must pass
 ```
 
@@ -61,15 +61,10 @@ npm test             # Must pass
 - Remove the newly unused code too (preferred approach)
 - OR revert your change if the newly unused code is actually needed
 
-**If typecheck errors appeared:**
+**If typecheck errors appeared or tests fail:**
 
 - The code is actually used somewhere
-- Restore the removed code immediately
-
-**If tests fail:**
-
-- The code is necessary for functionality
-- Restore the removed code immediately
+- Restore the removed code immediately, e.g. via git reset
 
 #### 5. Clean Up Cascading Deletions
 
@@ -104,7 +99,7 @@ If any fail, restore changes and investigate.
 
 #### 7. Commit
 
-Create a git commit with a message describing:
+IMPORTANT Create a git commit with a message describing:
 
 - What was removed
 - Why it's safe to remove
@@ -115,7 +110,7 @@ Create a git commit with a message describing:
 
 Use attempt_completion to report:
 
-- **Success**: What was removed, commit SHA, why it's safe
+- **Success**: What was removed, commit SHA, why it's safe. DO NOT REPORT SUCCESS unless you committed the changes!
 - **Failure**: Why the code is necessary and was kept
 
 ---

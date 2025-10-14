@@ -10,23 +10,23 @@ export class CodeRenderer {
     return CodeRenderer.instance;
   }
 
-  async setTheme(theme: string): Promise<void> {
+  async setTheme(_theme: string): Promise<void> {
     // No-op stub
   }
 
   async getDataUri(
-    text: string,
-    languageId: string,
-    options: {
+    _text: string,
+    _languageId: string,
+    _options: {
       imageType: "svg";
       fontSize: number;
       fontFamily: string;
       dimensions: { width: number; height: number };
       lineHeight: number;
     },
-    currLineOffsetFromTop: number,
-    newDiffLines: DiffLine[],
-    diffChars: DiffChar[],
+    _currLineOffsetFromTop: number,
+    _newDiffLines: DiffLine[],
+    _diffChars: DiffChar[],
   ): Promise<string> {
     // Return empty data URI as stub
     return "data:image/svg+xml;base64,";

@@ -514,7 +514,7 @@ function compileChatMessages({
   if (systemMsg) {
     reassembled.push(systemMsg);
   }
-  reassembled.push(...historyWithTokens.map(({ tokens, ...rest }) => rest));
+  reassembled.push(...historyWithTokens.map(({ tokens: _tokens, ...rest }) => rest));
   reassembled.push(...toolSequence);
 
   const inputTokens =

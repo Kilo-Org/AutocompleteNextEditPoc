@@ -20,27 +20,27 @@ class FileSystemIde implements IDE {
     return Promise.resolve(fs.existsSync(filepath));
   }
 
-  gotoDefinition(location: Location): Promise<RangeInFile[]> {
+  gotoDefinition(_location: Location): Promise<RangeInFile[]> {
     return Promise.resolve([]);
   }
 
-  gotoTypeDefinition(location: Location): Promise<RangeInFile[]> {
+  gotoTypeDefinition(_location: Location): Promise<RangeInFile[]> {
     return Promise.resolve([]);
   }
 
-  getSignatureHelp(location: Location): Promise<SignatureHelp | null> {
+  getSignatureHelp(_location: Location): Promise<SignatureHelp | null> {
     return Promise.resolve(null);
   }
 
-  getReferences(location: Location): Promise<RangeInFile[]> {
+  getReferences(_location: Location): Promise<RangeInFile[]> {
     return Promise.resolve([]);
   }
 
-  getDocumentSymbols(fileUri: string): Promise<DocumentSymbol[]> {
+  getDocumentSymbols(_fileUri: string): Promise<DocumentSymbol[]> {
     return Promise.resolve([]);
   }
 
-  onDidChangeActiveTextEditor(callback: (fileUri: string) => void): void {
+  onDidChangeActiveTextEditor(_callback: (fileUri: string) => void): void {
     return;
   }
 
@@ -72,7 +72,7 @@ class FileSystemIde implements IDE {
     });
   }
 
-  readRangeInFile(fileUri: string, range: Range): Promise<string> {
+  readRangeInFile(_fileUri: string, _range: Range): Promise<string> {
     return Promise.resolve("");
   }
 
@@ -99,7 +99,7 @@ class FileSystemIde implements IDE {
     });
   }
 
-  saveFile(fileUri: string): Promise<void> {
+  saveFile(_fileUri: string): Promise<void> {
     return Promise.resolve();
   }
 

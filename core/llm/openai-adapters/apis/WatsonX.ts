@@ -6,7 +6,6 @@ import {
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
   Completion,
-  CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
 } from "openai/resources/index";
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
@@ -15,8 +14,6 @@ import { chatCompletion } from "../util.js";
 import {
   BaseLlmApi,
   CreateRerankResponse,
-  FimCreateParamsStreaming,
-  RerankCreateParams,
 } from "./base.js";
 
 export class WatsonXApi implements BaseLlmApi {
@@ -239,10 +236,7 @@ export class WatsonXApi implements BaseLlmApi {
     }
   }
 
-  async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
-  ): Promise<Completion> {
+  async completionNonStream(): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
 
@@ -325,20 +319,15 @@ export class WatsonXApi implements BaseLlmApi {
     }
   }
 
-  async *fimStream(
-    body: FimCreateParamsStreaming,
-    signal: AbortSignal,
-  ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
+  async *fimStream(): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
 
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
+  async embed(): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 
-  async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  async rerank(): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
   }
 
