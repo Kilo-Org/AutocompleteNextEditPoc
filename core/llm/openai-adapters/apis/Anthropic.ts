@@ -439,31 +439,31 @@ export class AnthropicApi implements BaseLlmApi {
   }
 
   async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    _body: CompletionCreateParamsNonStreaming,
+    _signal: AbortSignal,
   ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
   async *completionStream(
-    body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    _body: CompletionCreateParamsStreaming,
+    _signal: AbortSignal,
   ): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
   async *fimStream(
-    body: FimCreateParamsStreaming,
-    signal: AbortSignal,
+    _body: FimCreateParamsStreaming,
+    _signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
 
   async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
+    _body: OpenAI.Embeddings.EmbeddingCreateParams,
   ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 
-  async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
   }
 

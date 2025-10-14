@@ -581,19 +581,19 @@ export class BedrockApi implements BaseLlmApi {
   }
 
   completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
+    _body: CompletionCreateParamsNonStreaming,
   ): Promise<Completion> {
     throw new Error("Bedrock does not support completions API");
   }
 
   completionStream(
-    body: CompletionCreateParamsStreaming,
+    _body: CompletionCreateParamsStreaming,
   ): AsyncGenerator<Completion> {
     throw new Error("Bedrock does not support completions API");
   }
 
   fimStream(
-    body: FimCreateParamsStreaming,
+    _body: FimCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Bedrock does not support FIM directly");
   }

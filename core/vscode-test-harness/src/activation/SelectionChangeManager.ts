@@ -323,7 +323,7 @@ export class SelectionChangeManager {
 
   private async defaultFallbackHandler(
     e: vscode.TextEditorSelectionChangeEvent,
-    state: StateSnapshot,
+    _state: StateSnapshot,
   ): Promise<boolean> {
     if (!this.ide) {
       console.error("IDE not initialized in SelectionChangeManager");

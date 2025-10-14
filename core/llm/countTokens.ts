@@ -81,24 +81,6 @@ function countImageTokens(content: MessagePart): number {
   throw new Error("Non-image content type");
 }
 
-async function countTokensAsync(
-  content: MessageContent,
-  // defaults to llama2 because the tokenizer tends to produce more tokens
-  modelName = "llama2",
-): Promise<number> {
-  const encoding = asyncEncoderForModel(modelName);
-  if (Array.isArray(content)) {
-    const promises = content.map(async (part) => {
-      if (part.type === "imageUrl") {
-        return countImageTokens(part);
-      }
-      return (await encoding.encode(part.text ?? "")).length;
-    });
-    return (await Promise.all(promises)).reduce((sum, val) => sum + val, 0);
-  }
-  return (await encoding.encode(content ?? "")).length;
-}
-
 function countTokens(
   content: MessageContent,
   // defaults to llama2 because the tokenizer tends to produce more tokens
@@ -532,7 +514,6 @@ function compileChatMessages({
 export {
   compileChatMessages,
   countTokens,
-  countTokensAsync,
   pruneLinesFromBottom,
   pruneLinesFromTop,
   pruneRawPromptFromTop,

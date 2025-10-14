@@ -1,4 +1,3 @@
-// eslint-disable-next-line max-lines-per-function
 import { describe, expect, it } from "vitest";
 
 import * as lineStream from "./lineStream";

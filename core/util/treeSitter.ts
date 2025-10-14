@@ -279,7 +279,7 @@ const GET_SYMBOLS_FOR_NODE_TYPES: Parser.SyntaxNode["type"][] = [
   // "arrow_function",
 ];
 
-async function getSymbolsForFile(
+export async function getSymbolsForFile( //MINIMAL_REPO - continue doesn't use this in autocomplete
   filepath: string,
   contents: string,
 ): Promise<SymbolWithRange[] | undefined> {

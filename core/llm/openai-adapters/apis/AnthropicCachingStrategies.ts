@@ -164,20 +164,3 @@ export const CACHING_STRATEGIES = {
 } as const;
 
 export type CachingStrategyName = keyof typeof CACHING_STRATEGIES;
-
-// Helper function to get available strategies
-const getAvailableStrategies = () => {
-  return Object.keys(CACHING_STRATEGIES) as CachingStrategyName[];
-};
-
-// Helper function to get strategy description
-const getStrategyDescription = (strategy: CachingStrategyName): string => {
-  const descriptions = {
-    none: "No caching - baseline for comparison",
-    systemOnly: "Cache only system messages (current implementation)",
-    systemAndTools: "Cache system messages and tool definitions (high impact)",
-    optimized:
-      "Intelligent caching - system, tools, and large content (best performance)",
-  };
-  return descriptions[strategy];
-};

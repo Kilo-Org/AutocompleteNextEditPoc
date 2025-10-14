@@ -346,7 +346,7 @@ export const Markdown: AutocompleteLanguageInfo = {
   topLevelKeywords: [],
   singleLineComment: "",
   endOfLine: [],
-  useMultiline: ({ prefix, suffix }) => {
+  useMultiline: ({ prefix }) => {
     const singleLineStarters = ["- ", "* ", /^\d+\. /, "> ", "```", /^#{1,6} /];
     let currentLine = prefix.split("\n").pop();
     if (!currentLine) {

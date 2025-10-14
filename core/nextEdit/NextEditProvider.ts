@@ -69,7 +69,7 @@ export class NextEditProvider {
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: unknown) => void,
     private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
-    endpointType: "default" | "fineTuned",
+    _endpointType: "default" | "fineTuned",
   ) {
     this.contextRetrievalService = new ContextRetrievalService(this.ide);
     this.loggingService = NextEditLoggingService.getInstance();
@@ -613,6 +613,5 @@ export class NextEditProvider {
 export function __setMockNextEditProviderInstance(
   mockInstance: NextEditProvider | null,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditProvider as any)._instance = mockInstance;
 }

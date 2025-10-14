@@ -152,9 +152,8 @@ export class PrefetchQueue {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockPrefetchQueueInstance(
+function __setMockPrefetchQueueInstance(
   mockInstance: PrefetchQueue | null,
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (PrefetchQueue as any)._instance = mockInstance;
 }

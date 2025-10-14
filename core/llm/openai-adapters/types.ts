@@ -1,11 +1,5 @@
 import * as z from "zod";
 
-const ClientCertificateOptionsSchema = z.object({
-  cert: z.string(),
-  key: z.string(),
-  passphrase: z.string().optional(),
-});
-
 // Base config objects
 const BaseConfig = z.object({
   provider: z.string(),
@@ -92,13 +86,10 @@ export const ContinueProxyConfigSchema = BasePlusConfig.extend({
     proxyUrl: z.string().optional(),
   }),
 });
-type ContinueProxyConfig = z.infer<typeof ContinueProxyConfigSchema>;
 
 const MockConfigSchema = BasePlusConfig.extend({
   provider: z.literal("mock"),
 });
-
-type MockConfig = z.infer<typeof MockConfigSchema>;
 
 // Other APIs
 const CohereConfigSchema = OpenAIConfigSchema.extend({
@@ -127,7 +118,6 @@ export const AzureConfigSchema = OpenAIConfigSchema.extend({
     })
     .optional(),
 });
-type AzureConfig = z.infer<typeof AzureConfigSchema>;
 
 const GeminiConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("gemini"),
@@ -176,7 +166,7 @@ const VertexAIConfigSchema = BasePlusConfig.extend({
 export type VertexAIConfig = z.infer<typeof VertexAIConfigSchema>;
 
 // Discriminated union
-const LLMConfigSchema = z.discriminatedUnion("provider", [
+export const LLMConfigSchema = z.discriminatedUnion("provider", [
   OpenAIConfigSchema,
   BedrockConfigSchema,
   MoonshotConfigSchema,

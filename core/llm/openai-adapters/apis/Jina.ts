@@ -26,33 +26,33 @@ export class JinaApi implements BaseLlmApi {
   }
 
   async chatCompletionNonStream(
-    body: ChatCompletionCreateParamsNonStreaming,
+    _body: ChatCompletionCreateParamsNonStreaming,
   ): Promise<ChatCompletion> {
     throw new Error("Method not implemented.");
   }
   async *chatCompletionStream(
-    body: ChatCompletionCreateParamsStreaming,
+    _body: ChatCompletionCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
   async completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
+    _body: CompletionCreateParamsNonStreaming,
   ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
   async *completionStream(
-    body: CompletionCreateParamsStreaming,
+    _body: CompletionCreateParamsStreaming,
   ): AsyncGenerator<Completion, any, unknown> {
     throw new Error("Method not implemented.");
   }
   async *fimStream(
-    body: FimCreateParamsStreaming,
+    _body: FimCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     throw new Error("Method not implemented.");
   }
 
   async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
+    _body: OpenAI.Embeddings.EmbeddingCreateParams,
   ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }

@@ -87,7 +87,6 @@ export class BracketMatchingService {
       stack.unshift(openBracket);
     }
 
-    let all = "";
     let seenNonWhitespaceOrClosingBracket = false;
     for await (let chunk of stream) {
       // Allow closing brackets before any non-whitespace characters
@@ -104,7 +103,6 @@ export class BracketMatchingService {
         }
       }
 
-      all += chunk;
       for (let i = 0; i < chunk.length; i++) {
         const char = chunk[i];
         if (Object.values(BRACKETS).includes(char)) {

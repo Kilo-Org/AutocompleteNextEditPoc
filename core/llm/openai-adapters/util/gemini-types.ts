@@ -1,22 +1,6 @@
 import { JSONSchema7Object } from "json-schema";
 import { ChatCompletionTool } from "openai/resources/index.mjs";
 
-// https://ai.google.dev/api/generate-content
-interface GeminiGenerationConfig {
-  stopSequences?: string[];
-  responseMimeType?: string;
-  candidateCount?: number;
-  maxOutputTokens?: number;
-  temperature?: number;
-  topP?: number;
-  topK?: number;
-  presencePenalty?: number;
-  frequencyPenalty?: number;
-  responseLogprobs?: boolean;
-  logprobs?: number;
-  // responseSchema?: object; // https://ai.google.dev/api/caching#Schema
-}
-
 type GeminiObjectSchemaType =
   | "TYPE_UNSPECIFIED"
   | "STRING"
@@ -251,35 +235,6 @@ export interface GeminiToolFunctionDeclaration {
   description: string;
   parameters?: GeminiObjectSchema;
   response?: GeminiObjectSchema;
-}
-interface GeminiTool {
-  functionDeclarations?: GeminiToolFunctionDeclaration[];
-  googleSearchRetrieval?: {
-    dynamicRetrievalConfig: {
-      mode?: "MODE_DYNAMIC" | "MODE_UNSPECIFIED";
-      dynamicThreshold?: number;
-    };
-  };
-  codeExecution?: {};
-}
-
-interface GeminiToolConfig {
-  functionCallingConfig?: {
-    mode?: "NONE" | "ANY" | "AUTO";
-    allowedFunctionNames?: string[];
-  };
-}
-
-interface GeminiChatResponseSuccess {
-  candidates: Candidate[];
-  promptFeedback: PromptFeedback;
-  usageMetadata: UsageMetadata;
-}
-
-interface GeminiChatResponseError {
-  error: {
-    message: string;
-  };
 }
 
 interface PromptFeedback {

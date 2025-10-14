@@ -116,7 +116,7 @@ export class MinimalConfigProvider {
    * Register config update handler (stub for compatibility)
    */
   onConfigUpdate(
-    handler: (event: {
+    _handler: (event: {
       config: MinimalConfig;
       configLoadInterrupted: boolean;
     }) => void,
@@ -127,7 +127,7 @@ export class MinimalConfigProvider {
   /**
    * Register custom context provider (stub for compatibility)
    */
-  registerCustomContextProvider(provider: unknown): void {
+  registerCustomContextProvider(_provider: unknown): void {
     // No-op for minimal config
   }
 }

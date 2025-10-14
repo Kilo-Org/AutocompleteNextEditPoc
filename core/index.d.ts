@@ -23,7 +23,7 @@ export function parseProxyModelName(model: string): {
   };
 }
 export type ContinueProperties = any;
-export function decodeSecretLocation(location: string): {
+export function decodeSecretLocation(_location: string): {
   secretType: SecretType;
 } {
   return { secretType: SecretType.NotFound };
@@ -1905,7 +1905,7 @@ export interface ListHistoryOptions {
   limit?: number;
 }
 
-export interface IMessenger<TFrom = any, TTo = any> {
+export interface IMessenger<TFrom = any, _TTo = any> {
   send(messageType: string, data: any, messageId?: string): string;
   on<T extends keyof TFrom>(
     messageType: T,

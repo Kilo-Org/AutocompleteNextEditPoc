@@ -1,5 +1,5 @@
 import { OpenAi } from "./providers/openai.js";
-import { LlmInfoWithProvider, ModelProvider, UseCase } from "./types.js";
+import { LlmInfoWithProvider, ModelProvider } from "./types.js";
 
 const allModelProviders: ModelProvider[] = [OpenAi];
 
@@ -26,8 +26,4 @@ export function findLlmInfo(
   return allLlms.find((llm) =>
     llm.regex ? llm.regex.test(model) : llm.model === model,
   );
-}
-
-function getAllRecommendedFor(useCase: UseCase): LlmInfoWithProvider[] {
-  return allLlms.filter((llm) => llm.recommendedFor?.includes(useCase));
 }

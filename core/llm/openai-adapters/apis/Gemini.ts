@@ -376,21 +376,21 @@ export class GeminiApi implements BaseLlmApi {
     yield* this.handleStreamResponse(resp, body.model);
   }
   completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
+    _body: CompletionCreateParamsNonStreaming,
   ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
   completionStream(
-    body: CompletionCreateParamsStreaming,
+    _body: CompletionCreateParamsStreaming,
   ): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
   fimStream(
-    body: FimCreateParamsStreaming,
+    _body: FimCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
-  async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
   }
 
@@ -410,9 +410,7 @@ export class GeminiApi implements BaseLlmApi {
           })),
         }),
         headers: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "x-goog-api-key": this.config.apiKey,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           "Content-Type": "application/json",
         },
       },

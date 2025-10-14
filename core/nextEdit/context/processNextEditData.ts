@@ -51,7 +51,7 @@ export const processNextEditData = async ({
   recentlyEditedRanges,
   recentlyVisitedRanges,
   workspaceDir,
-  modelNameOrInstance,
+  modelNameOrInstance: _modelNameOrInstance,
 }: ProcessNextEditDataParams) => {
   // To switch to the user's autocomplete model, uncomment the following lines
   // const { config } = await configHandler.loadConfig();
