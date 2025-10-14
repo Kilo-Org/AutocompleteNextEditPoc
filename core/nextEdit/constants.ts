@@ -3,7 +3,10 @@ import { NEXT_EDIT_MODELS } from "../llm/constants";
 export const NEXT_EDIT_EDITABLE_REGION_TOP_MARGIN = 0;
 export const NEXT_EDIT_EDITABLE_REGION_BOTTOM_MARGIN = 5;
 
-export const MODEL_WINDOW_SIZES: Record<NEXT_EDIT_MODELS, { topMargin: number; bottomMargin: number }> = {
+export const MODEL_WINDOW_SIZES: Record<
+  NEXT_EDIT_MODELS,
+  { topMargin: number; bottomMargin: number }
+> = {
   "mercury-coder": {
     topMargin: 0,
     bottomMargin: 5,
@@ -46,10 +49,14 @@ export const INSTINCT_USER_PROMPT_PREFIX =
   "Reference the user excerpt, user edits, and the snippets to understand the developer's intent. Update the editable region of the user excerpt by predicting and completing the changes they would have made next. This may be a deletion, addition, or modification of code.";
 
 // Mercury Coder Next Edit-specific tokens.
-export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPETS_OPEN = "<|recently_viewed_code_snippets|>";
-export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPETS_CLOSE = "<|/recently_viewed_code_snippets|>";
-export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_OPEN = "<|recently_viewed_code_snippet|>";
-export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_CLOSE = "<|/recently_viewed_code_snippet|>";
+export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPETS_OPEN =
+  "<|recently_viewed_code_snippets|>";
+export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPETS_CLOSE =
+  "<|/recently_viewed_code_snippets|>";
+export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_OPEN =
+  "<|recently_viewed_code_snippet|>";
+export const MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_CLOSE =
+  "<|/recently_viewed_code_snippet|>";
 export const MERCURY_CURRENT_FILE_CONTENT_OPEN = "<|current_file_content|>";
 export const MERCURY_CURRENT_FILE_CONTENT_CLOSE = "<|/current_file_content|>";
 export const MERCURY_CODE_TO_EDIT_OPEN = "<|code_to_edit|>";

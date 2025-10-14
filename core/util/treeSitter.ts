@@ -152,7 +152,9 @@ function getExtensionFromPathOrUri(input: string): string {
   return dot >= 0 ? base.slice(dot + 1).toLowerCase() : "";
 }
 
-async function getLanguageForFile(filepathOrUri: string): Promise<Language | undefined> {
+async function getLanguageForFile(
+  filepathOrUri: string,
+): Promise<Language | undefined> {
   try {
     await Parser.init();
     const extension = getExtensionFromPathOrUri(filepathOrUri);
@@ -179,7 +181,10 @@ export const getFullLanguageName = (filepathOrUri: string) => {
   return supportedLanguages[extension];
 };
 
-export async function getQueryForFile(filepathOrUri: string, queryPath: string): Promise<Parser.Query | undefined> {
+export async function getQueryForFile(
+  filepathOrUri: string,
+  queryPath: string,
+): Promise<Parser.Query | undefined> {
   const language = await getLanguageForFile(filepathOrUri);
   if (!language) {
     return undefined;
@@ -216,7 +221,9 @@ export async function getQueryForFile(filepathOrUri: string, queryPath: string):
   return query;
 }
 
-async function loadLanguageForFileExt(fileExtension: string): Promise<Language> {
+async function loadLanguageForFileExt(
+  fileExtension: string,
+): Promise<Language> {
   const filename = `tree-sitter-${supportedLanguages[fileExtension]}.wasm`;
 
   // Try multiple locations to support both hoisted (root node_modules) and local installs.
@@ -234,7 +241,9 @@ async function loadLanguageForFileExt(fileExtension: string): Promise<Language> 
   const candidatePaths: string[] = [];
   for (const root of candidateRoots) {
     // Typical hoisted location in monorepo tests
-    candidatePaths.push(path.join(root, "node_modules", "tree-sitter-wasms", "out", filename));
+    candidatePaths.push(
+      path.join(root, "node_modules", "tree-sitter-wasms", "out", filename),
+    );
     // Legacy/local bundled layout
     candidatePaths.push(path.join(root, "tree-sitter-wasms", filename));
   }
@@ -246,7 +255,13 @@ async function loadLanguageForFileExt(fileExtension: string): Promise<Language> 
   }
 
   // Fallback (will throw with a clear path in error if still missing)
-  const fallback = path.join(candidateRoots[0]!, "node_modules", "tree-sitter-wasms", "out", filename);
+  const fallback = path.join(
+    candidateRoots[0]!,
+    "node_modules",
+    "tree-sitter-wasms",
+    "out",
+    filename,
+  );
   return await Parser.Language.load(fallback);
 }
 
@@ -264,7 +279,10 @@ const GET_SYMBOLS_FOR_NODE_TYPES: Parser.SyntaxNode["type"][] = [
   // "arrow_function",
 ];
 
-async function getSymbolsForFile(filepath: string, contents: string): Promise<SymbolWithRange[] | undefined> {
+async function getSymbolsForFile(
+  filepath: string,
+  contents: string,
+): Promise<SymbolWithRange[] | undefined> {
   const parser = await getParserForFile(filepath);
   if (!parser) {
     return;
@@ -294,7 +312,10 @@ async function getSymbolsForFile(filepath: string, contents: string): Promise<Sy
       // TODO use findLast in newer version of node target
       let identifier: Parser.SyntaxNode | undefined = undefined;
       for (let i = node.children.length - 1; i >= 0; i--) {
-        if (node.children[i].type === "identifier" || node.children[i].type === "property_identifier") {
+        if (
+          node.children[i].type === "identifier" ||
+          node.children[i].type === "property_identifier"
+        ) {
           identifier = node.children[i];
           break;
         }

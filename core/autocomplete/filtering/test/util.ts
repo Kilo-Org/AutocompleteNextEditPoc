@@ -23,7 +23,9 @@ export interface AutocompleteFileringTestInput {
   };
 }
 
-export async function testAutocompleteFiltering(test: AutocompleteFileringTestInput) {
+export async function testAutocompleteFiltering(
+  test: AutocompleteFileringTestInput,
+) {
   const { prefix } = parseFimExample(test.input);
 
   // Setup necessary objects
@@ -45,7 +47,7 @@ export async function testAutocompleteFiltering(test: AutocompleteFileringTestIn
     ide,
     async () => llm,
     () => {},
-    async () => []
+    async () => [],
   );
 
   const line = prefix.split("\n").length - 1;
@@ -66,7 +68,7 @@ export async function testAutocompleteFiltering(test: AutocompleteFileringTestIn
   const result = await completionProvider.provideInlineCompletionItems(
     autocompleteInput,
     undefined,
-    true // force=true to skip debounce in tests
+    true, // force=true to skip debounce in tests
   );
 
   // Ensure that we return the text that is wanted to be displayed

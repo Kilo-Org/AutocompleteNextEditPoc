@@ -4,7 +4,10 @@ import { getParserForFile } from "../../util/treeSitter";
 
 export type AstPath = Parser.SyntaxNode[];
 
-export async function getAst(filepath: string, fileContents: string): Promise<Parser.Tree | undefined> {
+export async function getAst(
+  filepath: string,
+  fileContents: string,
+): Promise<Parser.Tree | undefined> {
   const parser = await getParserForFile(filepath);
 
   if (!parser) {
@@ -19,7 +22,10 @@ export async function getAst(filepath: string, fileContents: string): Promise<Pa
   }
 }
 
-export async function getTreePathAtCursor(ast: Parser.Tree, cursorIndex: number): Promise<AstPath> {
+export async function getTreePathAtCursor(
+  ast: Parser.Tree,
+  cursorIndex: number,
+): Promise<AstPath> {
   const path = [ast.rootNode];
   while (path[path.length - 1].childCount > 0) {
     let foundChild = false;

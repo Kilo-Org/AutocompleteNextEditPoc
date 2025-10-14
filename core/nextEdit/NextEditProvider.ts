@@ -22,7 +22,13 @@ import { NextEditLoggingService } from "./NextEditLoggingService.js";
 import { PrefetchQueue } from "./NextEditPrefetchQueue.js";
 import { NextEditProviderFactory } from "./NextEditProviderFactory.js";
 import { BaseNextEditModelProvider } from "./providers/BaseNextEditProvider.js";
-import { ModelSpecificContext, NextEditOutcome, Prompt, PromptMetadata, RecentlyEditedRange } from "./types.js";
+import {
+  ModelSpecificContext,
+  NextEditOutcome,
+  Prompt,
+  PromptMetadata,
+  RecentlyEditedRange,
+} from "./types.js";
 
 // Errors that can be expected on occasion even during normal functioning should not be shown.
 // Not worth disrupting the user to tell them that a single autocomplete request didn't go through
@@ -63,7 +69,7 @@ export class NextEditProvider {
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: unknown) => void,
     private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
-    endpointType: "default" | "fineTuned"
+    endpointType: "default" | "fineTuned",
   ) {
     this.contextRetrievalService = new ContextRetrievalService(this.ide);
     this.loggingService = NextEditLoggingService.getInstance();
@@ -75,7 +81,7 @@ export class NextEditProvider {
     injectedGetLlm: () => Promise<ILLM | undefined>,
     onError: (e: unknown) => void,
     getDefinitionsFromLsp: GetLspDefinitionsFunction,
-    endpointType: "default" | "fineTuned"
+    endpointType: "default" | "fineTuned",
   ): NextEditProvider {
     if (!NextEditProvider.instance) {
       NextEditProvider.instance = new NextEditProvider(
@@ -84,7 +90,7 @@ export class NextEditProvider {
         injectedGetLlm,
         onError,
         getDefinitionsFromLsp,
-        endpointType
+        endpointType,
       );
     }
     return NextEditProvider.instance;
@@ -92,7 +98,9 @@ export class NextEditProvider {
 
   public static getInstance(): NextEditProvider {
     if (!NextEditProvider.instance) {
-      throw new Error("NextEditProvider has not been initialized. Call initialize() first.");
+      throw new Error(
+        "NextEditProvider has not been initialized. Call initialize() first.",
+      );
     }
     return NextEditProvider.instance;
   }
@@ -147,7 +155,11 @@ export class NextEditProvider {
 
   private onError(e: unknown) {
     if (
-      ERRORS_TO_IGNORE.some((err) => (typeof e === "string" ? e.includes(err) : (e as Error)?.message?.includes(err)))
+      ERRORS_TO_IGNORE.some((err) =>
+        typeof e === "string"
+          ? e.includes(err)
+          : (e as Error)?.message?.includes(err),
+      )
     ) {
       return;
     }
@@ -210,7 +222,9 @@ export class NextEditProvider {
     this.previousCompletions = [];
 
     if (this.previousRequest) {
-      const fileContent = (await this.ide.readFile(this.previousRequest.filepath)).toString();
+      const fileContent = (
+        await this.ide.readFile(this.previousRequest.filepath)
+      ).toString();
 
       const ast = await getAst(this.previousRequest.filepath, fileContent);
 
@@ -218,7 +232,7 @@ export class NextEditProvider {
         DocumentHistoryTracker.getInstance().push(
           localPathOrUriToPath(this.previousRequest.filepath),
           fileContent,
-          ast
+          ast,
         );
       }
     }
@@ -245,20 +259,27 @@ export class NextEditProvider {
     opts?: {
       withChain: boolean;
       usingFullFileDiff: boolean;
-    }
+    },
   ): Promise<NextEditOutcome | undefined> {
     if (isSecurityConcern(input.filepath)) {
       return undefined;
     }
     try {
       this.previousRequest = input;
-      const { token: abortToken, startTime, helper } = await this._initializeCompletionRequest(input, token);
+      const {
+        token: abortToken,
+        startTime,
+        helper,
+      } = await this._initializeCompletionRequest(input, token);
       if (!helper) return undefined;
 
       // Create model-specific provider based on the model name.
-      this.modelProvider = NextEditProviderFactory.createProvider(helper.modelName);
+      this.modelProvider = NextEditProviderFactory.createProvider(
+        helper.modelName,
+      );
 
-      const { editableRegionStartLine, editableRegionEndLine, prompts } = await this._generatePrompts(helper, opts);
+      const { editableRegionStartLine, editableRegionEndLine, prompts } =
+        await this._generatePrompts(helper, opts);
 
       return await this._handleCompletion(
         helper,
@@ -267,7 +288,7 @@ export class NextEditProvider {
         startTime,
         editableRegionStartLine,
         editableRegionEndLine,
-        opts
+        opts,
       );
     } catch (e: unknown) {
       this.onError(e);
@@ -278,7 +299,7 @@ export class NextEditProvider {
 
   private async _initializeCompletionRequest(
     input: AutocompleteInput,
-    token: AbortSignal | undefined
+    token: AbortSignal | undefined,
   ): Promise<{
     token: AbortSignal;
     startTime: number;
@@ -286,7 +307,9 @@ export class NextEditProvider {
   }> {
     // Create abort signal if not given
     if (!token) {
-      const controller = this.loggingService.createAbortController(input.completionId);
+      const controller = this.loggingService.createAbortController(
+        input.completionId,
+      );
       token = controller.signal;
     } else {
       // Token was provided externally, just track the completion.
@@ -337,7 +360,7 @@ export class NextEditProvider {
     opts?: {
       withChain: boolean;
       usingFullFileDiff: boolean;
-    }
+    },
   ): Promise<{
     editableRegionStartLine: number;
     editableRegionEndLine: number;
@@ -360,10 +383,11 @@ export class NextEditProvider {
     ]);
 
     // Calculate editable region based on model and options.
-    const { editableRegionStartLine, editableRegionEndLine } = this.modelProvider.calculateEditableRegion(
-      helper,
-      opts?.usingFullFileDiff ?? false
-    );
+    const { editableRegionStartLine, editableRegionEndLine } =
+      this.modelProvider.calculateEditableRegion(
+        helper,
+        opts?.usingFullFileDiff ?? false,
+      );
 
     // Build context for model-specific prompt generation.
     const context: ModelSpecificContext = {
@@ -375,8 +399,9 @@ export class NextEditProvider {
       autocompleteContext: this.autocompleteContext,
       historyDiff: createDiff({
         beforeContent:
-          DocumentHistoryTracker.getInstance().getMostRecentDocumentHistory(localPathOrUriToPath(helper.filepath)) ??
-          "",
+          DocumentHistoryTracker.getInstance().getMostRecentDocumentHistory(
+            localPathOrUriToPath(helper.filepath),
+          ) ?? "",
         afterContent: helper.fileContents,
         filePath: helper.filepath,
         diffType: DiffFormatType.Unified,
@@ -402,7 +427,7 @@ export class NextEditProvider {
     opts?: {
       withChain: boolean;
       usingFullFileDiff: boolean;
-    }
+    },
   ): Promise<NextEditOutcome | undefined> {
     if (!this.modelProvider) {
       throw new Error("Model provider not initialized");
@@ -455,7 +480,8 @@ export class NextEditProvider {
     let outcome: NextEditOutcome | undefined;
 
     // Handle based on diff type.
-    const profileType = this.configHandler.currentProfile?.profileDescription.profileType;
+    const profileType =
+      this.configHandler.currentProfile?.profileDescription.profileType;
 
     if (opts?.usingFullFileDiff === false || !opts?.usingFullFileDiff) {
       outcome = await this.modelProvider.handlePartialFileDiff({
@@ -494,7 +520,10 @@ export class NextEditProvider {
     return outcome;
   }
 
-  private async _markDisplayedIfJetBrains(completionId: string, outcome: NextEditOutcome): Promise<void> {
+  private async _markDisplayedIfJetBrains(
+    completionId: string,
+    outcome: NextEditOutcome,
+  ): Promise<void> {
     const ideType = (await this.ide.getIdeInfo()).ideType;
     if (ideType === "jetbrains") {
       this.markDisplayed(completionId, outcome);
@@ -522,7 +551,7 @@ export class NextEditProvider {
     },
     nextEditLocation: RangeInFile,
     token: AbortSignal | undefined,
-    usingFullFileDiff: boolean
+    usingFullFileDiff: boolean,
   ) {
     try {
       const previousOutcome = this.getPreviousCompletion();
@@ -532,7 +561,11 @@ export class NextEditProvider {
       }
 
       // Use the frontmost RangeInFile to build an input.
-      const input = this.buildAutocompleteInputFromChain(previousOutcome, nextEditLocation, ctx);
+      const input = this.buildAutocompleteInputFromChain(
+        previousOutcome,
+        nextEditLocation,
+        ctx,
+      );
       if (!input) {
         console.log("input is undefined");
         return undefined;
@@ -561,7 +594,7 @@ export class NextEditProvider {
       isUntitledFile: boolean;
       recentlyVisitedRanges: AutocompleteCodeSnippet[];
       recentlyEditedRanges: RecentlyEditedRange[];
-    }
+    },
   ): AutocompleteInput | undefined {
     const input: AutocompleteInput = {
       pos: {
@@ -577,7 +610,9 @@ export class NextEditProvider {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockNextEditProviderInstance(mockInstance: NextEditProvider | null) {
+export function __setMockNextEditProviderInstance(
+  mockInstance: NextEditProvider | null,
+) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (NextEditProvider as any)._instance = mockInstance;
 }

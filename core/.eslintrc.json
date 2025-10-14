@@ -1,8 +1,9 @@
 {
   "root": true,
   "extends": ["../.eslintrc.shared.json"],
+  "ignorePatterns": ["**/testWorkspaceDir/**", "**/__fixtures__/**"],
   "parserOptions": {
-    "project": "../tsconfig.json"
+    "project": "./tsconfig.json"
   },
   "rules": {
     "quotes": ["off", "double", {}],
@@ -30,7 +31,8 @@
         "**/*.vitest.ts"
       ],
       "rules": {
-        "max-lines-per-function": "off"
+        "max-lines-per-function": "off",
+        "max-nested-callbacks": "off"
       }
     }
   ]

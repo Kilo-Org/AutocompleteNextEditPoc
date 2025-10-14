@@ -1,8 +1,15 @@
 import { afterAll, beforeAll, describe, it } from "vitest";
-import { addToTestDir, setUpTestDir, tearDownTestDir } from "../../../test/testDir";
+import {
+  addToTestDir,
+  setUpTestDir,
+  tearDownTestDir,
+} from "../../../test/testDir";
 
 import { TEST_CASES_WITH_DIFF, TEST_CASES_WITHOUT_DIFF } from "./testCases";
-import { AutocompleteFileringTestInput, testAutocompleteFiltering } from "./util";
+import {
+  AutocompleteFileringTestInput,
+  testAutocompleteFiltering,
+} from "./util";
 
 const filterTestCases = (tests: AutocompleteFileringTestInput[]) => {
   if (tests.some((test) => test.options?.only)) {
@@ -24,14 +31,20 @@ describe("Autocomplete filtering tests", () => {
   });
 
   describe("Should return unmodified LLM output", () => {
-    it.each(filterTestCases(TEST_CASES_WITHOUT_DIFF))("$description", async (testCase) => {
-      await testAutocompleteFiltering(testCase);
-    });
+    it.each(filterTestCases(TEST_CASES_WITHOUT_DIFF))(
+      "$description",
+      async (testCase) => {
+        await testAutocompleteFiltering(testCase);
+      },
+    );
   });
 
   describe("Should return modified LLM output", () => {
-    it.each(filterTestCases(TEST_CASES_WITH_DIFF))("$description", async (testCase) => {
-      await testAutocompleteFiltering(testCase);
-    });
+    it.each(filterTestCases(TEST_CASES_WITH_DIFF))(
+      "$description",
+      async (testCase) => {
+        await testAutocompleteFiltering(testCase);
+      },
+    );
   });
 });

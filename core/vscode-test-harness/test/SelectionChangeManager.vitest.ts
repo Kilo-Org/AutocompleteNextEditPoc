@@ -692,7 +692,7 @@ describe("SelectionChangeManager", () => {
         textEditor: {
           ...vscode.window.activeTextEditor!,
           document: {
-            //@ts-ignore
+            //@ts-expect-error
             uri: {
               toString: vi.fn().mockReturnValue("file:///test/file.ts"),
             },
@@ -778,7 +778,7 @@ describe("SelectionChangeManager", () => {
         textEditor: {
           ...vscode.window.activeTextEditor!,
           document: {
-            //@ts-ignore
+            //@ts-expect-error
             uri: {
               toString: vi.fn().mockReturnValue("file:///test/file.ts"),
             },

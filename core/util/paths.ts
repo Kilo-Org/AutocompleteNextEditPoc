@@ -37,7 +37,6 @@ export function getConfigJsonPath(): string {
   return p;
 }
 
-
 function getDevDataPath(): string {
   const sPath = path.join(getContinueGlobalPath(), "dev_data");
   if (!fs.existsSync(sPath)) {
@@ -65,10 +64,6 @@ export function getIndexSqlitePath(): string {
   return path.join(getIndexFolderPath(), "index.sqlite");
 }
 
-
 export function getTabAutocompleteCacheSqlitePath(): string {
   return path.join(getIndexFolderPath(), "autocompleteCache.sqlite");
 }
-
-
-

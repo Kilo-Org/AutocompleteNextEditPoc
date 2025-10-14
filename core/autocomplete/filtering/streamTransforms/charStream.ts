@@ -13,7 +13,10 @@
  * 5. After the stream ends, filters encountered stop tokens in remaining buffer.
  * 6. Yields any remaining buffered characters.
  */
-export async function* stopAtStopTokens(stream: AsyncGenerator<string>, stopTokens: string[]): AsyncGenerator<string> {
+export async function* stopAtStopTokens(
+  stream: AsyncGenerator<string>,
+  stopTokens: string[],
+): AsyncGenerator<string> {
   if (stopTokens.length === 0) {
     for await (const char of stream) {
       yield char;
@@ -21,7 +24,9 @@ export async function* stopAtStopTokens(stream: AsyncGenerator<string>, stopToke
     return;
   }
 
-  const maxStopTokenLength = Math.max(...stopTokens.map((token) => token.length));
+  const maxStopTokenLength = Math.max(
+    ...stopTokens.map((token) => token.length),
+  );
   let buffer = "";
 
   for await (const chunk of stream) {
@@ -60,7 +65,7 @@ export async function* stopAtStopTokens(stream: AsyncGenerator<string>, stopToke
 export async function* stopAtStartOf(
   stream: AsyncGenerator<string>,
   suffix: string,
-  sequenceLength: number = 20
+  sequenceLength: number = 20,
 ): AsyncGenerator<string> {
   if (suffix.length < sequenceLength) {
     for await (const chunk of stream) {
@@ -70,7 +75,9 @@ export async function* stopAtStartOf(
   }
   // We use sequenceLength * 1.5 as a heuristic to make sure we don't miss the sequence if the
   // stream is not perfectly aligned with the sequence (small whitespace differences etc).
-  const targetPart = suffix.trimStart().slice(0, Math.floor(sequenceLength * 1.5));
+  const targetPart = suffix
+    .trimStart()
+    .slice(0, Math.floor(sequenceLength * 1.5));
 
   let buffer = "";
 

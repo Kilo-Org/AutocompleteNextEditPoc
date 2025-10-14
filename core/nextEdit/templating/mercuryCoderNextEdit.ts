@@ -8,7 +8,9 @@ import {
 } from "../constants";
 import { insertCursorToken } from "./utils";
 
-export function recentlyViewedCodeSnippetsBlock(recentlyViewedCodeSnippets: { filepath: string; content: string }[]) {
+export function recentlyViewedCodeSnippetsBlock(
+  recentlyViewedCodeSnippets: { filepath: string; content: string }[],
+) {
   return recentlyViewedCodeSnippets.reduce((acc, snippet, i) => {
     const block = [
       MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_OPEN,
@@ -17,7 +19,9 @@ export function recentlyViewedCodeSnippetsBlock(recentlyViewedCodeSnippets: { fi
       MERCURY_RECENTLY_VIEWED_CODE_SNIPPET_CLOSE,
     ].join("\n");
 
-    return acc + block + (i === recentlyViewedCodeSnippets.length - 1 ? "" : "\n");
+    return (
+      acc + block + (i === recentlyViewedCodeSnippets.length - 1 ? "" : "\n")
+    );
   }, "");
 }
 
@@ -25,16 +29,23 @@ export function currentFileContentBlock(
   currentFileContent: string,
   editableRegionStartLine: number,
   editableRegionEndLine: number,
-  cursorPosition: Position
+  cursorPosition: Position,
 ) {
   const currentFileContentLines = currentFileContent.split("\n");
 
-  const insertedCursorLines = insertCursorToken(currentFileContentLines, cursorPosition, MERCURY_CURSOR);
+  const insertedCursorLines = insertCursorToken(
+    currentFileContentLines,
+    cursorPosition,
+    MERCURY_CURSOR,
+  );
 
   const instrumentedLines = [
     ...insertedCursorLines.slice(0, editableRegionStartLine),
     MERCURY_CODE_TO_EDIT_OPEN,
-    ...insertedCursorLines.slice(editableRegionStartLine, editableRegionEndLine + 1),
+    ...insertedCursorLines.slice(
+      editableRegionStartLine,
+      editableRegionEndLine + 1,
+    ),
     MERCURY_CODE_TO_EDIT_CLOSE,
     ...insertedCursorLines.slice(editableRegionEndLine + 1),
   ];
@@ -43,11 +54,13 @@ export function currentFileContentBlock(
 }
 
 export function editHistoryBlock(
-  editDiffHistory: string[] // could be a singe large unified diff
+  editDiffHistory: string[], // could be a singe large unified diff
 ) {
   // diffHistory is made from createDiff.
   // This uses createPatch from npm diff library, which includes an index line and a separator.
   // We get rid of these first two lines.
-  return editDiffHistory.map((diff) => diff.split("\n").slice(2).join("\n")).join("\n");
+  return editDiffHistory
+    .map((diff) => diff.split("\n").slice(2).join("\n"))
+    .join("\n");
   // return editDiffHistory.split("\n").slice(2).join("\n");
 }

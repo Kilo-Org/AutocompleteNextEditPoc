@@ -30,7 +30,7 @@ export function myersDiff(oldContent: string, newContent: string): DiffLine[] {
   const theirFormat = diffLines(oldContent, newContent, {
     ignoreNewlineAtEof: true,
   });
-  let ourFormat = theirFormat.flatMap(convertMyersChangeToDiffLines);
+  const ourFormat = theirFormat.flatMap(convertMyersChangeToDiffLines);
 
   // Combine consecutive old/new pairs that are identical after trimming
   for (let i = 0; i < ourFormat.length - 1; i++) {

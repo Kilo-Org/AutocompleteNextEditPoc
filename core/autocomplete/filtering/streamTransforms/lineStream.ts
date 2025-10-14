@@ -7,7 +7,10 @@ import { headerIsMarkdown, isMarkdownFile } from "../../../util/markdownUtils";
 
 export { filterCodeBlockLines } from "./filterCodeBlock";
 
-export type LineFilter = (args: { lines: LineStream; fullStop: () => void }) => LineStream;
+export type LineFilter = (args: {
+  lines: LineStream;
+  fullStop: () => void;
+}) => LineStream;
 
 export type CharacterFilter = (args: {
   chars: AsyncGenerator<string>;
@@ -27,7 +30,12 @@ function isBracketEnding(line: string): boolean {
 function isEnglishFirstLine(line: string) {
   line = line.trim().toLowerCase();
 
-  if (line.endsWith(":") && !CODE_KEYWORDS_ENDING_IN_SEMICOLON.some((keyword) => line.startsWith(keyword))) {
+  if (
+    line.endsWith(":") &&
+    !CODE_KEYWORDS_ENDING_IN_SEMICOLON.some((keyword) =>
+      line.startsWith(keyword),
+    )
+  ) {
     return true;
   }
 
@@ -45,7 +53,7 @@ function isEnglishPostExplanation(line: string): boolean {
  */
 export function validatePatternInLine(
   line: string,
-  pattern: string
+  pattern: string,
 ): {
   isValid: boolean;
   patternIndex: number;
@@ -112,7 +120,9 @@ export function shouldChangeLineAndStop(line: string): string | undefined {
 
 function isUselessLine(line: string): boolean {
   const trimmed = line.trim().toLowerCase();
-  const hasUselessLine = USELESS_LINES.some((uselessLine) => trimmed === uselessLine);
+  const hasUselessLine = USELESS_LINES.some(
+    (uselessLine) => trimmed === uselessLine,
+  );
 
   return hasUselessLine || trimmed.startsWith("// end");
 }
@@ -120,9 +130,13 @@ function isUselessLine(line: string): boolean {
 /**
  * Determines if the code block has nested markdown blocks.
  */
-export function hasNestedMarkdownBlocks(firstLine: string, filepath?: string): boolean {
+export function hasNestedMarkdownBlocks(
+  firstLine: string,
+  filepath?: string,
+): boolean {
   return (
-    (firstLine.startsWith("```") && headerIsMarkdown(firstLine.replace(/`/g, ""))) ||
+    (firstLine.startsWith("```") &&
+      headerIsMarkdown(firstLine.replace(/`/g, ""))) ||
     Boolean(filepath && isMarkdownFile(filepath))
   );
 }
@@ -132,7 +146,12 @@ export const CODE_KEYWORDS_ENDING_IN_SEMICOLON = ["def"];
 const CODE_STOP_BLOCK = "[/CODE]";
 const BRACKET_ENDING_CHARS = [")", "]", "}", ";"];
 export const PREFIXES_TO_SKIP = ["<COMPLETION>"];
-export const LINES_TO_STOP_AT = ["# End of file.", "<STOP EDITING HERE", "<|/updated_code|>", "```"];
+export const LINES_TO_STOP_AT = [
+  "# End of file.",
+  "<STOP EDITING HERE",
+  "<|/updated_code|>",
+  "```",
+];
 export const LINES_TO_SKIP = ["</START EDITING HERE>", "<|updated_code|>"];
 
 export const ENGLISH_START_PHRASES = [
@@ -147,7 +166,12 @@ export const ENGLISH_START_PHRASES = [
   "the code should",
 ];
 
-export const ENGLISH_POST_PHRASES = ["explanation:", "here is", "here's how", "the above"];
+export const ENGLISH_POST_PHRASES = [
+  "explanation:",
+  "here is",
+  "here's how",
+  "the above",
+];
 
 /**
  * Filters out lines starting with '// Path: <PATH>' from a LineStream.
@@ -156,7 +180,10 @@ export const ENGLISH_POST_PHRASES = ["explanation:", "here is", "here's how", "t
  * @param {string} comment - The comment syntax to filter (e.g., '//' for JavaScript-style comments).
  * @yields {string} The filtered lines, excluding unwanted path lines.
  */
-export async function* avoidPathLine(stream: LineStream, comment?: string): LineStream {
+export async function* avoidPathLine(
+  stream: LineStream,
+  comment?: string,
+): LineStream {
   // Snippets are inserted as comments with a line at the start '// Path: <PATH>'.
   // Sometimes the model with copy this pattern, which is unwanted
   for await (const line of stream) {
@@ -174,7 +201,10 @@ export async function* avoidPathLine(stream: LineStream, comment?: string): Line
  * @param {string} comment - The comment syntax to filter (e.g., '//' for JavaScript-style comments).
  * @yields {string} The filtered lines, excluding empty comments.
  */
-export async function* avoidEmptyComments(stream: LineStream, comment?: string): LineStream {
+export async function* avoidEmptyComments(
+  stream: LineStream,
+  comment?: string,
+): LineStream {
   // Filter lines that are empty comments
   for await (const line of stream) {
     if (!comment || line.trim() !== comment) {
@@ -239,7 +269,7 @@ export function lineIsRepeated(a: string, b: string): boolean {
 export async function* stopAtSimilarLine(
   stream: LineStream,
   line: string,
-  fullStop: () => void
+  fullStop: () => void,
 ): AsyncGenerator<string> {
   const trimmedLine = line.trim();
   const lineIsBracketEnding = isBracketEnding(trimmedLine);
@@ -278,7 +308,7 @@ export async function* stopAtSimilarLine(
 export async function* stopAtLines(
   stream: LineStream,
   fullStop: () => void,
-  linesToStopAt: string[] = LINES_TO_STOP_AT
+  linesToStopAt: string[] = LINES_TO_STOP_AT,
 ): LineStream {
   for await (const line of stream) {
     let shouldStop = false;
@@ -302,7 +332,9 @@ export async function* stopAtLines(
         } else {
           // Stop phrase appears after some content - check if it's separated by whitespace
           const contentBeforeStopPhrase = validation.beforePattern.trimEnd();
-          if (contentBeforeStopPhrase.length < validation.beforePattern.length) {
+          if (
+            contentBeforeStopPhrase.length < validation.beforePattern.length
+          ) {
             // There's whitespace before the stop phrase, so it's properly separated
             shouldStop = true;
             break;
@@ -320,7 +352,11 @@ export async function* stopAtLines(
   }
 }
 
-export async function* stopAtLinesExact(stream: LineStream, fullStop: () => void, linesToStopAt: string[]): LineStream {
+export async function* stopAtLinesExact(
+  stream: LineStream,
+  fullStop: () => void,
+  linesToStopAt: string[],
+): LineStream {
   for await (const line of stream) {
     if (linesToStopAt.some((stopAt) => line === stopAt)) {
       fullStop();
@@ -452,13 +488,14 @@ export async function* fixCodeLlamaFirstLineIndentation(lines: LineStream) {
  * 5. Yields all non-blank insertions and old lines.
  */
 export async function* filterLeadingAndTrailingNewLineInsertion(
-  diffLines: AsyncGenerator<DiffLine>
+  diffLines: AsyncGenerator<DiffLine>,
 ): AsyncGenerator<DiffLine> {
   let isFirst = true;
   let buffer: DiffLine[] = [];
 
   for await (const diffLine of diffLines) {
-    const isBlankLineInsertion = diffLine.type === "new" && isUselessLine(diffLine.line);
+    const isBlankLineInsertion =
+      diffLine.type === "new" && isUselessLine(diffLine.line);
 
     if (isFirst && isBlankLineInsertion) {
       isFirst = false;
@@ -495,7 +532,10 @@ export async function* filterLeadingAndTrailingNewLineInsertion(
  * the fullStop function and stops yielding. Only the first of the repeating
  * lines is yieled.
  */
-export async function* stopAtRepeatingLines(lines: LineStream, fullStop: () => void): LineStream {
+export async function* stopAtRepeatingLines(
+  lines: LineStream,
+  fullStop: () => void,
+): LineStream {
   let previousLine: string | undefined;
   let repeatCount = 0;
   const MAX_REPEATS = 3;
@@ -515,7 +555,10 @@ export async function* stopAtRepeatingLines(lines: LineStream, fullStop: () => v
   }
 }
 
-export async function* showWhateverWeHaveAtXMs(lines: LineStream, ms: number): LineStream {
+export async function* showWhateverWeHaveAtXMs(
+  lines: LineStream,
+  ms: number,
+): LineStream {
   const startTime = Date.now();
   let firstNonWhitespaceLineYielded = false;
 

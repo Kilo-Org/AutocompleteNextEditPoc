@@ -40,9 +40,9 @@ export async function testRootPathContext(
   const service = new RootPathContextService(importDefinitionsService, ide);
 
   const getSnippetsMock = vi
-    // @ts-ignore
+    // @ts-expect-error
     .spyOn(service, "getSnippets")
-    // @ts-ignore
+    // @ts-expect-error
     .mockImplementation((_filePath, _endPosition) => {
       return [];
     });

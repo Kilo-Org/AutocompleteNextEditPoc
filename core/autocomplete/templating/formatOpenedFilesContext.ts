@@ -75,16 +75,16 @@ export function formatOpenedFilesContext(
     if (N === 0) break;
   }
 
-  let trimmedSnippets = new Array<AutocompleteCodeSnippet>();
+  const trimmedSnippets = new Array<AutocompleteCodeSnippet>();
 
   while (N > 0) {
-    let W = 2 / (N + 1);
-    let snippetTokenLimit = Math.floor(
+    const W = 2 / (N + 1);
+    const snippetTokenLimit = Math.floor(
       minTokensInSnippet +
         W * (remainingTokenCount - TOKEN_BUFFER - N * minTokensInSnippet),
     );
 
-    let trimmedSnippetAndTokenCount = trimSnippetForContext(
+    const trimmedSnippetAndTokenCount = trimSnippetForContext(
       topScoredSnippets[0],
       snippetTokenLimit,
       helper.modelName,
@@ -144,7 +144,7 @@ const getRecencyAndSizeScore = (
 };
 
 const setLogStats = (snippets: AutocompleteSnippet[]): void => {
-  let contentSizes = snippets
+  const contentSizes = snippets
     .slice(0, 10)
     .map((snippet) => snippet.content.length);
   logMin = Math.log(Math.max(Math.min(...contentSizes), minSize));
@@ -157,12 +157,12 @@ function trimSnippetForContext(
   maxTokens: number,
   modelName: string,
 ): { newSnippet: AutocompleteCodeSnippet; newTokens: number } {
-  let numTokensInSnippet = countTokens(snippet.content, modelName);
+  const numTokensInSnippet = countTokens(snippet.content, modelName);
   if (numTokensInSnippet <= maxTokens) {
     return { newSnippet: snippet, newTokens: numTokensInSnippet };
   }
 
-  let trimmedCode = pruneStringFromBottom(
+  const trimmedCode = pruneStringFromBottom(
     modelName,
     maxTokens,
     snippet.content,

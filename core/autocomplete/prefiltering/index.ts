@@ -6,13 +6,16 @@ import { HelperVars } from "../util/HelperVars";
 async function isDisabledForFile(
   currentFilepath: string,
   disableInFiles: string[] | undefined,
-  workspaceDirs: string[]
+  workspaceDirs: string[],
 ) {
   if (disableInFiles) {
     // Relative path needed for `ignore`
-    const { relativePathOrBasename } = findUriInDirs(currentFilepath, workspaceDirs);
+    const { relativePathOrBasename } = findUriInDirs(
+      currentFilepath,
+      workspaceDirs,
+    );
 
-    // @ts-ignore
+    // @ts-expect-error
     const pattern = ignore.default().add(disableInFiles);
     if (pattern.ignores(relativePathOrBasename)) {
       return true;
@@ -20,7 +23,10 @@ async function isDisabledForFile(
   }
 }
 
-export async function shouldPrefilter(helper: HelperVars, workspaceDirs: string[]): Promise<boolean> {
+export async function shouldPrefilter(
+  helper: HelperVars,
+  workspaceDirs: string[],
+): Promise<boolean> {
   // Allow disabling autocomplete from config.json
   if (helper.options.disable) {
     return true;
@@ -42,7 +48,10 @@ export async function shouldPrefilter(helper: HelperVars, workspaceDirs: string[
   }
 
   // Don't offer completions when we have no information (untitled file and no file contents)
-  if (helper.filepath.includes("Untitled") && helper.fileContents.trim() === "") {
+  if (
+    helper.filepath.includes("Untitled") &&
+    helper.fileContents.trim() === ""
+  ) {
     return true;
   }
 
