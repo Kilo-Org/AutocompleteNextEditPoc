@@ -49,6 +49,17 @@ export function getDevDataSqlitePath(): string {
   return path.join(getDevDataPath(), "devdata.sqlite");
 }
 
+export function getDevDataFilePath(
+  eventName: DevEventName,
+  schema: string,
+): string {
+  const versionPath = path.join(getDevDataPath(), schema);
+  if (!fs.existsSync(versionPath)) {
+    fs.mkdirSync(versionPath);
+  }
+  return path.join(versionPath, `${String(eventName)}.jsonl`);
+}
+
 export function getIndexSqlitePath(): string {
   return path.join(getIndexFolderPath(), "index.sqlite");
 }
