@@ -124,7 +124,7 @@ export class GhostTextAcceptanceTracker {
 
     manager.registerListener(
       "ghostTextTracker",
-      async (e, state) => {
+      async (_e, state) => {
         if (!state.document || !state.cursorPosition) {
           return false;
         }

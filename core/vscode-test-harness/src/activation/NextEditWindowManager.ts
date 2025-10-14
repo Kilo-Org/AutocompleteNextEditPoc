@@ -411,7 +411,6 @@ export class NextEditWindowManager {
         await this.renderWindow(
           editor,
           currCursorPos,
-          oldEditRangeSlice,
           newEditRangeSlice,
           this.editableRegionStartLine,
           diffLines,
@@ -714,7 +713,6 @@ export class NextEditWindowManager {
    * @returns The decoration.
    */
   private async createCodeRenderDecoration(
-    originalCode: string,
     predictedCode: string,
     position: vscode.Position,
     editableRegionStartLine: number,
@@ -841,7 +839,6 @@ export class NextEditWindowManager {
   private async renderWindow(
     editor: vscode.TextEditor,
     position: vscode.Position,
-    originalCode: string,
     predictedCode: string,
     editableRegionStartLine: number,
     newDiffLines: DiffLine[],
@@ -852,7 +849,6 @@ export class NextEditWindowManager {
 
     // Create a new decoration with the text.
     const decoration = await this.createCodeRenderDecoration(
-      originalCode,
       predictedCode,
       position,
       editableRegionStartLine,
@@ -971,7 +967,7 @@ export class NextEditWindowManager {
 
     manager.registerListener(
       "nextEditWindowManager",
-      async (e, state) => {
+      async (_e, state) => {
         if (state.nextEditWindowAccepted) {
           console.debug(
             "NextEditWindowManager: Edit was just accepted, preserving chain",

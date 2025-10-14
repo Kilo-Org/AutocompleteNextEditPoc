@@ -355,7 +355,7 @@ export class EditAggregator {
   async finalizeAllClusters(): Promise<void> {
     const filePromises: Promise<void>[] = [];
 
-    this.fileStates.forEach((fileState, filePath) => {
+    this.fileStates.forEach((_fileState, filePath) => {
       const filePromise = this.finalizeClustersForFile(filePath);
       filePromises.push(filePromise);
     });

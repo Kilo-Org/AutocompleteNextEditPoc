@@ -426,7 +426,7 @@ export class JumpManager {
 
     manager.registerListener(
       "jumpManager",
-      async (e, state) => {
+      async (_e, state) => {
         if (state.jumpInProgress || state.jumpJustAccepted) {
           console.debug(
             "JumpManager: jump in progress or just accepted, preserving chain",

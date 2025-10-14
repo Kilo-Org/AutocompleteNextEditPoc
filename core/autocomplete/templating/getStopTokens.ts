@@ -13,7 +13,7 @@ const commonStops = [SRC_DIRECTORY, PYTHON_ENCODING, CODE_BLOCK_END];
 
 export function getStopTokens(
   completionOptions: Partial<CompletionOptions> | undefined,
-  lang: AutocompleteLanguageInfo,
+  _lang: AutocompleteLanguageInfo,
   model: string,
 ): string[] {
   const stopTokens = [

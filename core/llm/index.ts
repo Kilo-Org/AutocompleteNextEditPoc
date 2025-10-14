@@ -56,14 +56,6 @@ import {
   toCompleteBody,
   toFimBody,
 } from "./openaiTypeConverters.js";
-class LLMError extends Error {
-  constructor(
-    message: string,
-    public llm: ILLM,
-  ) {
-    super(message);
-  }
-}
 
 type InteractionStatus = "in_progress" | "success" | "error" | "cancelled";
 
@@ -385,51 +377,7 @@ export abstract class BaseLLM implements ILLM {
     }
   }
 
-  private async parseError(resp: any): Promise<Error> {
-    let text = await resp.text();
-
-    if (resp.status === 404 && !resp.url.includes("/v1")) {
-      const parsedError = JSON.parse(text);
-      const errorMessageRaw = parsedError?.error ?? parsedError?.message;
-      const error =
-        typeof errorMessageRaw === "string"
-          ? errorMessageRaw.replace(/"/g, "'")
-          : undefined;
-      const model = error?.match(/model '(.*)' not found/)?.[1];
-      if (model && resp.url.match("127.0.0.1:11434")) {
-        text = `The model "${model}" was not found. To download it, run \`ollama run ${model}\`.`;
-        return new LLMError(text, this); // No need to add HTTP status details
-      } else if (text.includes("/api/chat")) {
-        text =
-          "The /api/chat endpoint was not found. This may mean that you are using an older version of Ollama that does not support /api/chat. Upgrading to the latest version will solve the issue.";
-      } else {
-        text =
-          "This may mean that you forgot to add '/v1' to the end of your 'apiBase' in config.json.";
-      }
-    } else if (resp.status === 404 && resp.url.includes("api.openai.com")) {
-      text =
-        "You may need to add pre-paid credits before using the OpenAI API.";
-    } else if (
-      resp.status === 401 &&
-      (resp.url.includes("api.mistral.ai") ||
-        resp.url.includes("codestral.mistral.ai"))
-    ) {
-      if (resp.url.includes("codestral.mistral.ai")) {
-        return new Error(
-          "You are using a Mistral API key, which is not compatible with the Codestral API. Please either obtain a Codestral API key, or use the Mistral API by setting 'apiBase' to 'https://api.mistral.ai/v1' in config.json.",
-        );
-      } else {
-        return new Error(
-          "You are using a Codestral API key, which is not compatible with the Mistral API. Please either obtain a Mistral API key, or use the the Codestral API by setting 'apiBase' to 'https://codestral.mistral.ai/v1' in config.json.",
-        );
-      }
-    }
-    return new Error(
-      `HTTP ${resp.status} ${resp.statusText} from ${resp.url}\n\n${text}`,
-    );
-  }
-
-  private _parseCompletionOptions(options: LLMFullCompletionOptions) {
+  private parseCompletionOptions(options: LLMFullCompletionOptions) {
     const log = options.log ?? true;
     const raw = options.raw ?? false;
     options.log = undefined;
@@ -442,7 +390,7 @@ export abstract class BaseLLM implements ILLM {
     return { completionOptions, logEnabled: log, raw };
   }
 
-  private _formatChatMessages(messages: ChatMessage[]): string {
+  private formatChatMessages(messages: ChatMessage[]): string {
     const msgsCopy = messages ? messages.map((msg) => ({ ...msg })) : [];
     let formatted = "";
     for (const msg of msgsCopy) {
@@ -493,7 +441,7 @@ export abstract class BaseLLM implements ILLM {
   ): AsyncGenerator<string> {
     this.lastRequestId = undefined;
     const { completionOptions, logEnabled } =
-      this._parseCompletionOptions(options);
+      this.parseCompletionOptions(options);
     const interaction = logEnabled
       ? this.logger?.createInteractionLog()
       : undefined;
@@ -609,7 +557,7 @@ export abstract class BaseLLM implements ILLM {
   ) {
     this.lastRequestId = undefined;
     const { completionOptions, logEnabled, raw } =
-      this._parseCompletionOptions(options);
+      this.parseCompletionOptions(options);
     const interaction = logEnabled
       ? this.logger?.createInteractionLog()
       : undefined;
@@ -743,7 +691,7 @@ export abstract class BaseLLM implements ILLM {
   ) {
     this.lastRequestId = undefined;
     const { completionOptions, logEnabled, raw } =
-      this._parseCompletionOptions(options);
+      this.parseCompletionOptions(options);
     const interaction = logEnabled
       ? this.logger?.createInteractionLog()
       : undefined;
@@ -854,7 +802,7 @@ export abstract class BaseLLM implements ILLM {
     message: ChatMessage[],
     options: LLMFullCompletionOptions,
   ) {
-    let { completionOptions } = this._parseCompletionOptions(options);
+    let { completionOptions } = this.parseCompletionOptions(options);
     completionOptions = this._modifyCompletionOptions(completionOptions);
 
     return compileChatMessages({
@@ -894,8 +842,8 @@ export abstract class BaseLLM implements ILLM {
     messageOptions?: MessageOption,
   ): AsyncGenerator<ChatMessage, PromptLog> {
     this.lastRequestId = undefined;
-    let { completionOptions } = this._parseCompletionOptions(options);
-    const { logEnabled } = this._parseCompletionOptions(options);
+    let { completionOptions } = this.parseCompletionOptions(options);
+    const { logEnabled } = this.parseCompletionOptions(options);
     const interaction = logEnabled
       ? this.logger?.createInteractionLog()
       : undefined;
@@ -921,7 +869,7 @@ export abstract class BaseLLM implements ILLM {
 
     const prompt = this.templateMessages
       ? this.templateMessages(messages)
-      : this._formatChatMessages(messages);
+      : this.formatChatMessages(messages);
     if (logEnabled) {
       interaction?.logItem({
         kind: "startChat",
