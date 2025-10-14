@@ -51,7 +51,7 @@ npm test             # Must pass
 
 **A removal is safe if ALL of these conditions are met:**
 
-- ✅ Tests pass (`npm test`)
+- ✅ Tests pass (`npm test`), and all tests are present (40 files, 772 tests)
 - ✅ Typecheck warnings/errors did NOT increase (stayed same or decreased)
 - ✅ ESLint warnings/errors did NOT increase (stayed same or decreased)
 
@@ -184,7 +184,7 @@ Systematically verify:
 - [ ] Imports cleaned up (both regular and type imports)
 - [ ] `npm run typecheck` - no increase in warnings/errors
 - [ ] `npm run lint` - no increase in warnings/errors
-- [ ] `npm test` - all tests pass
+- [ ] `npm test` - all tests pass (40 files, 772 tests)
 - [ ] Check typecheck/lint output for NEW unused warnings OTHER than newly unused code.
 - [ ] Remove cascading unused code if warnings appeared
 - [ ] Repeat check until no new warnings
