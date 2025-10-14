@@ -1867,7 +1867,7 @@ export enum SymbolKind {
 
 // See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolTag.
 export namespace SymbolTag {
-  export const Deprecated: 1 = 1;
+  export const Deprecated = 1 as const;
 }
 
 // See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolTag.
