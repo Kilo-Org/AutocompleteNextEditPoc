@@ -1,5 +1,21 @@
 # Code Cleanup Instructions
 
+## CRITICAL: Protected Modules
+
+**AUTOCOMPLETE AND NEXTEDIT CODE MUST NOT BE MODIFIED**
+
+The following directories contain critical functionality that must be preserved:
+
+- `core/autocomplete/**` - All autocomplete-related code
+- `core/nextEdit/**` - All nextEdit-related code
+
+**Do not:**
+
+- Remove any code from these directories
+- Unexport any functions, types, or classes from these directories
+
+Even if linters or analysis tools report code as "unused", it may be used through dynamic imports, reflection, or other mechanisms that static analysis cannot detect. These modules are off-limits for cleanup operations.
+
 ## Objective
 
 Safely remove unnecessary code that isn't essential for running or testing autocomplete, NextEdit, and tree-sitter functionality.
