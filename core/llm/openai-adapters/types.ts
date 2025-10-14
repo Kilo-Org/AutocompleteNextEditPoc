@@ -45,17 +45,17 @@ export const OpenAIConfigSchema = BasePlusConfig.extend({
 });
 export type OpenAIConfig = z.infer<typeof OpenAIConfigSchema>;
 
-const MoonshotConfigSchema = OpenAIConfigSchema.extend({
+const _MoonshotConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("moonshot"),
 });
-export type MoonshotConfig = z.infer<typeof MoonshotConfigSchema>;
+export type MoonshotConfig = z.infer<typeof _MoonshotConfigSchema>;
 
-const DeepseekConfigSchema = OpenAIConfigSchema.extend({
+const _DeepseekConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("deepseek"),
 });
-export type DeepseekConfig = z.infer<typeof DeepseekConfigSchema>;
+export type DeepseekConfig = z.infer<typeof _DeepseekConfigSchema>;
 
-const BedrockConfigSchema = OpenAIConfigSchema.extend({
+const _BedrockConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("bedrock"),
   // cacheBehavior: z.object({
   //   cacheSystemMessage: z.boolean().optional(),
@@ -70,12 +70,12 @@ const BedrockConfigSchema = OpenAIConfigSchema.extend({
     })
     .optional(),
 });
-export type BedrockConfig = z.infer<typeof BedrockConfigSchema>;
+export type BedrockConfig = z.infer<typeof _BedrockConfigSchema>;
 
-const LlamastackConfigSchema = OpenAIConfigSchema.extend({
+const _LlamastackConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("llamastack"),
 });
-export type LlamastackConfig = z.infer<typeof LlamastackConfigSchema>;
+export type LlamastackConfig = z.infer<typeof _LlamastackConfigSchema>;
 
 export const ContinueProxyConfigSchema = BasePlusConfig.extend({
   provider: z.literal("continue-proxy"),
@@ -87,20 +87,20 @@ export const ContinueProxyConfigSchema = BasePlusConfig.extend({
   }),
 });
 
-const MockConfigSchema = BasePlusConfig.extend({
+const _MockConfigSchema = BasePlusConfig.extend({
   provider: z.literal("mock"),
 });
 
 // Other APIs
-const CohereConfigSchema = OpenAIConfigSchema.extend({
+const _CohereConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("cohere"),
 });
-export type CohereConfig = z.infer<typeof CohereConfigSchema>;
+export type CohereConfig = z.infer<typeof _CohereConfigSchema>;
 
-const CometAPIConfigSchema = OpenAIConfigSchema.extend({
+const _CometAPIConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("cometapi"),
 });
-export type CometAPIConfig = z.infer<typeof CometAPIConfigSchema>;
+export type CometAPIConfig = z.infer<typeof _CometAPIConfigSchema>;
 
 export const AzureConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("azure"),
@@ -119,19 +119,19 @@ export const AzureConfigSchema = OpenAIConfigSchema.extend({
     .optional(),
 });
 
-const GeminiConfigSchema = OpenAIConfigSchema.extend({
+const _GeminiConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("gemini"),
   apiKey: z.string(),
 });
-export type GeminiConfig = z.infer<typeof GeminiConfigSchema>;
+export type GeminiConfig = z.infer<typeof _GeminiConfigSchema>;
 
-const AnthropicConfigSchema = OpenAIConfigSchema.extend({
+const _AnthropicConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("anthropic"),
   apiKey: z.string(),
 });
-export type AnthropicConfig = z.infer<typeof AnthropicConfigSchema>;
+export type AnthropicConfig = z.infer<typeof _AnthropicConfigSchema>;
 
-const WatsonXConfigSchema = BasePlusConfig.extend({
+const _WatsonXConfigSchema = BasePlusConfig.extend({
   provider: z.literal("watsonx"),
   apiKey: z.string(),
   env: z.object({
@@ -140,19 +140,19 @@ const WatsonXConfigSchema = BasePlusConfig.extend({
     deploymentId: z.string().optional(),
   }),
 });
-export type WatsonXConfig = z.infer<typeof WatsonXConfigSchema>;
+export type WatsonXConfig = z.infer<typeof _WatsonXConfigSchema>;
 
-const JinaConfigSchema = OpenAIConfigSchema.extend({
+const _JinaConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("jina"),
 });
-export type JinaConfig = z.infer<typeof JinaConfigSchema>;
+export type JinaConfig = z.infer<typeof _JinaConfigSchema>;
 
-const InceptionConfigSchema = OpenAIConfigSchema.extend({
+const _InceptionConfigSchema = OpenAIConfigSchema.extend({
   provider: z.literal("inception"),
 });
-export type InceptionConfig = z.infer<typeof InceptionConfigSchema>;
+export type InceptionConfig = z.infer<typeof _InceptionConfigSchema>;
 
-const VertexAIConfigSchema = BasePlusConfig.extend({
+const _VertexAIConfigSchema = BasePlusConfig.extend({
   provider: z.literal("vertexai"),
   env: z
     .object({
@@ -163,25 +163,23 @@ const VertexAIConfigSchema = BasePlusConfig.extend({
     })
     .optional(),
 });
-export type VertexAIConfig = z.infer<typeof VertexAIConfigSchema>;
+export type VertexAIConfig = z.infer<typeof _VertexAIConfigSchema>;
 
 // Discriminated union
-export const LLMConfigSchema = z.discriminatedUnion("provider", [
-  OpenAIConfigSchema,
-  BedrockConfigSchema,
-  MoonshotConfigSchema,
-  DeepseekConfigSchema,
-  CohereConfigSchema,
-  AzureConfigSchema,
-  GeminiConfigSchema,
-  AnthropicConfigSchema,
-  WatsonXConfigSchema,
-  JinaConfigSchema,
-  MockConfigSchema,
-  InceptionConfigSchema,
-  VertexAIConfigSchema,
-  LlamastackConfigSchema,
-  ContinueProxyConfigSchema,
-  CometAPIConfigSchema,
-]);
-export type LLMConfig = z.infer<typeof LLMConfigSchema>;
+export type LLMConfig =
+  | OpenAIConfig
+  | BedrockConfig
+  | MoonshotConfig
+  | DeepseekConfig
+  | CohereConfig
+  | z.infer<typeof AzureConfigSchema>
+  | GeminiConfig
+  | AnthropicConfig
+  | WatsonXConfig
+  | JinaConfig
+  | z.infer<typeof _MockConfigSchema>
+  | InceptionConfig
+  | VertexAIConfig
+  | LlamastackConfig
+  | z.infer<typeof ContinueProxyConfigSchema>
+  | CometAPIConfig;

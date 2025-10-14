@@ -1,4 +1,4 @@
-export type UseCase = "chat" | "autocomplete" | "rerank" | "embed";
+type UseCase = "chat" | "autocomplete" | "rerank" | "embed";
 
 type ParameterType = "string" | "number" | "boolean";
 

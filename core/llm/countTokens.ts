@@ -30,35 +30,9 @@ class LlamaEncoding implements Encoding {
     return llamaTokenizer.decode(tokens);
   }
 }
-interface AsyncEncoder {
-  encode(text: string): Promise<number[]>;
-  decode(tokens: number[]): Promise<string>;
-  close(): Promise<void>;
-}
-
-class NonWorkerAsyncEncoder implements AsyncEncoder {
-  constructor(private readonly encoding: Encoding) {}
-
-  async close(): Promise<void> {}
-
-  async encode(text: string): Promise<number[]> {
-    return this.encoding.encode(text);
-  }
-
-  async decode(tokens: number[]): Promise<string> {
-    return this.encoding.decode(tokens);
-  }
-}
 
 let gptEncoding: Encoding | null = null;
 const llamaEncoding = new LlamaEncoding();
-
-function asyncEncoderForModel(modelName: string): AsyncEncoder {
-  // Temporary due to issues packaging the worker files
-  const encoding = encodingForModel(modelName);
-  return new NonWorkerAsyncEncoder(encoding);
-  //MINIMAL_REPO - more fully implemented functionality removed
-}
 
 function encodingForModel(modelName: string): Encoding {
   const modelType = autodetectTemplateType(modelName);
