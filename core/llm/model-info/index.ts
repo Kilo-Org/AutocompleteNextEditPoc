@@ -27,7 +27,3 @@ export function findLlmInfo(
     llm.regex ? llm.regex.test(model) : llm.model === model,
   );
 }
-
-function getAllRecommendedFor(useCase: UseCase): LlmInfoWithProvider[] {
-  return allLlms.filter((llm) => llm.recommendedFor?.includes(useCase));
-}
