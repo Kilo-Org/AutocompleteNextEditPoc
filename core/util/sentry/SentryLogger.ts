@@ -63,54 +63,12 @@ class SentryLogger {
 }
 
 /**
- * Initialize Sentry for error tracking, performance monitoring, and structured logging.
- * Returns the Sentry client and scope, or undefined objects if telemetry is disabled.
- * Stub implementation - Sentry not available.
- */
-function initializeSentry(): {
-  client: SentryNodeClient | undefined;
-  scope: SentryScope | undefined;
-} {
-  return {
-    client: SentryLogger.lazyClient,
-    scope: SentryLogger.lazyScope,
-  };
-}
-
-// Export utility functions for using Sentry throughout the application
-
-/**
- * Create a custom span for performance monitoring
- * Stub implementation - Sentry not available.
- */
-function createSpan<T>(
-  _operation: string,
-  _name: string,
-  callback: () => T | Promise<T>,
-): T | Promise<T> {
-  // Stub - just execute the callback without Sentry
-  return callback();
-}
-
-/**
  * Capture an exception and send it to Sentry
  * Stub implementation - Sentry not available.
  */
 export function captureException(
   _error: Error,
   _context?: Record<string, any>,
-) {
-  // Stub - no-op when Sentry is not available
-}
-
-/**
- * Capture a structured log message and send it to Sentry
- * Stub implementation - Sentry not available.
- */
-function captureLog(
-  _message: string,
-  _level: SeverityLevel = "info",
-  _context?: Extras,
 ) {
   // Stub - no-op when Sentry is not available
 }
