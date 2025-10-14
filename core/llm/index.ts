@@ -5,7 +5,6 @@ import { ChatCompletionCreateParams } from "openai/resources/index";
 import Handlebars from "handlebars";
 
 import { DevDataSqliteDb } from "../util/devdataSqlite.js";
-import { DataLogger } from "../util/log.js";
 import {
   CacheBehavior,
   ChatMessage,
@@ -344,14 +343,11 @@ export abstract class BaseLLM implements ILLM {
       generatedTokens,
     );
 
-    void DataLogger.getInstance().logDevData({
-      name: "tokensGenerated",
-      data: {
-        model: model,
-        provider: this.underlyingProviderName,
-        promptTokens: promptTokens,
-        generatedTokens: generatedTokens,
-      },
+    console.log("tokensGenerated", {
+      model: model,
+      provider: this.underlyingProviderName,
+      promptTokens: promptTokens,
+      generatedTokens: generatedTokens,
     });
 
     if (typeof error === "undefined") {
