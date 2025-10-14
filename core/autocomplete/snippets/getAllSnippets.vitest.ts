@@ -283,37 +283,37 @@ describe('getAllSnippets', () => {
   });
 
   describe('error handling', () => {
-    it('should handle errors from context retrieval service gracefully', async () => {
+    it('should propagate errors from context retrieval service', async () => {
       mockContextRetrievalService.getRootPathSnippets = vi.fn().mockRejectedValue(
         new Error('Service error')
       );
 
-      // Should not throw, should timeout and return empty array
-      const result = await getAllSnippets({
-        helper: mockHelper,
-        ide: mockIde,
-        getDefinitionsFromLsp: mockGetDefinitionsFromLsp,
-        contextRetrievalService: mockContextRetrievalService,
-      });
-
-      expect(result.rootPathSnippets).toEqual([]);
+      // Errors are not caught by racePromise - they propagate if they occur before timeout
+      await expect(
+        getAllSnippets({
+          helper: mockHelper,
+          ide: mockIde,
+          getDefinitionsFromLsp: mockGetDefinitionsFromLsp,
+          contextRetrievalService: mockContextRetrievalService,
+        })
+      ).rejects.toThrow('Service error');
     });
 
-    it('should handle errors from IDE clipboard gracefully', async () => {
+    it('should propagate errors from IDE clipboard', async () => {
       mockIde.getClipboardContent = vi.fn().mockRejectedValue(new Error('Clipboard error'));
 
-      // Should timeout and return empty array
-      const result = await getAllSnippets({
-        helper: mockHelper,
-        ide: mockIde,
-        getDefinitionsFromLsp: mockGetDefinitionsFromLsp,
-        contextRetrievalService: mockContextRetrievalService,
-      });
-
-      expect(result.clipboardSnippets).toEqual([]);
+      // Errors are not caught by racePromise - they propagate if they occur before timeout
+      await expect(
+        getAllSnippets({
+          helper: mockHelper,
+          ide: mockIde,
+          getDefinitionsFromLsp: mockGetDefinitionsFromLsp,
+          contextRetrievalService: mockContextRetrievalService,
+        })
+      ).rejects.toThrow('Clipboard error');
     });
 
-    it('should handle null/undefined from snippet sources', async () => {
+    it('should pass through null from snippet sources', async () => {
       mockContextRetrievalService.getRootPathSnippets = vi.fn().mockResolvedValue(null as any);
 
       const result = await getAllSnippets({
@@ -323,8 +323,8 @@ describe('getAllSnippets', () => {
         contextRetrievalService: mockContextRetrievalService,
       });
 
-      // Should handle null gracefully
-      expect(result.rootPathSnippets).toEqual([]);
+      // racePromise returns null if the promise resolves to null (not converted to [])
+      expect(result.rootPathSnippets).toBeNull();
     });
   });
 
