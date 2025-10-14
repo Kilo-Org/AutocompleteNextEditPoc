@@ -182,6 +182,7 @@ Remove feature X
 Systematically verify:
 
 - [ ] Imports cleaned up (both regular and type imports)
+- [ ] If you changes package.json: `npm install`
 - [ ] `npm run typecheck` - no increase in warnings/errors
 - [ ] `npm run lint` - no increase in warnings/errors
 - [ ] `npm test` - all tests pass (40 files, 772 tests)
