@@ -1187,7 +1187,7 @@ solveQuadratic a b c
 
 primesUpTo :: Int -> [Int]
 primesUpTo n = [x | x <- [2..n], isPrime x]
-  where isPrime num = <|fim|> && all (\d -> num \`mod\` d /= 0) [2..(floor . sqrt $ fromIntegral num)]`,
+  where isPrime num = <|fim|> && all (\\d -> num \`mod\` d /= 0) [2..(floor . sqrt $ fromIntegral num)]`,
     llmOutput: "num > 1",
     expectedCompletion: "num > 1",
   },
