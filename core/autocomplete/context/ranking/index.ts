@@ -147,7 +147,6 @@ export function fillPromptWithSnippets(
     if (tokensRemaining - tokenCount >= 0) {
       tokensRemaining -= tokenCount;
       keptSnippets.push(snippet);
-    } else {
     }
   }
 
