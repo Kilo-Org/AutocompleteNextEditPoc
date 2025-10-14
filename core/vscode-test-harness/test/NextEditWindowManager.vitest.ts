@@ -318,7 +318,7 @@ describe("NextEditWindowManager", () => {
     it("should handle concurrent operations with random delays and last-write-wins", async () => {
       const executeCommand = mockVscode.commands
         .executeCommand as MockedFunction<any>;
-      let completedOperations: string[] = [];
+      const completedOperations: string[] = [];
 
       // Reset key reservation to ensure clean state
       await manager.resetKeyReservation();

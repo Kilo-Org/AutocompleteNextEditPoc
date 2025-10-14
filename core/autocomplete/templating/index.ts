@@ -73,7 +73,7 @@ function preparePromptContext({
   snippets: AutocompleteSnippet[];
 } {
   // Determine base prefix/suffix, accounting for any manually supplied prefix.
-  let prefix = helper.input.manuallyPassPrefix || helper.prunedPrefix;
+  const prefix = helper.input.manuallyPassPrefix || helper.prunedPrefix;
   let suffix = helper.input.manuallyPassPrefix ? "" : helper.prunedSuffix;
   if (suffix === "") {
     suffix = "\n";

@@ -247,7 +247,7 @@ describe("streamDiff(", () => {
         "final line",
       ];
 
-      let newLines = [
+      const newLines = [
         "short",
         "middle",
         "a long enough line",

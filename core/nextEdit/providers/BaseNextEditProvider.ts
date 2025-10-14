@@ -411,7 +411,7 @@ export abstract class BaseNextEditModelProvider {
     let editableRegionStartLine = cursorLine;
     let editableRegionEndLine = cursorLine;
 
-    let currentContent = fileLines[cursorLine];
+    const currentContent = fileLines[cursorLine];
     let totalTokens =
       heuristic === "tokenizer"
         ? countTokens(currentContent, helper.modelName)

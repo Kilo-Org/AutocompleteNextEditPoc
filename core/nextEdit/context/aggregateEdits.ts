@@ -528,8 +528,8 @@ export class EditAggregator {
 
   private countChangedLines(diff: string): number {
     let count = 0;
-    let addedLines = new Set<number>();
-    let removedLines = new Set<number>();
+    const addedLines = new Set<number>();
+    const removedLines = new Set<number>();
 
     // Parse the diff lines
     const lines = diff.split("\n");

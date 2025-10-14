@@ -203,7 +203,7 @@ export class ContinueCompletionProvider
         return null;
       }
     }
-    let injectDetails: string | undefined = undefined;
+    const injectDetails: string | undefined = undefined;
 
     const currCursorPos = editor.selection.active;
 
@@ -224,7 +224,7 @@ export class ContinueCompletionProvider
       });
 
       // Handle notebook cells
-      let pos = {
+      const pos = {
         line: position.line,
         character: position.character,
       };
@@ -268,7 +268,7 @@ export class ContinueCompletionProvider
       }
 
       // Handle commit message input box
-      let manuallyPassPrefix: string | undefined = undefined;
+      const manuallyPassPrefix: string | undefined = undefined;
 
       // handle manual autocompletion trigger
       const wasManuallyTriggered =
@@ -277,7 +277,7 @@ export class ContinueCompletionProvider
       // const completionId = uuidv4();
       const filepath = document.uri.toString();
       const recentlyVisitedRanges = this.recentlyVisitedRanges.getSnippets();
-      let recentlyEditedRanges =
+      const recentlyEditedRanges =
         await this.recentlyEditedTracker.getRecentlyEditedRanges();
 
       const ctx = {

@@ -101,7 +101,7 @@ export async function* streamLines(
   streamCompletion: AsyncGenerator<string | ChatMessage>,
   log: boolean = false,
 ): LineStream {
-  let allLines = [];
+  const allLines = [];
 
   let buffer = "";
 

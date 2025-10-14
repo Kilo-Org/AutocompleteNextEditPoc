@@ -95,7 +95,7 @@ function llama2TemplateMessages(msgs: ChatMessage[]): string {
 
 // Llama2 template with added \n to prevent Codestral from continuing user message
 function codestralTemplateMessages(msgs: ChatMessage[]): string {
-  let template = llama2TemplateMessages(msgs);
+  const template = llama2TemplateMessages(msgs);
   if (template.length === 0) {
     return template;
   }
@@ -284,7 +284,7 @@ const gemmaTemplateMessage = templateFactory(
 );
 
 const graniteTemplateMessages = templateFactory(
-  (msg) => (!!msg ? `\n\nSystem:\n ${msg.content}\n\n` : ""),
+  (msg) => (msg ? `\n\nSystem:\n ${msg.content}\n\n` : ""),
   "Question:\n",
   "Answer:\n",
   "\n\n",
