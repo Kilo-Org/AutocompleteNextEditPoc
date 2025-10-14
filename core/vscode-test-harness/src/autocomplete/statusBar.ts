@@ -105,10 +105,6 @@ export function setupStatusBar(
     if (status === undefined) {
       status = statusBarStatus;
     }
-
-    if (loading === undefined) {
-      loading = loading;
-    }
   }
 
   statusBarItem.text = statusBarItemText(status, loading, statusBarError);
