@@ -31,12 +31,6 @@ import {
   stopStatusBarLoading,
 } from "./statusBar";
 
-interface VsCodeCompletionInput {
-  document: vscode.TextDocument;
-  position: vscode.Position;
-  context: vscode.InlineCompletionContext;
-}
-
 export class ContinueCompletionProvider
   implements vscode.InlineCompletionItemProvider
 {
@@ -203,7 +197,6 @@ export class ContinueCompletionProvider
         return null;
       }
     }
-    const injectDetails: string | undefined = undefined;
 
     const currCursorPos = editor.selection.active;
 

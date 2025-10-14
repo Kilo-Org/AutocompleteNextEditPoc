@@ -15,17 +15,7 @@ npm run lint
 
 Group any unused code into a superficially related looking batch (e.g. by file), and then start a subtask to remove the code in that batch with instructions to follow [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md) for the safe removal process.
 
-### Step 2; typescript
-
-Typescript will also detect dead code within a filw:
-
-```bash
-npm run typecheck
-```
-
-Again, group any unused code into a superficially related looking batch (e.g. by file), and then start a subtask to remove the code in that batch with instructions to follow [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md) for the safe removal process.
-
-### Step 3; knip
+### Step 2; knip
 
 ```bash
 npx knip  # Analyzes module graph for unused exports
@@ -39,9 +29,9 @@ Knip will list:
 
 - Dependencies in package.json that aren't used: start a subtask to remove the code in that batch with instructions to follow [`CODE_CLEANUP_INSTRUCTIONS.md`](CODE_CLEANUP_INSTRUCTIONS.md) for the safe removal process, emphasizing the need to run NPM install!
 
-### Step 4; loop:
+### Step 3; loop:
 
-These tools are complementary. It's possible knip's export removal allowed for more internal functions to be removed and vice-versa. So, if steps 1-3 removed anything, then start over at step 1 until there are no more changes made, skipping any removal suggestions when prior attempts to remove that code already failed (since that demonstrates the code is implicitly used).
+These tools are complementary. It's possible knip's export removal allowed for more internal functions to be removed and vice-versa. So, if prior steps removed anything, then start over at step 1 until there are no more changes made, skipping any removal suggestions when prior attempts to remove that code already failed (since that demonstrates the code is implicitly used).
 
 ## Reminder
 

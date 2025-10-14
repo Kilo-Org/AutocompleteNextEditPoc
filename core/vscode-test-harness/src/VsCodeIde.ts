@@ -215,7 +215,7 @@ class VsCodeIde implements IDE {
       const truncatedBytes = bytes.slice(0, VsCodeIde.MAX_BYTES);
       const contents = new TextDecoder().decode(truncatedBytes);
       return contents;
-    } catch (e) {
+    } catch {
       return "";
     }
   }

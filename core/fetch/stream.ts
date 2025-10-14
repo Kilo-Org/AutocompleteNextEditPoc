@@ -137,7 +137,7 @@ export async function* streamJSON(response: Response): AsyncGenerator<any> {
         try {
           const data = JSON.parse(line);
           yield data;
-        } catch (e) {
+        } catch {
           throw new Error(`Malformed JSON sent from server: ${line}`);
         }
       }

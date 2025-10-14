@@ -51,15 +51,6 @@ function getSecureID(): string {
   return `<!-- SID: ${fn.uuid} -->`;
 }
 
-/**
- * Interface for tool use state tracking
- */
-interface ToolUseState {
-  toolUseId: string;
-  name: string;
-  input: string;
-}
-
 export class BedrockApi implements BaseLlmApi {
   constructor(protected config: BedrockConfig) {
     if (config.env?.accessKeyId || config?.env?.secretAccessKey) {
@@ -89,7 +80,7 @@ export class BedrockApi implements BaseLlmApi {
         profile: profile,
         ignoreCache: true,
       })();
-    } catch (e) {
+    } catch {
       console.warn(
         `AWS profile with name ${profile} not found in ~/.aws/credentials, using default profile`,
       );

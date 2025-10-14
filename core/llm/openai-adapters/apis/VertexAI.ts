@@ -92,7 +92,7 @@ export class VertexAIApi implements BaseLlmApi {
           throw new Error("VertexAI: keyJson must be a valid JWT");
         }
         this.clientPromise = Promise.resolve(jsonClient);
-      } catch (e) {
+      } catch {
         throw new Error("VertexAI: Failed to parse keyJson");
       }
     } else if (keyFile) {
@@ -195,7 +195,7 @@ export class VertexAIApi implements BaseLlmApi {
 
   private convertAnthropicBody(oaiBody: ChatCompletionCreateParams): object {
     const body = this.anthropicInstance._convertToCleanAnthropicBody(oaiBody);
-    const { model, ...exceptModel } = body;
+    const { model: _model, ...exceptModel } = body;
     return {
       ...exceptModel,
       anthropic_version: "vertex-2023-10-16",

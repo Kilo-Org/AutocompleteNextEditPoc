@@ -291,7 +291,7 @@ async function getSymbolsForFile(
   let tree: Parser.Tree;
   try {
     tree = parser.parse(contents);
-  } catch (e) {
+  } catch {
     console.log(`Error parsing file: ${filepath}`);
     return;
   }

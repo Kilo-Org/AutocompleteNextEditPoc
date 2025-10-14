@@ -43,7 +43,7 @@ vi.mock("vscode", () => {
       },
     },
     workspace: {
-      getConfiguration: vi.fn().mockImplementation((section?: string) => {
+      getConfiguration: vi.fn().mockImplementation((_section?: string) => {
         // Return a configuration object with a get method
         return {
           get: vi.fn().mockImplementation((key: string) => {

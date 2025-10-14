@@ -8,7 +8,6 @@ const allDevEventNames: string[] = [];
 const devDataVersionedSchemas: any = {};
 import * as URI from "uri-js";
 import { fileURLToPath } from "url";
-import { z } from "zod";
 import { Core, ContinueConfig, IdeInfo, IdeSettings } from "../index.js";
 import { getDevDataFilePath } from "../util/paths.js";
 import { joinPathsToUri } from "../util/uri.js";

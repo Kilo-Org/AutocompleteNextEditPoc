@@ -60,7 +60,7 @@ export class ImportDefinitionsService {
       } else {
         fileContents = await this.ide.readFile(filepath);
       }
-    } catch (err) {
+    } catch {
       // File removed
       return null;
     }

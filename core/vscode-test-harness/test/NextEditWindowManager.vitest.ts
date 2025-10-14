@@ -181,7 +181,7 @@ describe("NextEditWindowManager", () => {
     ).mockResolvedValue(undefined);
     (mockVscode.commands.registerCommand as MockedFunction<any>)
       // @ts-expect-error -- mocking VSCode command registration callback
-      .mockImplementation((command: string, callback: any) => ({
+      .mockImplementation((_command: string, _callback: any) => ({
         dispose: vi.fn(),
       }));
     (
@@ -764,7 +764,7 @@ describe("NextEditWindowManager", () => {
     });
 
     it("should handle line deletion case", async () => {
-      mockEditor.document.lineAt = vi.fn((lineNumber: number) => ({
+      mockEditor.document.lineAt = vi.fn((_lineNumber: number) => ({
         text: "line to delete",
       }));
 

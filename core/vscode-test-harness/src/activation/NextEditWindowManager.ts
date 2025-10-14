@@ -303,7 +303,7 @@ export class NextEditWindowManager {
     try {
       const command = vscode.commands.registerCommand(commandId, callback);
       this.context.subscriptions.push(command);
-    } catch (error) {
+    } catch {
       // Command already registered - skip silently in test environments
       if (process.env.NODE_ENV !== "test" && !process.env.VITEST) {
         console.log(

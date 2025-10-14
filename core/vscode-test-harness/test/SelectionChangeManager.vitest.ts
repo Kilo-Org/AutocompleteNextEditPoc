@@ -188,10 +188,10 @@ describe("SelectionChangeManager", () => {
       extensionMode: 1, // Production mode
       extension: {} as any,
     } as unknown as vscode.ExtensionContext;
-    let resolveWebviewProtocol: any = undefined;
+    let _resolveWebviewProtocol: any = undefined;
     const webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>(
       (resolve) => {
-        resolveWebviewProtocol = resolve;
+        _resolveWebviewProtocol = resolve;
       },
     );
 
@@ -549,7 +549,7 @@ describe("SelectionChangeManager", () => {
 
       try {
         await eventPromise;
-      } catch (error) {
+      } catch {
         // Expected timeout error
       }
 
@@ -871,7 +871,7 @@ describe("SelectionChangeManager", () => {
       const handler1 = vi.fn().mockResolvedValue(false);
       const handler2 = vi.fn().mockResolvedValue(true);
       const handler3 = vi.fn().mockResolvedValue(false);
-      const fallbackHandler = vi.fn().mockResolvedValue(true);
+      const _fallbackHandler = vi.fn().mockResolvedValue(true);
 
       selectionChangeManager.registerListener(
         "handler1",

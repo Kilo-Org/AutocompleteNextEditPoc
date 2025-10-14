@@ -4,18 +4,12 @@ import { fileURLToPath } from "node:url";
 import {
   DocumentSymbol,
   FileStatsMap,
-  FileType,
   IDE,
   IdeInfo,
-  IdeSettings,
-  IndexTag,
   Location,
-  Problem,
   Range,
   RangeInFile,
   SignatureHelp,
-  Thread,
-  ToastType,
 } from "../index.js";
 
 class FileSystemIde implements IDE {

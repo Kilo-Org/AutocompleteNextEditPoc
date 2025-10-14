@@ -1,7 +1,6 @@
 import {
   ChatMessage,
   ModelCapability,
-  ModelDescription,
   TemplateType,
 } from "../index.js";
 import { NEXT_EDIT_MODELS } from "./constants.js";

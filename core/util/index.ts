@@ -1,5 +1,3 @@
-type TODO = any;
-
 export function dedent(strings: TemplateStringsArray, ...values: unknown[]) {
   let raw = "";
   for (let i = 0; i < strings.length; i++) {

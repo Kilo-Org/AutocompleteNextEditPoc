@@ -270,16 +270,6 @@ interface GeminiToolConfig {
   };
 }
 
-// https://ai.google.dev/api/generate-content#request-body
-interface GeminiChatRequestBody {
-  contents: GeminiChatContent[];
-  tools?: GeminiTool[];
-  toolConfig?: GeminiToolConfig;
-  systemInstruction?: GeminiChatContent;
-  generationConfig?: GeminiGenerationConfig;
-  // cachedContent?: string;
-}
-
 interface GeminiChatResponseSuccess {
   candidates: Candidate[];
   promptFeedback: PromptFeedback;
@@ -291,8 +281,6 @@ interface GeminiChatResponseError {
     message: string;
   };
 }
-
-type GeminiChatResponse = GeminiChatResponseError | GeminiChatResponseSuccess;
 
 interface PromptFeedback {
   blockReason?: BlockReason;

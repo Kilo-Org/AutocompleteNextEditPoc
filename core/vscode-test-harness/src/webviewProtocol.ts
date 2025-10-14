@@ -4,7 +4,6 @@ import {
   Message,
   IMessenger,
 } from "core";
-import { extractMinimalStackTraceInfo } from "core/util/extractMinimalStackTraceInfo";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 

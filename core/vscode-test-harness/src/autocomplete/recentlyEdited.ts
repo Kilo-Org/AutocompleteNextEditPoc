@@ -156,7 +156,7 @@ export class RecentlyEditedTracker {
               },
             },
           };
-        } catch (e) {
+        } catch {
           return null;
         }
       }),
