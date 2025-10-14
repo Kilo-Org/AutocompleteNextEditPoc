@@ -33,5 +33,10 @@
     }
   },
   "include": ["core/**/*.ts", "core/**/*.js", "core/**/*.d.ts"],
-  "exclude": ["node_modules", "dist", "**/__fixtures__/**", "**/testWorkspaceDir/**"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/__fixtures__/**",
+    "**/testWorkspaceDir/**"
+  ]
 }
