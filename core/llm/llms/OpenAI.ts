@@ -4,12 +4,7 @@ import {
 } from "openai/resources/index";
 
 import { streamSse } from "../../fetch/stream.js";
-import {
-  ChatMessage,
-  CompletionOptions,
-  LLMOptions,
-  Tool,
-} from "../../index.js";
+import { ChatMessage, CompletionOptions, LLMOptions } from "../../index.js";
 import { renderChatMessage } from "../../util/messageContent.js";
 import { BaseLLM } from "../index.js";
 import {
@@ -93,18 +88,6 @@ class OpenAI extends BaseLLM {
       "Fast-Apply",
     ];
     return SUPPORTED_MODELS.some((m) => model.includes(m));
-  }
-
-  private convertTool(tool: Tool): any {
-    return {
-      type: tool.type,
-      function: {
-        name: tool.function.name,
-        description: tool.function.description,
-        parameters: tool.function.parameters,
-        strict: tool.function.strict,
-      },
-    };
   }
 
   protected extraBodyProperties(): Record<string, any> {

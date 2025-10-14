@@ -202,10 +202,3 @@ export class NextEditLoggingService {
     }
   }
 }
-
-// Test helper to allow mocking in tests
-function __setMockNextEditLoggingServiceInstance(
-  mockInstance: NextEditLoggingService | null,
-) {
-  (NextEditLoggingService as any)._instance = mockInstance;
-}

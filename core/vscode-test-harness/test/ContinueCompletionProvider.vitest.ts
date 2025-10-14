@@ -167,12 +167,10 @@ function buildProvider(options: { usingFullFileDiff?: boolean } = {}) {
   } as any;
 
   const ide = { ideUtils: {} } as any;
-  const webviewProtocol = {} as any;
 
   const provider = new ContinueCompletionProvider(
     configHandler,
     ide,
-    webviewProtocol,
     usingFullFileDiff,
   );
   provider.activateNextEdit();

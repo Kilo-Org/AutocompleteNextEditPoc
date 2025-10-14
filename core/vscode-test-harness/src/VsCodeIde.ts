@@ -8,7 +8,6 @@ import {
   executeSymbolProvider,
 } from "./autocomplete/lsp";
 import { VsCodeIdeUtils } from "./util/ideUtils";
-import { VsCodeWebviewProtocol } from "./webviewProtocol";
 
 import type {
   DocumentSymbol,
@@ -24,10 +23,7 @@ import { getExtensionVersion, isExtensionPrerelease } from "./util/util";
 class VsCodeIde implements IDE {
   ideUtils: VsCodeIdeUtils;
 
-  constructor(
-    private readonly vscodeWebviewProtocolPromise: Promise<VsCodeWebviewProtocol>,
-    private readonly context: vscode.ExtensionContext,
-  ) {
+  constructor() {
     this.ideUtils = new VsCodeIdeUtils();
   }
 

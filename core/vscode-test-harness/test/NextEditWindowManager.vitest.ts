@@ -328,7 +328,7 @@ describe("NextEditWindowManager", () => {
       executeCommand.mockClear();
 
       // Make executeCommand take random time and track completions
-      executeCommand.mockImplementation((cmd, key, value) => {
+      executeCommand.mockImplementation((_cmd, _key, value) => {
         const operationId = `${value ? "reserve" : "free"}-${Date.now()}-${Math.random()}`;
         return new Promise((resolve) => {
           setTimeout(() => {
@@ -440,7 +440,7 @@ describe("NextEditWindowManager", () => {
 
       // Track actual VS Code context values set
       const contextValues: boolean[] = [];
-      executeCommand.mockImplementation((cmd, key, value) => {
+      executeCommand.mockImplementation((cmd, _key, value) => {
         if (cmd === "setContext") {
           // @ts-expect-error -- value type varies by context key
           contextValues.push(value);

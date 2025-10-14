@@ -15,7 +15,6 @@ import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import * as vscode from "vscode";
 import { VsCodeIde } from "../src/VsCodeIde";
-import { VsCodeWebviewProtocol } from "../src/webviewProtocol";
 import { JumpManager } from "../src/activation/JumpManager";
 import { NextEditWindowManager } from "../src/activation/NextEditWindowManager";
 import {
@@ -155,48 +154,8 @@ describe("SelectionChangeManager", () => {
       },
     ]);
 
-    // Create mock context and webview protocol promise
-    const mockContext = {
-      subscriptions: [],
-      workspaceState: {
-        get: vi.fn(),
-        update: vi.fn(),
-        keys: vi.fn().mockReturnValue([]),
-      },
-      globalState: {
-        get: vi.fn(),
-        update: vi.fn(),
-        keys: vi.fn().mockReturnValue([]),
-        setKeysForSync: vi.fn(),
-      },
-      secrets: {
-        get: vi.fn(),
-        store: vi.fn(),
-        delete: vi.fn(),
-        onDidChange: vi.fn(),
-      },
-      extensionUri: { fsPath: "/mock/extension/path" } as any,
-      extensionPath: "/mock/extension/path",
-      environmentVariableCollection: {} as any,
-      asAbsolutePath: vi.fn(),
-      storageUri: undefined,
-      storagePath: undefined,
-      globalStorageUri: { fsPath: "/mock/global/storage" } as any,
-      globalStoragePath: "/mock/global/storage",
-      logUri: { fsPath: "/mock/log" } as any,
-      logPath: "/mock/log",
-      extensionMode: 1, // Production mode
-      extension: {} as any,
-    } as unknown as vscode.ExtensionContext;
-    let _resolveWebviewProtocol: any = undefined;
-    const webviewProtocolPromise = new Promise<VsCodeWebviewProtocol>(
-      (resolve) => {
-        _resolveWebviewProtocol = resolve;
-      },
-    );
-
     // Create VsCodeIde instance with proper constructor arguments
-    mockIde = new VsCodeIde(webviewProtocolPromise, mockContext);
+    mockIde = new VsCodeIde();
 
     // Get a fresh instance
     selectionChangeManager = SelectionChangeManager.getInstance();
@@ -871,7 +830,6 @@ describe("SelectionChangeManager", () => {
       const handler1 = vi.fn().mockResolvedValue(false);
       const handler2 = vi.fn().mockResolvedValue(true);
       const handler3 = vi.fn().mockResolvedValue(false);
-      const _fallbackHandler = vi.fn().mockResolvedValue(true);
 
       selectionChangeManager.registerListener(
         "handler1",

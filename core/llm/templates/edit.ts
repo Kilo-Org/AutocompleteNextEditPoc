@@ -183,7 +183,7 @@ const codeLlama70bEditPrompt = `<s>Source: system\n\n You are an expert programm
 \`\`\` <step> Source: assistant\nDestination: user\n\n `;
 
 const claudeEditPrompt: PromptTemplate = (
-  history: ChatMessage[],
+  _history: ChatMessage[],
   otherData: Record<string, string>,
 ) => [
   {

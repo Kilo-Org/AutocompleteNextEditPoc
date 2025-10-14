@@ -237,19 +237,6 @@ export interface GeminiToolFunctionDeclaration {
   response?: GeminiObjectSchema;
 }
 
-interface PromptFeedback {
-  blockReason?: BlockReason;
-  safetyRatings: SafetyRating[];
-}
-
-enum BlockReason {
-  BLOCK_REASON_UNSPECIFIED = "BLOCK_REASON_UNSPECIFIED",
-  SAFETY = "SAFETY",
-  OTHER = "OTHER",
-  BLOCKLIST = "BLOCKLIST",
-  PROHIBITED_CONTENT = "PROHIBITED_CONTENT",
-}
-
 interface SafetyRating {
   harmCategory: HarmCategory;
   harmProbability: HarmProbability;
@@ -277,13 +264,6 @@ enum HarmProbability {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
   HIGH = "HIGH",
-}
-
-interface UsageMetadata {
-  promptTokenCount: number;
-  cachedContentTokenCount: number;
-  candidatesTokenCount: number;
-  totalTokenCount: number;
 }
 
 interface Candidate {

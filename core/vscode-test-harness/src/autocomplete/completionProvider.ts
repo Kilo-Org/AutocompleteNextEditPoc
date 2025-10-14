@@ -8,11 +8,8 @@ import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
 import * as URI from "uri-js";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
-
 import { handleLLMError } from "../util/errorHandling";
 import { VsCodeIde } from "../VsCodeIde";
-import { VsCodeWebviewProtocol } from "../webviewProtocol";
-
 import { checkFim } from "core/nextEdit/diff/diff";
 import { NextEditLoggingService } from "core/nextEdit/NextEditLoggingService";
 import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
@@ -76,7 +73,6 @@ export class ContinueCompletionProvider
   constructor(
     private readonly configHandler: MinimalConfigProvider,
     private readonly ide: VsCodeIde,
-    private readonly webviewProtocol: VsCodeWebviewProtocol,
     usingFullFileDiff: boolean,
   ) {
     this.usingFullFileDiff = usingFullFileDiff;
@@ -117,14 +113,6 @@ export class ContinueCompletionProvider
   }
 
   _lastShownCompletion: AutocompleteOutcome | NextEditOutcome | undefined;
-
-  private async getRerankModel() {
-    const { config } = await this.configHandler.loadConfig();
-    if (!config) {
-      return;
-    }
-    return config.selectedModelByRole?.rerank ?? undefined;
-  }
 
   /**
    * Updates this class and the prefetch queue's usingFullFileDiff flag.
@@ -698,7 +686,7 @@ export class ContinueCompletionProvider
   }
 
   willDisplay(
-    document: vscode.TextDocument,
+    _document: vscode.TextDocument,
     selectedCompletionInfo: vscode.SelectedCompletionInfo | undefined,
     abortSignal: AbortSignal,
     outcome: AutocompleteOutcome | NextEditOutcome,

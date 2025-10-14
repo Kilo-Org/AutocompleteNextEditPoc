@@ -40,17 +40,6 @@ import {
   RerankCreateParams,
 } from "./base.js";
 
-type GetSecureIDWithStatic = (() => string) & { uuid?: string };
-// Utility function to get or generate UUID for prompt caching
-function getSecureID(): string {
-  // Adding a type declaration for the static property
-  const fn = getSecureID as GetSecureIDWithStatic;
-  if (!fn.uuid) {
-    fn.uuid = uuidv4();
-  }
-  return `<!-- SID: ${fn.uuid} -->`;
-}
-
 export class BedrockApi implements BaseLlmApi {
   constructor(protected config: BedrockConfig) {
     if (config.env?.accessKeyId || config?.env?.secretAccessKey) {
@@ -301,25 +290,6 @@ export class BedrockApi implements BaseLlmApi {
     // }
 
     return converted;
-  }
-
-  private _addCachingToLastTwoUserMessages(converted: Message[]) {
-    let numCached = 0;
-    for (let i = converted.length - 1; i >= 0; i--) {
-      const message = converted[i];
-      if (message.role === "user") {
-        message.content?.forEach((block) => {
-          if (block.text) {
-            block.text += getSecureID();
-          }
-        });
-        message.content?.push({ cachePoint: { type: "default" } });
-        numCached++;
-      }
-      if (numCached === 2) {
-        break;
-      }
-    }
   }
 
   private _convertBody(
