@@ -135,6 +135,28 @@ function modelSupportsImages(
   return false;
 }
 
+const PARALLEL_PROVIDERS: string[] = [
+  "anthropic",
+  "bedrock",
+  "cohere",
+  "sagemaker",
+  "deepinfra",
+  "gemini",
+  "huggingface-inference-api",
+  "huggingface-tgi",
+  "mistral",
+  "moonshot",
+  "replicate",
+  "together",
+  "novita",
+  "sambanova",
+  "ovhcloud",
+  "nebius",
+  "vertexai",
+  "function-network",
+  "scaleway",
+];
+
 function isProviderHandlesTemplatingOrNoTemplateTypeRequired(
   modelName: string,
 ): boolean {
