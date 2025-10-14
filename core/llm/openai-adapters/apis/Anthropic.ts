@@ -227,7 +227,7 @@ export class AnthropicApi implements BaseLlmApi {
         ];
       case "user":
         return this.convertMessageContentToBlocks(message.content);
-      case "assistant":
+      case "assistant": {
         const blocks: ContentBlockParam[] = message.content
           ? this.convertMessageContentToBlocks(message.content)
           : [];
@@ -244,6 +244,7 @@ export class AnthropicApi implements BaseLlmApi {
           }
         }
         return blocks;
+      }
       // system, etc.
       default:
         return [];
@@ -345,14 +346,15 @@ export class AnthropicApi implements BaseLlmApi {
       // https://docs.anthropic.com/en/api/messages-streaming#event-types
       const rawEvent = event as RawMessageStreamEvent;
       switch (rawEvent.type) {
-        case "content_block_start":
+        case "content_block_start": {
           const blockStartEvent = rawEvent as RawContentBlockStartEvent;
           if (blockStartEvent.content_block.type === "tool_use") {
             lastToolUseId = blockStartEvent.content_block.id;
             lastToolUseName = blockStartEvent.content_block.name;
           }
           break;
-        case "message_start":
+        }
+        case "message_start": {
           const startEvent = rawEvent as RawMessageStartEvent;
           usage.prompt_tokens = startEvent.message.usage?.input_tokens ?? 0;
           usage.prompt_tokens_details = {
@@ -360,11 +362,13 @@ export class AnthropicApi implements BaseLlmApi {
               startEvent.message.usage?.cache_read_input_tokens ?? 0,
           };
           break;
-        case "message_delta":
+        }
+        case "message_delta": {
           const deltaEvent = rawEvent as RawMessageDeltaEvent;
           usage.completion_tokens = deltaEvent.usage?.output_tokens ?? 0;
           break;
-        case "content_block_delta":
+        }
+        case "content_block_delta": {
           // https://docs.anthropic.com/en/api/messages-streaming#delta-types
           const blockDeltaEvent = rawEvent as RawContentBlockDeltaEvent;
           switch (blockDeltaEvent.delta.type) {
@@ -397,6 +401,7 @@ export class AnthropicApi implements BaseLlmApi {
               break;
           }
           break;
+        }
         case "content_block_stop":
           lastToolUseId = undefined;
           lastToolUseName = undefined;

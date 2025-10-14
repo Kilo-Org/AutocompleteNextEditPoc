@@ -461,6 +461,7 @@ async function getComputeDeleteAddRemove(
         async () => {},
         repoName,
       )) {
+        // Consume async iterator - results not needed
       }
     },
   ];

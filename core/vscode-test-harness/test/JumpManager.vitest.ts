@@ -214,7 +214,7 @@ describe("JumpManager", () => {
     if (vscode.window.activeTextEditor?.document.lineAt) {
       vi.mocked(
         vscode.window.activeTextEditor.document.lineAt,
-        // @ts-expect-error
+        // @ts-expect-error -- vi.mocked type inference issue with overloaded methods
       ).mockImplementation((line: number) =>
         createMockTextLine("Sample line text", line),
       );

@@ -295,7 +295,7 @@ async function getDefinitionsForNode(
     case "impl_item":
       // impl of trait -> trait definition
       break;
-    case "new_expression":
+    case "new_expression": {
       // In 'new MyClass(...)', "MyClass" is the classNameNode
       const classNameNode = node.children.find(
         (child) => child.type === "identifier",
@@ -327,6 +327,7 @@ async function getDefinitionsForNode(
       ranges.push(...definitions.filter(Boolean));
 
       break;
+    }
     case "":
       // function definition -> implementations?
       break;

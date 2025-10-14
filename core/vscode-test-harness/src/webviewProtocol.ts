@@ -120,7 +120,9 @@ export class VsCodeWebviewProtocol
             message = message.split("\n").filter((l: string) => l !== "")[1];
             try {
               message = JSON.parse(message).message;
-            } catch {}
+            } catch {
+              // Intentionally ignore parse errors - use original message
+            }
             if (message.includes("exceeded")) {
               message +=
                 " To keep using Continue, you can set up a local model or use your own API key.";
@@ -155,34 +157,35 @@ export class VsCodeWebviewProtocol
     retry: boolean = true,
   ): Promise<ToWebviewProtocol[T][1]> {
     const messageId = uuidv4();
-    return new Promise(async (resolve) => {
+    
+    return (async () => {
       if (retry) {
         let i = 0;
         while (!this.webview) {
           if (i >= 10) {
-            resolve(undefined);
-            return;
-          } else {
-            await new Promise((res) => setTimeout(res, i >= 5 ? 1000 : 500));
-            i++;
+            return undefined as ToWebviewProtocol[T][1];
           }
+          await new Promise((res) => setTimeout(res, i >= 5 ? 1000 : 500));
+          i++;
         }
       }
 
       this.send(String(messageType), data, messageId);
 
       if (this.webview) {
-        const disposable = this.webview.onDidReceiveMessage(
-          (msg: Message<ToWebviewProtocol[T][1]>) => {
-            if (msg.messageId === messageId) {
-              resolve(msg.data);
-              disposable?.dispose();
-            }
-          },
-        );
-      } else if (!retry) {
-        resolve(undefined);
+        return new Promise<ToWebviewProtocol[T][1]>((resolve) => {
+          const disposable = this.webview!.onDidReceiveMessage(
+            (msg: Message<ToWebviewProtocol[T][1]>) => {
+              if (msg.messageId === messageId) {
+                resolve(msg.data);
+                disposable?.dispose();
+              }
+            },
+          );
+        });
       }
-    });
+      
+      return undefined as ToWebviewProtocol[T][1];
+    })();
   }
 }

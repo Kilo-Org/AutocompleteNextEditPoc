@@ -93,7 +93,7 @@ export class BracketMatchingService {
       // Allow closing brackets before any non-whitespace characters
       if (!seenNonWhitespaceOrClosingBracket) {
         const firstNonWhitespaceOrClosingBracketIndex =
-          chunk.search(/[^\s\)\}\]]/);
+          chunk.search(/[^\s)}\]]/);
         if (firstNonWhitespaceOrClosingBracketIndex !== -1) {
           yield chunk.slice(0, firstNonWhitespaceOrClosingBracketIndex);
           chunk = chunk.slice(firstNonWhitespaceOrClosingBracketIndex);

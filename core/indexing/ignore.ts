@@ -111,7 +111,9 @@ export function isSecurityConcern(filePathOrUri: string) {
   let filepath = filePathOrUri;
   try {
     filepath = fileURLToPath(filePathOrUri);
-  } catch {}
+  } catch {
+    // Intentionally ignore - not a valid file URL, continue with original path
+  }
   if (path.isAbsolute(filepath)) {
     const dir = path.dirname(filepath).split(/\/|\\/).at(-1) ?? "";
     const basename = path.basename(filepath);

@@ -25,14 +25,14 @@ describe("DocumentHistoryTracker", () => {
 
   beforeEach(() => {
     // Reset singleton instance for each test
-    // @ts-expect-error - accessing private static property for testing
+    // @ts-expect-error -- accessing private static property for testing
     DocumentHistoryTracker.instance = null;
     tracker = DocumentHistoryTracker.getInstance();
 
     // Create mock ASTs
-    //@ts-expect-error
+    // @ts-expect-error -- constructing mocked Tree class for testing
     mockAst1 = new Parser.Tree() as Parser.Tree;
-    //@ts-expect-error
+    // @ts-expect-error -- constructing mocked Tree class for testing
     mockAst2 = new Parser.Tree() as Parser.Tree;
   });
 

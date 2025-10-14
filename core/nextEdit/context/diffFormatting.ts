@@ -62,7 +62,7 @@ const createUnifiedDiff = (
   // Use relative path if workspace directory is provided
   let displayPath = filePath;
   if (workspaceDir && filePath.startsWith(workspaceDir)) {
-    displayPath = filePath.slice(workspaceDir.length).replace(/^[\/]/, "");
+    displayPath = filePath.slice(workspaceDir.length).replace(/^[/]/, "");
   } else if (workspaceDir) {
     // Fallback to just the basename if we can't determine relative path
     displayPath = getUriPathBasename(filePath);
