@@ -44,8 +44,8 @@ Write down these counts. Your removal must NOT increase them.
 Run verification commands:
 
 ```bash
-npm run typecheck    # Must NOT increase warnings/errors
-npm run lint         # Must NOT increase warnings/errors
+npm run typecheck    # Must NOT increase warnings/errors (other than warnings about unused code)
+npm run lint         # Must NOT increase warnings/errors (other than warnings about unused code)
 npm test             # Must pass
 ```
 
