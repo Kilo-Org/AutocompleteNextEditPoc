@@ -1,12 +1,11 @@
 import {
   ChatMessage,
-  ContextItem,
   MessageContent,
   MessagePart,
   TextMessagePart,
 } from "../index";
 
-export function stripImages(messageContent: MessageContent): string {
+function stripImages(messageContent: MessageContent): string {
   if (typeof messageContent === "string") {
     return messageContent;
   }
@@ -29,10 +28,6 @@ export function renderChatMessage(message: ChatMessage): string {
     default:
       return "";
   }
-}
-
-function renderContextItems(contextItems: ContextItem[]): string {
-  return contextItems.map((item) => item.content).join("\n\n");
 }
 
 function renderContextItemsWithStatus(contextItems: any[]): string {
