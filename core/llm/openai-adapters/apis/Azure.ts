@@ -10,6 +10,7 @@ import { OpenAIApi } from "./OpenAI.js";
 
 export class AzureApi extends OpenAIApi {
   constructor(azureConfig: z.infer<typeof AzureConfigSchema>) {
+    
     super({
       ...azureConfig,
       provider: "openai",
