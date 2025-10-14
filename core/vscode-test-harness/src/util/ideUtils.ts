@@ -132,7 +132,7 @@ export class VsCodeIdeUtils {
   ): Promise<vscode.FileStat | null> {
     return await this.fsOperation(
       uri,
-      async (u) => {
+      async (_u) => {
         return await vscode.workspace.fs.stat(uri);
       },
       ignoreMissingProviders,
@@ -153,7 +153,7 @@ export class VsCodeIdeUtils {
   ): Promise<[string, vscode.FileType][] | null> {
     return await this.fsOperation(
       uri,
-      async (u) => {
+      async (_u) => {
         return await vscode.workspace.fs.readDirectory(uri);
       },
       ignoreMissingProviders,

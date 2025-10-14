@@ -1,6 +1,5 @@
 import {
   Base64ImageSource,
-  ErrorResponse,
   MessageParam,
   Tool,
   ToolChoice,

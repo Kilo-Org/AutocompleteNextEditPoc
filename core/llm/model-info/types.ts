@@ -45,30 +45,9 @@ enum MediaType {
   Video = "video",
 }
 
-const AllMediaTypes = [
-  MediaType.Text,
-  MediaType.Image,
-  MediaType.Audio,
-  MediaType.Video,
-];
-
-interface ApiProviderInfo {
-  displayName: string;
-  supportsStreaming: boolean;
-  handlesTemplating: boolean;
-}
-
-type ModelProviderCapability =
-  | "stream"
-  | "fim"
-  | "image"
-  | "template_chat"
-  | "tools";
-
 export interface ModelProvider {
   id: string;
   displayName: string;
-  // capabilities: ModelProviderCapability[]; // TODO: uncomment and deal with the consequences
   models: Omit<LlmInfo, "provider">[];
 
   /** Any additional parameters required to configure the model

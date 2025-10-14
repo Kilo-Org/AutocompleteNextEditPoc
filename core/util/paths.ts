@@ -2,8 +2,6 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
-type DevEventName = string;
-
 const CONTINUE_GLOBAL_DIR = (() => {
   const configPath = process.env.CONTINUE_GLOBAL_DIR;
   if (configPath) {
@@ -47,17 +45,6 @@ function getDevDataPath(): string {
 
 export function getDevDataSqlitePath(): string {
   return path.join(getDevDataPath(), "devdata.sqlite");
-}
-
-export function getDevDataFilePath(
-  eventName: DevEventName,
-  schema: string,
-): string {
-  const versionPath = path.join(getDevDataPath(), schema);
-  if (!fs.existsSync(versionPath)) {
-    fs.mkdirSync(versionPath);
-  }
-  return path.join(versionPath, `${String(eventName)}.jsonl`);
 }
 
 export function getIndexSqlitePath(): string {

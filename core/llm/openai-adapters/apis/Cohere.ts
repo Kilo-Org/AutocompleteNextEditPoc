@@ -133,17 +133,17 @@ export class CohereApi implements BaseLlmApi {
     }
   }
   completionNonStream(
-    body: CompletionCreateParamsNonStreaming,
+    _body: CompletionCreateParamsNonStreaming,
   ): Promise<Completion> {
     throw new Error("Method not implemented.");
   }
   completionStream(
-    body: CompletionCreateParamsStreaming,
+    _body: CompletionCreateParamsStreaming,
   ): AsyncGenerator<Completion> {
     throw new Error("Method not implemented.");
   }
   fimStream(
-    body: FimCreateParamsStreaming,
+    _body: FimCreateParamsStreaming,
   ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }

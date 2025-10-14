@@ -102,9 +102,9 @@ export const createBeforeAfterDiff = (
 };
 
 const createTokenLineDiff = (
-  beforeContent: string,
-  afterContent: string,
-  filePath: string,
+  _beforeContent: string,
+  _afterContent: string,
+  _filePath: string,
 ) => {
   // TODO: Implement token line diff
   return "";

@@ -139,14 +139,14 @@ export class VsCodeWebviewProtocol
   constructor() {}
 
   invoke<T extends keyof FromWebviewProtocol>(
-    messageType: T,
-    data: FromWebviewProtocol[T][0],
-    messageId?: string,
+    _messageType: T,
+    _data: FromWebviewProtocol[T][0],
+    _messageId?: string,
   ): FromWebviewProtocol[T][1] {
     throw new Error("Method not implemented.");
   }
 
-  onError(handler: (message: Message, error: Error) => void): void {
+  onError(_handler: (message: Message, error: Error) => void): void {
     throw new Error("Method not implemented.");
   }
 

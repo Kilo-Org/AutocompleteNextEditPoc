@@ -69,7 +69,7 @@ export class NextEditProvider {
     private readonly _injectedGetLlm: () => Promise<ILLM | undefined>,
     private readonly _onError: (e: unknown) => void,
     private readonly getDefinitionsFromLsp: GetLspDefinitionsFunction,
-    endpointType: "default" | "fineTuned",
+    _endpointType: "default" | "fineTuned",
   ) {
     this.contextRetrievalService = new ContextRetrievalService(this.ide);
     this.loggingService = NextEditLoggingService.getInstance();

@@ -152,7 +152,7 @@ export class PrefetchQueue {
 }
 
 // Test helper to allow mocking in tests
-export function __setMockPrefetchQueueInstance(
+function __setMockPrefetchQueueInstance(
   mockInstance: PrefetchQueue | null,
 ) {
   (PrefetchQueue as any)._instance = mockInstance;

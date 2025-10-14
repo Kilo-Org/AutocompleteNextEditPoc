@@ -23,7 +23,7 @@ const MOCK_RESPONSE =
 export class MockApi implements BaseLlmApi {
   async chatCompletionNonStream(
     body: ChatCompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    _signal: AbortSignal,
   ): Promise<ChatCompletion> {
     await new Promise((resolve) => setTimeout(resolve, 800));
     const lastMessage = body.messages[body.messages.length - 1].content;
@@ -42,7 +42,7 @@ export class MockApi implements BaseLlmApi {
 
   async *chatCompletionStream(
     body: ChatCompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    _signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const lastMessage = body.messages[body.messages.length - 1].content;
     const content = !lastMessage
@@ -64,7 +64,7 @@ export class MockApi implements BaseLlmApi {
 
   async completionNonStream(
     body: CompletionCreateParamsNonStreaming,
-    signal: AbortSignal,
+    _signal: AbortSignal,
   ): Promise<Completion> {
     await new Promise((resolve) => setTimeout(resolve, 800));
     return {
@@ -84,7 +84,7 @@ export class MockApi implements BaseLlmApi {
 
   async *completionStream(
     body: CompletionCreateParamsStreaming,
-    signal: AbortSignal,
+    _signal: AbortSignal,
   ): AsyncGenerator<Completion, any, unknown> {
     const chunks = (body.prompt as string).split(" ");
     for (const chunk of chunks) {
@@ -107,7 +107,7 @@ export class MockApi implements BaseLlmApi {
 
   async *fimStream(
     body: FimCreateParamsStreaming,
-    signal: AbortSignal,
+    _signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk, any, unknown> {
     const chunks = (body.prompt as string).split(" ");
     for (const chunk of chunks) {
@@ -140,7 +140,7 @@ export class MockApi implements BaseLlmApi {
     };
   }
 
-  async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
+  async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
   }
 

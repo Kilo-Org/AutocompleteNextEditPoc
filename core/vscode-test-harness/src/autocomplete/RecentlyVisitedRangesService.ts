@@ -133,6 +133,6 @@ export class RecentlyVisitedRangesService {
             )),
       )
       .sort((a, b) => b.timestamp - a.timestamp)
-      .map(({ timestamp, ...snippet }) => snippet);
+      .map(({ timestamp: _timestamp, ...snippet }) => snippet);
   }
 }
