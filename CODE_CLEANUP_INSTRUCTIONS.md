@@ -196,7 +196,7 @@ Systematically verify:
 
 **Use typecheck & lint as your guide:** Don't guess what's unused - let `npm run typecheck` and `npm run lint` tell you definitively what became unused after each removal.
 
-**One removal at a time:** Complete the entire cascade for one feature before moving to the next.
+**One removal at a time:** Complete the entire cascade for one feature before moving to the next. DO NOT FORGET THE GIT COMMIT!
 
 ---
 
