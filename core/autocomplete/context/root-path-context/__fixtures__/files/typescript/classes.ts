@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 class Group extends BaseClass {}
 
 class Group implements FirstInterface {}

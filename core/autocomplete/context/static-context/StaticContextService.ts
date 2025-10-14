@@ -5,7 +5,10 @@ import Parser from "web-tree-sitter";
 import { IDE, Position } from "../../..";
 import { localPathOrUriToPath } from "../../../util/pathToUri";
 import { getFullLanguageName, getQueryForFile } from "../../../util/treeSitter";
-import { AutocompleteSnippetType, AutocompleteStaticSnippet } from "../../snippets/types";
+import {
+  AutocompleteSnippetType,
+  AutocompleteStaticSnippet,
+} from "../../snippets/types";
 import { getAst } from "../../util/ast";
 import { HelperVars } from "../../util/HelperVars";
 import {
@@ -30,7 +33,10 @@ export class StaticContextService {
     this.ide = ide;
   }
 
-  public logAutocompleteStaticSnippet(ctx: StaticContext, label = "Static Snippet") {
+  public logAutocompleteStaticSnippet(
+    ctx: StaticContext,
+    label = "Static Snippet",
+  ) {
     console.log(`=== ${label} ===`);
     console.log("Hole Type:", ctx.holeType);
 
@@ -72,17 +78,25 @@ export class StaticContextService {
     return output;
   }
 
-  public async getContext(helper: HelperVars): Promise<AutocompleteStaticSnippet[]> {
-    const tsFiles = await this.getTypeScriptFilesFromWorkspaces(helper.workspaceUris);
+  public async getContext(
+    helper: HelperVars,
+  ): Promise<AutocompleteStaticSnippet[]> {
+    const tsFiles = await this.getTypeScriptFilesFromWorkspaces(
+      helper.workspaceUris,
+    );
     // Get the three contexts holeContext, relevantTypes, relevantHeaders.
-    const holeContext = await this.getHoleContext(helper.fileContents, helper.filepath, helper.pos);
+    const holeContext = await this.getHoleContext(
+      helper.fileContents,
+      helper.filepath,
+      helper.pos,
+    );
 
     const relevantTypes = await this.extractRelevantTypes(
       holeContext.fullHoverResult,
       holeContext.functionName,
       holeContext.range.start.line,
       holeContext.source,
-      new Map<string, string>()
+      new Map<string, string>(),
     );
 
     // if (this.language === "typescript") {
@@ -97,10 +111,13 @@ export class StaticContextService {
       relevantTypes,
       holeContext.functionTypeSpan,
       helper.pos,
-      holeContext.returnTypeIsAny
+      holeContext.returnTypeIsAny,
     );
 
-    const relevantTypesToReturn: Map<string, string[]> = new Map<string, string[]>();
+    const relevantTypesToReturn: Map<string, string[]> = new Map<
+      string,
+      string[]
+    >();
     relevantTypes.forEach(({ typeSpan: v, sourceFile: src }, _) => {
       if (relevantTypesToReturn.has(src)) {
         const updated = relevantTypesToReturn.get(src)!;
@@ -111,7 +128,10 @@ export class StaticContextService {
       }
     });
 
-    const relevantHeadersToReturn: Map<string, string[]> = new Map<string, string[]>();
+    const relevantHeadersToReturn: Map<string, string[]> = new Map<
+      string,
+      string[]
+    >();
     relevantHeaders.forEach(({ typeSpan: v, sourceFile: src }) => {
       if (relevantHeadersToReturn.has(src)) {
         const updated = relevantHeadersToReturn.get(src)!;
@@ -164,12 +184,16 @@ export class StaticContextService {
   private async getHoleContext(
     sketchFileContent: string,
     sketchFilePath: string,
-    cursorPosition: Position
+    cursorPosition: Position,
   ): Promise<HoleContext> {
     // We need to inject the hole @ to trigger a treesitter error node.
     sketchFilePath = localPathOrUriToPath(sketchFilePath);
     // const sketchFileContent = await fs.readFile(sketchFilePath, "utf8");
-    const injectedContent = this.insertAtPosition(sketchFileContent, cursorPosition, "@;");
+    const injectedContent = this.insertAtPosition(
+      sketchFileContent,
+      cursorPosition,
+      "@;",
+    );
 
     // The hole's position is cursorPosition.
 
@@ -179,9 +203,14 @@ export class StaticContextService {
       throw new Error("failed to get ast");
     }
     const language = getFullLanguageName(sketchFilePath);
-    const query = await getQueryForFile(sketchFilePath, `static-context-queries/hole-queries/${language}.scm`);
+    const query = await getQueryForFile(
+      sketchFilePath,
+      `static-context-queries/hole-queries/${language}.scm`,
+    );
     if (!query) {
-      throw new Error(`getHoleContext: failed to get query for file ${sketchFilePath} and language ${language}`);
+      throw new Error(
+        `getHoleContext: failed to get query for file ${sketchFilePath} and language ${language}`,
+      );
     }
 
     const captures = query.captures(ast.rootNode);
@@ -254,11 +283,18 @@ export class StaticContextService {
     typeName: string,
     startLine: number,
     currentFile: string,
-    foundContents: Map<string, string> // uri -> contents
+    foundContents: Map<string, string>, // uri -> contents
   ): Promise<RelevantTypes> {
     const foundSoFar = new Map<string, TypeSpanAndSourceFileAndAst>(); // identifier -> [full hover result, source]
 
-    await this.extractRelevantTypesHelper(declText, typeName, startLine, foundSoFar, currentFile, foundContents);
+    await this.extractRelevantTypesHelper(
+      declText,
+      typeName,
+      startLine,
+      foundSoFar,
+      currentFile,
+      foundContents,
+    );
 
     return foundSoFar;
   }
@@ -269,7 +305,7 @@ export class StaticContextService {
     startLine: number,
     foundSoFar: Map<string, TypeSpanAndSourceFileAndAst>, // identifier -> [full hover result, source]
     currentFile: string,
-    foundContents: Map<string, string> // uri -> contents
+    foundContents: Map<string, string>, // uri -> contents
   ) {
     if (!foundSoFar.has(typeName)) {
       const ast = await getAst(currentFile, declText);
@@ -285,10 +321,12 @@ export class StaticContextService {
       const language = getFullLanguageName(currentFile);
       const query = await getQueryForFile(
         currentFile,
-        `static-context-queries/relevant-types-queries/${language}-extract-identifiers.scm`
+        `static-context-queries/relevant-types-queries/${language}-extract-identifiers.scm`,
       );
       if (!query) {
-        throw new Error(`failed to get query for file ${currentFile} and language ${language}`);
+        throw new Error(
+          `failed to get query for file ${currentFile} and language ${language}`,
+        );
       }
 
       const identifiers = query.captures(ast.rootNode);
@@ -313,23 +351,30 @@ export class StaticContextService {
             if (foundContents.has(tdLocation.filepath)) {
               content = foundContents.get(tdLocation.filepath)!;
             } else {
-              content = await fs.readFile(localPathOrUriToPath(tdLocation.filepath), "utf8");
+              content = await fs.readFile(
+                localPathOrUriToPath(tdLocation.filepath),
+                "utf8",
+              );
               foundContents.set(tdLocation.filepath, content);
             }
 
             const ast = await getAst(tdLocation.filepath, content);
             if (!ast) {
-              throw new Error(`failed to get ast for file ${tdLocation.filepath}`);
+              throw new Error(
+                `failed to get ast for file ${tdLocation.filepath}`,
+              );
             }
             const decl = findEnclosingTypeDeclaration(
               content,
               tdLocation.range.start.line,
               tdLocation.range.start.character,
-              ast
+              ast,
             );
             if (!decl) {
               // throw new Error(`failed to get decl for file ${tdLocation.uri}`);
-              console.error(`failed to get decl for file ${tdLocation.filepath}`);
+              console.error(
+                `failed to get decl for file ${tdLocation.filepath}`,
+              );
             }
 
             if (decl) {
@@ -339,7 +384,7 @@ export class StaticContextService {
                 tdLocation.range.start.line,
                 foundSoFar,
                 tdLocation.filepath,
-                foundContents
+                foundContents,
               );
             } else {
               // console.log("decl not found");
@@ -359,7 +404,7 @@ export class StaticContextService {
     relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>,
     holeType: string,
     cursorPosition: Position,
-    returnTypeIsAny: boolean
+    returnTypeIsAny: boolean,
   ): Promise<RelevantHeaders> {
     const relevantContext = new Set<TypeSpanAndSourceFile>();
     if (returnTypeIsAny) return relevantContext;
@@ -433,7 +478,9 @@ export class StaticContextService {
           const alias = ast.rootNode.namedChild(0);
           // console.log(alias);
           if (!alias || alias.type !== "type_alias_declaration") {
-            throw new Error("extractRelevantHeaders: Failed to parse type alias");
+            throw new Error(
+              "extractRelevantHeaders: Failed to parse type alias",
+            );
           }
 
           const valueNode = alias.childForFieldName("value");
@@ -449,10 +496,12 @@ export class StaticContextService {
             relevantContext,
             relevantContextMap,
             foundNormalForms,
-            source
+            source,
           );
         } else {
-          const varTypNode = tld.captures.find((d) => d.name === "top.var.type")!.node;
+          const varTypNode = tld.captures.find(
+            (d) => d.name === "top.var.type",
+          )!.node;
           await this.extractRelevantHeadersHelper(
             originalDeclText,
             varTypNode,
@@ -461,7 +510,7 @@ export class StaticContextService {
             relevantContext,
             relevantContextMap,
             foundNormalForms,
-            source
+            source,
           );
         }
       }
@@ -482,16 +531,20 @@ export class StaticContextService {
     relevantContext: Set<TypeSpanAndSourceFile>,
     relevantContextMap: Map<string, TypeSpanAndSourceFile>,
     foundNormalForms: Map<string, string>,
-    source: string
+    source: string,
   ) {
     for (const typ of targetTypes) {
-      if (await this.isTypeEquivalent(node, typ, relevantTypes, foundNormalForms)) {
+      if (
+        await this.isTypeEquivalent(node, typ, relevantTypes, foundNormalForms)
+      ) {
         const ctx = { typeSpan: originalDeclText, sourceFile: source };
         relevantContextMap.set(JSON.stringify(ctx), ctx);
       }
 
       if (node.type === "function_type") {
-        const retTypeNode = node.namedChildren.find((c) => c && c.type === "return_type");
+        const retTypeNode = node.namedChildren.find(
+          (c) => c && c.type === "return_type",
+        );
         if (retTypeNode) {
           await this.extractRelevantHeadersHelper(
             originalDeclText,
@@ -501,7 +554,7 @@ export class StaticContextService {
             relevantContext,
             relevantContextMap,
             foundNormalForms,
-            source
+            source,
           );
         }
       } else if (node.type === "tuple_type") {
@@ -514,14 +567,17 @@ export class StaticContextService {
             relevantContext,
             relevantContextMap,
             foundNormalForms,
-            source
+            source,
           );
         }
       }
     }
   }
 
-  private async generateTargetTypes(relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>, holeType: string) {
+  private async generateTargetTypes(
+    relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>,
+    holeType: string,
+  ) {
     const targetTypes = new Set<Parser.SyntaxNode>();
     // const ast = relevantTypes.get(holeIdentifier)!.ast;
     const ast = await getAst("file.ts", `type T = ${holeType};`);
@@ -539,7 +595,12 @@ export class StaticContextService {
 
     const baseNode = unwrapToBaseType(valueNode);
     targetTypes.add(baseNode);
-    await this.generateTargetTypesHelper(relevantTypes, holeType, targetTypes, baseNode);
+    await this.generateTargetTypesHelper(
+      relevantTypes,
+      holeType,
+      targetTypes,
+      baseNode,
+    );
 
     return targetTypes;
   }
@@ -548,7 +609,7 @@ export class StaticContextService {
     relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>,
     currType: string,
     targetTypes: Set<Parser.SyntaxNode>,
-    node: Parser.SyntaxNode | null
+    node: Parser.SyntaxNode | null,
   ): Promise<void> {
     if (!node) return;
 
@@ -556,7 +617,12 @@ export class StaticContextService {
       const returnType = node.childForFieldName("return_type");
       if (returnType) {
         targetTypes.add(returnType);
-        await this.generateTargetTypesHelper(relevantTypes, currType, targetTypes, returnType);
+        await this.generateTargetTypesHelper(
+          relevantTypes,
+          currType,
+          targetTypes,
+          returnType,
+        );
       }
     }
 
@@ -564,7 +630,12 @@ export class StaticContextService {
       for (const child of node.namedChildren) {
         if (child) {
           targetTypes.add(child);
-          await this.generateTargetTypesHelper(relevantTypes, currType, targetTypes, child);
+          await this.generateTargetTypesHelper(
+            relevantTypes,
+            currType,
+            targetTypes,
+            child,
+          );
         }
       }
     }
@@ -592,7 +663,12 @@ export class StaticContextService {
       if (!valueNode) throw new Error("No type value found");
 
       const baseNode = unwrapToBaseType(valueNode);
-      await this.generateTargetTypesHelper(relevantTypes, currType, targetTypes, baseNode);
+      await this.generateTargetTypesHelper(
+        relevantTypes,
+        currType,
+        targetTypes,
+        baseNode,
+      );
     }
 
     // if (node.type === "type_identifier" || node.type === "predefined_type") {
@@ -606,7 +682,7 @@ export class StaticContextService {
     node: Parser.SyntaxNode,
     typ: Parser.SyntaxNode,
     relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>,
-    foundNormalForms: Map<string, string>
+    foundNormalForms: Map<string, string>,
   ): Promise<boolean> {
     if (!node || !typ) {
       return false;
@@ -637,19 +713,24 @@ export class StaticContextService {
 
   private async normalize(
     node: Parser.SyntaxNode,
-    relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>
+    relevantTypes: Map<string, TypeSpanAndSourceFileAndAst>,
   ): Promise<string> {
     if (!node) return "";
 
     switch (node.type) {
       case "function_type": {
         const params = node.child(0); // formal_parameters
-        const returnType = node.childForFieldName("type") || node.namedChildren[1]; // function_type → parameters, =>, return
+        const returnType =
+          node.childForFieldName("type") || node.namedChildren[1]; // function_type → parameters, =>, return
 
         const paramTypes =
           params?.namedChildren
             .map((param) =>
-              this.normalize(param!.childForFieldName("type")! || param!.namedChildren.at(-1), relevantTypes)
+              this.normalize(
+                param!.childForFieldName("type")! ||
+                  param!.namedChildren.at(-1),
+                relevantTypes,
+              ),
             )
             .join(", ") || "";
 
@@ -658,12 +739,16 @@ export class StaticContextService {
       }
 
       case "tuple_type": {
-        const elements = node.namedChildren.map((c) => this.normalize(c!, relevantTypes));
+        const elements = node.namedChildren.map((c) =>
+          this.normalize(c!, relevantTypes),
+        );
         return `[${elements.join(", ")}]`;
       }
 
       case "union_type": {
-        const parts = node.namedChildren.map((c) => this.normalize(c!, relevantTypes));
+        const parts = node.namedChildren.map((c) =>
+          this.normalize(c!, relevantTypes),
+        );
         return parts.join(" | ");
       }
 
@@ -674,7 +759,9 @@ export class StaticContextService {
         // Parse the alias's type span
         const wrapped = `type __TMP = ${alias};`;
         const tree = await getAst("file.ts", wrapped);
-        const valueNode = tree!.rootNode.descendantsOfType("type_alias_declaration")[0]?.childForFieldName("value");
+        const valueNode = tree!.rootNode
+          .descendantsOfType("type_alias_declaration")[0]
+          ?.childForFieldName("value");
 
         return this.normalize(valueNode!, relevantTypes);
       }
@@ -693,7 +780,7 @@ export class StaticContextService {
   private insertAtPosition = (
     contents: string,
     cursorPosition: { line: number; character: number },
-    insertText: string
+    insertText: string,
   ): string => {
     const lines = contents.split(/\r?\n/); // Handle both LF and CRLF line endings
     const { line, character } = cursorPosition;
@@ -708,21 +795,29 @@ export class StaticContextService {
     }
 
     // Insert the text
-    lines[line] = targetLine.slice(0, character) + insertText + targetLine.slice(character);
+    lines[line] =
+      targetLine.slice(0, character) + insertText + targetLine.slice(character);
 
     return lines.join("\n"); // Reconstruct the file
   };
 
-  private async getTypeScriptFilesFromWorkspaces(workspaceUris: string[]): Promise<string[]> {
+  private async getTypeScriptFilesFromWorkspaces(
+    workspaceUris: string[],
+  ): Promise<string[]> {
     const tsExtensions = [".ts"];
     const allTsFiles: string[] = [];
 
     for (const workspaceUri of workspaceUris) {
       try {
         // Convert URI to file path
-        const folderPath = workspaceUri.startsWith("file://") ? new URL(workspaceUri).pathname : workspaceUri;
+        const folderPath = workspaceUri.startsWith("file://")
+          ? new URL(workspaceUri).pathname
+          : workspaceUri;
 
-        const tsFiles = await this.scanDirectoryForTypeScriptFiles(folderPath, tsExtensions);
+        const tsFiles = await this.scanDirectoryForTypeScriptFiles(
+          folderPath,
+          tsExtensions,
+        );
         allTsFiles.push(...tsFiles);
       } catch (error) {
         console.error(`Error scanning workspace ${workspaceUri}:`, error);
@@ -732,7 +827,10 @@ export class StaticContextService {
     return allTsFiles;
   }
 
-  private async scanDirectoryForTypeScriptFiles(dirPath: string, tsExtensions: string[]): Promise<string[]> {
+  private async scanDirectoryForTypeScriptFiles(
+    dirPath: string,
+    tsExtensions: string[],
+  ): Promise<string[]> {
     const tsFiles: string[] = [];
 
     const shouldSkipDirectory = (dirName: string): boolean => {
@@ -761,7 +859,9 @@ export class StaticContextService {
         });
 
         for (const entry of entries) {
-          const fullPath = localPathOrUriToPath(path.join(currentPath, entry.name));
+          const fullPath = localPathOrUriToPath(
+            path.join(currentPath, entry.name),
+          );
 
           if (entry.isDirectory()) {
             // Skip common directories that typically don't contain source files

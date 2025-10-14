@@ -14,13 +14,15 @@ const commonStops = [SRC_DIRECTORY, PYTHON_ENCODING, CODE_BLOCK_END];
 export function getStopTokens(
   completionOptions: Partial<CompletionOptions> | undefined,
   lang: AutocompleteLanguageInfo,
-  model: string
+  model: string,
 ): string[] {
   const stopTokens = [
     ...(completionOptions?.stop || []),
     // ...multilineStops,
     ...commonStops,
-    ...(model.toLowerCase().includes("starcoder2") ? STARCODER2_T_ARTIFACTS : []),
+    ...(model.toLowerCase().includes("starcoder2")
+      ? STARCODER2_T_ARTIFACTS
+      : []),
     // ...lang.topLevelKeywords.map((word) => `\n${word}`),
   ];
 

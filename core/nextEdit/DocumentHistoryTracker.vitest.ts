@@ -25,14 +25,14 @@ describe("DocumentHistoryTracker", () => {
 
   beforeEach(() => {
     // Reset singleton instance for each test
-    // @ts-ignore - accessing private static property for testing
+    // @ts-expect-error - accessing private static property for testing
     DocumentHistoryTracker.instance = null;
     tracker = DocumentHistoryTracker.getInstance();
 
     // Create mock ASTs
-    //@ts-ignore
+    //@ts-expect-error
     mockAst1 = new Parser.Tree() as Parser.Tree;
-    //@ts-ignore
+    //@ts-expect-error
     mockAst2 = new Parser.Tree() as Parser.Tree;
   });
 
@@ -100,7 +100,7 @@ describe("DocumentHistoryTracker", () => {
     it("should return null if the document has no ASTs", () => {
       tracker.addDocument(testDocPath, testContent1, mockAst1);
 
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property for testing
       tracker.documentAstMap.set(testDocPath, []);
 
       const ast = tracker.getMostRecentAst(testDocPath);
@@ -126,7 +126,7 @@ describe("DocumentHistoryTracker", () => {
     it("should return null if the document has no history", () => {
       tracker.addDocument(testDocPath, testContent1, mockAst1);
 
-      // @ts-ignore - accessing private property for testing
+      // @ts-expect-error - accessing private property for testing
       tracker.documentContentHistoryMap.set(testDocPath, []);
 
       const content = tracker.getMostRecentDocumentHistory(testDocPath);

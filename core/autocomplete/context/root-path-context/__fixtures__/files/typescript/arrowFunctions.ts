@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 const getAddress = (person: Person): Address => {
   // TODO
 };

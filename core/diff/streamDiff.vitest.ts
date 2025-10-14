@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-// @ts-ignore no typings available
+// @ts-expect-error no typings available
 import { changed, diff as myersDiff } from "myers-diff";
 import { streamDiff } from "../diff/streamDiff.js";
 import { DiffLine, DiffType } from "../index.js";

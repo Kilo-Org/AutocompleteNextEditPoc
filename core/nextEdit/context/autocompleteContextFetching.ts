@@ -5,7 +5,10 @@ import { AutocompleteCodeSnippet } from "../../autocomplete/snippets/types";
 import { renderPrompt } from "../../autocomplete/templating";
 import { GetLspDefinitionsFunction } from "../../autocomplete/types";
 import { HelperVars } from "../../autocomplete/util/HelperVars";
-import { AutocompleteInput, RecentlyEditedRange } from "../../autocomplete/util/types";
+import {
+  AutocompleteInput,
+  RecentlyEditedRange,
+} from "../../autocomplete/util/types";
 import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
 import { IDE, ILLM } from "../../index";
 import { isSecurityConcern } from "../../indexing/ignore";
@@ -38,7 +41,7 @@ export const getAutocompleteContext = async (
   recentlyVisitedRanges: AutocompleteCodeSnippet[],
   maxPromptTokens: number,
   manuallyPassFileContents: string,
-  autocompleteModel?: ILLM | string
+  autocompleteModel?: ILLM | string,
   // eslint-disable-next-line max-params
 ): Promise<string> => {
   if (!recentlyEditedRanges) recentlyEditedRanges = [];
@@ -70,7 +73,9 @@ export const getAutocompleteContext = async (
   if (autocompleteModel) {
     if (typeof autocompleteModel === "string") {
       // Try to find the model in config first
-      const foundModel = config.modelsByRole?.autocomplete?.find((m: ILLM) => m.title === autocompleteModel);
+      const foundModel = config.modelsByRole?.autocomplete?.find(
+        (m: ILLM) => m.title === autocompleteModel,
+      );
       if (foundModel) {
         finalModel = foundModel;
         modelNameForTemplating = foundModel.model;
@@ -78,7 +83,9 @@ export const getAutocompleteContext = async (
         // Model not found in config, but we can still use it for template selection
         const configuredModel = config.selectedModelByRole?.autocomplete;
         if (!configuredModel) {
-          throw new Error("No autocomplete model configured and provided model not found in config");
+          throw new Error(
+            "No autocomplete model configured and provided model not found in config",
+          );
         }
         finalModel = configuredModel;
         modelNameForTemplating = autocompleteModel; // Use the provided string for template selection
@@ -107,7 +114,12 @@ export const getAutocompleteContext = async (
     options.template = finalModel.promptTemplates.autocomplete as string;
   }
 
-  const helper = await HelperVars.create(input, options, modelNameForTemplating, ide);
+  const helper = await HelperVars.create(
+    input,
+    options,
+    modelNameForTemplating,
+    ide,
+  );
 
   const contextRetrievalService = new ContextRetrievalService(ide);
 

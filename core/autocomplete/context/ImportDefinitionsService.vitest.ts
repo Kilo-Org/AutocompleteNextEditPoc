@@ -39,7 +39,9 @@ import sys`;
       expect(ast?.rootNode.type).toBe("module");
 
       // Mock IDE operations (NOT tree-sitter)
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
 
       const mockDefinition: RangeInFileWithContents = {
         filepath: "/workspace/os/path.py",
@@ -56,7 +58,9 @@ import sys`;
           range: mockDefinition.range,
         },
       ]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(mockDefinition.contents);
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        mockDefinition.contents,
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -89,7 +93,9 @@ from another import FakeImport
       const stringNodes = ast?.rootNode.descendantsOfType("string");
       expect(stringNodes?.length).toBeGreaterThan(0);
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
       (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([
         {
           filepath: "/workspace/mymodule.py",
@@ -99,7 +105,9 @@ from another import FakeImport
           },
         },
       ]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("class MyClass: ...");
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "class MyClass: ...",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -121,16 +129,24 @@ import json`;
       expect(ast).toBeTruthy();
 
       // Verify we can find import_from_statement nodes
-      const importNodes = ast?.rootNode.descendantsOfType("import_from_statement");
+      const importNodes = ast?.rootNode.descendantsOfType(
+        "import_from_statement",
+      );
       expect(importNodes?.length).toBe(1);
 
       // Verify import_statement nodes
       const importStmts = ast?.rootNode.descendantsOfType("import_statement");
       expect(importStmts?.length).toBe(1);
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -163,7 +179,9 @@ import defaultExport from './module';`;
           },
         },
       ]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("export const Component = ...");
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "export const Component = ...",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -191,7 +209,9 @@ const template = \`
 
       const stringNodes = ast?.rootNode.descendantsOfType("string");
       const templateNodes = ast?.rootNode.descendantsOfType("template_string");
-      expect((stringNodes?.length || 0) + (templateNodes?.length || 0)).toBeGreaterThan(0);
+      expect(
+        (stringNodes?.length || 0) + (templateNodes?.length || 0),
+      ).toBeGreaterThan(0);
 
       (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(tsCode);
       (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([
@@ -203,7 +223,9 @@ const template = \`
           },
         },
       ]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("export const realImport = ...");
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "export const realImport = ...",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -225,12 +247,17 @@ import defaultExport from './module';`;
       expect(ast).toBeTruthy();
 
       // Should find import_statement nodes
-      const importStatements = ast?.rootNode.descendantsOfType("import_statement");
+      const importStatements =
+        ast?.rootNode.descendantsOfType("import_statement");
       expect(importStatements?.length).toBe(3);
 
       (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(tsCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -259,7 +286,9 @@ import defaultExport from './module';`;
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -297,9 +326,15 @@ def func():
       const ast = await getAst(filepath, pythonCode);
       expect(ast).toBeTruthy();
 
-      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(pythonCode);
-      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue("");
+      (mockIde.readFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        pythonCode,
+      );
+      (mockIde.gotoDefinition as ReturnType<typeof vi.fn>).mockResolvedValue(
+        [],
+      );
+      (mockIde.readRangeInFile as ReturnType<typeof vi.fn>).mockResolvedValue(
+        "",
+      );
 
       const result = await (service as any)._getFileInfo(filepath);
 
@@ -336,7 +371,9 @@ def func():
       expect(ast?.rootNode.type).toBe("module");
 
       // Verify we get actual Python syntax nodes
-      const importFrom = ast?.rootNode.descendantsOfType("import_from_statement");
+      const importFrom = ast?.rootNode.descendantsOfType(
+        "import_from_statement",
+      );
       expect(importFrom?.length).toBeGreaterThan(0);
     });
 
@@ -381,7 +418,9 @@ def func():
         if (!tree) return;
 
         // The imported names should be captured separately from the module
-        const importFromStmt = tree.rootNode.descendantsOfType("import_from_statement")[0];
+        const importFromStmt = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        )[0];
         expect(importFromStmt).toBeTruthy();
 
         // Find the actual imported names (not the module name)
@@ -389,8 +428,12 @@ def func():
         const texts = allIdentifiers.map((n) => n.text);
 
         // Should include the imported names
-        expect(texts.some((t) => t === "defaultdict" || t.includes("defaultdict"))).toBe(true);
-        expect(texts.some((t) => t === "Counter" || t.includes("Counter"))).toBe(true);
+        expect(
+          texts.some((t) => t === "defaultdict" || t.includes("defaultdict")),
+        ).toBe(true);
+        expect(
+          texts.some((t) => t === "Counter" || t.includes("Counter")),
+        ).toBe(true);
       });
 
       it("should handle aliased imports", async () => {
@@ -402,7 +445,9 @@ def func():
 
         // Should find both import types
         const importStmts = tree.rootNode.descendantsOfType("import_statement");
-        const importFromStmts = tree.rootNode.descendantsOfType("import_from_statement");
+        const importFromStmts = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        );
 
         expect(importStmts.length).toBeGreaterThan(0);
         expect(importFromStmts.length).toBeGreaterThan(0);
@@ -419,11 +464,14 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importFromStmt = tree.rootNode.descendantsOfType("import_from_statement")[0];
+        const importFromStmt = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        )[0];
         expect(importFromStmt).toBeTruthy();
 
         // Should have a wildcard import node
-        const wildcardImport = tree.rootNode.descendantsOfType("wildcard_import");
+        const wildcardImport =
+          tree.rootNode.descendantsOfType("wildcard_import");
         expect(wildcardImport.length).toBeGreaterThan(0);
       });
 
@@ -434,11 +482,14 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importFromStmts = tree.rootNode.descendantsOfType("import_from_statement");
+        const importFromStmts = tree.rootNode.descendantsOfType(
+          "import_from_statement",
+        );
         expect(importFromStmts.length).toBe(2);
 
         // Verify relative import prefix
-        const relativeImport = tree.rootNode.descendantsOfType("relative_import");
+        const relativeImport =
+          tree.rootNode.descendantsOfType("relative_import");
         expect(relativeImport.length).toBeGreaterThan(0);
       });
     });
@@ -452,7 +503,8 @@ def func():
         if (!tree) return;
 
         // Should find import specifier nodes
-        const importSpecifiers = tree.rootNode.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          tree.rootNode.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(2);
 
         // Verify the names
@@ -471,7 +523,8 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
 
         // Should find identifier for default import
@@ -486,11 +539,13 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
 
         // Should find namespace import
-        const namespaceImport = tree.rootNode.descendantsOfType("namespace_import");
+        const namespaceImport =
+          tree.rootNode.descendantsOfType("namespace_import");
         expect(namespaceImport.length).toBeGreaterThan(0);
 
         // Verify the alias name
@@ -505,7 +560,8 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
 
         // Should have string literal for the path
@@ -520,11 +576,13 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
 
         // Should have both default and named imports
-        const importSpecifiers = importStatement.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          importStatement.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(2); // Component and useState
 
         // Should also have the default import identifier
@@ -539,7 +597,8 @@ def func():
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importSpecifier = tree.rootNode.descendantsOfType("import_specifier")[0];
+        const importSpecifier =
+          tree.rootNode.descendantsOfType("import_specifier")[0];
         expect(importSpecifier).toBeTruthy();
 
         // Should find both the original and alias names
@@ -562,11 +621,14 @@ import static java.lang.Math.PI;`;
         if (!tree) return;
 
         // Should find import declarations
-        const importDecls = tree.rootNode.descendantsOfType("import_declaration");
+        const importDecls =
+          tree.rootNode.descendantsOfType("import_declaration");
         expect(importDecls.length).toBe(3);
 
         // Check for static import
-        const staticImports = importDecls.filter((decl) => decl.text.includes("static"));
+        const staticImports = importDecls.filter((decl) =>
+          decl.text.includes("static"),
+        );
         expect(staticImports.length).toBe(1);
       });
 
@@ -577,7 +639,8 @@ import static java.lang.Math.PI;`;
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importDecl = tree.rootNode.descendantsOfType("import_declaration")[0];
+        const importDecl =
+          tree.rootNode.descendantsOfType("import_declaration")[0];
         expect(importDecl).toBeTruthy();
 
         // Should have scoped identifier for the full path
@@ -592,7 +655,8 @@ import static java.lang.Math.PI;`;
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importDecl = tree.rootNode.descendantsOfType("import_declaration")[0];
+        const importDecl =
+          tree.rootNode.descendantsOfType("import_declaration")[0];
         expect(importDecl).toBeTruthy();
 
         // Should contain asterisk for wildcard
@@ -681,17 +745,21 @@ import static java.lang.Math.PI;`;
       });
 
       it("should handle very long import statements", async () => {
-        const imports = Array.from({ length: 50 }, (_, i) => `import${i}`).join(", ");
+        const imports = Array.from({ length: 50 }, (_, i) => `import${i}`).join(
+          ", ",
+        );
         const code = `import { ${imports} } from 'large-module';`;
         const tree = await getAst("test.ts", code);
 
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importStatement = tree.rootNode.descendantsOfType("import_statement")[0];
+        const importStatement =
+          tree.rootNode.descendantsOfType("import_statement")[0];
         expect(importStatement).toBeTruthy();
 
-        const importSpecifiers = importStatement.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          importStatement.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(50);
       });
 
@@ -706,7 +774,8 @@ import static java.lang.Math.PI;`;
         expect(tree).toBeTruthy();
         if (!tree) return;
 
-        const importSpecifiers = tree.rootNode.descendantsOfType("import_specifier");
+        const importSpecifiers =
+          tree.rootNode.descendantsOfType("import_specifier");
         expect(importSpecifiers.length).toBe(3);
       });
     });

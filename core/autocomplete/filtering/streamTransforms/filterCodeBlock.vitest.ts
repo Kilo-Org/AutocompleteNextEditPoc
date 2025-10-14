@@ -32,7 +32,12 @@ describe("filterCodeBlock", () => {
   });
 
   it("should handle unfenced code with a code block", async () => {
-    const linesGenerator = await getLineGenerator(["const x = 5;", "```bash", "ls -al", "```"]);
+    const linesGenerator = await getLineGenerator([
+      "const x = 5;",
+      "```bash",
+      "ls -al",
+      "```",
+    ]);
 
     const result = lineStream.filterCodeBlockLines(linesGenerator);
     const filteredLines = await getFilteredLines(result);
@@ -167,7 +172,15 @@ describe("filterCodeBlock", () => {
     const result = lineStream.filterCodeBlockLines(linesGenerator);
     const filteredLines = await getFilteredLines(result);
 
-    expect(filteredLines).toEqual(["const x = 5;", "```bash", "ls -al", "```", "```bash", "ls -al", "```"]);
+    expect(filteredLines).toEqual([
+      "const x = 5;",
+      "```bash",
+      "ls -al",
+      "```",
+      "```bash",
+      "ls -al",
+      "```",
+    ]);
   });
 
   it("should remove lines before the first valid line", async () => {
@@ -180,7 +193,11 @@ describe("filterCodeBlock", () => {
   });
 
   it("should remove outer blocks", async () => {
-    const linesGenerator = await getLineGenerator(["```ts", "const x = 5;", "```"]);
+    const linesGenerator = await getLineGenerator([
+      "```ts",
+      "const x = 5;",
+      "```",
+    ]);
 
     const result = lineStream.filterCodeBlockLines(linesGenerator);
     const filteredLines = await getFilteredLines(result);
@@ -189,7 +206,14 @@ describe("filterCodeBlock", () => {
   });
 
   it("should leave inner blocks intact", async () => {
-    const linesGenerator = await getLineGenerator(["```md", "const x = 5;", "```bash", "ls -al", "```", "```"]);
+    const linesGenerator = await getLineGenerator([
+      "```md",
+      "const x = 5;",
+      "```bash",
+      "ls -al",
+      "```",
+      "```",
+    ]);
 
     const result = lineStream.filterCodeBlockLines(linesGenerator);
     const filteredLines = await getFilteredLines(result);
@@ -241,7 +265,12 @@ describe("filterCodeBlock", () => {
     const result = lineStream.filterCodeBlockLines(linesGenerator);
     const filteredLines = await getFilteredLines(result);
 
-    expect(filteredLines).toEqual(["const x = 5;", "```bash", "echo ```test```", "```"]);
+    expect(filteredLines).toEqual([
+      "const x = 5;",
+      "```bash",
+      "echo ```test```",
+      "```",
+    ]);
   });
 
   it("should leave single inner blocks intact but not return trailing text", async () => {
@@ -371,12 +400,22 @@ describe("filterCodeBlock", () => {
   });
 
   it("should handle non-markdown files normally with filepath parameter", async () => {
-    const linesGenerator = await getLineGenerator(["```", "function test() {", "  return 'hello';", "}", "```"]);
+    const linesGenerator = await getLineGenerator([
+      "```",
+      "function test() {",
+      "  return 'hello';",
+      "}",
+      "```",
+    ]);
 
     const result = lineStream.filterCodeBlockLines(linesGenerator, "test.js");
     const filteredLines = await getFilteredLines(result);
 
-    expect(filteredLines).toEqual(["function test() {", "  return 'hello';", "}"]);
+    expect(filteredLines).toEqual([
+      "function test() {",
+      "  return 'hello';",
+      "}",
+    ]);
   });
 
   it("should handle simple markdown code blocks", async () => {

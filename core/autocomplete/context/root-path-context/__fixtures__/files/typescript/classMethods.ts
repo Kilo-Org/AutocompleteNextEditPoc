@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 class Group {
   getPersonAddress(person: Person): Address {
     // TODO

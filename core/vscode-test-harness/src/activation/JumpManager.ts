@@ -1,6 +1,6 @@
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { NextEditOutcome } from "core/nextEdit/types";
-// @ts-ignore
+// @ts-expect-error
 import svgBuilder from "svg-builder";
 import * as vscode from "vscode";
 import {
