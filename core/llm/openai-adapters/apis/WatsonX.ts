@@ -288,7 +288,6 @@ export class WatsonXApi implements BaseLlmApi {
       throw new Error(`Failed to stream completion: ${await response.text()}`);
     }
 
-    let generatedText = "";
     for await (const value of streamSse(response as any)) {
       const lines = value.toString().split("\n");
       let generatedChunk = "";
@@ -308,7 +307,6 @@ export class WatsonXApi implements BaseLlmApi {
       });
 
       if (generatedChunk) {
-        generatedText += generatedChunk;
         yield {
           id: `watsonx-${Date.now()}`,
           object: "text_completion",

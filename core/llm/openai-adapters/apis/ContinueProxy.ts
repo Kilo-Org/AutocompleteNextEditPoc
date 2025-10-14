@@ -17,13 +17,6 @@ interface ContinueProperties {
   env?: Record<string, any>;
 }
 
-interface ProxyModelName {
-  ownerSlug: string;
-  packageSlug: string;
-  provider: string;
-  model: string;
-}
-
 export class ContinueProxyApi extends OpenAIApi {
   // The apiKey and apiBase are set to the values for the proxy,
   // but we need to keep track of the actual values that the proxy will use

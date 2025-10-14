@@ -2,7 +2,6 @@ import {
   ChatCompletionChunk,
   CompletionUsage,
   CreateEmbeddingResponse,
-  Model,
 } from "openai/resources/index";
 
 import { ChatCompletion } from "openai/resources/index.js";

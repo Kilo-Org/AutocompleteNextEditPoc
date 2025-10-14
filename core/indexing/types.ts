@@ -35,5 +35,3 @@ export type RefreshIndexResults = {
   addTag: PathAndCacheKey[];
   removeTag: PathAndCacheKey[];
 };
-
-type RefreshIndex = (tag: IndexTag) => Promise<RefreshIndexResults>;

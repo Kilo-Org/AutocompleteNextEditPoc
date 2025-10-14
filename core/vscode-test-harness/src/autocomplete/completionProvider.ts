@@ -197,7 +197,6 @@ export class ContinueCompletionProvider
         return null;
       }
     }
-    const injectDetails: string | undefined = undefined;
 
     const currCursorPos = editor.selection.active;
 
