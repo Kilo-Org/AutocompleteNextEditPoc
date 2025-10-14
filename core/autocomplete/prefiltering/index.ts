@@ -15,7 +15,7 @@ async function isDisabledForFile(
       workspaceDirs,
     );
 
-    // @ts-expect-error
+    // @ts-expect-error -- ignore library CommonJS/ESM interop requires .default access
     const pattern = ignore.default().add(disableInFiles);
     if (pattern.ignores(relativePathOrBasename)) {
       return true;

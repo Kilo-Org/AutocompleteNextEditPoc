@@ -180,7 +180,7 @@ describe("NextEditWindowManager", () => {
       mockVscode.commands.executeCommand as MockedFunction<any>
     ).mockResolvedValue(undefined);
     (mockVscode.commands.registerCommand as MockedFunction<any>)
-      //@ts-expect-error
+      // @ts-expect-error -- mocking VSCode command registration callback
       .mockImplementation((command: string, callback: any) => ({
         dispose: vi.fn(),
       }));
@@ -442,7 +442,7 @@ describe("NextEditWindowManager", () => {
       const contextValues: boolean[] = [];
       executeCommand.mockImplementation((cmd, key, value) => {
         if (cmd === "setContext") {
-          //@ts-expect-error
+          // @ts-expect-error -- value type varies by context key
           contextValues.push(value);
         }
         return Promise.resolve(undefined);
@@ -473,7 +473,7 @@ describe("NextEditWindowManager", () => {
       const contextCalls: boolean[] = [];
       executeCommand.mockImplementation((cmd, key, value) => {
         if (cmd === "setContext" && key === "nextEditWindowActive") {
-          //@ts-expect-error
+          // @ts-expect-error -- value type varies by context key
           contextCalls.push(value);
         }
         return Promise.resolve();
@@ -504,7 +504,7 @@ describe("NextEditWindowManager", () => {
       const contextCalls: boolean[] = [];
       executeCommand.mockImplementation((cmd, key, value) => {
         if (cmd === "setContext" && key === "nextEditWindowActive") {
-          //@ts-expect-error
+          // @ts-expect-error -- value type varies by context key
           contextCalls.push(value);
         }
         return Promise.resolve();
@@ -543,7 +543,7 @@ describe("NextEditWindowManager", () => {
       const contextCalls: boolean[] = [];
       executeCommand.mockImplementation((cmd, key, value) => {
         if (cmd === "setContext" && key === "nextEditWindowActive") {
-          //@ts-expect-error
+          // @ts-expect-error -- value type varies by context key
           contextCalls.push(value);
           // Add small delay to simulate real async behavior
           return new Promise((resolve) => setTimeout(resolve, 5));
@@ -831,11 +831,11 @@ describe("NextEditWindowManager", () => {
       const acceptCall = registerCalls.find(
         (call) => call[0] === ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND,
       );
-      //@ts-expect-error
+      // @ts-expect-error -- extracting callback from mock call array
       const acceptCallback = acceptCall[1];
 
       // Call accept
-      //@ts-expect-error
+      // @ts-expect-error -- calling extracted callback without args
       await acceptCallback();
 
       // Should have called edit
@@ -854,11 +854,11 @@ describe("NextEditWindowManager", () => {
       const acceptCall = registerCalls.find(
         (call) => call[0] === ACCEPT_NEXT_EDIT_SUGGESTION_COMMAND,
       );
-      //@ts-expect-error
+      // @ts-expect-error -- extracting callback from mock call array
       const acceptCallback = acceptCall[1];
 
       // Call accept without showing window
-      //@ts-expect-error
+      // @ts-expect-error -- calling extracted callback without args
       await acceptCallback();
 
       // Should not have called edit
@@ -884,11 +884,11 @@ describe("NextEditWindowManager", () => {
       const hideCall = registerCalls.find(
         (call) => call[0] === HIDE_NEXT_EDIT_SUGGESTION_COMMAND,
       );
-      //@ts-expect-error
+      // @ts-expect-error -- extracting callback from mock call array
       const hideCallback = hideCall[1];
 
       // Call hide
-      //@ts-expect-error
+      // @ts-expect-error -- calling extracted callback without args
       await hideCallback();
 
       // Should have cleared everything
@@ -945,7 +945,7 @@ describe("NextEditWindowManager", () => {
       const changeCallback = onDidChange.mock.calls[0][0];
 
       // Simulate theme change
-      //@ts-expect-error
+      // @ts-expect-error -- mocking partial ConfigurationChangeEvent
       await changeCallback({
         affectsConfiguration: (key: string) => key === "workbench.colorTheme",
       });
@@ -969,7 +969,7 @@ describe("NextEditWindowManager", () => {
         get: (key: string) => (key === "fontSize" ? 16 : "monospace"),
       });
 
-      //@ts-expect-error
+      // @ts-expect-error -- mocking partial ConfigurationChangeEvent
       await changeCallback({
         affectsConfiguration: (key: string) => key === "editor.fontSize",
       });

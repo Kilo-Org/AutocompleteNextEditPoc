@@ -1,6 +1,6 @@
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { NextEditOutcome } from "core/nextEdit/types";
-// @ts-expect-error
+// @ts-expect-error -- svg-builder has no TypeScript types
 import svgBuilder from "svg-builder";
 import * as vscode from "vscode";
 import {

@@ -152,7 +152,7 @@ export class ContinueCompletionProvider
     position: vscode.Position,
     context: vscode.InlineCompletionContext,
     token: vscode.CancellationToken,
-    //@ts-expect-error
+    // @ts-expect-error -- return type mismatch between vscode types and implementation
   ): ProviderResult<InlineCompletionItem[] | InlineCompletionList> {
     // This method is triggered on every keystroke, tab keypress, and cursor move.
     // We need to determine why it was triggered:
