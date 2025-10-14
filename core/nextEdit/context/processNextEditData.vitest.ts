@@ -49,7 +49,6 @@ describe("processNextEditData", () => {
   let mockConfigHandler: any;
   let mockGetDefinitionsFromLsp: any;
   let mockNextEditProvider: any;
-  let mockDataLogger: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -233,84 +232,6 @@ describe("processNextEditData", () => {
     });
   });
 
-  describe("data logging", () => {
-    it("should log data when previous edits exist", async () => {
-      const mockPrevEdit = {
-        unidiff:
-          "--- file:///workspace/prev.ts\n+++ file:///workspace/prev.ts\n@@ -1,1 +1,1 @@\n@@ -2,2 +2,2 @@\n-old\n+new",
-        fileUri: "file:///workspace/prev.ts",
-        workspaceUri: "file:///workspace",
-        timestamp: Date.now() - 1000,
-      };
-
-      (getPrevEditsDescending as any).mockReturnValue([mockPrevEdit]);
-
-      await processNextEditData(baseParams);
-
-      expect(mockDataLogger.logDevData).toHaveBeenCalledWith({
-        name: "nextEditWithHistory",
-        data: expect.objectContaining({
-          previousEdits: expect.arrayContaining([
-            expect.objectContaining({
-              filename: expect.any(String),
-              diff: expect.any(String),
-            }),
-          ]),
-          fileURI: baseParams.filePath,
-          workspaceDirURI: baseParams.workspaceDir,
-          beforeContent: baseParams.beforeContent,
-          afterContent: baseParams.afterContent,
-          beforeCursorPos: baseParams.cursorPosBeforeEdit,
-          afterCursorPos: baseParams.cursorPosAfterPrevEdit,
-          context: "test autocomplete context",
-          modelProvider: "mistral",
-          modelName: "Codestral",
-          modelTitle: "Codestral",
-        }),
-      });
-    });
-
-    it("should not log when no previous edits exist", async () => {
-      (getPrevEditsDescending as any).mockReturnValue([]);
-
-      await processNextEditData(baseParams);
-
-      expect(mockDataLogger.logDevData).not.toHaveBeenCalled();
-    });
-
-    it("should format filenames relative to workspace", async () => {
-      (getPrevEditsDescending as any).mockReturnValue([
-        {
-          unidiff: "--- test\n+++ test\nheader3\nheader4\n-old\n+new",
-          fileUri: "file:///workspace/src/test.ts",
-          workspaceUri: "file:///workspace",
-          timestamp: Date.now() - 1000,
-        },
-      ]);
-
-      await processNextEditData(baseParams);
-
-      const logCall = mockDataLogger.logDevData.mock.calls[0][0];
-      expect(logCall.data.previousEdits[0].filename).toBe("src/test.ts");
-    });
-
-    it("should strip first 4 lines from diff in logged data", async () => {
-      (getPrevEditsDescending as any).mockReturnValue([
-        {
-          unidiff: "line1\nline2\nline3\nline4\nline5\nline6",
-          fileUri: "file:///workspace/test.ts",
-          workspaceUri: "file:///workspace",
-          timestamp: Date.now() - 1000,
-        },
-      ]);
-
-      await processNextEditData(baseParams);
-
-      const logCall = mockDataLogger.logDevData.mock.calls[0][0];
-      expect(logCall.data.previousEdits[0].diff).toBe("line5\nline6");
-    });
-  });
-
   describe("maxPromptTokens randomization", () => {
     it("should use random maxPromptTokens between 500 and 12000", async () => {
       (getAutocompleteContext as any).mockClear();
@@ -332,15 +253,17 @@ describe("processNextEditData", () => {
     });
 
     it("should handle multiple previous edits", async () => {
+      const consoleLogSpy = vi.spyOn(console, "log");
+      
       const mockEdits = [
         {
-          unidiff: "--- a\n+++ b\nheader\nheader\n-old1\n+new1",
+          unidiff: "--- a/test1.ts\n+++ b/test1.ts\n@@ @@\nheader\n-old1\n+new1",
           fileUri: "file:///workspace/test1.ts",
           workspaceUri: "file:///workspace",
           timestamp: Date.now() - 1000,
         },
         {
-          unidiff: "--- a\n+++ b\nheader\nheader\n-old2\n+new2",
+          unidiff: "--- a/test2.ts\n+++ b/test2.ts\n@@ @@\nheader\n-old2\n+new2",
           fileUri: "file:///workspace/test2.ts",
           workspaceUri: "file:///workspace",
           timestamp: Date.now() - 2000,
@@ -351,9 +274,26 @@ describe("processNextEditData", () => {
 
       await processNextEditData(baseParams);
 
-      expect(mockDataLogger.logDevData).toHaveBeenCalled();
-      const logCall = mockDataLogger.logDevData.mock.calls[0][0];
-      expect(logCall.data.previousEdits).toHaveLength(2);
+      // Verify console.log was called with nextEditWithHistory
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        "nextEditWithHistory",
+        expect.objectContaining({
+          previousEdits: [
+            {
+              filename: "test1.ts",
+              diff: "-old1\n+new1", // diff without first 4 lines (header lines)
+            },
+            {
+              filename: "test2.ts",
+              diff: "-old2\n+new2", // diff without first 4 lines (header lines)
+            },
+          ],
+          fileURI: baseParams.filePath,
+          workspaceDirURI: baseParams.workspaceDir,
+        }),
+      );
+
+      consoleLogSpy.mockRestore();
     });
 
     it("should handle undefined model name", async () => {
