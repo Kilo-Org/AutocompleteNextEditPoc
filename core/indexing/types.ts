@@ -1,6 +1,6 @@
 import { IndexTag, IndexingProgressUpdate } from "../index.js";
 
-export enum IndexResultType {
+enum IndexResultType {
   Compute = "compute",
   Delete = "del",
   AddTag = "addTag",
@@ -24,7 +24,7 @@ export interface CodebaseIndex {
   ): AsyncGenerator<IndexingProgressUpdate>;
 }
 
-export type PathAndCacheKey = {
+type PathAndCacheKey = {
   path: string;
   cacheKey: string;
 };
