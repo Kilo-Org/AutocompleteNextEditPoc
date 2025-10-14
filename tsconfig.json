@@ -24,8 +24,8 @@
     "composite": false,
     "incremental": false,
     "sourceRoot": "/",
-    //"noUnusedLocals": true,
-    //"noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "*": ["./*"],
       "core": ["./core/index.d.ts"],
