@@ -56,11 +56,12 @@ const statusBarItemTooltip = (status: StatusBarStatus | undefined) => {
     case undefined:
     case StatusBarStatus.Disabled:
       return "Click to enable tab autocomplete";
-    case StatusBarStatus.Enabled:
+    case StatusBarStatus.Enabled: {
       const nextEditEnabled = true; //MINIMAL_REPO - was configurable
       return nextEditEnabled
         ? "Next Edit is enabled"
         : "Tab autocomplete is enabled";
+    }
     case StatusBarStatus.Paused:
       return "Tab autocomplete is paused";
   }
