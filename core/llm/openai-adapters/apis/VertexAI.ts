@@ -330,7 +330,7 @@ export class VertexAIApi implements BaseLlmApi {
     }
 
     switch (vertexProvider) {
-      case "mistral":
+      case "mistral": {
         const mistralResponse =
           await this.mistralInstance.openai.chat.completions.create(
             this.mistralInstance.modifyChatBody(body),
@@ -343,8 +343,9 @@ export class VertexAIApi implements BaseLlmApi {
           yield result;
         }
         break;
+      }
       case "anthropic":
-      case "gemini":
+      case "gemini": {
         const response = await fetch(url.toString(), {
           method: "POST",
           headers,
@@ -371,6 +372,7 @@ export class VertexAIApi implements BaseLlmApi {
           );
         }
         break;
+      }
     }
   }
 
