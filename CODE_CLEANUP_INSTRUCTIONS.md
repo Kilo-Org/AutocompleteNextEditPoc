@@ -46,7 +46,7 @@ npm test             # Must pass
 
 **A removal is safe if ALL of these conditions are met:**
 
-- ✅ Tests pass (`npm test`), and all tests are present (40 files, 772 tests)
+- ✅ Tests pass (`npm test`), and all tests are present (43 test files, 965 tests)
 - ✅ Typecheck warnings/errors contain at most errors about unused code (we'll deal with those later)
 - ✅ ESLint warnings/errors contain at most errors about unused code (we'll deal with those later)
 
