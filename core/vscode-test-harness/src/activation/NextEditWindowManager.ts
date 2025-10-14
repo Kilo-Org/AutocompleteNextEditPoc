@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-// @ts-expect-error
 import * as vscode from "vscode";
 
 import { DiffChar, DiffLine } from "core";
