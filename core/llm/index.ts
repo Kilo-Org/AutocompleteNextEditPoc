@@ -696,7 +696,6 @@ export abstract class BaseLLM implements ILLM {
       knownContextLength: this._contextLength,
       maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
       supportsImages: this.supportsImages(),
-      tools: options.tools,
     });
   }
 
@@ -746,7 +745,6 @@ export abstract class BaseLLM implements ILLM {
         knownContextLength: this._contextLength,
         maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
         supportsImages: this.supportsImages(),
-        tools: options.tools,
       });
 
       messages = compiledChatMessages;

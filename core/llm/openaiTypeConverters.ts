@@ -95,20 +95,6 @@ export function toChatBody(
     stream: options.stream ?? true,
     stop: options.stop,
     prediction: options.prediction,
-    tool_choice: options.toolChoice,
-    tools: !options.tools?.length
-      ? undefined
-      : options.tools
-          .filter((tool) => !tool.type || tool.type === "function")
-          .map((tool) => ({
-            type: tool.type,
-            function: {
-              name: tool.function.name,
-              description: tool.function.description,
-              parameters: tool.function.parameters,
-              strict: tool.function.strict,
-            },
-          })),
   };
 }
 

@@ -21,77 +21,6 @@ export type TemplateType =
   | "llama3"
   | "codestral";
 
-const PROVIDER_SUPPORTS_IMAGES: string[] = [
-  "openai",
-  "ollama",
-  "lemonade",
-  "cohere",
-  "gemini",
-  "msty",
-  "anthropic",
-  "bedrock",
-  "sagemaker",
-  "continue-proxy",
-  "openrouter",
-  "venice",
-  "sambanova",
-  "vertexai",
-  "azure",
-  "scaleway",
-  "nebius",
-  "ovhcloud",
-  "watsonx",
-];
-
-const MODEL_SUPPORTS_IMAGES: RegExp[] = [
-  /llava/,
-  /gpt-4-turbo/,
-  /gpt-4o/,
-  /gpt-4o-mini/,
-  /claude-3/,
-  /gemini-ultra/,
-  /gemini-1\.5-pro/,
-  /gemini-1\.5-flash/,
-  /sonnet/,
-  /opus/,
-  /haiku/,
-  /pixtral/,
-  /llama-?3\.2/,
-  /llama-?4/, // might use something like /llama-?(?:[4-9](?:\.\d+)?|\d{2,}(?:\.\d+)?)/ for forward compat, if needed
-  /\bgemma-?3(?!n)/, // gemma3 supports vision, but gemma3n doesn't!
-  /\b(pali|med)gemma/,
-  /qwen(.*)vl/,
-];
-
-function modelSupportsImages(
-  provider: string,
-  model: string,
-  title: string | undefined,
-  capabilities: ModelCapability | undefined,
-): boolean {
-  if (capabilities?.uploadImage !== undefined) {
-    return capabilities.uploadImage;
-  }
-  if (!PROVIDER_SUPPORTS_IMAGES.includes(provider)) {
-    return false;
-  }
-
-  const lowerModel = model.toLowerCase();
-  const lowerTitle = title?.toLowerCase() ?? "";
-
-  if (
-    lowerModel.includes("vision") ||
-    lowerTitle.includes("vision") ||
-    MODEL_SUPPORTS_IMAGES.some(
-      (modelrx) => modelrx.test(lowerModel) || modelrx.test(lowerTitle),
-    )
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
 function isProviderHandlesTemplatingOrNoTemplateTypeRequired(
   modelName: string,
 ): boolean {
@@ -117,7 +46,7 @@ const MODEL_SUPPORTS_NEXT_EDIT: string[] = [
   NEXT_EDIT_MODELS.INSTINCT,
 ];
 
-function modelSupportsNextEdit(
+export function modelSupportsNextEdit(
   capabilities: ModelCapability | undefined,
   model: string,
   title: string | undefined,
@@ -138,7 +67,9 @@ function modelSupportsNextEdit(
   return false;
 }
 
-function autodetectTemplateType(model: string): TemplateType | undefined {
+export function autodetectTemplateType(
+  model: string,
+): TemplateType | undefined {
   const lower = model.toLowerCase();
 
   if (lower.includes("codellama") && lower.includes("70b")) {
@@ -229,5 +160,3 @@ function autodetectTemplateType(model: string): TemplateType | undefined {
 
   return "chatml";
 }
-
-export { autodetectTemplateType, modelSupportsImages, modelSupportsNextEdit };
