@@ -851,65 +851,6 @@ export interface IDE {
   onDidChangeActiveTextEditor(callback: (fileUri: string) => void): void;
 }
 
-// Slash Commands
-
-export interface ContinueSDK {
-  ide: IDE;
-  llm: ILLM;
-  addContextItem: (item: ContextItemWithId) => void;
-  history: ChatMessage[];
-  input: string;
-  params?: { [key: string]: any } | undefined;
-  contextItems: ContextItemWithId[];
-  selectedCode: RangeInFile[];
-  config: ContinueConfig;
-  fetch: FetchFunction;
-  completionOptions?: LLMFullCompletionOptions;
-  abortController: AbortController;
-}
-
-/* Be careful changing SlashCommand or SlashCommandDescription, config.ts can break */
-export interface SlashCommandDescription {
-  name: string;
-  description: string;
-  prompt?: string;
-  params?: { [key: string]: any };
-}
-
-export interface SlashCommand extends SlashCommandDescription {
-  run: (sdk: ContinueSDK) => AsyncGenerator<string | undefined>;
-}
-
-export interface SlashCommandWithSource extends SlashCommandDescription {
-  run?: (sdk: ContinueSDK) => AsyncGenerator<string | undefined>; // Optional - only needed for legacy
-  source: SlashCommandSource;
-  sourceFile?: string;
-  slug?: string;
-  overrideSystemMessage?: string;
-}
-
-export type SlashCommandSource =
-  | "built-in-legacy"
-  | "built-in"
-  | "json-custom-command"
-  | "config-ts-slash-command"
-  | "yaml-prompt-block"
-  | "mcp-prompt"
-  | "prompt-file-v1"
-  | "prompt-file-v2"
-  | "invokable-rule";
-
-export interface SlashCommandDescWithSource extends SlashCommandDescription {
-  isLegacy: boolean; // Maps to if slashcommand.run exists
-  source: SlashCommandSource;
-  sourceFile?: string;
-  slug?: string;
-  mcpServerName?: string;
-  mcpArgs?: MCPPromptArgs;
-}
-
-// Config
-
 export type StepName =
   | "AnswerQuestionChroma"
   | "GenerateShellCommandStep"
@@ -987,21 +928,9 @@ export interface ClientCertificateOptions {
   passphrase?: string;
 }
 
-export interface StepWithParams {
-  name: StepName;
-  params: { [key: string]: any };
-}
-
 export interface ContextProviderWithParams {
   name: ContextProviderName;
   params: { [key: string]: any };
-}
-
-export interface CustomCommand {
-  name: string;
-  prompt: string;
-  description?: string;
-  sourceFile?: string;
 }
 
 export interface Prediction {
@@ -1071,38 +1000,18 @@ interface ToolChoice {
   };
 }
 
-export interface ConfigDependentToolParams {
-  rules: RuleWithSource[];
-  enableExperimentalTools: boolean;
-  isSignedIn: boolean;
-  isRemote: boolean;
-  modelName: string | undefined;
-}
-
-export type GetTool = (params: ConfigDependentToolParams) => Tool;
-
 export interface BaseCompletionOptions {
   temperature?: number;
   topP?: number;
-  topK?: number;
-  minP?: number;
   presencePenalty?: number;
   frequencyPenalty?: number;
-  mirostat?: number;
   stop?: string[];
   maxTokens?: number;
-  numThreads?: number;
-  useMmap?: boolean;
-  keepAlive?: number;
-  numGpu?: number;
   raw?: boolean;
   stream?: boolean;
   prediction?: Prediction;
   tools?: Tool[];
   toolChoice?: ToolChoice;
-  reasoning?: boolean;
-  reasoningBudgetTokens?: number;
-  promptCaching?: boolean;
 }
 
 export interface ModelCapability {
