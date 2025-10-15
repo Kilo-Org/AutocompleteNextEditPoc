@@ -1,17 +1,13 @@
-import { ModelRole } from "../index.js";
 import { findLlmInfo } from "./model-info";
 import { BaseLlmApi, constructLlmApi } from "./openai-adapters";
 import { ChatCompletionCreateParams } from "openai/resources/index";
 
 import { DevDataSqliteDb } from "../util/devdataSqlite.js";
 import {
-  CacheBehavior,
   ChatMessage,
   Chunk,
   CompletionOptions,
   ILLM,
-  ILLMInteractionLog,
-  ILLMLogger,
   LLMFullCompletionOptions,
   LLMOptions,
   MessageOption,
@@ -22,22 +18,18 @@ import {
   TemplateType,
   Usage,
 } from "../index.js";
+import type { ILLMInteractionLog, ILLMLogger } from "../index.js";
 import { Logger } from "../util/Logger.js";
 import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
-import { withExponentialBackoff } from "../util/withExponentialBackoff.js";
 
 import {
   autodetectPromptTemplates,
-  autodetectTemplateFunction,
   autodetectTemplateType,
-  modelSupportsImages,
 } from "./autodetect.js";
 import {
   DEFAULT_CONTEXT_LENGTH,
-  DEFAULT_MAX_BATCH_SIZE,
-  DEFAULT_MAX_CHUNK_SIZE,
   DEFAULT_MAX_TOKENS,
 } from "./constants.js";
 import {
@@ -79,12 +71,7 @@ export abstract class BaseLLM implements ILLM {
   }
 
   supportsImages(): boolean {
-    return modelSupportsImages(
-      this.providerName,
-      this.model,
-      this.title,
-      this.capabilities,
-    );
+    return false;
   }
 
   supportsCompletions(): boolean {
@@ -115,9 +102,6 @@ export abstract class BaseLLM implements ILLM {
   model: string;
 
   title?: string;
-  baseChatSystemMessage?: string;
-  basePlanSystemMessage?: string;
-  baseAgentSystemMessage?: string;
   _contextLength: number | undefined;
   maxStopWords?: number | undefined;
   completionOptions: CompletionOptions;
@@ -127,42 +111,8 @@ export abstract class BaseLLM implements ILLM {
   logger?: ILLMLogger;
   llmRequestHook?: (model: string, prompt: string) => any;
   apiKey?: string;
-
-  // continueProperties
-  apiKeyLocation?: string;
-  envSecretLocations?: Record<string, string>;
   apiBase?: string;
-  orgScopeId?: string | null;
-
-  onPremProxyUrl?: string | null;
-
-  cacheBehavior?: CacheBehavior;
   capabilities?: ModelCapability;
-  roles?: ModelRole[];
-
-  deployment?: string;
-  apiVersion?: string;
-  apiType?: string;
-  region?: string;
-  projectId?: string;
-  accountId?: string;
-  aiGatewaySlug?: string;
-  profile?: string | undefined;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-
-  // For IBM watsonx
-  deploymentId?: string;
-
-  // Embedding options
-  embeddingId: string;
-  maxEmbeddingChunkSize: number;
-  maxEmbeddingBatchSize: number;
-
-  //URI to local block defining this LLM
-  sourceFile?: string;
-
-  isFromAutoDetect?: boolean;
 
   lastRequestId: string | undefined;
 
@@ -194,9 +144,6 @@ export abstract class BaseLLM implements ILLM {
 
     this.title = options.title;
     this.uniqueId = options.uniqueId ?? "None";
-    this.baseAgentSystemMessage = options.baseAgentSystemMessage;
-    this.basePlanSystemMessage = options.basePlanSystemMessage;
-    this.baseChatSystemMessage = options.baseChatSystemMessage;
     this._contextLength = options.contextLength ?? llmInfo?.contextLength;
     this.maxStopWords = options.maxStopWords ?? this.maxStopWords;
     this.completionOptions = {
@@ -217,59 +164,18 @@ export abstract class BaseLLM implements ILLM {
       ...autodetectPromptTemplates(options.model, templateType),
       ...options.promptTemplates,
     };
-    this.templateMessages =
-      options.templateMessages ??
-      autodetectTemplateFunction(
-        options.model,
-        this.providerName,
-        options.template,
-      ) ??
-      undefined;
-    this.logger = options.logger;
-    this.llmRequestHook = options.llmRequestHook;
     this.apiKey = options.apiKey;
-
-    // continueProperties
-    this.apiKeyLocation = options.apiKeyLocation;
-    this.envSecretLocations = options.envSecretLocations;
-    this.orgScopeId = options.orgScopeId;
     this.apiBase = options.apiBase;
-
-    this.onPremProxyUrl = options.onPremProxyUrl;
-
-    this.aiGatewaySlug = options.aiGatewaySlug;
-    this.cacheBehavior = options.cacheBehavior;
-
-    // watsonx deploymentId
-    this.deploymentId = options.deploymentId;
-
     if (this.apiBase && !this.apiBase.endsWith("/")) {
       this.apiBase = `${this.apiBase}/`;
     }
-    this.accountId = options.accountId;
     this.capabilities = options.capabilities;
-    this.roles = options.roles;
-
-    this.deployment = options.deployment;
-    this.apiVersion = options.apiVersion;
-    this.apiType = options.apiType;
-    this.region = options.region;
-    this.projectId = options.projectId;
-    this.profile = options.profile;
-    this.accessKeyId = options.accessKeyId;
-    this.secretAccessKey = options.secretAccessKey;
 
     this.openaiAdapter = this.createOpenAiAdapter();
 
-    this.maxEmbeddingBatchSize =
-      options.maxEmbeddingBatchSize ?? DEFAULT_MAX_BATCH_SIZE;
-    this.maxEmbeddingChunkSize =
-      options.maxEmbeddingChunkSize ?? DEFAULT_MAX_CHUNK_SIZE;
-    this.embeddingId = `${this.constructor.name}::${this.model}::${this.maxEmbeddingChunkSize}`;
-
     this.autocompleteOptions = options.autocompleteOptions;
-    this.sourceFile = options.sourceFile;
-    this.isFromAutoDetect = options.isFromAutoDetect;
+
+    // openaiAdapter is initialized above
   }
 
   get contextLength() {
@@ -1020,45 +926,7 @@ export abstract class BaseLLM implements ILLM {
     };
   }
 
-  getBatchedChunks(chunks: string[]): string[][] {
-    const batchedChunks = [];
 
-    for (let i = 0; i < chunks.length; i += this.maxEmbeddingBatchSize) {
-      batchedChunks.push(chunks.slice(i, i + this.maxEmbeddingBatchSize));
-    }
-
-    return batchedChunks;
-  }
-
-  async embed(chunks: string[]): Promise<number[][]> {
-    const batches = this.getBatchedChunks(chunks);
-
-    return (
-      await Promise.all(
-        batches.map(async (batch) => {
-          if (batch.length === 0) {
-            return [];
-          }
-
-          const embeddings = await withExponentialBackoff<number[][]>(
-            async () => {
-              if (this.shouldUseOpenAIAdapter("embed") && this.openaiAdapter) {
-                const result = await this.openaiAdapter.embed({
-                  model: this.model,
-                  input: batch,
-                });
-                return result.data.map((chunk) => chunk.embedding);
-              }
-
-              return await this._embed(batch);
-            },
-          );
-
-          return embeddings;
-        }),
-      )
-    ).flat();
-  }
 
   async rerank(query: string, chunks: Chunk[]): Promise<number[]> {
     if (this.shouldUseOpenAIAdapter("rerank") && this.openaiAdapter) {
@@ -1126,11 +994,6 @@ export abstract class BaseLLM implements ILLM {
     return completion;
   }
 
-  protected async _embed(_chunks: string[]): Promise<number[][]> {
-    throw new Error(
-      `Embedding is not supported for provider type ${this.providerName}`,
-    );
-  }
 
   countTokens(text: string): number {
     return countTokens(text, this.model);

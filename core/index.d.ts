@@ -75,9 +75,6 @@ export type PromptTemplate = string | PromptTemplateFunction;
 type RequiredLLMOptions =
   | "uniqueId"
   | "contextLength"
-  | "embeddingId"
-  | "maxEmbeddingChunkSize"
-  | "maxEmbeddingBatchSize"
   | "completionOptions";
 
 export interface ILLM
@@ -89,12 +86,6 @@ export interface ILLM
   autocompleteOptions?: Partial<TabAutocompleteOptions>;
 
   lastRequestId?: string;
-
-  complete(
-    prompt: string,
-    signal: AbortSignal,
-    options?: LLMFullCompletionOptions,
-  ): Promise<string>;
 
   streamComplete(
     prompt: string,
@@ -109,37 +100,70 @@ export interface ILLM
     options?: LLMFullCompletionOptions,
   ): AsyncGenerator<string, PromptLog>;
 
-  streamChat(
-    messages: ChatMessage[],
-    signal: AbortSignal,
-    options?: LLMFullCompletionOptions,
-    messageOptions?: MessageOption,
-  ): AsyncGenerator<ChatMessage, PromptLog>;
-
   chat(
     messages: ChatMessage[],
     signal: AbortSignal,
     options?: LLMFullCompletionOptions,
   ): Promise<ChatMessage>;
 
-  compileChatMessages(
-    messages: ChatMessage[],
-    options: LLMFullCompletionOpeions,
-  ): CompiledChatMessagesReport;
-
-  embed(chunks: string[]): Promise<number[][]>;
-
   rerank(query: string, chunks: Chunk[]): Promise<number[]>;
 
   countTokens(text: string): number;
 
-  supportsImages(): boolean;
+  supportsFim(): boolean;
+}
 
-  supportsCompletions(): boolean;
+// Narrowed interface for autocomplete and NextEdit consumers
+export interface IAutocompleteNextEditLLM {
+  // Core identification
+  readonly providerName: string;
+  readonly underlyingProviderName: string;
+  model: string;
+  title?: string;
 
-  supportsPrefill(): boolean;
+  // API configuration
+  apiKey?: string;
+  apiBase?: string;
+
+  // Capabilities and options
+  capabilities?: ModelCapability;
+  contextLength: number;
+  completionOptions: CompletionOptions;
+  autocompleteOptions?: Partial<TabAutocompleteOptions>;
+  promptTemplates?: Partial<Record<keyof PromptTemplates, PromptTemplate>>;
+  useLegacyCompletionsEndpoint?: boolean;
+
+  // State
+  lastRequestId?: string;
+
+  // Required methods for autocomplete
+  streamComplete(
+    prompt: string,
+    signal: AbortSignal,
+    options?: LLMFullCompletionOptions,
+  ): AsyncGenerator<string, PromptLog>;
+
+  streamFim(
+    prefix: string,
+    suffix: string,
+    signal: AbortSignal,
+    options?: LLMFullCompletionOptions,
+  ): AsyncGenerator<string, PromptLog>;
 
   supportsFim(): boolean;
+
+  // Required methods for NextEdit
+  chat(
+    messages: ChatMessage[],
+    signal: AbortSignal,
+    options?: LLMFullCompletionOptions,
+  ): Promise<ChatMessage>;
+
+  // Required for token counting
+  countTokens(text: string): number;
+
+  // Required for reranking (NextEdit editable region calculation)
+  rerank(query: string, chunks: Chunk[]): Promise<number[]>;
 }
 
 export type ContextProviderType = "normal" | "query" | "submenu";
@@ -427,9 +451,6 @@ export interface LLMOptions {
 
   title?: string;
   uniqueId?: string;
-  baseAgentSystemMessage?: string;
-  basePlanSystemMessage?: string;
-  baseChatSystemMessage?: string;
   autocompleteOptions?: Partial<TabAutocompleteOptions>;
   contextLength?: number;
   maxStopWords?: number;
@@ -437,58 +458,11 @@ export interface LLMOptions {
   chatStreams?: MockMessage[][];
   template?: TemplateType;
   promptTemplates?: Partial<Record<keyof PromptTemplates, PromptTemplate>>;
-  templateMessages?: (messages: ChatMessage[]) => string;
-  logger?: ILLMLogger;
-  llmRequestHook?: (model: string, prompt: string) => any;
   apiKey?: string;
-
-  // continueProperties
-  apiKeyLocation?: string;
-  envSecretLocations?: Record<string, string>;
   apiBase?: string;
-  orgScopeId?: string | null;
-
-  onPremProxyUrl?: string | null;
-
-  aiGatewaySlug?: string;
-  cacheBehavior?: CacheBehavior;
-  capabilities?: ModelCapability;
-  roles?: ModelRole[];
-
   useLegacyCompletionsEndpoint?: boolean;
-
-  // Embedding options
-  embeddingId?: string;
-  maxEmbeddingChunkSize?: number;
-  maxEmbeddingBatchSize?: number;
-
-  // Cloudflare options
-  accountId?: string;
-
-  // Azure options
-  deployment?: string;
-  apiVersion?: string;
-  apiType?: string;
-
-  // AWS options
-  profile?: string;
-  modelArn?: string;
-  accessKeyId?: string;
-  secretAccessKey?: string;
-
-  // AWS and VertexAI Options
-  region?: string;
-
-  // VertexAI and Watsonx Options
-  projectId?: string;
-
-  // IBM watsonx Options
-  deploymentId?: string;
-
+  capabilities?: ModelCapability;
   env?: Record<string, string | number | boolean>;
-
-  sourceFile?: string;
-  isFromAutoDetect?: boolean;
 }
 
 type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<
