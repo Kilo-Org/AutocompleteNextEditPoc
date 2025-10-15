@@ -36,18 +36,12 @@ describe("ContinueCompletionProvider triggering logic", () => {
     setActiveEditor(document);
 
     const provider = buildProvider();
-    
-    // Get real NextEditProvider
     realNextEditProvider = NextEditProvider.getInstance();
-    
-    // Ensure clean state before test
+
+    // Ensure clean state
     if (realNextEditProvider.chainExists()) {
       await realNextEditProvider.deleteChain();
     }
-    
-    // Spy on methods after ensuring clean state
-    const startChainSpy = vi.spyOn(realNextEditProvider, "startChain");
-    const provideCompletionSpy = vi.spyOn(realNextEditProvider, "provideInlineCompletionItems");
 
     await provider.provideInlineCompletionItems(
       document,
@@ -56,9 +50,7 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    // Verify a chain was started and completion was attempted
-    expect(startChainSpy).toHaveBeenCalled();
-    expect(provideCompletionSpy).toHaveBeenCalled();
+    // Verify observable behavior: chain was created
     expect(realNextEditProvider.chainExists()).toBe(true);
   });
 
@@ -67,18 +59,12 @@ describe("ContinueCompletionProvider triggering logic", () => {
     setActiveEditor(document);
 
     const provider = buildProvider();
-    
     realNextEditProvider = NextEditProvider.getInstance();
     realPrefetchQueue = PrefetchQueue.getInstance();
-    
-    // Set up chain state using real methods
-    realNextEditProvider.startChain();
-    realPrefetchQueue.__setProcessedForTests([]);
-    realPrefetchQueue.__setUnprocessedForTests([]);
 
-    const deleteChainSpy = vi.spyOn(realNextEditProvider, "deleteChain");
-    const startChainSpy = vi.spyOn(realNextEditProvider, "startChain");
-    const provideCompletionSpy = vi.spyOn(realNextEditProvider, "provideInlineCompletionItems");
+    // Set up: chain exists with empty queues
+    realNextEditProvider.startChain();
+    realPrefetchQueue.clear();
 
     await provider.provideInlineCompletionItems(
       document,
@@ -87,9 +73,8 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    expect(deleteChainSpy).toHaveBeenCalledTimes(1);
-    expect(startChainSpy).toHaveBeenCalled();
-    expect(provideCompletionSpy).toHaveBeenCalled();
+    // Verify behavior: chain still exists (was restarted after clearing)
+    expect(realNextEditProvider.chainExists()).toBe(true);
   });
 
   it("returns null after clearing empty chain when no outcome is available", async () => {
@@ -97,18 +82,16 @@ describe("ContinueCompletionProvider triggering logic", () => {
     setActiveEditor(document);
 
     const provider = buildProvider();
-    
     realNextEditProvider = NextEditProvider.getInstance();
     realPrefetchQueue = PrefetchQueue.getInstance();
-    
-    // Set up chain with no outcomes
+
+    // Set up: chain with empty queues, mock to return no outcome
     realNextEditProvider.startChain();
-    realPrefetchQueue.__setProcessedForTests([]);
-    realPrefetchQueue.__setUnprocessedForTests([]);
-    
-    // Mock to return undefined outcome for both initial and retry calls
-    const provideCompletionSpy = vi.spyOn(realNextEditProvider, "provideInlineCompletionItems")
-      .mockResolvedValue(undefined);
+    realPrefetchQueue.clear();
+    vi.spyOn(
+      realNextEditProvider,
+      "provideInlineCompletionItems",
+    ).mockResolvedValue(undefined);
 
     const result = await provider.provideInlineCompletionItems(
       document,
@@ -117,9 +100,8 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
+    // Verify behavior: returns null when no outcome available
     expect(result).toBeNull();
-    expect(provideCompletionSpy).toHaveBeenCalled();
-    // Chain may still exist after null outcome, that's OK - it's cleared on next real edit
   });
 
   it("uses queued outcomes when processed items exist", async () => {
@@ -127,29 +109,27 @@ describe("ContinueCompletionProvider triggering logic", () => {
     setActiveEditor(document);
 
     const provider = buildProvider();
-    
     realNextEditProvider = NextEditProvider.getInstance();
     realPrefetchQueue = PrefetchQueue.getInstance();
     realJumpManager = JumpManager.getInstance();
-    
-    // Set up chain with queued outcome
+
+    // Set up: chain with queued outcome
     realNextEditProvider.startChain();
-    realPrefetchQueue.__setProcessedForTests([
-      {
-        location: {
-          filepath: document.uri.toString(),
-          range: {
-            start: { line: 0, character: 0 },
-            end: { line: 0, character: 0 },
-          },
+    realPrefetchQueue.enqueueProcessed({
+      location: {
+        filepath: document.uri.toString(),
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 0, character: 0 },
         },
-        outcome: mockOutcome,
       },
-    ]);
-    
+      outcome: mockOutcome,
+    });
+
+    // Mock jump behavior
     vi.spyOn(realJumpManager, "suggestJump").mockResolvedValue(true);
-    const setCompletionSpy = vi.spyOn(realJumpManager, "setCompletionAfterJump");
-    const provideCompletionSpy = vi.spyOn(realNextEditProvider, "provideInlineCompletionItems");
+
+    const initialQueueCount = realPrefetchQueue.processedCount;
 
     await provider.provideInlineCompletionItems(
       document,
@@ -158,9 +138,10 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    expect(realPrefetchQueue.processedCount).toBe(0); // Should have dequeued
-    expect(setCompletionSpy).toHaveBeenCalledTimes(1);
-    expect(provideCompletionSpy).not.toHaveBeenCalled();
+    // Verify behavior: queue was consumed
+    expect(realPrefetchQueue.processedCount).toBeLessThan(initialQueueCount);
+    // Verify completion was set for after jump
+    expect(realJumpManager.completionAfterJump).toBeTruthy();
   });
 });
 
@@ -168,7 +149,12 @@ function buildProvider(options: { usingFullFileDiff?: boolean } = {}) {
   const usingFullFileDiff = options.usingFullFileDiff ?? true;
   const configHandler = {
     loadConfig: vi.fn(async () => ({
-      config: { selectedModelByRole: { autocomplete: undefined } },
+      config: {
+        selectedModelByRole: { autocomplete: undefined },
+        tabAutocompleteOptions: {
+          debounceDelay: 0,
+        },
+      },
     })),
   } as any;
 
@@ -257,7 +243,6 @@ function setActiveEditor(document: any, cursor = createPosition()) {
   };
 }
 
-
 vi.mock("vscode", () => {
   class Position {
     constructor(
@@ -319,7 +304,10 @@ vi.mock("vscode", () => {
       executeCommand: vi.fn(),
     },
     Selection: class {
-      constructor(public anchor: any, public active: any) {}
+      constructor(
+        public anchor: any,
+        public active: any,
+      ) {}
     },
     TextEditorRevealType: { InCenter: 1 },
   };

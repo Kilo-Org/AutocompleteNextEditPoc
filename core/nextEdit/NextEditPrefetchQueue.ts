@@ -123,17 +123,6 @@ export class PrefetchQueue {
     this.processedQueue = [];
   }
 
-  // TEST HELPERS: provide controlled setup without full mocks
-  // Replace entire processed queue with provided items
-  public __setProcessedForTests(items: ProcessedItem[]): void {
-    this.processedQueue = [...items];
-  }
-
-  // Replace entire unprocessed queue with provided locations
-  public __setUnprocessedForTests(items: RangeInFile[]): void {
-    this.unprocessedQueue = [...items];
-  }
-
   // Additional helper methods
   get unprocessedCount(): number {
     return this.unprocessedQueue.length;
@@ -141,10 +130,6 @@ export class PrefetchQueue {
 
   get processedCount(): number {
     return this.processedQueue.length;
-  }
-
-  peekProcessed(): ProcessedItem | undefined {
-    return this.processedQueue[0];
   }
 
   peekThreeProcessed(): void {
@@ -155,10 +140,6 @@ export class PrefetchQueue {
         `Item ${index + 1}: ${item.location.range.start.line} to ${item.location.range.end.line}`,
       );
     });
-  }
-
-  setPreetchLimit(limit: number): void {
-    this.prefetchLimit = limit;
   }
 
   // Reset singleton for test isolation
