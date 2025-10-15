@@ -56,13 +56,8 @@ function modelUsesGptTokenizer(modelName: string): boolean {
 }
 
 export function encodingForModel(modelName: string): Encoding {
-  if (modelUsesGptTokenizer(modelName)) {
-    if (!gptEncoding) {
-      gptEncoding = _encodingForModel("gpt-4");
-    }
-    return gptEncoding;
-  }
-  return llamaEncoding;
+  if (!modelUsesGptTokenizer(modelName)) return llamaEncoding;
+  return (gptEncoding ??= _encodingForModel("gpt-4"));
 }
 
 function countImageTokens(content: MessagePart): number {
