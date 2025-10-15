@@ -2,7 +2,6 @@ import { ModelRole } from "../index.js";
 import { findLlmInfo } from "./model-info";
 import { BaseLlmApi, constructLlmApi } from "./openai-adapters";
 import { ChatCompletionCreateParams } from "openai/resources/index";
-import Handlebars from "handlebars";
 
 import { DevDataSqliteDb } from "../util/devdataSqlite.js";
 import {
@@ -36,12 +35,10 @@ import {
   modelSupportsImages,
 } from "./autodetect.js";
 import {
-  DEFAULT_ARGS,
   DEFAULT_CONTEXT_LENGTH,
   DEFAULT_MAX_BATCH_SIZE,
   DEFAULT_MAX_CHUNK_SIZE,
   DEFAULT_MAX_TOKENS,
-  LLMConfigurationStatuses,
 } from "./constants.js";
 import {
   compileChatMessages,
@@ -279,10 +276,6 @@ export abstract class BaseLLM implements ILLM {
     return this._contextLength ?? DEFAULT_CONTEXT_LENGTH;
   }
 
-  getConfigurationStatus() {
-    return LLMConfigurationStatuses.VALID;
-  }
-
   protected createOpenAiAdapter() {
     return constructLlmApi({
       provider: this.providerName as any,
@@ -290,10 +283,6 @@ export abstract class BaseLLM implements ILLM {
       apiBase: this.apiBase,
       env: this._llmOptions.env,
     });
-  }
-
-  listModels(): Promise<string[]> {
-    return Promise.resolve([]);
   }
 
   private _templatePromptLikeMessages(prompt: string): string {
@@ -1145,56 +1134,5 @@ export abstract class BaseLLM implements ILLM {
 
   countTokens(text: string): number {
     return countTokens(text, this.model);
-  }
-
-  protected collectArgs(options: CompletionOptions): any {
-    return {
-      ...DEFAULT_ARGS,
-      // model: this.model,
-      ...options,
-    };
-  }
-
-  public renderPromptTemplate(
-    template: PromptTemplate,
-    history: ChatMessage[],
-    otherData: Record<string, string>,
-    canPutWordsInModelsMouth = false,
-  ): string | ChatMessage[] {
-    if (typeof template === "string") {
-      const data: any = {
-        history: history,
-        ...otherData,
-      };
-      if (history.length > 0 && history[0].role === "system") {
-        data.system_message = history.shift()!.content;
-      }
-
-      const compiledTemplate = Handlebars.compile(template);
-      return compiledTemplate(data);
-    }
-    const rendered = template(history, {
-      ...otherData,
-      supportsCompletions: this.supportsCompletions() ? "true" : "false",
-      supportsPrefill: this.supportsPrefill() ? "true" : "false",
-    });
-    if (
-      typeof rendered !== "string" &&
-      rendered[rendered.length - 1]?.role === "assistant" &&
-      !canPutWordsInModelsMouth
-    ) {
-      // Some providers don't allow you to put words in the model's mouth
-      // So we have to manually compile the prompt template and use
-      // raw /completions, not /chat/completions
-      const templateMessages = autodetectTemplateFunction(
-        this.model,
-        this.providerName,
-        autodetectTemplateType(this.model),
-      );
-      if (templateMessages) {
-        return templateMessages(rendered);
-      }
-    }
-    return rendered;
   }
 }
