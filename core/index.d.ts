@@ -456,7 +456,6 @@ export interface LLMOptions {
   maxStopWords?: number;
   completionOptions?: CompletionOptions;
   chatStreams?: MockMessage[][];
-  template?: TemplateType;
   promptTemplates?: Partial<Record<keyof PromptTemplates, PromptTemplate>>;
   apiKey?: string;
   apiBase?: string;
@@ -620,25 +619,6 @@ export type ContextProviderName =
   | "clipboard"
   | string;
 
-export type TemplateType =
-  | "llama2"
-  | "alpaca"
-  | "zephyr"
-  | "phi2"
-  | "phind"
-  | "anthropic"
-  | "chatml"
-  | "none"
-  | "openchat"
-  | "deepseek"
-  | "xwin-coder"
-  | "neural-chat"
-  | "codellama-70b"
-  | "llava"
-  | "gemma"
-  | "granite"
-  | "llama3"
-  | "codestral";
 
 export interface CacheBehavior {
   cacheSystemMessage?: boolean;

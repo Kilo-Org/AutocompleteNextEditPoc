@@ -15,7 +15,6 @@ import {
   PromptLog,
   PromptTemplate,
   TabAutocompleteOptions,
-  TemplateType,
   Usage,
 } from "../index.js";
 import type { ILLMInteractionLog, ILLMLogger } from "../index.js";
@@ -24,10 +23,7 @@ import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
 
-import {
-  DEFAULT_CONTEXT_LENGTH,
-  DEFAULT_MAX_TOKENS,
-} from "./constants.js";
+import { DEFAULT_CONTEXT_LENGTH, DEFAULT_MAX_TOKENS } from "./constants.js";
 import {
   compileChatMessages,
   countTokens,
@@ -100,7 +96,6 @@ export abstract class BaseLLM implements ILLM {
   _contextLength: number | undefined;
   maxStopWords?: number | undefined;
   completionOptions: CompletionOptions;
-  template?: TemplateType;
   promptTemplates?: Record<string, PromptTemplate>;
   templateMessages?: (messages: ChatMessage[]) => string;
   logger?: ILLMLogger;
@@ -133,7 +128,6 @@ export abstract class BaseLLM implements ILLM {
         : this.model;
     const llmInfo = findLlmInfo(modelSearchString, this.underlyingProviderName);
 
-
     this.title = options.title;
     this.uniqueId = options.uniqueId ?? "None";
     this._contextLength = options.contextLength ?? llmInfo?.contextLength;
@@ -155,7 +149,9 @@ export abstract class BaseLLM implements ILLM {
     // Normalize user-specified prompt templates to a concrete record or leave undefined
     this.promptTemplates = options.promptTemplates
       ? (Object.fromEntries(
-          Object.entries(options.promptTemplates).filter(([, v]) => v !== undefined),
+          Object.entries(options.promptTemplates).filter(
+            ([, v]) => v !== undefined,
+          ),
         ) as Record<string, PromptTemplate>)
       : undefined;
     this.apiKey = options.apiKey;
@@ -920,8 +916,6 @@ export abstract class BaseLLM implements ILLM {
     };
   }
 
-
-
   async rerank(query: string, chunks: Chunk[]): Promise<number[]> {
     if (this.shouldUseOpenAIAdapter("rerank") && this.openaiAdapter) {
       const results = await this.openaiAdapter.rerank({
@@ -987,7 +981,6 @@ export abstract class BaseLLM implements ILLM {
     }
     return completion;
   }
-
 
   countTokens(text: string): number {
     return countTokens(text, this.model);

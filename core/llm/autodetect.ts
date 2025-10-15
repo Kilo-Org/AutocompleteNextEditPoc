@@ -1,10 +1,25 @@
-import {
-  ModelCapability,
-  TemplateType,
-} from "../index.js";
+import { ModelCapability } from "../index.js";
 import { NEXT_EDIT_MODELS } from "./constants.js";
 
-
+export type TemplateType =
+  | "llama2"
+  | "alpaca"
+  | "zephyr"
+  | "phi2"
+  | "phind"
+  | "anthropic"
+  | "chatml"
+  | "none"
+  | "openchat"
+  | "deepseek"
+  | "xwin-coder"
+  | "neural-chat"
+  | "codellama-70b"
+  | "llava"
+  | "gemma"
+  | "granite"
+  | "llama3"
+  | "codestral";
 
 const PROVIDER_SUPPORTS_IMAGES: string[] = [
   "openai",
@@ -215,10 +230,4 @@ function autodetectTemplateType(model: string): TemplateType | undefined {
   return "chatml";
 }
 
-
-
-export {
-  autodetectTemplateType,
-  modelSupportsImages,
-  modelSupportsNextEdit,
-};
+export { autodetectTemplateType, modelSupportsImages, modelSupportsNextEdit };
