@@ -411,12 +411,6 @@ export interface Usage {
     cacheWriteTokens?: number;
     audioTokens?: number;
   };
-  completionTokensDetails?: {
-    acceptedPredictionTokens?: number;
-    reasoningTokens?: number;
-    rejectedPredictionTokens?: number;
-    audioTokens?: number;
-  };
 }
 
 export interface AssistantChatMessage {
@@ -477,16 +471,12 @@ export interface SymbolWithRange extends RangeInFile {
   content: string;
 }
 
-export type FileSymbolMap = Record<string, SymbolWithRange[]>;
-
 export interface PromptLog {
   modelTitle: string;
   modelProvider: string;
   prompt: string;
   completion: string;
 }
-
-export type MessageModes = "chat" | "agent" | "plan";
 
 export type ToolStatus =
   | "generating" // Tool call arguments are being streamed from the LLM
@@ -497,7 +487,7 @@ export type ToolStatus =
   | "canceled"; // Tool call was canceled by user or system
 
 // Will exist only on "assistant" messages with tool calls
-interface ToolCallState {
+export interface ToolCallState {
   toolCallId: string;
   toolCall: ToolCall;
   status: ToolStatus;
@@ -507,7 +497,7 @@ interface ToolCallState {
   tool?: Tool;
 }
 
-interface Reasoning {
+export interface Reasoning {
   active: boolean;
   text: string;
   startAt: number;
@@ -742,7 +732,7 @@ export interface DiffLine extends DiffObject {
   line: string;
 }
 
-interface DiffChar extends DiffObject {
+export interface DiffChar extends DiffObject {
   char: string;
   oldIndex?: number; // Character index assuming a flattened line string.
   newIndex?: number;
@@ -752,26 +742,10 @@ interface DiffChar extends DiffObject {
   newLineIndex?: number;
 }
 
-export interface Problem {
-  filepath: string;
-  range: Range;
-  message: string;
-}
-
-export interface Thread {
-  name: string;
-  id: number;
-}
-
 export type IdeType = "vscode" | "jetbrains";
 
 export interface IdeInfo {
   ideType: IdeType;
-  name: string;
-  version: string;
-  remoteName: string;
-  extensionVersion: string;
-  isPrerelease: boolean;
 }
 
 export interface BranchAndDir {
@@ -943,20 +917,6 @@ export interface Prediction {
       }[];
 }
 
-export interface ToolExtras {
-  ide: IDE;
-  llm: ILLM;
-  fetch: FetchFunction;
-  tool: Tool;
-  toolCallId?: string;
-  onPartialOutput?: (params: {
-    toolCallId: string;
-    contextItems: ContextItem[];
-  }) => void;
-  config: ContinueConfig;
-  codeBaseIndexer?: any; // TODO: Type properly when CodebaseIndexer is implemented
-}
-
 export interface Tool {
   type: "function";
   function: {
@@ -965,35 +925,9 @@ export interface Tool {
     parameters?: Record<string, any>;
     strict?: boolean | null;
   };
-  displayTitle: string;
-  wouldLikeTo?: string;
-  isCurrently?: string;
-  hasAlready?: string;
-  readonly: boolean;
-  isInstant?: boolean;
-  uri?: string;
-  faviconUrl?: string;
-  group: string;
-  originalFunctionName?: string;
-  systemMessageDescription?: {
-    prefix: string;
-    exampleArgs?: Array<[string, string | number]>;
-  };
-  defaultToolPolicy?: ToolPolicy;
-  toolCallIcon?: string;
-  preprocessArgs?: (
-    args: Record<string, unknown>,
-    extras: {
-      ide: IDE;
-    },
-  ) => Promise<Record<string, unknown>>;
-  evaluateToolCallPolicy?: (
-    basePolicy: ToolPolicy,
-    parsedArgs: Record<string, unknown>,
-  ) => ToolPolicy;
 }
 
-interface ToolChoice {
+export interface ToolChoice {
   type: "function";
   function: {
     name: string;
@@ -1018,37 +952,6 @@ export interface ModelCapability {
   uploadImage?: boolean;
   tools?: boolean;
   nextEdit?: boolean;
-}
-
-export interface ModelDescription {
-  title: string;
-  provider: string;
-  underlyingProviderName: string;
-  model: string;
-  apiKey?: string;
-
-  apiBase?: string;
-  apiKeyLocation?: string;
-  envSecretLocations?: Record<string, string>;
-  orgScopeId?: string | null;
-
-  onPremProxyUrl?: string | null;
-
-  contextLength?: number;
-  maxStopWords?: number;
-  template?: TemplateType;
-  completionOptions?: BaseCompletionOptions;
-  baseAgentSystemMessage?: string;
-  basePlanSystemMessage?: string;
-  baseChatSystemMessage?: string;
-  promptTemplates?: { [key: string]: string };
-  cacheBehavior?: CacheBehavior;
-  capabilities?: ModelCapability;
-  roles?: ModelRole[];
-  configurationStatus?: LLMConfigurationStatuses;
-
-  sourceFile?: string;
-  isFromAutoDetect?: boolean;
 }
 
 export interface JSONEmbedOptions {
@@ -1272,66 +1175,6 @@ export type ApplyStateStatus =
   | "streaming" // Changes are being applied to the file
   | "done" // All changes have been applied, awaiting user to accept/reject
   | "closed"; // All changes have been applied. Note that for new files, we immediately set the status to "closed"
-
-export interface ApplyState {
-  streamId: string;
-  status?: ApplyStateStatus;
-  numDiffs?: number;
-  filepath?: string;
-  fileContent?: string;
-  originalFileContent?: string;
-  toolCallId?: string;
-  autoFormattingDiff?: string;
-}
-
-export type StreamDiffLinesType = "edit" | "apply";
-interface StreamDiffLinesOptionsBase {
-  type: StreamDiffLinesType;
-  prefix: string;
-  highlighted: string;
-  suffix: string;
-  input: string;
-  language: string | undefined;
-  modelTitle: string | undefined;
-  includeRulesInSystemMessage: boolean;
-  fileUri?: string;
-}
-
-interface StreamDiffLinesOptionsEdit extends StreamDiffLinesOptionsBase {
-  type: "edit";
-}
-
-interface StreamDiffLinesOptionsApply extends StreamDiffLinesOptionsBase {
-  type: "apply";
-  newCode: string;
-}
-
-type StreamDiffLinesPayload =
-  | StreamDiffLinesOptionsApply
-  | StreamDiffLinesOptionsEdit;
-
-export interface HighlightedCodePayload {
-  rangeInFileWithContents: RangeInFileWithContents;
-  prompt?: string;
-  shouldRun?: boolean;
-}
-
-export interface AcceptOrRejectDiffPayload {
-  filepath?: string;
-  streamId?: string;
-}
-
-export interface ShowFilePayload {
-  filepath: string;
-}
-
-export interface ApplyToFilePayload {
-  streamId: string;
-  filepath?: string;
-  text: string;
-  toolCallId?: string;
-  isSearchAndReplace?: boolean;
-}
 
 export interface RangeInFileWithContents {
   filepath: string;
@@ -1625,28 +1468,6 @@ export interface ContinueConfig {
   data?: DataDestination[];
 }
 
-export interface BrowserSerializedContinueConfig {
-  allowAnonymousTelemetry?: boolean;
-  // systemMessage?: string;
-  completionOptions?: BaseCompletionOptions;
-  slashCommands: SlashCommandDescWithSource[];
-  contextProviders: ContextProviderDescription[];
-  disableIndexing?: boolean;
-  disableSessionTitles?: boolean;
-  userToken?: string;
-  ui?: ContinueUIConfig;
-  experimental?: ExperimentalConfig;
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
-  tools: Omit<Tool, "preprocessArgs", "evaluatePolicy">[];
-  mcpServerStatuses: MCPServerStatus[];
-  rules: RuleWithSource[];
-  usePlatform: boolean;
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  modelsByRole: Record<ModelRole, ModelDescription[]>;
-  selectedModelByRole: Record<ModelRole, ModelDescription | null>;
-}
-
 // DOCS SUGGESTIONS AND PACKAGE INFO
 export interface FilePathAndName {
   path: string;
@@ -1684,12 +1505,6 @@ export type PackageDocsResult = {
   | { details: PackageDetailsSuccess; error?: never }
 );
 
-export interface TerminalOptions {
-  reuseTerminal?: boolean;
-  terminalName?: string;
-  waitForCompletion?: boolean;
-}
-
 export type RuleSource =
   | "default-chat"
   | "default-plan"
@@ -1715,26 +1530,11 @@ export interface RuleWithSource {
   alwaysApply?: boolean;
   invokable?: boolean;
 }
-export interface CompleteOnboardingPayload {
-  mode: OnboardingModes;
-  provider?: string;
-  apiKey?: string;
-}
 
 export interface CompiledMessagesResult {
   compiledChatMessages: ChatMessage[];
   didPrune: boolean;
   contextPercentage: number;
-}
-
-export interface AddToChatPayload {
-  data: AddToChatPayloadItem[];
-}
-
-interface AddToChatPayloadItem {
-  type: "file" | "folder";
-  fullPath: string;
-  name: string;
 }
 
 export interface MessageOption {
@@ -1794,24 +1594,10 @@ export interface DocumentSymbol {
   children?: DocumentSymbol[];
 }
 
-// Protocol stubs for vscode-test-harness
-export type FromCoreProtocol = any;
-export type ToCoreProtocol = any;
-export type FromWebviewProtocol = any;
-export type ToWebviewProtocol = any;
-export type ToIdeFromCoreProtocol = any;
-export type ToIdeFromWebviewOrCoreProtocol = any;
-export type ToWebviewFromCoreProtocol = any;
-
 export interface Message<T = any> {
   messageType: string;
   data: T;
   messageId?: string;
-}
-
-export interface ListHistoryOptions {
-  offset?: number;
-  limit?: number;
 }
 
 export interface IMessenger<TFrom = any, _TTo = any> {
@@ -1837,14 +1623,4 @@ export class InProcessMessenger<TFrom = any, TTo = any>
     handler: (message: Message<any>) => void,
   ): void;
   externalRequest?(messageType: string, data: any): Promise<any>;
-}
-
-export const CORE_TO_WEBVIEW_PASS_THROUGH: string[] = [];
-export const WEBVIEW_TO_CORE_PASS_THROUGH: string[] = [];
-
-// Stub for Core class
-export class Core {
-  constructor(messenger: InProcessMessenger, ide: IDE, configProvider?: any);
-  configHandler: any;
-  invoke(method: string, ...args: any[]): Promise<any>;
 }
