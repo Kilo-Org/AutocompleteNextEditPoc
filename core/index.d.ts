@@ -411,12 +411,6 @@ export interface Usage {
     cacheWriteTokens?: number;
     audioTokens?: number;
   };
-  completionTokensDetails?: {
-    acceptedPredictionTokens?: number;
-    reasoningTokens?: number;
-    rejectedPredictionTokens?: number;
-    audioTokens?: number;
-  };
 }
 
 export interface AssistantChatMessage {
@@ -477,16 +471,12 @@ export interface SymbolWithRange extends RangeInFile {
   content: string;
 }
 
-export type FileSymbolMap = Record<string, SymbolWithRange[]>;
-
 export interface PromptLog {
   modelTitle: string;
   modelProvider: string;
   prompt: string;
   completion: string;
 }
-
-export type MessageModes = "chat" | "agent" | "plan";
 
 export type ToolStatus =
   | "generating" // Tool call arguments are being streamed from the LLM
@@ -497,7 +487,7 @@ export type ToolStatus =
   | "canceled"; // Tool call was canceled by user or system
 
 // Will exist only on "assistant" messages with tool calls
-interface ToolCallState {
+export interface ToolCallState {
   toolCallId: string;
   toolCall: ToolCall;
   status: ToolStatus;
@@ -507,32 +497,9 @@ interface ToolCallState {
   tool?: Tool;
 }
 
-interface Reasoning {
-  active: boolean;
-  text: string;
-  startAt: number;
-  endAt?: number;
-}
-
-export interface ChatHistoryItem {
-  message: ChatMessage;
-  contextItems: ContextItemWithId[];
-  editorState?: any;
-  modifiers?: InputModifiers;
-  promptLogs?: PromptLog[];
-  toolCallStates?: ToolCallState[];
-  isGatheringContext?: boolean;
-  reasoning?: Reasoning;
-  appliedRules?: RuleWithSource[];
-  conversationSummary?: string;
-}
-
 export interface LLMFullCompletionOptions extends BaseCompletionOptions {
   log?: boolean;
-  model?: string;
 }
-
-export type ToastType = "info" | "error" | "warning";
 
 export interface LLMInteractionBase {
   interactionId: string;
@@ -742,7 +709,7 @@ export interface DiffLine extends DiffObject {
   line: string;
 }
 
-interface DiffChar extends DiffObject {
+export interface DiffChar extends DiffObject {
   char: string;
   oldIndex?: number; // Character index assuming a flattened line string.
   newIndex?: number;
@@ -752,26 +719,10 @@ interface DiffChar extends DiffObject {
   newLineIndex?: number;
 }
 
-export interface Problem {
-  filepath: string;
-  range: Range;
-  message: string;
-}
-
-export interface Thread {
-  name: string;
-  id: number;
-}
-
 export type IdeType = "vscode" | "jetbrains";
 
 export interface IdeInfo {
   ideType: IdeType;
-  name: string;
-  version: string;
-  remoteName: string;
-  extensionVersion: string;
-  isPrerelease: boolean;
 }
 
 export interface BranchAndDir {
@@ -781,21 +732,6 @@ export interface BranchAndDir {
 
 export interface IndexTag extends BranchAndDir {
   artifactId: string;
-}
-
-export enum FileType {
-  Unkown = 0,
-  File = 1,
-  Directory = 2,
-  SymbolicLink = 64,
-}
-
-export interface IdeSettings {
-  remoteConfigServerUrl: string | undefined;
-  remoteConfigSyncPeriod: number;
-  userToken: string;
-  continueTestEnvironment: "none" | "production" | "staging" | "local";
-  pauseCodebaseIndexOnStart: boolean;
 }
 
 export interface FileStats {
@@ -850,78 +786,6 @@ export interface IDE {
   // Callbacks
   onDidChangeActiveTextEditor(callback: (fileUri: string) => void): void;
 }
-
-// Slash Commands
-
-export interface ContinueSDK {
-  ide: IDE;
-  llm: ILLM;
-  addContextItem: (item: ContextItemWithId) => void;
-  history: ChatMessage[];
-  input: string;
-  params?: { [key: string]: any } | undefined;
-  contextItems: ContextItemWithId[];
-  selectedCode: RangeInFile[];
-  config: ContinueConfig;
-  fetch: FetchFunction;
-  completionOptions?: LLMFullCompletionOptions;
-  abortController: AbortController;
-}
-
-/* Be careful changing SlashCommand or SlashCommandDescription, config.ts can break */
-export interface SlashCommandDescription {
-  name: string;
-  description: string;
-  prompt?: string;
-  params?: { [key: string]: any };
-}
-
-export interface SlashCommand extends SlashCommandDescription {
-  run: (sdk: ContinueSDK) => AsyncGenerator<string | undefined>;
-}
-
-export interface SlashCommandWithSource extends SlashCommandDescription {
-  run?: (sdk: ContinueSDK) => AsyncGenerator<string | undefined>; // Optional - only needed for legacy
-  source: SlashCommandSource;
-  sourceFile?: string;
-  slug?: string;
-  overrideSystemMessage?: string;
-}
-
-export type SlashCommandSource =
-  | "built-in-legacy"
-  | "built-in"
-  | "json-custom-command"
-  | "config-ts-slash-command"
-  | "yaml-prompt-block"
-  | "mcp-prompt"
-  | "prompt-file-v1"
-  | "prompt-file-v2"
-  | "invokable-rule";
-
-export interface SlashCommandDescWithSource extends SlashCommandDescription {
-  isLegacy: boolean; // Maps to if slashcommand.run exists
-  source: SlashCommandSource;
-  sourceFile?: string;
-  slug?: string;
-  mcpServerName?: string;
-  mcpArgs?: MCPPromptArgs;
-}
-
-// Config
-
-export type StepName =
-  | "AnswerQuestionChroma"
-  | "GenerateShellCommandStep"
-  | "EditHighlightedCodeStep"
-  | "ShareSessionStep"
-  | "CommentCodeStep"
-  | "ClearHistoryStep"
-  | "StackOverflowStep"
-  | "OpenConfigStep"
-  | "GenerateShellCommandStep"
-  | "DraftIssueStep";
-
 export type ContextProviderName =
   | "diff"
   | "terminal"
@@ -987,21 +851,9 @@ export interface ClientCertificateOptions {
   passphrase?: string;
 }
 
-export interface StepWithParams {
-  name: StepName;
-  params: { [key: string]: any };
-}
-
 export interface ContextProviderWithParams {
   name: ContextProviderName;
   params: { [key: string]: any };
-}
-
-export interface CustomCommand {
-  name: string;
-  prompt: string;
-  description?: string;
-  sourceFile?: string;
 }
 
 export interface Prediction {
@@ -1014,20 +866,6 @@ export interface Prediction {
       }[];
 }
 
-export interface ToolExtras {
-  ide: IDE;
-  llm: ILLM;
-  fetch: FetchFunction;
-  tool: Tool;
-  toolCallId?: string;
-  onPartialOutput?: (params: {
-    toolCallId: string;
-    contextItems: ContextItem[];
-  }) => void;
-  config: ContinueConfig;
-  codeBaseIndexer?: any; // TODO: Type properly when CodebaseIndexer is implemented
-}
-
 export interface Tool {
   type: "function";
   function: {
@@ -1036,110 +874,33 @@ export interface Tool {
     parameters?: Record<string, any>;
     strict?: boolean | null;
   };
-  displayTitle: string;
-  wouldLikeTo?: string;
-  isCurrently?: string;
-  hasAlready?: string;
-  readonly: boolean;
-  isInstant?: boolean;
-  uri?: string;
-  faviconUrl?: string;
-  group: string;
-  originalFunctionName?: string;
-  systemMessageDescription?: {
-    prefix: string;
-    exampleArgs?: Array<[string, string | number]>;
-  };
-  defaultToolPolicy?: ToolPolicy;
-  toolCallIcon?: string;
-  preprocessArgs?: (
-    args: Record<string, unknown>,
-    extras: {
-      ide: IDE;
-    },
-  ) => Promise<Record<string, unknown>>;
-  evaluateToolCallPolicy?: (
-    basePolicy: ToolPolicy,
-    parsedArgs: Record<string, unknown>,
-  ) => ToolPolicy;
 }
 
-interface ToolChoice {
+export interface ToolChoice {
   type: "function";
   function: {
     name: string;
   };
 }
 
-export interface ConfigDependentToolParams {
-  rules: RuleWithSource[];
-  enableExperimentalTools: boolean;
-  isSignedIn: boolean;
-  isRemote: boolean;
-  modelName: string | undefined;
-}
-
-export type GetTool = (params: ConfigDependentToolParams) => Tool;
-
 export interface BaseCompletionOptions {
   temperature?: number;
   topP?: number;
-  topK?: number;
-  minP?: number;
   presencePenalty?: number;
   frequencyPenalty?: number;
-  mirostat?: number;
   stop?: string[];
   maxTokens?: number;
-  numThreads?: number;
-  useMmap?: boolean;
-  keepAlive?: number;
-  numGpu?: number;
   raw?: boolean;
   stream?: boolean;
   prediction?: Prediction;
   tools?: Tool[];
   toolChoice?: ToolChoice;
-  reasoning?: boolean;
-  reasoningBudgetTokens?: number;
-  promptCaching?: boolean;
 }
 
 export interface ModelCapability {
   uploadImage?: boolean;
   tools?: boolean;
   nextEdit?: boolean;
-}
-
-export interface ModelDescription {
-  title: string;
-  provider: string;
-  underlyingProviderName: string;
-  model: string;
-  apiKey?: string;
-
-  apiBase?: string;
-  apiKeyLocation?: string;
-  envSecretLocations?: Record<string, string>;
-  orgScopeId?: string | null;
-
-  onPremProxyUrl?: string | null;
-
-  contextLength?: number;
-  maxStopWords?: number;
-  template?: TemplateType;
-  completionOptions?: BaseCompletionOptions;
-  baseAgentSystemMessage?: string;
-  basePlanSystemMessage?: string;
-  baseChatSystemMessage?: string;
-  promptTemplates?: { [key: string]: string };
-  cacheBehavior?: CacheBehavior;
-  capabilities?: ModelCapability;
-  roles?: ModelRole[];
-  configurationStatus?: LLMConfigurationStatuses;
-
-  sourceFile?: string;
-  isFromAutoDetect?: boolean;
 }
 
 export interface JSONEmbedOptions {
@@ -1160,15 +921,6 @@ export interface JSONEmbedOptions {
 
   // VertexAI and Watsonx Options
   projectId?: string;
-}
-
-export interface EmbeddingsProviderDescription extends JSONEmbedOptions {
-  provider: string;
-}
-
-export interface RerankerDescription {
-  name: string;
-  params?: { [key: string]: any };
 }
 
 // TODO: We should consider renaming this to AutocompleteOptions.
@@ -1358,72 +1110,6 @@ export interface ExperimentalMCPOptions {
   timeout?: number;
 }
 
-export type ApplyStateStatus =
-  | "not-started" // Apply state created but not necessarily streaming
-  | "streaming" // Changes are being applied to the file
-  | "done" // All changes have been applied, awaiting user to accept/reject
-  | "closed"; // All changes have been applied. Note that for new files, we immediately set the status to "closed"
-
-export interface ApplyState {
-  streamId: string;
-  status?: ApplyStateStatus;
-  numDiffs?: number;
-  filepath?: string;
-  fileContent?: string;
-  originalFileContent?: string;
-  toolCallId?: string;
-  autoFormattingDiff?: string;
-}
-
-export type StreamDiffLinesType = "edit" | "apply";
-interface StreamDiffLinesOptionsBase {
-  type: StreamDiffLinesType;
-  prefix: string;
-  highlighted: string;
-  suffix: string;
-  input: string;
-  language: string | undefined;
-  modelTitle: string | undefined;
-  includeRulesInSystemMessage: boolean;
-  fileUri?: string;
-}
-
-interface StreamDiffLinesOptionsEdit extends StreamDiffLinesOptionsBase {
-  type: "edit";
-}
-
-interface StreamDiffLinesOptionsApply extends StreamDiffLinesOptionsBase {
-  type: "apply";
-  newCode: string;
-}
-
-type StreamDiffLinesPayload =
-  | StreamDiffLinesOptionsApply
-  | StreamDiffLinesOptionsEdit;
-
-export interface HighlightedCodePayload {
-  rangeInFileWithContents: RangeInFileWithContents;
-  prompt?: string;
-  shouldRun?: boolean;
-}
-
-export interface AcceptOrRejectDiffPayload {
-  filepath?: string;
-  streamId?: string;
-}
-
-export interface ShowFilePayload {
-  filepath: string;
-}
-
-export interface ApplyToFilePayload {
-  streamId: string;
-  filepath?: string;
-  text: string;
-  toolCallId?: string;
-  isSearchAndReplace?: boolean;
-}
-
 export interface RangeInFileWithContents {
   filepath: string;
   range: {
@@ -1442,8 +1128,6 @@ export interface RangeInFileWithNextEditInfo {
   beforeCursorPos: Position;
   workspaceDir: string;
 }
-
-export type SetCodeToEditPayload = RangeInFileWithContents | FileWithContents;
 
 /**
  * Signature help represents the signature of something
@@ -1492,325 +1176,10 @@ export class SignatureInformation {
   activeParameter?: number;
 }
 
-/**
- * Represents a parameter of a callable-signature. A parameter can
- * have a label and a doc-comment.
- */
-export class ParameterInformation {
-  /**
-   * The label of this signature.
-   *
-   * Either a string or inclusive start and exclusive end offsets within its containing
-   * {@link SignatureInformation.label signature label}. *Note*: A label of type string must be
-   * a substring of its containing signature information's {@link SignatureInformation.label label}.
-   */
-  label: string | [number, number];
-}
-
-/**
- * Represents the configuration for a quick action in the Code Lens.
- * Quick actions are custom commands that can be added to function and class declarations.
- */
-export interface QuickActionConfig {
-  /**
-   * The title of the quick action that will display in the Code Lens.
-   */
-  title: string;
-
-  /**
-   * The prompt that will be sent to the model when the quick action is invoked,
-   * with the function or class body concatenated.
-   */
-  prompt: string;
-
-  /**
-   * If `true`, the result of the quick action will be sent to the chat panel.
-   * If `false`, the streamed result will be inserted into the document.
-   *
-   * Defaults to `false`.
-   */
-  sendToChat: boolean;
-}
-
-export type DefaultContextProvider = ContextProviderWithParams & {
-  query?: string;
-};
-
-export interface ExperimentalConfig {
-  contextMenuPrompts?: ContextMenuConfig;
-  modelRoles?: ExperimentalModelRoles;
-  defaultContext?: DefaultContextProvider[];
-  promptPath?: string;
-  enableExperimentalTools?: boolean;
-  onlyUseSystemMessageTools?: boolean;
-
-  /**
-   * Quick actions are a way to add custom commands to the Code Lens of
-   * function and class declarations.
-   */
-  quickActions?: QuickActionConfig[];
-
-  /**
-   * Automatically read LLM chat responses aloud using system TTS models
-   */
-  readResponseTTS?: boolean;
-
-  /**
-   * If set to true, we will attempt to pull down and install an instance of Chromium
-   * that is compatible with the current version of Puppeteer.
-   * This is needed to crawl a large number of documentation sites that are dynamically rendered.
-   */
-  useChromiumForDocsCrawling?: boolean;
-  modelContextProtocolServers?: ExperimentalMCPOptions[];
-
-  /**
-   * If enabled, will add the current file as context.
-   */
-  useCurrentFileAsContext?: boolean;
-
-  /**
-   * If enabled, @codebase will only use tool calling
-   * instead of embeddings, FTS, recently edited files, etc.
-   */
-  codebaseToolCallingOnly?: boolean;
-
-  /**
-   * If enabled, static contextualization will be used to
-   * gather context for the model where necessary.
-   */
-  enableStaticContextualization?: boolean;
-}
-
-export interface AnalyticsConfig {
-  provider: string;
-  url?: string;
-  clientKey?: string;
-}
-
-export interface JSONModelDescription {
-  title: string;
-  provider: string;
-  underlyingProviderName: string;
-  model: string;
-  apiKey?: string;
-  apiBase?: string;
-
-  contextLength?: number;
-  maxStopWords?: number;
-  template?: TemplateType;
-  completionOptions?: BaseCompletionOptions;
-  systemMessage?: string;
-  cacheBehavior?: CacheBehavior;
-
-  region?: string;
-  profile?: string;
-  modelArn?: string;
-  apiType?: "openai" | "azure";
-  apiVersion?: string;
-  deployment?: string;
-  projectId?: string;
-  accountId?: string;
-  aiGatewaySlug?: string;
-  useLegacyCompletionsEndpoint?: boolean;
-  deploymentId?: string;
-  isFromAutoDetect?: boolean;
-}
-
-// config.json
-export interface SerializedContinueConfig {
-  env?: string[];
-  allowAnonymousTelemetry?: boolean;
-  models: JSONModelDescription[];
-  systemMessage?: string;
-  completionOptions?: BaseCompletionOptions;
-  slashCommands?: SlashCommandDescription[];
-  customCommands?: CustomCommand[];
-  contextProviders?: ContextProviderWithParams[];
-  disableIndexing?: boolean;
-  disableSessionTitles?: boolean;
-  userToken?: string;
-  embeddingsProvider?: EmbeddingsProviderDescription;
-  tabAutocompleteModel?: JSONModelDescription | JSONModelDescription[];
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  ui?: ContinueUIConfig;
-  reranker?: RerankerDescription;
-  experimental?: ExperimentalConfig;
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
-  data?: DataDestination[];
-}
-
 export type ConfigMergeType = "merge" | "overwrite";
 
-export type ContinueRcJson = Partial<SerializedContinueConfig> & {
-  mergeBehavior: ConfigMergeType;
-};
-
-// config.ts - give users simplified interfaces
-export interface Config {
-  /** If set to true, Continue will collect anonymous usage data to improve the product. If set to false, we will collect nothing. Read here to learn more: https://docs.continue.dev/telemetry */
-  allowAnonymousTelemetry?: boolean;
-  /** Each entry in this array will originally be a JSONModelDescription, the same object from your config.json, but you may add CustomLLMs.
-   * A CustomLLM requires you only to define an AsyncGenerator that calls the LLM and yields string updates. You can choose to define either `streamCompletion` or `streamChat` (or both).
-   * Continue will do the rest of the work to construct prompt templates, handle context items, prune context, etc.
-   */
-  models: (CustomLLM | JSONModelDescription)[];
-  /** A system message to be followed by all of your models */
-  systemMessage?: string;
-  /** The default completion options for all models */
-  completionOptions?: BaseCompletionOptions;
-  /** Request options that will be applied to all models and context providers */
-  /** The list of slash commands that will be available in the sidebar */
-  slashCommands?: (SlashCommand | SlashCommandWithSource)[];
-  /** Each entry in this array will originally be a ContextProviderWithParams, the same object from your config.json, but you may add CustomContextProviders.
-   * A CustomContextProvider requires you only to define a title and getContextItems function. When you type '@title <query>', Continue will call `getContextItems(query)`.
-   */
-  contextProviders?: (CustomContextProvider | ContextProviderWithParams)[];
-  /** If set to true, Continue will not index your codebase for retrieval */
-  disableIndexing?: boolean;
-  /** If set to true, Continue will not make extra requests to the LLM to generate a summary title of each session. */
-  disableSessionTitles?: boolean;
-  /** An optional token to identify a user. Not used by Continue unless you write custom coniguration that requires such a token */
-  userToken?: string;
-  /** The provider used to calculate embeddings. If left empty, Continue will use transformers.js to calculate the embeddings with all-MiniLM-L6-v2 */
-  embeddingsProvider?: EmbeddingsProviderDescription | ILLM;
-  /** The model that Continue will use for tab autocompletions. */
-  tabAutocompleteModel?:
-    | CustomLLM
-    | JSONModelDescription
-    | (CustomLLM | JSONModelDescription)[];
-  /** Options for tab autocomplete */
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  /** UI styles customization */
-  ui?: ContinueUIConfig;
-  /** Options for the reranker */
-  reranker?: RerankerDescription | ILLM;
-  /** Experimental configuration */
-  experimental?: ExperimentalConfig;
-  /** Analytics configuration */
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
-  data?: DataDestination[];
-}
-
 // in the actual Continue source code
-export interface ContinueConfig {
-  allowAnonymousTelemetry?: boolean;
-  // systemMessage?: string;
-  completionOptions?: BaseCompletionOptions;
-  slashCommands: SlashCommandWithSource[];
-  contextProviders: IContextProvider[];
-  disableSessionTitles?: boolean;
-  disableIndexing?: boolean;
-  userToken?: string;
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  ui?: ContinueUIConfig;
-  experimental?: ExperimentalConfig;
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
-  tools: Tool[];
-  mcpServerStatuses: MCPServerStatus[];
-  rules: RuleWithSource[];
-  modelsByRole: Record<ModelRole, ILLM[]>;
-  selectedModelByRole: Record<ModelRole, ILLM | null>;
-  data?: DataDestination[];
-}
-
-export interface BrowserSerializedContinueConfig {
-  allowAnonymousTelemetry?: boolean;
-  // systemMessage?: string;
-  completionOptions?: BaseCompletionOptions;
-  slashCommands: SlashCommandDescWithSource[];
-  contextProviders: ContextProviderDescription[];
-  disableIndexing?: boolean;
-  disableSessionTitles?: boolean;
-  userToken?: string;
-  ui?: ContinueUIConfig;
-  experimental?: ExperimentalConfig;
-  analytics?: AnalyticsConfig;
-  docs?: SiteIndexingConfig[];
-  tools: Omit<Tool, "preprocessArgs", "evaluatePolicy">[];
-  mcpServerStatuses: MCPServerStatus[];
-  rules: RuleWithSource[];
-  usePlatform: boolean;
-  tabAutocompleteOptions?: Partial<TabAutocompleteOptions>;
-  modelsByRole: Record<ModelRole, ModelDescription[]>;
-  selectedModelByRole: Record<ModelRole, ModelDescription | null>;
-}
-
-// DOCS SUGGESTIONS AND PACKAGE INFO
-export interface FilePathAndName {
-  path: string;
-  name: string;
-}
-
-export interface PackageFilePathAndName extends FilePathAndName {
-  packageRegistry: string; // e.g. npm, pypi
-}
-
-export type ParsedPackageInfo = {
-  name: string;
-  packageFile: PackageFilePathAndName;
-  language: string;
-  version: string;
-};
-
-export type PackageDetails = {
-  docsLink?: string;
-  docsLinkWarning?: string;
-  title?: string;
-  description?: string;
-  repo?: string;
-  license?: string;
-};
-
-export type PackageDetailsSuccess = PackageDetails & {
-  docsLink: string;
-};
-
-export type PackageDocsResult = {
-  packageInfo: ParsedPackageInfo;
-} & (
-  | { error: string; details?: never }
-  | { details: PackageDetailsSuccess; error?: never }
-);
-
-export interface TerminalOptions {
-  reuseTerminal?: boolean;
-  terminalName?: string;
-  waitForCompletion?: boolean;
-}
-
-export type RuleSource =
-  | "default-chat"
-  | "default-plan"
-  | "default-agent"
-  | "model-options-chat"
-  | "model-options-plan"
-  | "model-options-agent"
-  | "rules-block"
-  | "colocated-markdown"
-  | "json-systemMessage"
-  | ".continuerules"
-  | "agent-file";
-
-export interface RuleWithSource {
-  name?: string;
-  slug?: string;
-  source: RuleSource;
-  globs?: string | string[];
-  regex?: string | string[];
-  rule: string;
-  description?: string;
-  sourceFile?: string;
-  alwaysApply?: boolean;
-  invokable?: boolean;
-}
-export interface CompleteOnboardingPayload {
-  mode: OnboardingModes;
-  provider?: string;
-  apiKey?: string;
-}
+export interface ContinueConfig {}
 
 export interface CompiledMessagesResult {
   compiledChatMessages: ChatMessage[];
@@ -1818,21 +1187,9 @@ export interface CompiledMessagesResult {
   contextPercentage: number;
 }
 
-export interface AddToChatPayload {
-  data: AddToChatPayloadItem[];
-}
-
-interface AddToChatPayloadItem {
-  type: "file" | "folder";
-  fullPath: string;
-  name: string;
-}
-
 export interface MessageOption {
   precompiled: boolean;
 }
-
-/* LSP-specific interfaces. */
 
 // See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolKind.
 // We shift this one index down to match vscode.SymbolKind.
@@ -1866,11 +1223,6 @@ export enum SymbolKind {
 }
 
 // See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolTag.
-export namespace SymbolTag {
-  export const Deprecated = 1 as const;
-}
-
-// See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#symbolTag.
 export type SymbolTag = 1;
 
 // See https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#documentSymbol.
@@ -1883,59 +1235,4 @@ export interface DocumentSymbol {
   range: Range;
   selectionRange: Range;
   children?: DocumentSymbol[];
-}
-
-// Protocol stubs for vscode-test-harness
-export type FromCoreProtocol = any;
-export type ToCoreProtocol = any;
-export type FromWebviewProtocol = any;
-export type ToWebviewProtocol = any;
-export type ToIdeFromCoreProtocol = any;
-export type ToIdeFromWebviewOrCoreProtocol = any;
-export type ToWebviewFromCoreProtocol = any;
-
-export interface Message<T = any> {
-  messageType: string;
-  data: T;
-  messageId?: string;
-}
-
-export interface ListHistoryOptions {
-  offset?: number;
-  limit?: number;
-}
-
-export interface IMessenger<TFrom = any, _TTo = any> {
-  send(messageType: string, data: any, messageId?: string): string;
-  on<T extends keyof TFrom>(
-    messageType: T,
-    handler: (message: Message<any>) => Promise<any> | any,
-  ): void;
-  request?(messageType: string, data: any): Promise<any>;
-}
-
-export class InProcessMessenger<TFrom = any, TTo = any>
-  implements IMessenger<TFrom, TTo>
-{
-  send(messageType: string, data: any, messageId?: string): string;
-  on<T extends keyof TFrom>(
-    messageType: T,
-    handler: (message: Message<any>) => void,
-  ): void;
-  request(messageType: string, data: any): Promise<any>;
-  externalOn?(
-    messageType: string,
-    handler: (message: Message<any>) => void,
-  ): void;
-  externalRequest?(messageType: string, data: any): Promise<any>;
-}
-
-export const CORE_TO_WEBVIEW_PASS_THROUGH: string[] = [];
-export const WEBVIEW_TO_CORE_PASS_THROUGH: string[] = [];
-
-// Stub for Core class
-export class Core {
-  constructor(messenger: InProcessMessenger, ide: IDE, configProvider?: any);
-  configHandler: any;
-  invoke(method: string, ...args: any[]): Promise<any>;
 }
