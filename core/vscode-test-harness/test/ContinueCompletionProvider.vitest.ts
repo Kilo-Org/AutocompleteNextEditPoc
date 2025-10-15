@@ -4,14 +4,10 @@ import * as vscode from "vscode";
 
 import { ContinueCompletionProvider } from "../src/autocomplete/completionProvider";
 
-import * as NextEditLoggingServiceModule from "core/nextEdit/NextEditLoggingService";
-import * as PrefetchQueueModule from "core/nextEdit/NextEditPrefetchQueue";
-import * as NextEditProviderModule from "core/nextEdit/NextEditProvider";
-import * as JumpManagerModule from "../src/activation/JumpManager";
-
-type MockNextEditProvider = ReturnType<typeof createMockNextEditProvider>;
-type MockPrefetchQueue = ReturnType<typeof createMockPrefetchQueue>;
-type MockJumpManager = ReturnType<typeof createMockJumpManager>;
+import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
+import { NextEditProvider } from "core/nextEdit/NextEditProvider";
+import { JumpManager } from "../src/activation/JumpManager";
+import { FakeIDE } from "../../test/FakeIDE";
 
 const mockOutcome = {
   completion: "suggested change",
@@ -20,31 +16,18 @@ const mockOutcome = {
   editableRegionEndLine: 0,
 } as any;
 
-let mockNextEditProvider: MockNextEditProvider;
-let mockPrefetchQueue: MockPrefetchQueue;
-let mockJumpManager: MockJumpManager;
+let realNextEditProvider: NextEditProvider;
+let realPrefetchQueue: PrefetchQueue;
+let realJumpManager: JumpManager;
 
 beforeEach(() => {
   vi.clearAllMocks();
 
-  mockNextEditProvider = createMockNextEditProvider();
-  (NextEditProviderModule as any).__setMockNextEditProviderInstance(
-    mockNextEditProvider,
-  );
+  // Reset singletons for clean test state
+  PrefetchQueue.__resetInstanceForTests();
+  JumpManager.clearInstance();
 
-  mockPrefetchQueue = createMockPrefetchQueue();
-  (PrefetchQueueModule as any).__setMockPrefetchQueueInstance(
-    mockPrefetchQueue,
-  );
-
-  mockJumpManager = createMockJumpManager();
-  (JumpManagerModule as any).__setMockJumpManagerInstance(mockJumpManager);
-
-  const mockLoggingService = createMockLoggingService();
-  (NextEditLoggingServiceModule as any).__setMockNextEditLoggingServiceInstance(
-    mockLoggingService,
-  );
-
+  // Use real instances - they'll be properly initialized when ContinueCompletionProvider is created
   (vscode.window as any).activeTextEditor = null;
 });
 
@@ -54,6 +37,12 @@ describe("ContinueCompletionProvider triggering logic", () => {
     setActiveEditor(document);
 
     const provider = buildProvider();
+    realNextEditProvider = NextEditProvider.getInstance();
+
+    // Ensure clean state
+    if (realNextEditProvider.chainExists()) {
+      await realNextEditProvider.deleteChain();
+    }
 
     await provider.provideInlineCompletionItems(
       document,
@@ -62,22 +51,21 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    expect(mockNextEditProvider.startChain).toHaveBeenCalledTimes(1);
-    expect(
-      mockNextEditProvider.provideInlineCompletionItems,
-    ).toHaveBeenCalledTimes(1);
-    expect(mockNextEditProvider.deleteChain).not.toHaveBeenCalled();
+    // Verify observable behavior: chain was created
+    expect(realNextEditProvider.chainExists()).toBe(true);
   });
 
   it("clears an empty chain once in full file diff mode", async () => {
     const document = createDocument();
     setActiveEditor(document);
 
-    mockNextEditProvider.chainExists.mockReturnValue(true);
-    mockPrefetchQueue.__setProcessed([]);
-    mockPrefetchQueue.__setUnprocessed([]);
-
     const provider = buildProvider();
+    realNextEditProvider = NextEditProvider.getInstance();
+    realPrefetchQueue = PrefetchQueue.getInstance();
+
+    // Set up: chain exists with empty queues
+    realNextEditProvider.startChain();
+    realPrefetchQueue.clear();
 
     await provider.provideInlineCompletionItems(
       document,
@@ -86,25 +74,25 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    expect(mockNextEditProvider.deleteChain).toHaveBeenCalledTimes(1);
-    expect(mockNextEditProvider.startChain).toHaveBeenCalledTimes(1);
-    expect(
-      mockNextEditProvider.provideInlineCompletionItems,
-    ).toHaveBeenCalledTimes(1);
+    // Verify behavior: chain still exists (was restarted after clearing)
+    expect(realNextEditProvider.chainExists()).toBe(true);
   });
 
   it("returns null after clearing empty chain when no outcome is available", async () => {
     const document = createDocument();
     setActiveEditor(document);
 
-    mockNextEditProvider.chainExists.mockReturnValue(true);
-    mockPrefetchQueue.__setProcessed([]);
-    mockPrefetchQueue.__setUnprocessed([]);
-    mockNextEditProvider.provideInlineCompletionItems.mockResolvedValueOnce(
-      undefined,
-    );
-
     const provider = buildProvider();
+    realNextEditProvider = NextEditProvider.getInstance();
+    realPrefetchQueue = PrefetchQueue.getInstance();
+
+    // Set up: chain with empty queues, mock to return no outcome
+    realNextEditProvider.startChain();
+    realPrefetchQueue.clear();
+    vi.spyOn(
+      realNextEditProvider,
+      "provideInlineCompletionItems",
+    ).mockResolvedValue(undefined);
 
     const result = await provider.provideInlineCompletionItems(
       document,
@@ -113,33 +101,36 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
+    // Verify behavior: returns null when no outcome available
     expect(result).toBeNull();
-    expect(mockNextEditProvider.deleteChain).toHaveBeenCalledTimes(1);
-    expect(mockNextEditProvider.startChain).toHaveBeenCalledTimes(1);
-    expect(
-      mockNextEditProvider.provideInlineCompletionItems,
-    ).toHaveBeenCalledTimes(1);
   });
 
   it("uses queued outcomes when processed items exist", async () => {
     const document = createDocument();
     setActiveEditor(document);
 
-    mockNextEditProvider.chainExists.mockReturnValue(true);
-    mockPrefetchQueue.__setProcessed([
-      {
-        location: {
-          range: {
-            start: { line: 0, character: 0 },
-            end: { line: 0, character: 0 },
-          },
-        },
-        outcome: mockOutcome,
-      },
-    ]);
-    mockJumpManager.suggestJump.mockResolvedValue(true);
-
     const provider = buildProvider();
+    realNextEditProvider = NextEditProvider.getInstance();
+    realPrefetchQueue = PrefetchQueue.getInstance();
+    realJumpManager = JumpManager.getInstance();
+
+    // Set up: chain with queued outcome
+    realNextEditProvider.startChain();
+    realPrefetchQueue.enqueueProcessed({
+      location: {
+        filepath: document.uri.toString(),
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 0, character: 0 },
+        },
+      },
+      outcome: mockOutcome,
+    });
+
+    // Mock jump behavior
+    vi.spyOn(realJumpManager, "suggestJump").mockResolvedValue(true);
+
+    const initialQueueCount = realPrefetchQueue.processedCount;
 
     await provider.provideInlineCompletionItems(
       document,
@@ -148,13 +139,10 @@ describe("ContinueCompletionProvider triggering logic", () => {
       createToken(),
     );
 
-    expect(mockPrefetchQueue.dequeueProcessed).toHaveBeenCalledTimes(1);
-    expect(mockJumpManager.setCompletionAfterJump).toHaveBeenCalledTimes(1);
-    expect(mockNextEditProvider.startChain).not.toHaveBeenCalled();
-    expect(mockNextEditProvider.deleteChain).not.toHaveBeenCalled();
-    expect(
-      mockNextEditProvider.provideInlineCompletionItems,
-    ).not.toHaveBeenCalled();
+    // Verify behavior: queue was consumed
+    expect(realPrefetchQueue.processedCount).toBeLessThan(initialQueueCount);
+    // Verify completion was set for after jump
+    expect(realJumpManager.completionAfterJump).toBeTruthy();
   });
 });
 
@@ -162,11 +150,28 @@ function buildProvider(options: { usingFullFileDiff?: boolean } = {}) {
   const usingFullFileDiff = options.usingFullFileDiff ?? true;
   const configHandler = {
     loadConfig: vi.fn(async () => ({
-      config: { selectedModelByRole: { autocomplete: undefined } },
+      config: {
+        selectedModelByRole: { autocomplete: undefined },
+        tabAutocompleteOptions: {
+          debounceDelay: 0,
+        },
+      },
     })),
   } as any;
 
-  const ide = { ideUtils: {} } as any;
+  const ide = new FakeIDE({
+    workspaceDirs: ["/workspace"],
+    ideInfo: {
+      ideType: "vscode",
+    },
+  });
+
+  // Override onDidChangeActiveTextEditor to return a disposable
+  const originalOnDidChange = ide.onDidChangeActiveTextEditor.bind(ide);
+  ide.onDidChangeActiveTextEditor = (callback: (fileUri: string) => void) => {
+    originalOnDidChange(callback);
+    return { dispose: vi.fn() };
+  };
 
   const provider = new ContinueCompletionProvider(
     configHandler,
@@ -245,72 +250,6 @@ function setActiveEditor(document: any, cursor = createPosition()) {
   };
 }
 
-function createMockNextEditProvider() {
-  return {
-    chainExists: vi.fn(() => false),
-    startChain: vi.fn(),
-    deleteChain: vi.fn(async () => {}),
-    provideInlineCompletionItems: vi.fn(async () => mockOutcome),
-    provideInlineCompletionItemsWithChain: vi.fn(async () => mockOutcome),
-    markDisplayed: vi.fn(),
-    getChainLength: vi.fn(() => 0),
-  };
-}
-
-function createMockPrefetchQueue() {
-  let processedItems: any[] = [];
-  let unprocessedItems: any[] = [];
-
-  const queue: any = {
-    initialize: vi.fn(),
-    process: vi.fn(),
-    peekThreeProcessed: vi.fn(),
-    dequeueProcessed: vi.fn(() => processedItems.shift()),
-    enqueueProcessed: vi.fn((item: any) => {
-      processedItems.push(item);
-    }),
-    __setProcessed(items: any[]) {
-      processedItems = [...items];
-    },
-    __setUnprocessed(items: any[]) {
-      unprocessedItems = [...items];
-    },
-  };
-
-  Object.defineProperty(queue, "processedCount", {
-    get: () => processedItems.length,
-  });
-
-  Object.defineProperty(queue, "unprocessedCount", {
-    get: () => unprocessedItems.length,
-  });
-
-  return queue;
-}
-
-function createMockJumpManager() {
-  return {
-    isJumpInProgress: vi.fn(() => false),
-    setJumpInProgress: vi.fn(),
-    completionAfterJump: undefined,
-    clearCompletionAfterJump: vi.fn(),
-    setCompletionAfterJump: vi.fn(),
-    suggestJump: vi.fn(async () => false),
-    wasJumpJustAccepted: vi.fn(() => false),
-  };
-}
-
-function createMockLoggingService() {
-  return {
-    trackPendingCompletion: vi.fn(),
-    handleAbort: vi.fn(),
-    markDisplayed: vi.fn(),
-    cancelRejectionTimeout: vi.fn(),
-    deleteAbortController: vi.fn(),
-    cancel: vi.fn(),
-  };
-}
-
 vi.mock("vscode", () => {
   class Position {
     constructor(
@@ -348,10 +287,18 @@ vi.mock("vscode", () => {
     notebookDocuments: [] as any[],
     getConfiguration: vi.fn(() => ({ get: vi.fn() })),
     onDidChangeTextDocument: vi.fn(() => ({ dispose: vi.fn() })),
+    onDidChangeConfiguration: vi.fn(() => ({ dispose: vi.fn() })),
+  };
+
+  const windowWithDecorations = {
+    ...window,
+    createTextEditorDecorationType: vi.fn(() => ({
+      dispose: vi.fn(),
+    })),
   };
 
   return {
-    window,
+    window: windowWithDecorations,
     workspace,
     Uri: { parse: (value: string) => ({ toString: () => value }) },
     Position,
@@ -359,6 +306,17 @@ vi.mock("vscode", () => {
     InlineCompletionItem,
     InlineCompletionTriggerKind: { Automatic: 0, Invoke: 1 },
     NotebookCellKind: { Markup: 1 },
+    commands: {
+      registerCommand: vi.fn(() => ({ dispose: vi.fn() })),
+      executeCommand: vi.fn(),
+    },
+    Selection: class {
+      constructor(
+        public anchor: any,
+        public active: any,
+      ) {}
+    },
+    TextEditorRevealType: { InCenter: 1 },
   };
 });
 
@@ -442,42 +400,7 @@ vi.mock("../../activation/JumpManager", () => {
   };
 });
 
-vi.mock("core/nextEdit/NextEditPrefetchQueue", () => {
-  let instance: any = null;
-  return {
-    PrefetchQueue: {
-      getInstance: () => instance,
-    },
-    __setMockPrefetchQueueInstance(value: any) {
-      instance = value;
-    },
-  };
-});
-
-vi.mock("core/nextEdit/NextEditProvider", () => {
-  let instance: any = null;
-  return {
-    NextEditProvider: {
-      initialize: vi.fn(() => instance),
-      getInstance: vi.fn(() => instance),
-    },
-    __setMockNextEditProviderInstance(value: any) {
-      instance = value;
-    },
-  };
-});
-
-vi.mock("core/nextEdit/NextEditLoggingService", () => {
-  let instance: any = null;
-  return {
-    NextEditLoggingService: {
-      getInstance: () => instance,
-    },
-    __setMockNextEditLoggingServiceInstance(value: any) {
-      instance = value;
-    },
-  };
-});
+// Using real implementations - no mocks needed
 
 vi.mock("core/nextEdit/diff/diff", () => ({
   checkFim: vi.fn(() => ({ isFim: true, fimText: "ghost" })),

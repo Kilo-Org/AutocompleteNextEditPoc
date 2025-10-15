@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getAutocompleteContext } from "./autocompleteContextFetching";
 import { Position } from "../..";
 import { IDE, ILLM } from "../../index";
-import { MinimalConfigProvider } from "../../autocomplete/MinimalConfig";
+import { FakeConfigHandler } from "../../test/FakeConfigHandler";
 
 // Mock dependencies
 vi.mock("../../indexing/ignore", () => ({
@@ -37,7 +37,7 @@ import { isSecurityConcern } from "../../indexing/ignore";
 
 describe("autocompleteContextFetching", () => {
   let mockIde: IDE;
-  let mockConfigHandler: MinimalConfigProvider;
+  let mockConfigHandler: FakeConfigHandler;
   let mockGetDefinitionsFromLsp: any;
 
   beforeEach(() => {
@@ -51,29 +51,13 @@ describe("autocompleteContextFetching", () => {
     } as any;
 
     // Mock config handler
-    mockConfigHandler = {
-      loadConfig: vi.fn().mockResolvedValue({
-        config: {
-          modelsByRole: {
-            autocomplete: [
-              {
-                title: "test-model",
-                model: "gpt-4",
-                autocompleteOptions: {},
-              },
-            ],
-          },
-          selectedModelByRole: {
-            autocomplete: {
-              title: "test-model",
-              model: "gpt-4",
-              autocompleteOptions: {},
-            },
-          },
-          tabAutocompleteOptions: {},
-        },
-      }),
-    } as any;
+    mockConfigHandler = new FakeConfigHandler({
+      autocompleteModel: {
+        title: "test-model",
+        model: "gpt-4",
+        autocompleteOptions: {},
+      } as any,
+    });
 
     mockGetDefinitionsFromLsp = vi.fn().mockResolvedValue([]);
 
@@ -109,6 +93,8 @@ describe("autocompleteContextFetching", () => {
 
   describe("getAutocompleteContext", () => {
     it("should successfully fetch autocomplete context", async () => {
+      const loadConfigSpy = vi.spyOn(mockConfigHandler, 'loadConfig');
+      
       const result = await getAutocompleteContext(
         "test.ts",
         mockPosition,
@@ -122,13 +108,11 @@ describe("autocompleteContextFetching", () => {
       );
 
       expect(result).toBe("test prefix context");
-      expect(mockConfigHandler.loadConfig).toHaveBeenCalled();
+      expect(loadConfigSpy).toHaveBeenCalled();
     });
 
     it("should throw error when config is not available", async () => {
-      mockConfigHandler.loadConfig = vi
-        .fn()
-        .mockResolvedValue({ config: null });
+      mockConfigHandler.loadConfig = async () => ({ config: null as any });
 
       await expect(
         getAutocompleteContext(
@@ -218,12 +202,9 @@ describe("autocompleteContextFetching", () => {
     });
 
     it("should throw error when no autocomplete model configured and none provided", async () => {
-      mockConfigHandler.loadConfig = vi.fn().mockResolvedValue({
-        config: {
-          modelsByRole: { autocomplete: [] },
-          selectedModelByRole: { autocomplete: null },
-          tabAutocompleteOptions: {},
-        },
+      mockConfigHandler.updateConfig({
+        modelsByRole: { autocomplete: [] },
+        selectedModelByRole: { autocomplete: undefined },
       });
 
       await expect(

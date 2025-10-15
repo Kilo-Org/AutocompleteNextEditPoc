@@ -9,8 +9,6 @@ export type ModelRole =
   | "repoMapFileSelection";
 export type PromptTemplates = Record<string, any>;
 
-import { LLMConfigurationStatuses } from "./llm/constants";
-
 declare global {
   interface Window {
     ide?: "vscode";
@@ -72,10 +70,7 @@ export type PromptTemplateFunction = (
 
 export type PromptTemplate = string | PromptTemplateFunction;
 
-type RequiredLLMOptions =
-  | "uniqueId"
-  | "contextLength"
-  | "completionOptions";
+type RequiredLLMOptions = "uniqueId" | "contextLength" | "completionOptions";
 
 export interface ILLM
   extends Omit<LLMOptions, RequiredLLMOptions>,
@@ -456,7 +451,6 @@ export interface LLMOptions {
   maxStopWords?: number;
   completionOptions?: CompletionOptions;
   chatStreams?: MockMessage[][];
-  template?: TemplateType;
   promptTemplates?: Partial<Record<keyof PromptTemplates, PromptTemplate>>;
   apiKey?: string;
   apiBase?: string;
@@ -620,26 +614,6 @@ export type ContextProviderName =
   | "clipboard"
   | string;
 
-export type TemplateType =
-  | "llama2"
-  | "alpaca"
-  | "zephyr"
-  | "phi2"
-  | "phind"
-  | "anthropic"
-  | "chatml"
-  | "none"
-  | "openchat"
-  | "deepseek"
-  | "xwin-coder"
-  | "neural-chat"
-  | "codellama-70b"
-  | "llava"
-  | "gemma"
-  | "granite"
-  | "llama3"
-  | "codestral";
-
 export interface CacheBehavior {
   cacheSystemMessage?: boolean;
   cacheConversation?: boolean;
@@ -655,23 +629,6 @@ export interface Prediction {
       }[];
 }
 
-export interface Tool {
-  type: "function";
-  function: {
-    name: string;
-    description?: string;
-    parameters?: Record<string, any>;
-    strict?: boolean | null;
-  };
-}
-
-export interface ToolChoice {
-  type: "function";
-  function: {
-    name: string;
-  };
-}
-
 export interface BaseCompletionOptions {
   temperature?: number;
   topP?: number;
@@ -682,8 +639,6 @@ export interface BaseCompletionOptions {
   raw?: boolean;
   stream?: boolean;
   prediction?: Prediction;
-  tools?: Tool[];
-  toolChoice?: ToolChoice;
 }
 
 export interface ModelCapability {

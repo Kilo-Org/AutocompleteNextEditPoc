@@ -44,19 +44,19 @@ const formatMessageForO1OrGpt5 = (messages: ChatCompletionMessageParam[]) => {
   });
 };
 
-class OpenAI extends BaseLLM {
+export class OpenAI extends BaseLLM {
   public useLegacyCompletionsEndpoint: boolean | undefined = undefined;
 
   constructor(options: LLMOptions) {
-    super(options);
+    super({
+      apiBase: "https://api.openai.com/v1/",
+      ...options,
+    });
     this.useLegacyCompletionsEndpoint = options.useLegacyCompletionsEndpoint;
     // Azure apiVersion removed from narrowed LLMOptions; not used
   }
 
   static providerName = "openai";
-  static defaultOptions: Partial<LLMOptions> | undefined = {
-    apiBase: "https://api.openai.com/v1/",
-  };
 
   protected useOpenAIAdapterFor: (LlmApiRequestType | "*")[] = [
     "chat",
@@ -402,5 +402,3 @@ class OpenAI extends BaseLLM {
     return data.data.map((result: { embedding: number[] }) => result.embedding);
   }
 }
-
-export { OpenAI };

@@ -132,10 +132,6 @@ export class PrefetchQueue {
     return this.processedQueue.length;
   }
 
-  peekProcessed(): ProcessedItem | undefined {
-    return this.processedQueue[0];
-  }
-
   peekThreeProcessed(): void {
     const count = Math.min(3, this.processedQueue.length);
     const firstThree = this.processedQueue.slice(0, count);
@@ -146,7 +142,15 @@ export class PrefetchQueue {
     });
   }
 
-  setPreetchLimit(limit: number): void {
-    this.prefetchLimit = limit;
+  // Reset singleton for test isolation
+  public static __resetInstanceForTests(): void {
+    if (PrefetchQueue.instance) {
+      try {
+        PrefetchQueue.instance.abort();
+      } catch {
+        // ignore
+      }
+      PrefetchQueue.instance = null;
+    }
   }
 }

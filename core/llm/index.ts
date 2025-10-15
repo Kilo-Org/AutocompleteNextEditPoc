@@ -15,7 +15,6 @@ import {
   PromptLog,
   PromptTemplate,
   TabAutocompleteOptions,
-  TemplateType,
   Usage,
 } from "../index.js";
 import type { ILLMInteractionLog, ILLMLogger } from "../index.js";
@@ -24,14 +23,7 @@ import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
 
-import {
-  autodetectPromptTemplates,
-  autodetectTemplateType,
-} from "./autodetect.js";
-import {
-  DEFAULT_CONTEXT_LENGTH,
-  DEFAULT_MAX_TOKENS,
-} from "./constants.js";
+import { DEFAULT_CONTEXT_LENGTH, DEFAULT_MAX_TOKENS } from "./constants.js";
 import {
   compileChatMessages,
   countTokens,
@@ -50,7 +42,6 @@ type InteractionStatus = "in_progress" | "success" | "error" | "cancelled";
 
 export abstract class BaseLLM implements ILLM {
   static providerName: string;
-  static defaultOptions: Partial<LLMOptions> | undefined = undefined;
 
   get providerName(): string {
     return (this.constructor as typeof BaseLLM).providerName;
@@ -105,7 +96,6 @@ export abstract class BaseLLM implements ILLM {
   _contextLength: number | undefined;
   maxStopWords?: number | undefined;
   completionOptions: CompletionOptions;
-  template?: TemplateType;
   promptTemplates?: Record<string, PromptTemplate>;
   templateMessages?: (messages: ChatMessage[]) => string;
   logger?: ILLMLogger;
@@ -127,7 +117,6 @@ export abstract class BaseLLM implements ILLM {
     // Set default options
     const options = {
       title: (this.constructor as typeof BaseLLM).providerName,
-      ...(this.constructor as typeof BaseLLM).defaultOptions,
       ..._options,
     };
 
@@ -138,9 +127,6 @@ export abstract class BaseLLM implements ILLM {
         ? this.model?.split("/").pop() || this.model
         : this.model;
     const llmInfo = findLlmInfo(modelSearchString, this.underlyingProviderName);
-
-    const templateType =
-      options.template ?? autodetectTemplateType(options.model);
 
     this.title = options.title;
     this.uniqueId = options.uniqueId ?? "None";
@@ -160,10 +146,14 @@ export abstract class BaseLLM implements ILLM {
             )
           : DEFAULT_MAX_TOKENS),
     };
-    this.promptTemplates = {
-      ...autodetectPromptTemplates(options.model, templateType),
-      ...options.promptTemplates,
-    };
+    // Normalize user-specified prompt templates to a concrete record or leave undefined
+    this.promptTemplates = options.promptTemplates
+      ? (Object.fromEntries(
+          Object.entries(options.promptTemplates).filter(
+            ([, v]) => v !== undefined,
+          ),
+        ) as Record<string, PromptTemplate>)
+      : undefined;
     this.apiKey = options.apiKey;
     this.apiBase = options.apiBase;
     if (this.apiBase && !this.apiBase.endsWith("/")) {
@@ -706,7 +696,6 @@ export abstract class BaseLLM implements ILLM {
       knownContextLength: this._contextLength,
       maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
       supportsImages: this.supportsImages(),
-      tools: options.tools,
     });
   }
 
@@ -756,7 +745,6 @@ export abstract class BaseLLM implements ILLM {
         knownContextLength: this._contextLength,
         maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
         supportsImages: this.supportsImages(),
-        tools: options.tools,
       });
 
       messages = compiledChatMessages;
@@ -926,8 +914,6 @@ export abstract class BaseLLM implements ILLM {
     };
   }
 
-
-
   async rerank(query: string, chunks: Chunk[]): Promise<number[]> {
     if (this.shouldUseOpenAIAdapter("rerank") && this.openaiAdapter) {
       const results = await this.openaiAdapter.rerank({
@@ -993,7 +979,6 @@ export abstract class BaseLLM implements ILLM {
     }
     return completion;
   }
-
 
   countTokens(text: string): number {
     return countTokens(text, this.model);

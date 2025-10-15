@@ -172,10 +172,6 @@ export class NextEditProvider {
     }
   }
 
-  public cancel() {
-    this.loggingService.cancel();
-  }
-
   public accept(completionId: string) {
     const outcome = this.loggingService.accept(completionId);
     if (!outcome) {

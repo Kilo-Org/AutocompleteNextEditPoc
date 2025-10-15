@@ -4,9 +4,7 @@ import {
   CompiledMessagesResult,
   MessageContent,
   MessagePart,
-  Tool,
 } from "../index.js";
-import { autodetectTemplateType } from "./autodetect.js";
 import {
   addSpaceToAnyEmptyMessages,
   chatMessageIsEmpty,
@@ -34,18 +32,32 @@ class LlamaEncoding implements Encoding {
 let gptEncoding: Encoding | null = null;
 const llamaEncoding = new LlamaEncoding();
 
-function encodingForModel(modelName: string): Encoding {
-  const modelType = autodetectTemplateType(modelName);
+function modelUsesGptTokenizer(modelName: string): boolean {
+  const name = (modelName || "").toLowerCase();
+  const patterns: (RegExp | string)[] = [
+    /^gpt/,
+    /^o3/,
+    /^o4/,
+    "command-r",
+    "aya",
+    "chat-bison",
+    "pplx",
+    "gemini",
+    "grok",
+    "moonshot",
+    "mercury",
+    "claude",
+    "codestral",
+    "nova",
+  ];
+  return patterns.some((p) =>
+    typeof p === "string" ? name.includes(p) : p.test(name),
+  );
+}
 
-  if (!modelType || modelType === "none") {
-    if (!gptEncoding) {
-      gptEncoding = _encodingForModel("gpt-4");
-    }
-
-    return gptEncoding;
-  }
-
-  return llamaEncoding;
+export function encodingForModel(modelName: string): Encoding {
+  if (!modelUsesGptTokenizer(modelName)) return llamaEncoding;
+  return (gptEncoding ??= _encodingForModel("gpt-4"));
 }
 
 function countImageTokens(content: MessagePart): number {
@@ -73,51 +85,6 @@ function countTokens(
   } else {
     return encoding.encode(content ?? "", "all", []).length;
   }
-}
-
-// https://community.openai.com/t/how-to-calculate-the-tokens-when-using-function-call/266573/10
-function countToolsTokens(tools: Tool[], modelName: string): number {
-  const count = (value: string) =>
-    encodingForModel(modelName).encode(value).length;
-
-  let numTokens = 12;
-
-  for (const tool of tools) {
-    let functionTokens = count(tool.function.name);
-    if (tool.function.description) {
-      functionTokens += count(tool.function.description);
-    }
-    const props = tool.function.parameters?.properties;
-    if (props) {
-      for (const key in props) {
-        functionTokens += count(key);
-        const fields = props[key];
-        if (fields) {
-          const fieldType = fields["type"];
-          const fieldDesc = fields["description"];
-          const fieldEnum = fields["enum"];
-          if (fieldType && typeof fieldType === "string") {
-            functionTokens += 2;
-            functionTokens += count(fieldType);
-          }
-          if (fieldDesc && typeof fieldDesc === "string") {
-            functionTokens += 2;
-            functionTokens += count(fieldDesc);
-          }
-          if (fieldEnum && Array.isArray(fieldEnum)) {
-            functionTokens -= 3;
-            for (const e of fieldEnum) {
-              functionTokens += 3;
-              functionTokens += typeof e === "string" ? count(e) : 5;
-            }
-          }
-        }
-      }
-    }
-    numTokens += functionTokens;
-  }
-
-  return numTokens + 12;
 }
 
 function countChatMessageTokens(
@@ -360,14 +327,12 @@ function compileChatMessages({
   knownContextLength,
   maxTokens,
   supportsImages,
-  tools,
 }: {
   modelName: string;
   msgs: ChatMessage[];
   knownContextLength: number | undefined;
   maxTokens: number;
   supportsImages: boolean;
-  tools?: Tool[];
 }): CompiledMessagesResult {
   let didPrune = false;
 
@@ -407,12 +372,6 @@ function compileChatMessages({
     systemMsgTokens = countChatMessageTokens(modelName, systemMsg);
   }
 
-  // Tools
-  let toolTokens = 0;
-  if (tools) {
-    toolTokens = countToolsTokens(tools, modelName);
-  }
-
   const contextLength = knownContextLength ?? DEFAULT_PRUNING_LENGTH;
   const countingSafetyBuffer = getTokenCountingBufferSafety(contextLength);
   const minOutputTokens = Math.min(MIN_RESPONSE_TOKENS, maxTokens);
@@ -424,7 +383,6 @@ function compileChatMessages({
   inputTokensAvailable -= minOutputTokens;
 
   // Non-negotiable messages
-  inputTokensAvailable -= toolTokens;
   inputTokensAvailable -= systemMsgTokens;
   inputTokensAvailable -= lastMessagesTokens;
 
@@ -436,7 +394,6 @@ function compileChatMessages({
         Request had the following token counts:
         - contextLength: ${knownContextLength}
         - counting safety buffer: ${countingSafetyBuffer}
-        - tools: ~${toolTokens}
         - system message: ~${systemMsgTokens}
         - max output tokens: ${maxTokens}`,
     );
@@ -470,11 +427,12 @@ function compileChatMessages({
   if (systemMsg) {
     reassembled.push(systemMsg);
   }
-  reassembled.push(...historyWithTokens.map(({ tokens: _tokens, ...rest }) => rest));
+  reassembled.push(
+    ...historyWithTokens.map(({ tokens: _tokens, ...rest }) => rest),
+  );
   reassembled.push(...toolSequence);
 
-  const inputTokens =
-    currentTotal + systemMsgTokens + toolTokens + lastMessagesTokens;
+  const inputTokens = currentTotal + systemMsgTokens + lastMessagesTokens;
   const availableTokens =
     contextLength - countingSafetyBuffer - minOutputTokens;
   const contextPercentage = inputTokens / availableTokens;

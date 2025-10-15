@@ -13,8 +13,8 @@ import {
 } from "core/nextEdit/NextEditEditableRegionCalculator";
 import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
+import { FakeIDE } from "../../test/FakeIDE";
 import * as vscode from "vscode";
-import { VsCodeIde } from "../src/VsCodeIde";
 import { JumpManager } from "../src/activation/JumpManager";
 import { NextEditWindowManager } from "../src/activation/NextEditWindowManager";
 import {
@@ -99,10 +99,6 @@ vi.mock("core/util/pathToUri", () => ({
   }),
 }));
 
-vi.mock("../src/VsCodeIde", () => ({
-  VsCodeIde: vi.fn(),
-}));
-
 vi.mock("../src/activation/JumpManager", () => ({
   JumpManager: {
     getInstance: vi.fn(() => ({
@@ -123,7 +119,7 @@ vi.mock("../src/activation/NextEditWindowManager", () => ({
 
 describe("SelectionChangeManager", () => {
   let selectionChangeManager: SelectionChangeManager;
-  let mockIde: VsCodeIde;
+  let mockIde: FakeIDE;
   let mockDeleteChain: ReturnType<typeof vi.fn>;
   let mockEnqueueUnprocessed: ReturnType<typeof vi.fn>;
 
@@ -154,8 +150,10 @@ describe("SelectionChangeManager", () => {
       },
     ]);
 
-    // Create VsCodeIde instance with proper constructor arguments
-    mockIde = new VsCodeIde();
+    // Create FakeIDE instance
+    mockIde = new FakeIDE({
+      workspaceDirs: ["/test"],
+    });
 
     // Get a fresh instance
     selectionChangeManager = SelectionChangeManager.getInstance();
@@ -202,7 +200,8 @@ describe("SelectionChangeManager", () => {
       const newManager = new (SelectionChangeManager as any)();
       const registerSpy = vi.spyOn(newManager, "registerListener");
 
-      newManager.initialize(mockIde, true);
+      const testIde = new FakeIDE({ workspaceDirs: ["/test"] });
+      newManager.initialize(testIde, true);
 
       expect(registerSpy).toHaveBeenCalledWith(
         "defaultFallbackHandler",
