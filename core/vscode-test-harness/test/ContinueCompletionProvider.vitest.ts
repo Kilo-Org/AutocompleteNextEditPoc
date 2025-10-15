@@ -7,6 +7,7 @@ import { ContinueCompletionProvider } from "../src/autocomplete/completionProvid
 import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { JumpManager } from "../src/activation/JumpManager";
+import { FakeIDE } from "../../test/FakeIDE";
 
 const mockOutcome = {
   completion: "suggested change",
@@ -158,13 +159,19 @@ function buildProvider(options: { usingFullFileDiff?: boolean } = {}) {
     })),
   } as any;
 
-  const ide = {
-    ideUtils: {},
-    onDidChangeActiveTextEditor: vi.fn(() => ({ dispose: vi.fn() })),
-    readFile: vi.fn(async () => ""),
-    getWorkspaceDirs: vi.fn(async () => ["/workspace"]),
-    getIdeInfo: vi.fn(async () => ({ ideType: "vscode" })),
-  } as any;
+  const ide = new FakeIDE({
+    workspaceDirs: ["/workspace"],
+    ideInfo: {
+      ideType: "vscode",
+    },
+  });
+
+  // Override onDidChangeActiveTextEditor to return a disposable
+  const originalOnDidChange = ide.onDidChangeActiveTextEditor.bind(ide);
+  ide.onDidChangeActiveTextEditor = (callback: (fileUri: string) => void) => {
+    originalOnDidChange(callback);
+    return { dispose: vi.fn() };
+  };
 
   const provider = new ContinueCompletionProvider(
     configHandler,
