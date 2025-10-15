@@ -13,12 +13,6 @@ vi.mock("../NextEditProvider", () => ({
   },
 }));
 
-vi.mock("../../util/log", () => ({
-  DataLogger: {
-    getInstance: vi.fn(),
-  },
-}));
-
 vi.mock("./diffFormatting", () => ({
   createDiff: vi.fn(),
   DiffFormatType: {
