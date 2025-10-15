@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { processNextEditData } from "./processNextEditData";
 import { Position } from "../..";
+import { FakeConfigHandler } from "../../test/FakeConfigHandler";
 
 // Mock all dependencies
 vi.mock("./autocompleteContextFetching", () => ({
@@ -40,7 +41,7 @@ import {
 
 describe("processNextEditData", () => {
   let mockIde: any;
-  let mockConfigHandler: any;
+  let mockConfigHandler: FakeConfigHandler;
   let mockGetDefinitionsFromLsp: any;
   let mockNextEditProvider: any;
 
@@ -54,15 +55,11 @@ describe("processNextEditData", () => {
     };
 
     // Setup mock config handler
-    mockConfigHandler = {
-      loadConfig: vi.fn().mockResolvedValue({
-        config: {
-          selectedModelByRole: {
-            autocomplete: { model: "test-model" },
-          },
-        },
-      }),
-    };
+    mockConfigHandler = new FakeConfigHandler({
+      autocompleteModel: {
+        model: "test-model"
+      } as any,
+    });
 
     // Setup mock LSP function
     mockGetDefinitionsFromLsp = vi.fn().mockResolvedValue([]);
@@ -100,7 +97,7 @@ describe("processNextEditData", () => {
     cursorPosBeforeEdit: mockPosition,
     cursorPosAfterPrevEdit: mockPosition,
     ide: mockIde,
-    configHandler: mockConfigHandler,
+    configHandler: mockConfigHandler as any,
     getDefinitionsFromLsp: mockGetDefinitionsFromLsp,
     recentlyEditedRanges: [],
     recentlyVisitedRanges: [],
