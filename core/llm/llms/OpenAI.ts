@@ -50,13 +50,12 @@ class OpenAI extends BaseLLM {
   constructor(options: LLMOptions) {
     super(options);
     this.useLegacyCompletionsEndpoint = options.useLegacyCompletionsEndpoint;
-    this.apiVersion = options.apiVersion ?? "2023-07-01-preview";
+    // Azure apiVersion removed from narrowed LLMOptions; not used
   }
 
   static providerName = "openai";
   static defaultOptions: Partial<LLMOptions> | undefined = {
     apiBase: "https://api.openai.com/v1/",
-    maxEmbeddingBatchSize: 128,
   };
 
   protected useOpenAIAdapterFor: (LlmApiRequestType | "*")[] = [
@@ -104,8 +103,7 @@ class OpenAI extends BaseLLM {
     } else if (
       url.port === "1337" ||
       url.host === "api.openai.com" ||
-      url.host === "api.groq.com" ||
-      this.apiType === "azure"
+      url.host === "api.groq.com"
     ) {
       return 4;
     } else {
@@ -187,20 +185,6 @@ class OpenAI extends BaseLLM {
         "No API base URL provided. Please set the 'apiBase' option in config.json",
       );
     }
-
-    if (this.apiType?.includes("azure")) {
-      // Default is `azure-openai`, but previously was `azure`
-      const isAzureOpenAI =
-        this.apiType === "azure-openai" || this.apiType === "azure";
-
-      const path = isAzureOpenAI
-        ? `openai/deployments/${this.deployment}/${endpoint}`
-        : endpoint;
-
-      const version = this.apiVersion ? `?api-version=${this.apiVersion}` : "";
-      return new URL(`${path}${version}`, this.apiBase);
-    }
-
     return new URL(endpoint, this.apiBase);
   }
 
@@ -390,13 +374,6 @@ class OpenAI extends BaseLLM {
     if (!this.apiBase) {
       throw new Error(
         "No API base URL provided. Please set the 'apiBase' option in config.json",
-      );
-    }
-
-    if (this.apiType === "azure") {
-      return new URL(
-        `openai/deployments/${this.deployment}/embeddings?api-version=${this.apiVersion}`,
-        this.apiBase,
       );
     }
     return new URL("embeddings", this.apiBase);
