@@ -44,7 +44,7 @@ const formatMessageForO1OrGpt5 = (messages: ChatCompletionMessageParam[]) => {
   });
 };
 
-class OpenAI extends BaseLLM {
+export class OpenAI extends BaseLLM {
   public useLegacyCompletionsEndpoint: boolean | undefined = undefined;
 
   constructor(options: LLMOptions) {
@@ -402,5 +402,3 @@ class OpenAI extends BaseLLM {
     return data.data.map((result: { embedding: number[] }) => result.embedding);
   }
 }
-
-export { OpenAI };
