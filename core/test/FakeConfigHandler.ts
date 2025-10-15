@@ -1,5 +1,5 @@
 import type { ILLM, TabAutocompleteOptions } from "../index.js";
-import { DEFAULT_AUTOCOMPLETE_OPTS } from "../util/parameters.js";
+import { MinimalConfigProvider } from "../autocomplete/MinimalConfig.js";
 
 /**
  * Minimal config structure for testing.
@@ -45,7 +45,8 @@ export interface FakeConfigHandlerOptions {
 
 /**
  * FakeConfigHandler is a test implementation of the config handler interface.
- * It provides sensible defaults for all methods while allowing tests to customize behavior.
+ * It extends MinimalConfigProvider to ensure type compatibility and provides additional
+ * test utilities for tracking config updates and simulating changes.
  *
  * Usage example:
  * ```typescript
@@ -64,10 +65,7 @@ export interface FakeConfigHandlerOptions {
  * });
  * ```
  */
-export class FakeConfigHandler {
-  private config: MinimalTestConfig;
-  public currentProfile: { profileDescription: { profileType?: string } } | undefined;
-  
+export class FakeConfigHandler extends MinimalConfigProvider {
   /** Track calls to onConfigUpdate for assertions */
   public configUpdateCallbacks: Array<(event: { config: MinimalTestConfig; configLoadInterrupted: boolean }) => void> = [];
 
@@ -75,11 +73,8 @@ export class FakeConfigHandler {
     // Build config from options
     const autocompleteModel = options.autocompleteModel;
     
-    this.config = {
-      tabAutocompleteOptions: {
-        ...DEFAULT_AUTOCOMPLETE_OPTS,
-        ...options.tabAutocompleteOptions,
-      } as TabAutocompleteOptions,
+    const config = {
+      tabAutocompleteOptions: options.tabAutocompleteOptions,
       experimental: {
         enableStaticContextualization: options.enableStaticContextualization ?? false,
       },
@@ -92,6 +87,9 @@ export class FakeConfigHandler {
       ...options.config,
     };
     
+    // Call parent constructor with merged config
+    super(config);
+    
     // Set profile if provided
     if (options.profileType) {
       this.currentProfile = {
@@ -103,38 +101,10 @@ export class FakeConfigHandler {
   }
 
   /**
-   * Returns the config in the same shape as ConfigHandler.loadConfig()
-   * This maintains API compatibility with existing code.
-   */
-  async loadConfig(): Promise<{ config: MinimalTestConfig }> {
-    return { config: this.config };
-  }
-
-  /**
-   * Get autocomplete options directly
-   */
-  getAutocompleteOptions(): TabAutocompleteOptions {
-    return this.config.tabAutocompleteOptions || DEFAULT_AUTOCOMPLETE_OPTS;
-  }
-
-  /**
-   * Check if static contextualization is enabled
-   */
-  isStaticContextualizationEnabled(): boolean {
-    return this.config.experimental?.enableStaticContextualization ?? false;
-  }
-
-  /**
-   * Reload config (stub for compatibility)
-   */
-  async reloadConfig(..._args: unknown[]): Promise<void> {
-    // No-op by default, tests can override if needed
-  }
-
-  /**
    * Register config update handler
+   * Overrides parent to track callbacks for test assertions
    */
-  onConfigUpdate(
+  override onConfigUpdate(
     handler: (event: {
       config: MinimalTestConfig;
       configLoadInterrupted: boolean;
@@ -142,29 +112,28 @@ export class FakeConfigHandler {
   ): void {
     this.configUpdateCallbacks.push(handler);
   }
-
-  /**
-   * Register custom context provider (stub for compatibility)
-   */
-  registerCustomContextProvider(_provider: unknown): void {
-    // No-op by default, tests can override if needed
-  }
   
   /**
    * Helper method to simulate config updates in tests.
    * This is not part of the config handler interface but useful for testing.
    */
-  simulateConfigUpdate(newConfig: Partial<MinimalTestConfig>, interrupted = false): void {
-    this.config = { ...this.config, ...newConfig };
-    this.configUpdateCallbacks.forEach((callback) => 
-      callback({ config: this.config, configLoadInterrupted: interrupted })
+  async simulateConfigUpdate(newConfig: Partial<MinimalTestConfig>, interrupted = false): Promise<void> {
+    // Update the internal config
+    const { config } = await this.loadConfig();
+    const updatedConfig = { ...config, ...newConfig } as MinimalTestConfig;
+    
+    // Notify all callbacks
+    this.configUpdateCallbacks.forEach((callback) =>
+      callback({ config: updatedConfig, configLoadInterrupted: interrupted })
     );
   }
   
   /**
    * Helper method to update config for tests
+   * Note: This directly modifies the internal config state
    */
-  updateConfig(newConfig: Partial<MinimalTestConfig>): void {
-    this.config = { ...this.config, ...newConfig };
+  async updateConfig(newConfig: Partial<MinimalTestConfig>): Promise<void> {
+    const { config } = await this.loadConfig();
+    Object.assign(config, newConfig);
   }
 }

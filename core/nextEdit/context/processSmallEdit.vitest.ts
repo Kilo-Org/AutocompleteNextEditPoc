@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { processSmallEdit } from "./processSmallEdit";
 import { BeforeAfterDiff } from "./diffFormatting";
 import { Position } from "../..";
+import { FakeConfigHandler } from "../../test/FakeConfigHandler";
 
 // Mock all dependencies
 vi.mock("./aggregateEdits", () => ({
@@ -43,10 +44,13 @@ describe("processSmallEdit", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
+    // Setup real config handler
+    mockConfigHandler = new FakeConfigHandler();
+
     // Setup mock EditAggregator
     mockEditAggregator = {
       latestContextData: {
-        configHandler: { loadConfig: vi.fn() },
+        configHandler: new FakeConfigHandler(),
         getDefsFromLspFunction: vi.fn(),
         recentlyEditedRanges: [{ filepath: "test.ts", range: {} }],
         recentlyVisitedRanges: [{ filepath: "other.ts", contents: "test" }],
@@ -73,13 +77,6 @@ describe("processSmallEdit", () => {
     mockIde = {
       getWorkspaceDirs: vi.fn().mockResolvedValue(["/workspace"]),
       readFile: vi.fn().mockResolvedValue("file content"),
-    };
-
-    // Setup mock config handler
-    mockConfigHandler = {
-      loadConfig: vi.fn().mockResolvedValue({
-        config: { tabAutocompleteOptions: {} },
-      }),
     };
 
     // Setup mock LSP function
@@ -360,8 +357,9 @@ describe("processSmallEdit", () => {
 
   describe("integration with context data", () => {
     it("should use all context data fields when available", async () => {
+      const customConfigHandler = new FakeConfigHandler();
       const contextData = {
-        configHandler: { custom: "config" },
+        configHandler: customConfigHandler,
         getDefsFromLspFunction: vi.fn(),
         recentlyEditedRanges: [{ filepath: "edited.ts", range: {} }],
         recentlyVisitedRanges: [{ filepath: "visited.ts", contents: "code" }],
@@ -389,7 +387,7 @@ describe("processSmallEdit", () => {
         cursorPosBeforeEdit: mockPosition,
         cursorPosAfterPrevEdit: mockPosition,
         ide: mockIde,
-        configHandler: contextData.configHandler,
+        configHandler: customConfigHandler,
         getDefinitionsFromLsp: contextData.getDefsFromLspFunction,
         recentlyEditedRanges: contextData.recentlyEditedRanges,
         recentlyVisitedRanges: contextData.recentlyVisitedRanges,

@@ -90,7 +90,7 @@ describe("processNextEditData", () => {
 
   const mockPosition: Position = { line: 10, character: 5 };
 
-  const baseParams = {
+  const getBaseParams = () => ({
     filePath: "file:///workspace/test.ts",
     beforeContent: "const a = 1;",
     afterContent: "const a = 2;",
@@ -102,28 +102,28 @@ describe("processNextEditData", () => {
     recentlyEditedRanges: [],
     recentlyVisitedRanges: [],
     workspaceDir: "file:///workspace",
-  };
+  });
 
   describe("basic functionality", () => {
     it("should fetch autocomplete context", async () => {
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(getAutocompleteContext).toHaveBeenCalledWith(
-        baseParams.filePath,
-        baseParams.cursorPosBeforeEdit,
-        baseParams.ide,
-        baseParams.configHandler,
-        baseParams.getDefinitionsFromLsp,
-        baseParams.recentlyEditedRanges,
-        baseParams.recentlyVisitedRanges,
+        getBaseParams().filePath,
+        getBaseParams().cursorPosBeforeEdit,
+        getBaseParams().ide,
+        getBaseParams().configHandler,
+        getBaseParams().getDefinitionsFromLsp,
+        getBaseParams().recentlyEditedRanges,
+        getBaseParams().recentlyVisitedRanges,
         expect.any(Number), // maxPromptTokens is randomized
-        baseParams.beforeContent,
+        getBaseParams().beforeContent,
         "Codestral",
       );
     });
 
     it("should add context to NextEditProvider", async () => {
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(mockNextEditProvider.addAutocompleteContext).toHaveBeenCalledWith(
         "test autocomplete context",
@@ -131,26 +131,26 @@ describe("processNextEditData", () => {
     });
 
     it("should store current edit in cache", async () => {
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(setPrevEdit).toHaveBeenCalledWith({
         unidiff: expect.any(String),
-        fileUri: baseParams.filePath,
-        workspaceUri: baseParams.workspaceDir,
+        fileUri: getBaseParams().filePath,
+        workspaceUri: getBaseParams().workspaceDir,
         timestamp: expect.any(Number),
       });
     });
 
     it("should create diff with 25 context lines", async () => {
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(createDiff).toHaveBeenCalledWith({
-        beforeContent: baseParams.beforeContent,
-        afterContent: baseParams.afterContent,
-        filePath: baseParams.filePath,
+        beforeContent: getBaseParams().beforeContent,
+        afterContent: getBaseParams().afterContent,
+        filePath: getBaseParams().filePath,
         diffType: "Unified",
         contextLines: 25,
-        workspaceDir: baseParams.workspaceDir,
+        workspaceDir: getBaseParams().workspaceDir,
       });
     });
   });
@@ -168,7 +168,7 @@ describe("processNextEditData", () => {
         },
       ]);
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(prevEditLruCache.clear).toHaveBeenCalled();
     });
@@ -185,7 +185,7 @@ describe("processNextEditData", () => {
         },
       ]);
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(prevEditLruCache.clear).not.toHaveBeenCalled();
     });
@@ -202,7 +202,7 @@ describe("processNextEditData", () => {
         },
       ]);
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(prevEditLruCache.clear).toHaveBeenCalled();
     });
@@ -217,7 +217,7 @@ describe("processNextEditData", () => {
         },
       ]);
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       expect(prevEditLruCache.clear).not.toHaveBeenCalled();
     });
@@ -227,7 +227,7 @@ describe("processNextEditData", () => {
     it("should use random maxPromptTokens between 500 and 12000", async () => {
       (getAutocompleteContext as any).mockClear();
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       const maxPromptTokens = (getAutocompleteContext as any).mock.calls[0][7];
 
@@ -240,7 +240,7 @@ describe("processNextEditData", () => {
     it("should handle empty previous edits array", async () => {
       (getPrevEditsDescending as any).mockReturnValue([]);
 
-      await expect(processNextEditData(baseParams)).resolves.not.toThrow();
+      await expect(processNextEditData(getBaseParams())).resolves.not.toThrow();
     });
 
     it("should handle multiple previous edits", async () => {
@@ -263,7 +263,7 @@ describe("processNextEditData", () => {
 
       (getPrevEditsDescending as any).mockReturnValue(mockEdits);
 
-      await processNextEditData(baseParams);
+      await processNextEditData(getBaseParams());
 
       // Verify console.log was called with nextEditWithHistory
       expect(consoleLogSpy).toHaveBeenCalledWith(
@@ -279,8 +279,8 @@ describe("processNextEditData", () => {
               diff: "-old2\n+new2", // diff without first 4 lines (header lines)
             },
           ],
-          fileURI: baseParams.filePath,
-          workspaceDirURI: baseParams.workspaceDir,
+          fileURI: getBaseParams().filePath,
+          workspaceDirURI: getBaseParams().workspaceDir,
         }),
       );
 
@@ -290,7 +290,7 @@ describe("processNextEditData", () => {
     it("should handle undefined model name", async () => {
       await expect(
         processNextEditData({
-          ...baseParams,
+          ...getBaseParams(),
           modelNameOrInstance: undefined,
         }),
       ).resolves.not.toThrow();
