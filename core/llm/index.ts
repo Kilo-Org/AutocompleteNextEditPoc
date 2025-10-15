@@ -25,10 +25,6 @@ import { renderChatMessage } from "../util/messageContent.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
 
 import {
-  autodetectPromptTemplates,
-  autodetectTemplateType,
-} from "./autodetect.js";
-import {
   DEFAULT_CONTEXT_LENGTH,
   DEFAULT_MAX_TOKENS,
 } from "./constants.js";
@@ -137,8 +133,6 @@ export abstract class BaseLLM implements ILLM {
         : this.model;
     const llmInfo = findLlmInfo(modelSearchString, this.underlyingProviderName);
 
-    const templateType =
-      options.template ?? autodetectTemplateType(options.model);
 
     this.title = options.title;
     this.uniqueId = options.uniqueId ?? "None";
@@ -158,10 +152,12 @@ export abstract class BaseLLM implements ILLM {
             )
           : DEFAULT_MAX_TOKENS),
     };
-    this.promptTemplates = {
-      ...autodetectPromptTemplates(options.model, templateType),
-      ...options.promptTemplates,
-    };
+    // Normalize user-specified prompt templates to a concrete record or leave undefined
+    this.promptTemplates = options.promptTemplates
+      ? (Object.fromEntries(
+          Object.entries(options.promptTemplates).filter(([, v]) => v !== undefined),
+        ) as Record<string, PromptTemplate>)
+      : undefined;
     this.apiKey = options.apiKey;
     this.apiBase = options.apiBase;
     if (this.apiBase && !this.apiBase.endsWith("/")) {

@@ -1,68 +1,10 @@
 import {
-  ChatMessage,
   ModelCapability,
   TemplateType,
 } from "../index.js";
 import { NEXT_EDIT_MODELS } from "./constants.js";
 
-import {
-  anthropicTemplateMessages,
-  chatmlTemplateMessages,
-  codeLlama70bTemplateMessages,
-  codestralTemplateMessages,
-  deepseekTemplateMessages,
-  gemmaTemplateMessage,
-  graniteTemplateMessages,
-  llama2TemplateMessages,
-  llama3TemplateMessages,
-  llavaTemplateMessages,
-  neuralChatTemplateMessages,
-  openchatTemplateMessages,
-  phi2TemplateMessages,
-  phindTemplateMessages,
-  templateAlpacaMessages,
-  xWinCoderTemplateMessages,
-  zephyrTemplateMessages,
-} from "./templates/chat.js";
-import {
-  alpacaEditPrompt,
-  claudeEditPrompt,
-  codeLlama70bEditPrompt,
-  deepseekEditPrompt,
-  gemmaEditPrompt,
-  gptEditPrompt,
-  llama3EditPrompt,
-  mistralEditPrompt,
-  neuralChatEditPrompt,
-  openchatEditPrompt,
-  osModelsEditPrompt,
-  phindEditPrompt,
-  simplifiedEditPrompt,
-  xWinCoderEditPrompt,
-  zephyrEditPrompt,
-} from "./templates/edit.js";
 
-const PROVIDER_HANDLES_TEMPLATING: string[] = [
-  "lmstudio",
-  "lemonade",
-  "openai",
-  "nvidia",
-  "ollama",
-  "together",
-  "novita",
-  "msty",
-  "anthropic",
-  "bedrock",
-  "cohere",
-  "sagemaker",
-  "continue-proxy",
-  "mistral",
-  "sambanova",
-  "vertexai",
-  "watsonx",
-  "nebius",
-  "relace",
-];
 
 const PROVIDER_SUPPORTS_IMAGES: string[] = [
   "openai",
@@ -273,129 +215,9 @@ function autodetectTemplateType(model: string): TemplateType | undefined {
   return "chatml";
 }
 
-function autodetectTemplateFunction(
-  model: string,
-  provider: string,
-  explicitTemplate: TemplateType | undefined = undefined,
-) {
-  if (
-    explicitTemplate === undefined &&
-    PROVIDER_HANDLES_TEMPLATING.includes(provider)
-  ) {
-    return null;
-  }
 
-  const templateType = explicitTemplate ?? autodetectTemplateType(model);
-
-  if (templateType) {
-    const mapping: Record<
-      TemplateType,
-      null | ((msg: ChatMessage[]) => string)
-    > = {
-      llama2: llama2TemplateMessages,
-      alpaca: templateAlpacaMessages,
-      phi2: phi2TemplateMessages,
-      phind: phindTemplateMessages,
-      zephyr: zephyrTemplateMessages,
-      anthropic: anthropicTemplateMessages,
-      chatml: chatmlTemplateMessages,
-      deepseek: deepseekTemplateMessages,
-      openchat: openchatTemplateMessages,
-      "xwin-coder": xWinCoderTemplateMessages,
-      "neural-chat": neuralChatTemplateMessages,
-      llava: llavaTemplateMessages,
-      "codellama-70b": codeLlama70bTemplateMessages,
-      gemma: gemmaTemplateMessage,
-      granite: graniteTemplateMessages,
-      llama3: llama3TemplateMessages,
-      codestral: codestralTemplateMessages,
-      none: null,
-    };
-
-    return mapping[templateType];
-  }
-
-  return null;
-}
-
-const USES_OS_MODELS_EDIT_PROMPT: TemplateType[] = [
-  "alpaca",
-  "chatml",
-  // "codellama-70b", Doesn't respond well to this prompt
-  "deepseek",
-  "gemma",
-  "llama2",
-  "llava",
-  "neural-chat",
-  "openchat",
-  "phi2",
-  "phind",
-  "xwin-coder",
-  "zephyr",
-  "llama3",
-];
-
-function autodetectPromptTemplates(
-  model: string,
-  explicitTemplate: TemplateType | undefined = undefined,
-) {
-  const templateType = explicitTemplate ?? autodetectTemplateType(model);
-  const templates: Record<string, any> = {};
-
-  let editTemplate = null;
-
-  if (templateType && USES_OS_MODELS_EDIT_PROMPT.includes(templateType)) {
-    // This is overriding basically everything else
-    // Will probably delete the rest later, but for now it's easy to revert
-    editTemplate = osModelsEditPrompt;
-  } else if (templateType === "phind") {
-    editTemplate = phindEditPrompt;
-  } else if (templateType === "phi2") {
-    editTemplate = simplifiedEditPrompt;
-  } else if (templateType === "zephyr") {
-    editTemplate = zephyrEditPrompt;
-  } else if (templateType === "llama2") {
-    if (model.includes("mistral")) {
-      editTemplate = mistralEditPrompt;
-    } else {
-      editTemplate = osModelsEditPrompt;
-    }
-  } else if (templateType === "alpaca") {
-    editTemplate = alpacaEditPrompt;
-  } else if (templateType === "deepseek") {
-    editTemplate = deepseekEditPrompt;
-  } else if (templateType === "openchat") {
-    editTemplate = openchatEditPrompt;
-  } else if (templateType === "xwin-coder") {
-    editTemplate = xWinCoderEditPrompt;
-  } else if (templateType === "neural-chat") {
-    editTemplate = neuralChatEditPrompt;
-  } else if (templateType === "codellama-70b") {
-    editTemplate = codeLlama70bEditPrompt;
-  } else if (templateType === "anthropic") {
-    editTemplate = claudeEditPrompt;
-  } else if (templateType === "gemma") {
-    editTemplate = gemmaEditPrompt;
-  } else if (templateType === "llama3") {
-    editTemplate = llama3EditPrompt;
-  } else if (templateType === "none") {
-    editTemplate = null;
-  } else if (templateType) {
-    editTemplate = gptEditPrompt;
-  } else if (model.includes("codestral")) {
-    editTemplate = osModelsEditPrompt;
-  }
-
-  if (editTemplate !== null) {
-    templates.edit = editTemplate;
-  }
-
-  return templates;
-}
 
 export {
-  autodetectPromptTemplates,
-  autodetectTemplateFunction,
   autodetectTemplateType,
   modelSupportsImages,
   modelSupportsNextEdit,
