@@ -7,27 +7,7 @@ export type ModelRole =
   | "autocomplete"
   | "apply"
   | "repoMapFileSelection";
-export type DataDestination = any;
 export type PromptTemplates = Record<string, any>;
-export enum SecretType {
-  NotFound = "not_found",
-}
-export function parseProxyModelName(model: string): {
-  provider: string;
-  model: string;
-} {
-  const parts = model.split("/");
-  return {
-    provider: parts[0] || "continue-proxy",
-    model: parts.slice(1).join("/") || model,
-  };
-}
-export type ContinueProperties = any;
-export function decodeSecretLocation(_location: string): {
-  secretType: SecretType;
-} {
-  return { secretType: SecretType.NotFound };
-}
 
 import { LLMConfigurationStatuses } from "./llm/constants";
 
@@ -83,21 +63,6 @@ export interface IndexingProgressUpdate {
     | "cancelled";
   debugInfo?: string;
   warnings?: string[];
-}
-
-// This is more or less a V2 of IndexingProgressUpdate for docs etc.
-export interface IndexingStatus {
-  id: string;
-  type: "docs";
-  progress: number;
-  description: string;
-  status: "indexing" | "complete" | "paused" | "failed" | "aborted" | "pending";
-  embeddingsProviderId?: string;
-  isReindexing?: boolean;
-  debugInfo?: string;
-  title: string;
-  icon?: string;
-  url?: string;
 }
 
 export type PromptTemplateFunction = (
@@ -175,27 +140,6 @@ export interface ILLM
   supportsPrefill(): boolean;
 
   supportsFim(): boolean;
-
-  listModels(): Promise<string[]>;
-
-  renderPromptTemplate(
-    template: PromptTemplate,
-    history: ChatMessage[],
-    otherData: Record<string, string>,
-    canPutWordsInModelsMouth?: boolean,
-  ): string | ChatMessage[];
-
-  getConfigurationStatus(): LLMConfigurationStatuses;
-}
-
-export interface ModelInstaller {
-  installModel(
-    modelName: string,
-    signal: AbortSignal,
-    progressReporter?: (task: string, increment: number, total: number) => void,
-  ): Promise<any>;
-
-  isInstallingModel(modelName: string): Promise<boolean>;
 }
 
 export type ContextProviderType = "normal" | "query" | "submenu";
@@ -233,33 +177,12 @@ export interface LoadSubmenuItemsArgs {
   ide: IDE;
   fetch: FetchFunction;
 }
-
-export interface CustomContextProvider {
-  title: string;
-  displayTitle?: string;
-  description?: string;
-  renderInlineAs?: string;
-  type?: ContextProviderType;
-  loadSubmenuItems?: (
-    args: LoadSubmenuItemsArgs,
-  ) => Promise<ContextSubmenuItem[]>;
-
-  getContextItems(
-    query: string,
-    extras: ContextProviderExtras,
-  ): Promise<ContextItem[]>;
-}
-
 export interface ContextSubmenuItem {
   id: string;
   title: string;
   description: string;
   icon?: string;
   metadata?: any;
-}
-
-export interface ContextSubmenuItemWithProvider extends ContextSubmenuItem {
-  providerTitle: string;
 }
 
 export interface SiteIndexingConfig {
@@ -269,40 +192,6 @@ export interface SiteIndexingConfig {
   faviconUrl?: string;
   useLocalCrawling?: boolean;
   sourceFile?: string;
-}
-
-export interface DocsIndexingDetails {
-  startUrl: string;
-  config: SiteIndexingConfig;
-  indexingStatus: IndexingStatus | undefined;
-  chunks: Chunk[];
-}
-
-export interface IContextProvider {
-  get description(): ContextProviderDescription;
-
-  getContextItems(
-    query: string,
-    extras: ContextProviderExtras,
-  ): Promise<ContextItem[]>;
-
-  loadSubmenuItems(args: LoadSubmenuItemsArgs): Promise<ContextSubmenuItem[]>;
-
-  get deprecationMessage(): string | null;
-}
-
-export interface Session {
-  sessionId: string;
-  title: string;
-  workspaceDirectory: string;
-  history: ChatHistoryItem[];
-}
-
-export interface BaseSessionMetadata {
-  sessionId: string;
-  title: string;
-  dateCreated: string;
-  workspaceDirectory: string;
 }
 
 export interface RangeInFile {
@@ -315,11 +204,6 @@ export interface Location {
   position: Position;
 }
 
-export interface FileWithContents {
-  filepath: string;
-  contents: string;
-}
-
 export interface Range {
   start: Position;
   end: Position;
@@ -328,12 +212,6 @@ export interface Range {
 export interface Position {
   line: number;
   character: number;
-}
-
-export interface FileEdit {
-  filepath: string;
-  range: Range;
-  replacement: string;
 }
 
 export interface CompletionOptions extends BaseCompletionOptions {
@@ -360,15 +238,6 @@ export type ImageMessagePart = {
 export type MessagePart = TextMessagePart | ImageMessagePart;
 
 export type MessageContent = string | MessagePart[];
-
-export interface ToolCall {
-  id: string;
-  type: "function";
-  function: {
-    name: string;
-    arguments: string;
-  };
-}
 
 export interface ToolCallDelta {
   id?: string;
@@ -444,27 +313,6 @@ export interface ContextItemUri {
   value: string;
 }
 
-export interface ContextItem {
-  content: string;
-  name: string;
-  description: string;
-  editing?: boolean;
-  editable?: boolean;
-  icon?: string;
-  uri?: ContextItemUri;
-  hidden?: boolean;
-  status?: string;
-}
-
-export interface ContextItemWithId extends ContextItem {
-  id: ContextItemId;
-}
-
-export interface InputModifiers {
-  useCodebase: boolean;
-  noContext: boolean;
-}
-
 export interface SymbolWithRange extends RangeInFile {
   name: string;
   type: Parser.SyntaxNode["type"];
@@ -476,25 +324,6 @@ export interface PromptLog {
   modelProvider: string;
   prompt: string;
   completion: string;
-}
-
-export type ToolStatus =
-  | "generating" // Tool call arguments are being streamed from the LLM
-  | "generated" // Tool call is complete and ready for execution (awaiting approval)
-  | "calling" // Tool is actively being executed
-  | "errored" // Tool execution failed with an error
-  | "done" // Tool execution completed successfully
-  | "canceled"; // Tool call was canceled by user or system
-
-// Will exist only on "assistant" messages with tool calls
-export interface ToolCallState {
-  toolCallId: string;
-  toolCall: ToolCall;
-  status: ToolStatus;
-  parsedArgs: any;
-  processedArgs?: Record<string, any>; // Added in preprocesing step
-  output?: ContextItem[];
-  tool?: Tool;
 }
 
 export interface LLMFullCompletionOptions extends BaseCompletionOptions {
@@ -684,9 +513,6 @@ export interface CustomLLMWithOptionals {
     options: CompletionOptions,
     fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   ) => AsyncGenerator<ChatMessage | string>;
-  listModels?: (
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
-  ) => Promise<string[]>;
 }
 
 /**
@@ -845,17 +671,6 @@ export interface CacheBehavior {
   cacheConversation?: boolean;
 }
 
-export interface ClientCertificateOptions {
-  cert: string;
-  key: string;
-  passphrase?: string;
-}
-
-export interface ContextProviderWithParams {
-  name: ContextProviderName;
-  params: { [key: string]: any };
-}
-
 export interface Prediction {
   type: "content";
   content:
@@ -949,165 +764,6 @@ export interface TabAutocompleteOptions {
   experimental_includeRecentlyEditedRanges: boolean | number;
   experimental_includeDiff: boolean | number;
   experimental_enableStaticContextualization: boolean;
-}
-
-export interface StdioOptions {
-  type: "stdio";
-  command: string;
-  args: string[];
-  env?: Record<string, string>;
-  cwd?: string;
-}
-
-export interface WebSocketOptions {
-  type: "websocket";
-  url: string;
-}
-
-export interface SSEOptions {
-  type: "sse";
-  url: string;
-}
-
-export interface StreamableHTTPOptions {
-  type: "streamable-http";
-  url: string;
-}
-
-export type TransportOptions =
-  | StdioOptions
-  | WebSocketOptions
-  | SSEOptions
-  | StreamableHTTPOptions;
-
-export type MCPConnectionStatus =
-  | "disabled"
-  | "connecting"
-  | "connected"
-  | "error"
-  | "authenticating"
-  | "not-connected";
-
-export type MCPPromptArgs = {
-  name: string;
-  description?: string;
-  required?: boolean;
-}[];
-
-export interface MCPPrompt {
-  name: string;
-  description?: string;
-  arguments?: MCPPromptArgs;
-}
-
-// Leaving here to ideate on
-// export type ContinueConfigSource = "local-yaml" | "local-json" | "hub-assistant" | "hub"
-
-// https://modelcontextprotocol.io/docs/concepts/resources#direct-resources
-export interface MCPResource {
-  name: string;
-  uri: string;
-  description?: string;
-  mimeType?: string;
-}
-
-// https://modelcontextprotocol.io/docs/concepts/resources#resource-templates
-export interface MCPResourceTemplate {
-  uriTemplate: string;
-  name: string;
-  description?: string;
-  mimeType?: string;
-}
-
-export interface MCPTool {
-  name: string;
-  description?: string;
-  inputSchema: {
-    type: "object";
-    properties?: Record<string, any>;
-  };
-}
-
-type BaseInternalMCPOptions = {
-  id: string;
-  name: string;
-  faviconUrl?: string;
-  timeout?: number;
-  sourceFile?: string;
-};
-
-export type InternalStdioMcpOptions = BaseInternalMCPOptions & {
-  type?: "stdio";
-  command: string;
-  args?: string[];
-  env?: Record<string, string>;
-  cwd?: string;
-};
-
-export type InternalStreamableHttpMcpOptions = BaseInternalMCPOptions & {
-  type?: "streamable-http";
-  url: string;
-  apiKey?: string;
-};
-
-export type InternalSseMcpOptions = BaseInternalMCPOptions & {
-  type?: "sse";
-  url: string;
-  apiKey?: string;
-};
-
-export type InternalWebsocketMcpOptions = BaseInternalMCPOptions & {
-  type: "websocket"; // websocket requires explicit type
-  url: string;
-};
-
-export type InternalMcpOptions =
-  | InternalStdioMcpOptions
-  | InternalStreamableHttpMcpOptions
-  | InternalSseMcpOptions
-  | InternalWebsocketMcpOptions;
-
-export type MCPServerStatus = InternalMcpOptions & {
-  status: MCPConnectionStatus;
-  errors: string[];
-  infos: string[];
-  isProtectedResource: boolean;
-  prompts: MCPPrompt[];
-  tools: MCPTool[];
-  resources: MCPResource[];
-  resourceTemplates: MCPResourceTemplate[];
-  sourceFile?: string;
-};
-
-export interface ContinueUIConfig {
-  codeBlockToolbarPosition?: "top" | "bottom";
-  fontSize?: number;
-  displayRawMarkdown?: boolean;
-  showChatScrollbar?: boolean;
-  codeWrap?: boolean;
-  showSessionTabs?: boolean;
-  autoAcceptEditToolDiffs?: boolean;
-  continueAfterToolRejection?: boolean;
-}
-
-export interface ContextMenuConfig {
-  comment?: string;
-  docstring?: string;
-  fix?: string;
-  optimize?: string;
-  fixGrammar?: string;
-}
-
-export interface ExperimentalModelRoles {
-  repoMapFileSelection?: string;
-  inlineEdit?: string;
-  applyCodeBlock?: string;
-}
-
-export interface ExperimentalMCPOptions {
-  transport: TransportOptions;
-  faviconUrl?: string;
-  timeout?: number;
 }
 
 export interface RangeInFileWithContents {

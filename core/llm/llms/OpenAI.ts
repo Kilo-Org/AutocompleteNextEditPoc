@@ -386,16 +386,6 @@ class OpenAI extends BaseLLM {
     }
   }
 
-  async listModels(): Promise<string[]> {
-    const response = await fetch(this._getEndpoint("models"), {
-      method: "GET",
-      headers: this._getHeaders(),
-    });
-
-    const data = await response.json();
-    return data.data.map((m: any) => m.id);
-  }
-
   private _getEmbedEndpoint() {
     if (!this.apiBase) {
       throw new Error(
