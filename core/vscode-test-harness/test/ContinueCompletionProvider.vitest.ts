@@ -38,7 +38,7 @@ beforeEach(() => {
   );
 
   mockJumpManager = createMockJumpManager();
-  (JumpManagerModule as any).__setMockJumpManagerInstance(mockJumpManager);
+  JumpManagerModule.__setMockJumpManagerInstance(mockJumpManager);
 
   const mockLoggingService = createMockLoggingService();
   (NextEditLoggingServiceModule as any).__setMockNextEditLoggingServiceInstance(
