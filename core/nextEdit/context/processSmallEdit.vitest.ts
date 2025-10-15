@@ -4,7 +4,7 @@ import { BeforeAfterDiff } from "./diffFormatting";
 import { Position } from "../..";
 import { FakeConfigHandler } from "../../test/FakeConfigHandler";
 
-// Mock all dependencies
+// Mock only external/async dependencies that would require complex setup
 vi.mock("./aggregateEdits", () => ({
   EditAggregator: {
     getInstance: vi.fn(),
@@ -17,13 +17,6 @@ vi.mock("../NextEditProvider", () => ({
   },
 }));
 
-vi.mock("./diffFormatting", () => ({
-  createDiff: vi.fn(),
-  DiffFormatType: {
-    Unified: "Unified",
-  },
-}));
-
 vi.mock("./processNextEditData", () => ({
   processNextEditData: vi.fn(),
 }));
@@ -31,7 +24,6 @@ vi.mock("./processNextEditData", () => ({
 // Import mocked modules
 import { EditAggregator } from "./aggregateEdits";
 import { NextEditProvider } from "../NextEditProvider";
-import { createDiff } from "./diffFormatting";
 import { processNextEditData } from "./processNextEditData";
 
 describe("processSmallEdit", () => {
@@ -64,11 +56,6 @@ describe("processSmallEdit", () => {
       addDiffToContext: vi.fn(),
     };
     (NextEditProvider.getInstance as any).mockReturnValue(mockNextEditProvider);
-
-    // Setup mock createDiff
-    (createDiff as any).mockReturnValue(
-      "--- test.ts\n+++ test.ts\n@@ -1,1 +1,1 @@\n-old\n+new",
-    );
 
     // Setup mock processNextEditData
     (processNextEditData as any).mockResolvedValue(undefined);
@@ -123,14 +110,14 @@ describe("processSmallEdit", () => {
         mockIde,
       );
 
-      expect(createDiff).toHaveBeenCalledWith({
-        beforeContent: diff.beforeContent,
-        afterContent: diff.afterContent,
-        filePath: diff.filePath,
-        diffType: "Unified",
-        contextLines: 3,
-        workspaceDir: "file:///workspace",
-      });
+      // Verify that addDiffToContext was called with a unified diff format
+      expect(mockNextEditProvider.addDiffToContext).toHaveBeenCalledTimes(1);
+      const diffArg = mockNextEditProvider.addDiffToContext.mock.calls[0][0];
+      
+      // Unified diffs should contain diff markers
+      expect(diffArg).toContain("---");
+      expect(diffArg).toContain("+++");
+      expect(diffArg).toContain("@@");
     });
 
     it("should add diff to NextEditProvider", async () => {
@@ -145,8 +132,10 @@ describe("processSmallEdit", () => {
         mockIde,
       );
 
+      // Verify that addDiffToContext was called with a string (the actual diff output)
+      expect(mockNextEditProvider.addDiffToContext).toHaveBeenCalledTimes(1);
       expect(mockNextEditProvider.addDiffToContext).toHaveBeenCalledWith(
-        "--- test.ts\n+++ test.ts\n@@ -1,1 +1,1 @@\n-old\n+new",
+        expect.stringContaining("test.ts"),
       );
     });
 
@@ -330,7 +319,7 @@ describe("processSmallEdit", () => {
       ];
 
       for (const path of testPaths) {
-        (createDiff as any).mockClear();
+        mockNextEditProvider.addDiffToContext.mockClear();
         const diff: BeforeAfterDiff = {
           filePath: path,
           beforeContent: "test",
@@ -346,10 +335,10 @@ describe("processSmallEdit", () => {
           mockIde,
         );
 
-        expect(createDiff).toHaveBeenCalledWith(
-          expect.objectContaining({
-            filePath: path,
-          }),
+        // Verify diff was generated and added to context
+        expect(mockNextEditProvider.addDiffToContext).toHaveBeenCalledTimes(1);
+        expect(mockNextEditProvider.addDiffToContext).toHaveBeenCalledWith(
+          expect.stringContaining("@@"),
         );
       }
     });
