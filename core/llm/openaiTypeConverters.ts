@@ -84,7 +84,7 @@ export function toChatBody(
   messages: ChatMessage[],
   options: CompletionOptions,
 ): ChatCompletionCreateParams {
-  const params: ChatCompletionCreateParams = {
+  return {
     messages: messages.map(toChatMessage),
     model: options.model,
     max_tokens: options.maxTokens,
@@ -96,23 +96,20 @@ export function toChatBody(
     stop: options.stop,
     prediction: options.prediction,
     tool_choice: options.toolChoice,
+    tools: !options.tools?.length
+      ? undefined
+      : options.tools
+          .filter((tool) => !tool.type || tool.type === "function")
+          .map((tool) => ({
+            type: tool.type,
+            function: {
+              name: tool.function.name,
+              description: tool.function.description,
+              parameters: tool.function.parameters,
+              strict: tool.function.strict,
+            },
+          })),
   };
-
-  if (options.tools?.length) {
-    params.tools = options.tools
-      .filter((tool) => !tool.type || tool.type === "function")
-      .map((tool) => ({
-        type: tool.type,
-        function: {
-          name: tool.function.name,
-          description: tool.function.description,
-          parameters: tool.function.parameters,
-          strict: tool.function.strict,
-        },
-      }));
-  }
-
-  return params;
 }
 
 export function toCompleteBody(
