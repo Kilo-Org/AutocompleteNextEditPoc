@@ -48,15 +48,15 @@ class OpenAI extends BaseLLM {
   public useLegacyCompletionsEndpoint: boolean | undefined = undefined;
 
   constructor(options: LLMOptions) {
-    super(options);
+    super({
+      apiBase: "https://api.openai.com/v1/",
+      ...options,
+    });
     this.useLegacyCompletionsEndpoint = options.useLegacyCompletionsEndpoint;
     // Azure apiVersion removed from narrowed LLMOptions; not used
   }
 
   static providerName = "openai";
-  static defaultOptions: Partial<LLMOptions> | undefined = {
-    apiBase: "https://api.openai.com/v1/",
-  };
 
   protected useOpenAIAdapterFor: (LlmApiRequestType | "*")[] = [
     "chat",

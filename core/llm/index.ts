@@ -50,7 +50,6 @@ type InteractionStatus = "in_progress" | "success" | "error" | "cancelled";
 
 export abstract class BaseLLM implements ILLM {
   static providerName: string;
-  static defaultOptions: Partial<LLMOptions> | undefined = undefined;
 
   get providerName(): string {
     return (this.constructor as typeof BaseLLM).providerName;
@@ -127,7 +126,6 @@ export abstract class BaseLLM implements ILLM {
     // Set default options
     const options = {
       title: (this.constructor as typeof BaseLLM).providerName,
-      ...(this.constructor as typeof BaseLLM).defaultOptions,
       ..._options,
     };
 
