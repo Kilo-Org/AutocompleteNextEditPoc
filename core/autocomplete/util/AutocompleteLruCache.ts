@@ -1,12 +1,28 @@
 import { Mutex } from "async-mutex";
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
-
-import {
-  DatabaseConnection,
-  truncateSqliteLikePattern,
-} from "../../indexing/refreshIndex.js";
 import { getTabAutocompleteCacheSqlitePath } from "../../util/paths.js";
+import { type Database } from "sqlite";
+
+export type DatabaseConnection = Database<sqlite3.Database>;
+
+const SQLITE_MAX_LIKE_PATTERN_LENGTH = 50000;
+
+export function truncateSqliteLikePattern(input: string, safety: number = 100) {
+  const maxBytes = SQLITE_MAX_LIKE_PATTERN_LENGTH - safety;
+  let bytes = 0;
+  let startIndex = 0;
+
+  for (let i = input.length - 1; i >= 0; i--) {
+    bytes += new TextEncoder().encode(input[i]).length;
+    if (bytes > maxBytes) {
+      startIndex = i + 1;
+      break;
+    }
+  }
+
+  return input.substring(startIndex, input.length);
+}
 
 export class AutocompleteLruCache {
   private static capacity = 1000;

@@ -6,9 +6,9 @@ import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { localPathOrUriToPath } from "core/util/pathToUri";
 import * as vscode from "vscode";
-import { VsCodeIde } from "../VsCodeIde";
 import { JumpManager } from "./JumpManager";
 import { NextEditWindowManager } from "./NextEditWindowManager";
+import { IDE } from "core";
 
 export enum HandlerPriority {
   CRITICAL = 5,
@@ -112,7 +112,7 @@ interface HandlerRegistration {
 export class SelectionChangeManager {
   private static instance: SelectionChangeManager;
   private listeners: HandlerRegistration[] = [];
-  private ide: VsCodeIde | null = null;
+  private ide: IDE | null = null;
   private usingFullFileDiff: boolean = true;
 
   // Event bus-related attributes.
@@ -140,7 +140,7 @@ export class SelectionChangeManager {
     return SelectionChangeManager.instance;
   }
 
-  public initialize(ide: VsCodeIde, usingFullFileDiff: boolean): void {
+  public initialize(ide: IDE, usingFullFileDiff: boolean): void {
     this.ide = ide;
     this.usingFullFileDiff = usingFullFileDiff;
 

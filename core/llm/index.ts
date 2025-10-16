@@ -2,7 +2,6 @@ import { findLlmInfo } from "./model-info";
 import { BaseLlmApi, constructLlmApi } from "./openai-adapters";
 import { ChatCompletionCreateParams } from "openai/resources/index";
 
-import { DevDataSqliteDb } from "../util/devdataSqlite.js";
 import {
   ChatMessage,
   Chunk,
@@ -197,13 +196,6 @@ export abstract class BaseLLM implements ILLM {
     const generatedTokens = this.countTokens(completion);
 
     TokensBatchingService.getInstance().addTokens(
-      model,
-      this.providerName,
-      promptTokens,
-      generatedTokens,
-    );
-
-    void DevDataSqliteDb.logTokensGenerated(
       model,
       this.providerName,
       promptTokens,
