@@ -11,7 +11,7 @@ import {
   AutocompleteSnippetType,
 } from "../snippets/types.js";
 
-export type TemplateRenderer = (
+type TemplateRenderer = (
   prefix: string,
   suffix: string,
   filepath: string,
