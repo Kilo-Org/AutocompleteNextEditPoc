@@ -34,7 +34,7 @@ class MockLLM extends BaseLLM {
     if (this.chatStreams) {
       const chatStream =
         this.chatStreams?.[
-          messages.filter((m) => m.role === "user" || m.role === "tool")
+          messages.filter((m) => m.role === "user")
             .length - 1
         ];
       if (chatStream) {

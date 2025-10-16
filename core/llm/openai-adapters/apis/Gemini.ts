@@ -103,7 +103,7 @@ export class GeminiApi implements BaseLlmApi {
                 text:
                   typeof msg.content === "string"
                     ? msg.content
-                    : msg.content
+                    : (msg.content ?? [])
                         .filter((part) => part.type === "text")
                         .map((part) => part.text)
                         .join(""),
@@ -134,8 +134,7 @@ export class GeminiApi implements BaseLlmApi {
         }
 
         return {
-          role:
-            msg.role === "assistant" ? ("model" as const) : ("user" as const),
+          role: "user" as const,
           parts:
             typeof msg.content === "string"
               ? [{ text: msg.content }]
