@@ -1,7 +1,4 @@
-import {
-  ChatCompletionChunk,
-  CompletionUsage,
-} from "openai/resources/index";
+import { ChatCompletionChunk, CompletionUsage } from "openai/resources/index";
 
 import { ChatCompletion } from "openai/resources/index.js";
 import { CreateRerankResponse } from "./apis/base.js";
@@ -40,30 +37,6 @@ export function usageChatChunk(options: {
 }): ChatCompletionChunk {
   return {
     choices: [],
-    usage: options.usage,
-    created: Date.now(),
-    id: options.id ?? "",
-    model: options.model,
-    object: "chat.completion.chunk",
-  };
-}
-
-export function chatChunkFromDelta(options: {
-  delta: ChatCompletionChunk.Choice["delta"];
-  model: string;
-  finish_reason?: ChatCompletionChunk.Choice["finish_reason"];
-  id?: string | null;
-  usage?: CompletionUsage;
-}): ChatCompletionChunk {
-  return {
-    choices: [
-      {
-        delta: options.delta,
-        finish_reason: options.finish_reason ?? "stop",
-        index: 0,
-        logprobs: null,
-      },
-    ],
     usage: options.usage,
     created: Date.now(),
     id: options.id ?? "",

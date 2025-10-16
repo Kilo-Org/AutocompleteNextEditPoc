@@ -4,11 +4,9 @@ import sqlite3 from "sqlite3";
 import { getTabAutocompleteCacheSqlitePath } from "../../util/paths.js";
 import { type Database } from "sqlite";
 
-export type DatabaseConnection = Database<sqlite3.Database>;
-
 const SQLITE_MAX_LIKE_PATTERN_LENGTH = 50000;
 
-export function truncateSqliteLikePattern(input: string, safety: number = 100) {
+function truncateSqliteLikePattern(input: string, safety: number = 100) {
   const maxBytes = SQLITE_MAX_LIKE_PATTERN_LENGTH - safety;
   let bytes = 0;
   let startIndex = 0;
@@ -28,7 +26,7 @@ export class AutocompleteLruCache {
   private static capacity = 1000;
   private mutex = new Mutex();
 
-  constructor(private db: DatabaseConnection) {}
+  constructor(private db: Database<sqlite3.Database>) {}
 
   static async get(): Promise<AutocompleteLruCache> {
     const db = await open({

@@ -35,22 +35,6 @@ export function getConfigJsonPath(): string {
   return p;
 }
 
-function getDevDataPath(): string {
-  const sPath = path.join(getContinueGlobalPath(), "dev_data");
-  if (!fs.existsSync(sPath)) {
-    fs.mkdirSync(sPath);
-  }
-  return sPath;
-}
-
-export function getDevDataSqlitePath(): string {
-  return path.join(getDevDataPath(), "devdata.sqlite");
-}
-
-export function getIndexSqlitePath(): string {
-  return path.join(getIndexFolderPath(), "index.sqlite");
-}
-
 export function getTabAutocompleteCacheSqlitePath(): string {
   return path.join(getIndexFolderPath(), "autocompleteCache.sqlite");
 }
