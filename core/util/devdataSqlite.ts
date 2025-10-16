@@ -1,11 +1,8 @@
 import fs from "fs";
-
 import { open } from "sqlite";
 import sqlite3 from "sqlite3";
-
-import { DatabaseConnection } from "../indexing/refreshIndex.js";
-
 import { getDevDataSqlitePath } from "../util/paths.js";
+import { DatabaseConnection } from "core/autocomplete/util/AutocompleteLruCache.js";
 
 /* The Dev Data SQLITE table is only used for local tokens generated */
 export class DevDataSqliteDb {
