@@ -1,4 +1,3 @@
-import { Position } from "shiki";
 import { DiffLine } from "../..";
 import { myersDiff } from "../../diff/myers";
 
@@ -148,7 +147,10 @@ export function checkFim(
     return { isFim, fimText: null };
   }
 }
-
+type Position = {
+  line: number;
+  character: number;
+};
 export function calculateFinalCursorPosition(
   currCursorPos: Position,
   editableRegionStartLine: number,
@@ -173,14 +175,10 @@ export function calculateFinalCursorPosition(
     lineOffsetAtCursorPos,
   );
 
-  // Calculate the actual line number in the editor by adding the startPos offset
-  // to the line number from the diff calculation.
-  const finalCursorPos: Position = {
+  return {
     line: editableRegionStartLine + offset.line,
     character: offset.character,
   };
-
-  return finalCursorPos;
 }
 
 export interface DiffGroup {
