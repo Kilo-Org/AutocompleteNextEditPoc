@@ -1,5 +1,5 @@
 import * as path from "path";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import { HelperVars } from "../../autocomplete/util/HelperVars.js";
 import { myersDiff } from "../../diff/myers.js";
@@ -271,7 +271,7 @@ export abstract class BaseNextEditModelProvider {
       userExcerpts: promptMetadata.userExcerpts,
       originalEditableRange: originalContent,
       cursorPosition: { line: group.startLine, character: 0 },
-      completionId: uuidv4(), // Generate a new ID for this prefetched item.
+      completionId: randomUUID(), // Generate a new ID for this prefetched item.
       diffLines: group.lines,
       ide,
       profileType,

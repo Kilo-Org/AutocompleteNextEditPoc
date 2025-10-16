@@ -11,7 +11,7 @@ import {
   ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
 import { OpenAI } from "openai/index";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 import {
   ChatCompletion,
@@ -356,7 +356,7 @@ export class BedrockApi implements BaseLlmApi {
     }
 
     return {
-      id: uuidv4(),
+      id: randomUUID(),
       object: "chat.completion",
       model: body.model,
       created: Date.now(),

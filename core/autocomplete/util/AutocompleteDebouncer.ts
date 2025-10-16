@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 export class AutocompleteDebouncer {
   private debounceTimeout: NodeJS.Timeout | undefined = undefined;
@@ -6,7 +6,7 @@ export class AutocompleteDebouncer {
 
   async delayAndShouldDebounce(debounceDelay: number): Promise<boolean> {
     // Generate a unique ID for this request
-    const requestId = uuidv4();
+    const requestId = randomUUID();
     this.currentRequestId = requestId;
 
     // Clear any existing timeout
