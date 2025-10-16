@@ -3,12 +3,10 @@ import {
   MessageCreateParams,
   MessageParam,
   RawContentBlockDeltaEvent,
-  RawContentBlockStartEvent,
   RawMessageDeltaEvent,
   RawMessageStartEvent,
   RawMessageStreamEvent,
   Tool,
-  ToolUseBlock,
 } from "@anthropic-ai/sdk/resources";
 import { streamSse } from "../../../fetch/stream.js";
 import { OpenAI } from "openai/index";
@@ -26,9 +24,8 @@ import {
 } from "openai/resources/index";
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
 import { AnthropicConfig } from "../types.js";
-import { chatChunk, chatChunkFromDelta, usageChatChunk } from "../util.js";
+import { chatChunk, usageChatChunk } from "../util.js";
 import { EMPTY_CHAT_COMPLETION } from "../util/emptyChatCompletion.js";
-import { safeParseArgs } from "../util/parseArgs.js";
 import {
   CACHING_STRATEGIES,
   CachingStrategyName,
@@ -144,24 +141,6 @@ export class AnthropicApi implements BaseLlmApi {
     return anthropicBody;
   }
 
-  private convertToolCallsToBlocks(
-    toolCall: OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall,
-  ): ToolUseBlock | undefined {
-    const toolCallId = toolCall.id;
-    const toolName = toolCall.function?.name;
-    if (toolCallId && toolName) {
-      return {
-        type: "tool_use",
-        id: toolCallId,
-        name: toolName,
-        input: safeParseArgs(
-          toolCall.function.arguments,
-          `${toolName} ${toolCallId}`,
-        ),
-      };
-    }
-  }
-
   // 1. ignores empty content
   // 2. converts string content to text parts
   // 3. converts text and refusal parts to text blocks
@@ -217,32 +196,12 @@ export class AnthropicApi implements BaseLlmApi {
   ): ContentBlockParam[] {
     switch (message.role) {
       // One tool message = one tool_result block
-      case "tool":
-        return [
-          {
-            type: "tool_result",
-            tool_use_id: message.tool_call_id,
-            content: message.content,
-          },
-        ];
       case "user":
         return this.convertMessageContentToBlocks(message.content);
       case "assistant": {
         const blocks: ContentBlockParam[] = message.content
           ? this.convertMessageContentToBlocks(message.content)
           : [];
-        // If any tool calls are present, always put them last
-        // Loses order vs what was originally sent, but they typically come last
-        for (const toolCall of message.tool_calls ?? []) {
-          if (toolCall.type !== "function") {
-            // TODO support custom tool calls
-            continue;
-          }
-          const block = this.convertToolCallsToBlocks(toolCall);
-          if (block) {
-            blocks.push(block);
-          }
-        }
         return blocks;
       }
       // system, etc.
@@ -334,9 +293,6 @@ export class AnthropicApi implements BaseLlmApi {
 
   // This is split off so e.g. VertexAI can use it
   async *handleStreamResponse(response: any, model: string) {
-    let lastToolUseId: string | undefined;
-    let lastToolUseName: string | undefined;
-
     const usage: CompletionUsage = {
       completion_tokens: 0,
       prompt_tokens: 0,
@@ -346,14 +302,6 @@ export class AnthropicApi implements BaseLlmApi {
       // https://docs.anthropic.com/en/api/messages-streaming#event-types
       const rawEvent = event as RawMessageStreamEvent;
       switch (rawEvent.type) {
-        case "content_block_start": {
-          const blockStartEvent = rawEvent as RawContentBlockStartEvent;
-          if (blockStartEvent.content_block.type === "tool_use") {
-            lastToolUseId = blockStartEvent.content_block.id;
-            lastToolUseName = blockStartEvent.content_block.name;
-          }
-          break;
-        }
         case "message_start": {
           const startEvent = rawEvent as RawMessageStartEvent;
           usage.prompt_tokens = startEvent.message.usage?.input_tokens ?? 0;
@@ -379,33 +327,11 @@ export class AnthropicApi implements BaseLlmApi {
               });
               break;
             case "input_json_delta":
-              if (!lastToolUseId || !lastToolUseName) {
-                throw new Error("No tool use found");
-              }
-              yield chatChunkFromDelta({
-                model,
-                delta: {
-                  tool_calls: [
-                    {
-                      id: lastToolUseId,
-                      type: "function",
-                      index: 0,
-                      function: {
-                        name: lastToolUseName,
-                        arguments: blockDeltaEvent.delta.partial_json,
-                      },
-                    },
-                  ],
-                },
-              });
+              // Skip tool use delta
               break;
           }
           break;
         }
-        case "content_block_stop":
-          lastToolUseId = undefined;
-          lastToolUseName = undefined;
-          break;
         default:
           break;
       }
@@ -454,12 +380,6 @@ export class AnthropicApi implements BaseLlmApi {
     _body: FimCreateParamsStreaming,
     _signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
-    throw new Error("Method not implemented.");
-  }
-
-  async embed(
-    _body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
     throw new Error("Method not implemented.");
   }
 

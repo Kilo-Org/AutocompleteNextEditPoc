@@ -20,19 +20,15 @@ import {
   ChatCompletionCreateParams,
   ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
-  ChatCompletionMessageToolCall,
   Completion,
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { BedrockConfig } from "../types.js";
-import { chatChunk, chatChunkFromDelta, embedding, rerank } from "../util.js";
-import { safeParseArgs } from "../util/parseArgs.js";
+import { chatChunk, rerank } from "../util.js";
 import {
   BaseLlmApi,
   CreateRerankResponse,
@@ -150,12 +146,11 @@ export class BedrockApi implements BaseLlmApi {
 
   private _convertMessages(
     oaiMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-    availableTools: Set<string>,
+    _availableTools: Set<string>,
   ): Message[] {
     let currentRole: "user" | "assistant" = "user";
     let currentBlocks: ContentBlock[] = [];
     const converted: Message[] = [];
-    const hasAddedToolCallIds = new Set<string>();
 
     const pushCurrentMessage = () => {
       if (currentBlocks.length > 0) {
@@ -192,33 +187,7 @@ export class BedrockApi implements BaseLlmApi {
             }
           }
         }
-        // TOOL messages
-        else if (message.role === "tool") {
-          const trimmedContent =
-            typeof message.content === "string"
-              ? message.content.trim()
-              : message.content
-                  .map((c) => c.text)
-                  .join("\n")
-                  .trim();
-
-          if (hasAddedToolCallIds.has(message.tool_call_id)) {
-            currentBlocks.push({
-              toolResult: {
-                toolUseId: message.tool_call_id,
-                content: [
-                  {
-                    text: trimmedContent || "No tool output",
-                  },
-                ],
-              },
-            });
-          } else {
-            currentBlocks.push({
-              text: `Tool call output for Tool Call ID ${message.tool_call_id}:\n\n${trimmedContent || "No tool output"}`,
-            });
-          }
-        }
+        // TOOL messages - no longer supported, skip
       } else if (message.role === "assistant") {
         // Detect conversational turn change
         if (currentRole !== ConversationRole.ASSISTANT) {
@@ -240,42 +209,6 @@ export class BedrockApi implements BaseLlmApi {
               currentBlocks.push({ text: trimmedText });
             }
           });
-        }
-
-        // TOOL CALLS
-        if (message.tool_calls) {
-          for (const toolCall of message.tool_calls) {
-            // Type guard for function tool calls
-            if (
-              toolCall.type === "function" &&
-              "function" in toolCall &&
-              toolCall.id &&
-              toolCall.function?.name
-            ) {
-              if (availableTools.has(toolCall.function.name)) {
-                currentBlocks.push({
-                  toolUse: {
-                    toolUseId: toolCall.id,
-                    name: toolCall.function.name,
-                    input: safeParseArgs(
-                      toolCall.function.arguments,
-                      `Call: ${toolCall.function.name} ${toolCall.id}`,
-                    ),
-                  },
-                });
-                hasAddedToolCallIds.add(toolCall.id);
-              } else {
-                const toolCallText = `Assistant tool call:\nTool name: ${toolCall.function.name}\nTool Call ID: ${toolCall.id}\nArguments: ${toolCall.function?.arguments ?? "{}"}`;
-                currentBlocks.push({
-                  text: toolCallText,
-                });
-              }
-            } else {
-              console.warn(
-                `Unsupported tool call type in Bedrock: ${toolCall.type}`,
-              );
-            }
-          }
         }
       }
     }
@@ -409,7 +342,6 @@ export class BedrockApi implements BaseLlmApi {
     signal: AbortSignal,
   ): Promise<ChatCompletion> {
     let completion = "";
-    const toolCalls: ChatCompletionMessageToolCall[] = [];
 
     for await (const chunk of this.chatCompletionStream(
       {
@@ -421,7 +353,6 @@ export class BedrockApi implements BaseLlmApi {
       if (chunk.choices[0].delta.content) {
         completion += chunk.choices[0].delta.content;
       }
-      // TODO tool calls not supported
     }
 
     return {
@@ -437,7 +368,6 @@ export class BedrockApi implements BaseLlmApi {
           message: {
             role: "assistant",
             content: completion,
-            tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
             refusal: null,
           },
         },
@@ -490,47 +420,15 @@ export class BedrockApi implements BaseLlmApi {
             continue;
           }
 
-          // Handle tool use
-          if (delta.toolUse) {
-            yield chatChunkFromDelta({
-              model: body.model,
-              delta: {
-                tool_calls: [
-                  {
-                    index: 0,
-                    id: delta.toolUse.toolUseId,
-                    type: "function",
-                    function: {
-                      name: delta.toolUse.name,
-                      arguments: delta.toolUse.input,
-                    },
-                  },
-                ],
-              },
-            });
-          }
+          // Skip tool use blocks
         }
 
         if (chunk.contentBlockStart?.start) {
           const start: ContentBlockStart = chunk.contentBlockStart.start;
 
           if (start.toolUse) {
-            yield chatChunkFromDelta({
-              model: body.model,
-              delta: {
-                tool_calls: [
-                  {
-                    index: 0,
-                    id: start.toolUse.toolUseId,
-                    type: "function",
-                    function: {
-                      name: start.toolUse.name,
-                      arguments: undefined,
-                    },
-                  },
-                ],
-              },
-            });
+            // Skip tool use
+            continue;
           }
         }
       }
@@ -584,63 +482,6 @@ export class BedrockApi implements BaseLlmApi {
     const decoder = new TextDecoder();
     const decoded = decoder.decode(response.body);
     return JSON.parse(decoded);
-  }
-
-  private getEmbedTexts(body: EmbeddingCreateParams): string[] {
-    const texts: string[] = [];
-    if (typeof body.input === "string") {
-      texts.push(body.input);
-    } else if (body.input.length > 0) {
-      const firstVal = body.input[0];
-      if (Array.isArray(firstVal)) {
-        throw new Error("Unsupported embeddings type received: number[][]");
-      }
-      if (typeof firstVal === "string") {
-        texts.push(...(body.input as string[]));
-      } else {
-        throw new Error("Unsupported embeddings type received: number[]");
-      }
-    }
-    return texts;
-  }
-
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    const texts = this.getEmbedTexts(body);
-
-    let embeddings: number[][];
-    if (body.model.startsWith("cohere")) {
-      const payload = {
-        texts,
-        input_type: "search_document",
-        truncate: "END",
-      };
-      const output = await this.getInvokeModelResponseBody(body.model, payload);
-      embeddings = [output.embedding];
-    } else if (body.model.startsWith("amazon.titan-embed")) {
-      embeddings = await Promise.all(
-        texts.map(async (text) => {
-          const payload = {
-            inputText: text,
-          };
-          const output = await this.getInvokeModelResponseBody(
-            body.model,
-            payload,
-          );
-          return output.embeddings || [];
-        }),
-      );
-    } else {
-      throw new Error(`Unsupported model: ${body.model}`);
-    }
-
-    return embedding({
-      data: embeddings,
-      model: body.model,
-      usage: {
-        prompt_tokens: 0,
-        total_tokens: 0,
-      },
-    });
   }
 
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {

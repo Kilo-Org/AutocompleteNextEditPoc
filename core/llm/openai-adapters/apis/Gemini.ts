@@ -10,27 +10,18 @@ import {
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
   CompletionUsage,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 
-import { v4 as uuidv4 } from "uuid";
 import { streamResponse } from "../../../fetch/stream.js";
 import { GeminiConfig } from "../types.js";
-import {
-  chatChunk,
-  chatChunkFromDelta,
-  embedding,
-  usageChatChunk,
-} from "../util.js";
+import { chatChunk, usageChatChunk } from "../util.js";
 import {
   convertOpenAIToolToGeminiFunction,
   GeminiChatContent,
   GeminiChatContentPart,
   GeminiToolFunctionDeclaration,
 } from "../util/gemini-types.js";
-import { safeParseArgs } from "../util/parseArgs.js";
 import {
   BaseLlmApi,
   CreateRerankResponse,
@@ -79,12 +70,7 @@ export class GeminiApi implements BaseLlmApi {
     }
   }
 
-  public _convertBody(
-    oaiBody: ChatCompletionCreateParams,
-    url: string,
-    includeToolCallIds: boolean,
-    overrideIsV1?: boolean,
-  ) {
+  public _convertBody(oaiBody: ChatCompletionCreateParams, url: string) {
     const generationConfig: any = {};
 
     if (oaiBody.top_p) {
@@ -101,19 +87,7 @@ export class GeminiApi implements BaseLlmApi {
       generationConfig.stopSequences = stop.filter((x) => x.trim() !== "");
     }
 
-    const isV1API = overrideIsV1 ?? url.includes("/v1/");
-
-    const toolCallIdToNameMap = new Map<string, string>();
-    oaiBody.messages.forEach((msg) => {
-      if (msg.role === "assistant" && msg.tool_calls) {
-        msg.tool_calls.forEach((call) => {
-          // Type guard for function tool calls
-          if (call.type === "function" && "function" in call) {
-            toolCallIdToNameMap.set(call.id, call.function.name);
-          }
-        });
-      }
-    });
+    const isV1API = url.includes("/v1/");
 
     const contents: (GeminiChatContent | null)[] = oaiBody.messages
       .map((msg) => {
@@ -121,54 +95,35 @@ export class GeminiApi implements BaseLlmApi {
           return null; // Don't include system message in contents
         }
 
-        if (msg.role === "assistant" && msg.tool_calls?.length) {
-          for (const toolCall of msg.tool_calls) {
-            // Type guard for function tool calls
-            if (toolCall.type === "function" && "function" in toolCall) {
-              toolCallIdToNameMap.set(toolCall.id, toolCall.function.name);
-            }
-          }
-
+        if (msg.role === "assistant") {
           return {
             role: "model" as const,
-            parts: msg.tool_calls.map((toolCall) => {
-              // Type guard for function tool calls
-              if (toolCall.type === "function" && "function" in toolCall) {
-                return {
-                  functionCall: {
-                    id: includeToolCallIds ? toolCall.id : undefined,
-                    name: toolCall.function.name,
-                    args: safeParseArgs(
-                      toolCall.function.arguments,
-                      `Call: ${toolCall.function.name} ${toolCall.id}`,
-                    ),
-                  },
-                };
-              } else {
-                throw new Error(
-                  `Unsupported tool call type in Gemini: ${toolCall.type}`,
-                );
-              }
-            }),
+            parts: [
+              {
+                text:
+                  typeof msg.content === "string"
+                    ? msg.content
+                    : (msg.content ?? [])
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join(""),
+              },
+            ],
           };
         }
 
-        if (msg.role === "tool") {
-          const functionName = toolCallIdToNameMap.get(msg.tool_call_id);
+        if (msg.role === "user") {
           return {
             role: "user" as const,
             parts: [
               {
-                functionResponse: {
-                  id: includeToolCallIds ? msg.tool_call_id : undefined,
-                  name: functionName ?? "unknown",
-                  response: {
-                    content:
-                      typeof msg.content === "string"
-                        ? msg.content
-                        : msg.content.map((part) => part.text).join(""),
-                  },
-                },
+                text:
+                  typeof msg.content === "string"
+                    ? msg.content
+                    : msg.content
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join(""),
               },
             ],
           };
@@ -179,8 +134,7 @@ export class GeminiApi implements BaseLlmApi {
         }
 
         return {
-          role:
-            msg.role === "assistant" ? ("model" as const) : ("user" as const),
+          role: "user" as const,
           parts:
             typeof msg.content === "string"
               ? [{ text: msg.content }]
@@ -320,23 +274,6 @@ export class GeminiApi implements BaseLlmApi {
                 content: part.text,
                 model,
               });
-            } else if ("functionCall" in part) {
-              yield chatChunkFromDelta({
-                model,
-                delta: {
-                  tool_calls: [
-                    {
-                      index: 0,
-                      id: part.functionCall.id ?? uuidv4(),
-                      type: "function",
-                      function: {
-                        name: part.functionCall.name,
-                        arguments: JSON.stringify(part.functionCall.args),
-                      },
-                    },
-                  ],
-                },
-              });
             }
           }
         } else {
@@ -367,7 +304,7 @@ export class GeminiApi implements BaseLlmApi {
       `models/${body.model}:streamGenerateContent?key=${this.config.apiKey}`,
       this.apiBase,
     ).toString();
-    const convertedBody = this._convertBody(body, apiURL, true);
+    const convertedBody = this._convertBody(body, apiURL);
     const resp = await fetch(apiURL, {
       method: "POST",
       body: JSON.stringify(convertedBody),
@@ -392,39 +329,6 @@ export class GeminiApi implements BaseLlmApi {
   }
   async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
-  }
-
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    const inputs = Array.isArray(body.input) ? body.input : [body.input];
-    const response = await fetch(
-      new URL(`${body.model}:batchEmbedContents`, this.apiBase),
-      {
-        method: "POST",
-        body: JSON.stringify({
-          requests: inputs.map((input) => ({
-            model: body.model,
-            content: {
-              role: "user",
-              parts: [{ text: input }],
-            },
-          })),
-        }),
-        headers: {
-          "x-goog-api-key": this.config.apiKey,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    const data = (await response.json()) as any;
-    return embedding({
-      model: body.model,
-      usage: {
-        total_tokens: data.total_tokens,
-        prompt_tokens: data.prompt_tokens,
-      },
-      data: data.batchEmbedContents.map((embedding: any) => embedding.values),
-    });
   }
 
   list(): Promise<Model[]> {

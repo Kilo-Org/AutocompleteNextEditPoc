@@ -202,9 +202,11 @@ describe("autocompleteContextFetching", () => {
     });
 
     it("should throw error when no autocomplete model configured and none provided", async () => {
-      mockConfigHandler.updateConfig({
-        modelsByRole: { autocomplete: [] },
-        selectedModelByRole: { autocomplete: undefined },
+      const testConfigHandler = new FakeConfigHandler({
+        config: {
+          modelsByRole: { autocomplete: [] },
+          selectedModelByRole: { autocomplete: undefined },
+        },
       });
 
       await expect(
@@ -212,7 +214,7 @@ describe("autocompleteContextFetching", () => {
           "test.ts",
           mockPosition,
           mockIde,
-          mockConfigHandler,
+          testConfigHandler,
           mockGetDefinitionsFromLsp,
           [],
           [],

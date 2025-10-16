@@ -3,15 +3,11 @@ import {
   ChatMessage,
   CompiledMessagesResult,
   MessageContent,
-  MessagePart,
 } from "../index.js";
 import {
   addSpaceToAnyEmptyMessages,
   chatMessageIsEmpty,
-  isUserOrToolMsg,
-  messageHasToolCallId,
 } from "./messages.js";
-import { renderChatMessage } from "../util/messageContent.js";
 import { DEFAULT_PRUNING_LENGTH } from "./constants.js";
 import { llamaTokenizer } from "./llamaTokenizer.js";
 interface Encoding {
@@ -60,13 +56,6 @@ export function encodingForModel(modelName: string): Encoding {
   return (gptEncoding ??= _encodingForModel("gpt-4"));
 }
 
-function countImageTokens(content: MessagePart): number {
-  if (content.type === "imageUrl") {
-    return 1024;
-  }
-  throw new Error("Non-image content type");
-}
-
 function countTokens(
   content: MessageContent,
   // defaults to llama2 because the tokenizer tends to produce more tokens
@@ -75,12 +64,7 @@ function countTokens(
   const encoding = encodingForModel(modelName);
   if (Array.isArray(content)) {
     return content.reduce((acc, part) => {
-      return (
-        acc +
-        (part.type === "text"
-          ? encoding.encode(part.text ?? "", "all", []).length
-          : countImageTokens(part))
-      );
+      return acc + encoding.encode(part.text ?? "", "all", []).length;
     }, 0);
   } else {
     return encoding.encode(content ?? "", "all", []).length;
@@ -95,88 +79,28 @@ function countChatMessageTokens(
   // https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   // every message follows <|im_start|>{role/name}\n{content}<|end|>\n
   const BASE_TOKENS = 4;
-  const TOOL_CALL_EXTRA_TOKENS = 10;
-  const TOOL_OUTPUT_EXTRA_TOKENS = 10;
   let tokens = BASE_TOKENS;
 
   if (chatMessage.content) {
     tokens += countTokens(chatMessage.content, modelName);
   }
 
-  if ("toolCalls" in chatMessage && chatMessage.toolCalls) {
-    for (const call of chatMessage.toolCalls) {
-      tokens += TOOL_CALL_EXTRA_TOKENS;
-      tokens += countTokens(JSON.stringify(call), modelName); // TODO hone this
-    }
-  }
-
-  if (chatMessage.role === "thinking") {
-    if (chatMessage.redactedThinking) {
-      tokens += countTokens(chatMessage.redactedThinking, modelName);
-    }
-    if (chatMessage.signature) {
-      tokens += countTokens(chatMessage.signature, modelName);
-    }
-  }
-
-  if (chatMessage.role === "tool") {
-    tokens += TOOL_OUTPUT_EXTRA_TOKENS; // safety
-    if (chatMessage.toolCallId) {
-      tokens += countTokens(chatMessage.toolCallId, modelName);
-    }
-  }
   return tokens;
 }
 
 /**
- * Extracts and validates the tool call sequence from the end of a message array.
- * Tool sequences consist of: [assistant_with_tool_calls, tool_response_1, tool_response_2, ...]
- * or just a single user message.
+ * Extracts and validates the user message from the end of a message array.
  *
  * @param messages - Array of chat messages (will be modified by popping messages)
  * @returns Array of messages that form the tool sequence
  */
 function extractToolSequence(messages: ChatMessage[]): ChatMessage[] {
   const lastMsg = messages.pop();
-  if (!lastMsg || !isUserOrToolMsg(lastMsg)) {
-    throw new Error("Error parsing chat history: no user/tool message found");
+  if (!lastMsg || lastMsg.role !== "user") {
+    throw new Error("Error parsing chat history: no user message found");
   }
 
-  const toolSequence: ChatMessage[] = [];
-
-  if (lastMsg.role === "tool") {
-    toolSequence.push(lastMsg);
-
-    // Collect all consecutive tool messages from the end
-    while (
-      messages.length > 0 &&
-      messages[messages.length - 1].role === "tool"
-    ) {
-      toolSequence.unshift(messages.pop()!);
-    }
-
-    // Get the assistant message with tool calls
-    const assistantMsg = messages.pop();
-    if (assistantMsg) {
-      toolSequence.unshift(assistantMsg);
-
-      // Validate that all tool messages have matching tool call IDs
-      for (const toolMsg of toolSequence.slice(1)) {
-        // Skip assistant message
-        if (
-          toolMsg.role === "tool" &&
-          !messageHasToolCallId(assistantMsg, toolMsg.toolCallId)
-        ) {
-          throw new Error(
-            `Error parsing chat history: no tool call found to match tool output for id "${toolMsg.toolCallId}"`,
-          );
-        }
-      }
-    }
-  } else {
-    // Single user message
-    toolSequence.push(lastMsg);
-  }
+  const toolSequence: ChatMessage[] = [lastMsg];
 
   return toolSequence;
 }
@@ -316,8 +240,6 @@ function pruneRawPromptFromTop(
  *   - msgs: Array of chat messages to process
  *   - contextLength: Maximum context length supported by the model
  *   - maxTokens: Maximum tokens to reserve for the response
- *   - supportsImages: Whether the model supports image content
- *   - tools: Optional array of available tools
  * @returns Processed array of chat messages that fit within context constraints
  * @throws Error if non-negotiable elements exceed available context
  */
@@ -326,27 +248,15 @@ function compileChatMessages({
   msgs,
   knownContextLength,
   maxTokens,
-  supportsImages,
 }: {
   modelName: string;
   msgs: ChatMessage[];
   knownContextLength: number | undefined;
   maxTokens: number;
-  supportsImages: boolean;
 }): CompiledMessagesResult {
   let didPrune = false;
 
   let msgsCopy: ChatMessage[] = msgs.map((m) => ({ ...m }));
-
-  // If images not supported, convert MessagePart[] to string
-  if (!supportsImages) {
-    for (const msg of msgsCopy) {
-      if ("content" in msg && Array.isArray(msg.content)) {
-        const content = renderChatMessage(msg);
-        msg.content = content;
-      }
-    }
-  }
 
   // Extract system message
   const systemMsg = msgsCopy.find((msg) => msg.role === "system");
@@ -414,12 +324,6 @@ function compileChatMessages({
     const message = historyWithTokens.shift()!;
     currentTotal -= message.tokens;
     didPrune = true;
-
-    // At this point make sure no latent tool response without corresponding call
-    while (historyWithTokens[0]?.role === "tool") {
-      const message = historyWithTokens.shift()!;
-      currentTotal -= message.tokens;
-    }
   }
 
   // Now reassemble

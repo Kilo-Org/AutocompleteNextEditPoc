@@ -6,8 +6,6 @@ import {
   Completion,
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 import { CometAPIConfig } from "../types.js";
@@ -101,17 +99,6 @@ export class CometAPIApi extends OpenAIApi implements BaseLlmApi {
     signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk> {
     return super.fimStream(body, signal);
-  }
-
-  /**
-   * Embeddings support (if available through CometAPI)
-   */
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    try {
-      return await super.embed(body);
-    } catch (error) {
-      throw new Error(`CometAPI embeddings not supported: ${error}`);
-    }
   }
 
   /**

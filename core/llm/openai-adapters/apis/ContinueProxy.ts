@@ -1,4 +1,3 @@
-import { OpenAI } from "openai/index";
 import {
   ChatCompletionCreateParams,
   CompletionCreateParamsNonStreaming,
@@ -95,12 +94,6 @@ export class ContinueProxyApi extends OpenAIApi {
       "x-api-key": this.continueProxyConfig.apiKey ?? "",
       Authorization: `Bearer ${this.continueProxyConfig.apiKey}`,
     };
-  }
-
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
-    body: T,
-  ): T {
-    return this.modifyBodyWithContinueProperties(body);
   }
 
   modifyRerankBody<T extends RerankCreateParams>(body: T): T {

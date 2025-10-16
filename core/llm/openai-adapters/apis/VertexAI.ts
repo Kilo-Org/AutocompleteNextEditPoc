@@ -9,12 +9,10 @@ import {
   Completion,
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 import { VertexAIConfig } from "../types.js";
-import { chatChunk, chatCompletion, embedding } from "../util.js";
+import { chatChunk, chatCompletion } from "../util.js";
 import { AnthropicApi } from "./Anthropic.js";
 import {
   BaseLlmApi,
@@ -207,9 +205,7 @@ export class VertexAIApi implements BaseLlmApi {
   ): object {
     return this.geminiInstance._convertBody(
       oaiBody,
-      url.toString(),
-      false,
-      false,
+      url.toString()
     );
   }
 
@@ -504,48 +500,6 @@ export class VertexAIApi implements BaseLlmApi {
         });
       }
     }
-  }
-
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    const headers = await this.getAuthHeaders();
-    const url = this.buildUrl(`publishers/google/models/${body.model}:predict`);
-
-    // Convert input to text strings
-    const textInputs = Array.isArray(body.input)
-      ? body.input.map((item) =>
-          typeof item === "string" ? item : JSON.stringify(item),
-        )
-      : [
-          typeof body.input === "string"
-            ? body.input
-            : JSON.stringify(body.input),
-        ];
-
-    const requestBody = {
-      instances: textInputs.map((text) => ({ content: text })),
-    };
-
-    const response = await fetch(url.toString(), {
-      method: "POST",
-      headers,
-      body: JSON.stringify(requestBody),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `VertexAI API error: ${response.status} ${response.statusText}`,
-      );
-    }
-
-    const data = await response.json();
-    const embeddings = data.predictions.map(
-      (prediction: any) => prediction.embeddings.values,
-    );
-
-    return embedding({
-      data: embeddings,
-      model: body.model,
-    });
   }
 
   async rerank(): Promise<CreateRerankResponse> {

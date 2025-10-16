@@ -13,72 +13,58 @@ import type {
  * Options for customizing FakeIDE behavior.
  * All options are optional and will use sensible defaults if not provided.
  */
-export interface FakeIDEOptions {
+interface FakeIDEOptions {
   /** File contents to return for readFile calls. Maps filepath -> content */
   fileContents?: Map<string, string>;
-  
+
   /** Workspace directories to return */
   workspaceDirs?: string[];
-  
+
   /** IDE info to return */
   ideInfo?: IdeInfo;
-  
+
   /** Open files to return */
   openFiles?: string[];
-  
+
   /** Current file to return */
   currentFile?: {
     isUntitled: boolean;
     path: string;
     contents: string;
   };
-  
+
   /** Clipboard content to return */
   clipboardContent?: { text: string; copiedAt: string };
-  
+
   /** Unique ID to return */
   uniqueId?: string;
 }
 
-/**
- * FakeIDE is a test implementation of the IDE interface.
- * It provides sensible defaults for all methods while allowing tests to customize behavior.
- *
- * Usage example:
- * ```typescript
- * const ide = new FakeIDE({
- *   workspaceDirs: ["/test/workspace"],
- *   fileContents: new Map([["test.ts", "console.log('hello')"]]),
- * });
- *
- * // Override specific methods
- * ide.readFile = async (path) => `custom content for ${path}`;
- * ```
- */
 export class FakeIDE implements IDE {
   private options: FakeIDEOptions;
-  
+
   /** Track calls to onDidChangeActiveTextEditor for assertions */
   public activeTextEditorCallbacks: Array<(fileUri: string) => void> = [];
-  
-  /** IDE utilities - empty object by default, can be customized by tests */
-  public ideUtils: any = {};
 
   constructor(options: FakeIDEOptions = {}) {
     this.options = options;
   }
 
   async getIdeInfo(): Promise<IdeInfo> {
-    return this.options.ideInfo ?? {
-      ideType: "vscode",
-    };
+    return (
+      this.options.ideInfo ?? {
+        ideType: "vscode",
+      }
+    );
   }
 
   async getClipboardContent(): Promise<{ text: string; copiedAt: string }> {
-    return this.options.clipboardContent ?? {
-      text: "",
-      copiedAt: new Date().toISOString(),
-    };
+    return (
+      this.options.clipboardContent ?? {
+        text: "",
+        copiedAt: new Date().toISOString(),
+      }
+    );
   }
 
   async getUniqueId(): Promise<string> {
@@ -153,20 +139,14 @@ export class FakeIDE implements IDE {
     return [];
   }
 
-  async getDocumentSymbols(_textDocumentIdentifier: string): Promise<DocumentSymbol[]> {
+  async getDocumentSymbols(
+    _textDocumentIdentifier: string,
+  ): Promise<DocumentSymbol[]> {
     return [];
   }
 
   // Callbacks
   onDidChangeActiveTextEditor(callback: (fileUri: string) => void): void {
     this.activeTextEditorCallbacks.push(callback);
-  }
-  
-  /**
-   * Helper method to simulate active text editor changes in tests.
-   * This is not part of the IDE interface but useful for testing.
-   */
-  simulateActiveTextEditorChange(fileUri: string): void {
-    this.activeTextEditorCallbacks.forEach((callback) => callback(fileUri));
   }
 }

@@ -24,23 +24,6 @@ export function addSpaceToAnyEmptyMessages(
   });
 }
 
-export function isUserOrToolMsg(msg: ChatMessage | undefined): boolean {
-  if (!msg) {
-    return false;
-  }
-  return msg.role === "user" || msg.role === "tool";
-}
-
-export function messageHasToolCallId(
-  msg: ChatMessage | undefined,
-  toolCallId: string,
-): boolean {
-  return (
-    !!msg &&
-    msg.role === "assistant" &&
-    !!msg.toolCalls?.find((call) => call.id === toolCallId)
-  );
-}
 
 export function chatMessageIsEmpty(message: ChatMessage): boolean {
   switch (message.role) {
@@ -52,11 +35,7 @@ export function chatMessageIsEmpty(message: ChatMessage): boolean {
     case "assistant":
       return (
         typeof message.content === "string" &&
-        message.content.trim() === "" &&
-        !message.toolCalls
+        message.content.trim() === ""
       );
-    case "thinking":
-    case "tool":
-      return false;
   }
 }

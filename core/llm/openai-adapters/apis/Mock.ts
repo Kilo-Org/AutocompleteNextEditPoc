@@ -1,4 +1,3 @@
-import { OpenAI } from "openai/index";
 import {
   ChatCompletion,
   ChatCompletionChunk,
@@ -117,27 +116,6 @@ export class MockApi implements BaseLlmApi {
         model: body.model,
       });
     }
-  }
-
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    return {
-      data: [
-        {
-          embedding: new Array(1536).fill(0),
-          index: 0,
-          object: "embedding",
-        },
-      ],
-      model: body.model,
-      object: "list",
-      usage: {
-        prompt_tokens: 0,
-        total_tokens: 0,
-      },
-    };
   }
 
   async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {

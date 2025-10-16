@@ -9,12 +9,10 @@ import {
   Completion,
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 import { CohereConfig } from "../types.js";
-import { chatCompletion, embedding } from "../util.js";
+import { chatCompletion } from "../util.js";
 import { EMPTY_CHAT_COMPLETION } from "../util/emptyChatCompletion.js";
 import {
   BaseLlmApi,
@@ -171,33 +169,6 @@ export class CohereApi implements BaseLlmApi {
         total_tokens: 0,
       },
     };
-  }
-
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    const url = new URL("/embed", this.apiBase);
-    const texts = typeof body.input === "string" ? [body.input] : body.input;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${this.config.apiKey}`,
-      },
-      body: JSON.stringify({
-        texts,
-        model: body.model,
-        input_type: "search_document",
-      }),
-    });
-    const data = (await response.json()) as any;
-
-    return embedding({
-      model: body.model,
-      usage: {
-        total_tokens: 0,
-        prompt_tokens: 0,
-      },
-      data: data.embeddings.map((embedding: any) => embedding),
-    });
   }
 
   list(): Promise<Model[]> {

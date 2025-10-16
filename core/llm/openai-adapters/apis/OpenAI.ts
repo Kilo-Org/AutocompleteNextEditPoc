@@ -54,9 +54,6 @@ export class OpenAIApi implements BaseLlmApi {
           return message;
         });
       }
-      if (body.tools?.length && !body.model.startsWith("o3")) {
-        body.parallel_tool_calls = false;
-      }
     }
     return body;
   }
@@ -66,12 +63,6 @@ export class OpenAIApi implements BaseLlmApi {
       | CompletionCreateParamsNonStreaming
       | CompletionCreateParamsStreaming,
   >(body: T): T {
-    return body;
-  }
-
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
-    body: T,
-  ): T {
     return body;
   }
 
@@ -170,15 +161,6 @@ export class OpenAIApi implements BaseLlmApi {
         yield chunk;
       }
     }
-  }
-
-  async embed(
-    body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    const response = await this.openai.embeddings.create(
-      this.modifyEmbedBody(body),
-    );
-    return response;
   }
 
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {

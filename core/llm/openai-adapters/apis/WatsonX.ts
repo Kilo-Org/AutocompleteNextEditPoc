@@ -323,9 +323,7 @@ export class WatsonXApi implements BaseLlmApi {
     throw new Error("Method not implemented.");
   }
 
-  async embed(): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    throw new Error("Method not implemented.");
-  }
+  
 
   async rerank(): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
