@@ -20,7 +20,6 @@ import { VertexAIApi } from "./apis/VertexAI.js";
 import { WatsonXApi } from "./apis/WatsonX.js";
 import { BaseLlmApi } from "./apis/base.js";
 import { LLMConfig, OpenAIConfigSchema } from "./types.js";
-import { appendPathToUrlIfNotPresent } from "./util/appendPathToUrl.js";
 
 dotenv.config();
 
@@ -148,8 +147,8 @@ export function constructLlmApi(config: LLMConfig): BaseLlmApi | undefined {
     case "ollama":
       // for openai compaitability, we need to add /v1 to the end of the url
       // this is required for cli (for core, endpoints are overriden by core/llm/llms/Ollama.ts)
-      if (config.apiBase)
-        config.apiBase = appendPathToUrlIfNotPresent(config.apiBase, "v1");
+      config.apiBase =
+        config.apiBase && new URL("v1/", config.apiBase).toString();
       return openAICompatible("http://localhost:11434/v1/", config);
     case "mock":
       return new MockApi();
