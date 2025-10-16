@@ -14,8 +14,16 @@ function pathToUriPathSegment(path: string) {
 }
 
 function getCleanUriPath(uri: string) {
-  const parsed = new URL(uri);
-  let clean = parsed.pathname.replace(/^\//, ""); // remove start slash
+  // Handle both URIs and plain paths
+  let path: string;
+  try {
+    const parsed = new URL(uri);
+    path = parsed.pathname;
+  } catch {
+    // Not a valid URL, treat as plain path
+    path = uri;
+  }
+  let clean = path.replace(/^\//, ""); // remove start slash
   return clean.replace(/\/$/, ""); // remove end slash
 }
 
