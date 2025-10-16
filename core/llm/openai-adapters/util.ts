@@ -1,7 +1,6 @@
 import {
   ChatCompletionChunk,
   CompletionUsage,
-  CreateEmbeddingResponse,
 } from "openai/resources/index";
 
 import { ChatCompletion } from "openai/resources/index.js";
@@ -99,26 +98,6 @@ export function chatCompletion(options: {
     id: options.id ?? "",
     model: options.model,
     object: "chat.completion",
-  };
-}
-
-export function embedding(options: {
-  data: number[][];
-  model: string;
-  usage?: CreateEmbeddingResponse.Usage;
-}): CreateEmbeddingResponse {
-  return {
-    data: options.data.map((embedding, i) => ({
-      index: i,
-      embedding: embedding,
-      object: "embedding" as const,
-    })),
-    model: options.model,
-    object: "list" as const,
-    usage: options.usage ?? {
-      prompt_tokens: 0,
-      total_tokens: 0,
-    },
   };
 }
 

@@ -51,11 +51,7 @@ export class JinaApi implements BaseLlmApi {
     throw new Error("Method not implemented.");
   }
 
-  async embed(
-    _body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    throw new Error("Method not implemented.");
-  }
+  
 
   async rerank(body: RerankCreateParams): Promise<CreateRerankResponse> {
     const endpoint = new URL("rerank", this.apiBase);

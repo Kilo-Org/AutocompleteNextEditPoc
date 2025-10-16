@@ -6,8 +6,6 @@ import {
   Completion,
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 
@@ -67,9 +65,6 @@ export interface BaseLlmApi {
     body: FimCreateParamsStreaming,
     signal: AbortSignal,
   ): AsyncGenerator<ChatCompletionChunk>;
-
-  // Embeddings
-  embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse>;
 
   // Reranking
   rerank(body: RerankCreateParams): Promise<CreateRerankResponse>;

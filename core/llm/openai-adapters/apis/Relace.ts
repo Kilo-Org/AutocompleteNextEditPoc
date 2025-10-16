@@ -3,9 +3,6 @@ import {
   CompletionUsage,
 } from "openai/resources/completions.mjs";
 import {
-  CreateEmbeddingResponse,
-} from "openai/resources/embeddings.mjs";
-import {
   ChatCompletion,
   ChatCompletionChunk,
   ChatCompletionCreateParamsNonStreaming,
@@ -146,9 +143,6 @@ export class RelaceApi implements BaseLlmApi {
     throw new Error(
       "Relace provider does not support streaming FIM completion.",
     );
-  }
-  embed(): Promise<CreateEmbeddingResponse> {
-    throw new Error("Relace provider does not support embeddings.");
   }
   rerank(): Promise<CreateRerankResponse> {
     throw new Error("Relace provider does not support reranking.");

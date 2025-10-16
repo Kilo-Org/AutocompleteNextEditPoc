@@ -97,12 +97,6 @@ export class ContinueProxyApi extends OpenAIApi {
     };
   }
 
-  modifyEmbedBody<T extends OpenAI.Embeddings.EmbeddingCreateParams>(
-    body: T,
-  ): T {
-    return this.modifyBodyWithContinueProperties(body);
-  }
-
   modifyRerankBody<T extends RerankCreateParams>(body: T): T {
     return {
       ...body,

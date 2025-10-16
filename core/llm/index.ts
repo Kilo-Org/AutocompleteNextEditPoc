@@ -61,10 +61,6 @@ export abstract class BaseLLM implements ILLM {
     return false;
   }
 
-  supportsImages(): boolean {
-    return false;
-  }
-
   supportsCompletions(): boolean {
     if (["openai", "azure"].includes(this.providerName)) {
       if (
@@ -83,10 +79,6 @@ export abstract class BaseLLM implements ILLM {
       return false;
     }
     return true;
-  }
-
-  supportsPrefill(): boolean {
-    return ["ollama", "anthropic", "mistral"].includes(this.providerName);
   }
 
   uniqueId: string;
@@ -197,14 +189,12 @@ export abstract class BaseLLM implements ILLM {
     model: string,
     prompt: string,
     completion: string,
-    thinking: string | undefined,
     interaction: ILLMInteractionLog | undefined,
     usage: Usage | undefined,
     error?: any,
   ): InteractionStatus {
     const promptTokens = this.countTokens(prompt);
     const generatedTokens = this.countTokens(completion);
-    const thinkingTokens = thinking ? this.countTokens(thinking) : 0;
 
     TokensBatchingService.getInstance().addTokens(
       model,
@@ -232,7 +222,6 @@ export abstract class BaseLLM implements ILLM {
         kind: "success",
         promptTokens,
         generatedTokens,
-        thinkingTokens,
         usage,
       });
       return "success";
@@ -242,7 +231,6 @@ export abstract class BaseLLM implements ILLM {
           kind: "cancel",
           promptTokens,
           generatedTokens,
-          thinkingTokens,
           usage,
         });
         return "cancelled";
@@ -254,7 +242,6 @@ export abstract class BaseLLM implements ILLM {
           message: error.message,
           promptTokens,
           generatedTokens,
-          thinkingTokens,
           usage,
         });
         return "error";
@@ -286,16 +273,6 @@ export abstract class BaseLLM implements ILLM {
 
   private _formatChatMessage(msg: ChatMessage): string {
     let contentToShow = renderChatMessage(msg);
-    if (msg.role === "assistant" && msg.toolCalls?.length) {
-      contentToShow +=
-        "\n" +
-        msg.toolCalls
-          ?.map(
-            (toolCall) =>
-              `${toolCall.function?.name}(${toolCall.function?.arguments})`,
-          )
-          .join("\n");
-    }
 
     return `<${msg.role}>\n${contentToShow}\n\n`;
   }
@@ -391,7 +368,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         fimLog,
         completion,
-        undefined,
         interaction,
         undefined,
       );
@@ -408,7 +384,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         fimLog,
         completion,
-        undefined,
         interaction,
         undefined,
         e,
@@ -420,7 +395,6 @@ export abstract class BaseLLM implements ILLM {
           completionOptions.model,
           fimLog,
           completion,
-          undefined,
           interaction,
           undefined,
           "cancel",
@@ -522,7 +496,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         prompt,
         completion,
-        undefined,
         interaction,
         undefined,
       );
@@ -540,7 +513,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         prompt,
         completion,
-        undefined,
         interaction,
         undefined,
         e,
@@ -552,7 +524,6 @@ export abstract class BaseLLM implements ILLM {
           completionOptions.model,
           prompt,
           completion,
-          undefined,
           interaction,
           undefined,
           "cancel",
@@ -567,108 +538,6 @@ export abstract class BaseLLM implements ILLM {
       completion,
       completionOptions,
     };
-  }
-
-  async complete(
-    _prompt: string,
-    signal: AbortSignal,
-    options: LLMFullCompletionOptions = {},
-  ) {
-    this.lastRequestId = undefined;
-    const { completionOptions, logEnabled, raw } =
-      this.parseCompletionOptions(options);
-    const interaction = logEnabled
-      ? this.logger?.createInteractionLog()
-      : undefined;
-    let status: InteractionStatus = "in_progress";
-
-    let prompt = pruneRawPromptFromTop(
-      completionOptions.model,
-      this.contextLength,
-      _prompt,
-      completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
-    );
-
-    if (!raw) {
-      prompt = this._templatePromptLikeMessages(prompt);
-    }
-
-    if (logEnabled) {
-      interaction?.logItem({
-        kind: "startComplete",
-        prompt: prompt,
-        options: completionOptions,
-        provider: this.providerName,
-      });
-      if (this.llmRequestHook) {
-        this.llmRequestHook(completionOptions.model, prompt);
-      }
-    }
-
-    let completion: string = "";
-
-    try {
-      if (this.shouldUseOpenAIAdapter("complete") && this.openaiAdapter) {
-        const result = await this.openaiAdapter.completionNonStream(
-          {
-            ...toCompleteBody(prompt, completionOptions),
-            stream: false,
-          },
-          signal,
-        );
-        this.lastRequestId = result.id ?? this.lastRequestId;
-        completion = result.choices[0].text;
-      } else {
-        completion = await this._complete(prompt, signal, completionOptions);
-      }
-
-      interaction?.logItem({
-        kind: "chunk",
-        chunk: completion,
-      });
-
-      status = this._logEnd(
-        completionOptions.model,
-        prompt,
-        completion,
-        undefined,
-        interaction,
-        undefined,
-      );
-    } catch (e) {
-      // Capture completion failures to Sentry
-      Logger.error(e as Error, {
-        context: "llm_complete",
-        model: completionOptions.model,
-        provider: this.providerName,
-        useOpenAIAdapter: this.shouldUseOpenAIAdapter("complete"),
-      });
-
-      status = this._logEnd(
-        completionOptions.model,
-        prompt,
-        completion,
-        undefined,
-        interaction,
-        undefined,
-        e,
-      );
-      throw e;
-    } finally {
-      if (status === "in_progress") {
-        this._logEnd(
-          completionOptions.model,
-          prompt,
-          completion,
-          undefined,
-          interaction,
-          undefined,
-          "cancel",
-        );
-      }
-    }
-
-    return completion;
   }
 
   async chat(
@@ -695,7 +564,6 @@ export abstract class BaseLLM implements ILLM {
       msgs: message,
       knownContextLength: this._contextLength,
       maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
-      supportsImages: this.supportsImages(),
     });
   }
 
@@ -744,7 +612,6 @@ export abstract class BaseLLM implements ILLM {
         msgs: _messages,
         knownContextLength: this._contextLength,
         maxTokens: completionOptions.maxTokens ?? DEFAULT_MAX_TOKENS,
-        supportsImages: this.supportsImages(),
       });
 
       messages = compiledChatMessages;
@@ -765,7 +632,6 @@ export abstract class BaseLLM implements ILLM {
       }
     }
 
-    let thinking = "";
     let completion = "";
     let usage: Usage | undefined = undefined;
 
@@ -837,8 +703,6 @@ export abstract class BaseLLM implements ILLM {
           )) {
             if (chunk.role === "assistant") {
               completion += this._formatChatMessage(chunk);
-            } else if (chunk.role === "thinking") {
-              thinking += chunk.content;
             }
 
             interaction?.logItem({
@@ -858,7 +722,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         prompt,
         completion,
-        thinking,
         interaction,
         usage,
       );
@@ -877,7 +740,6 @@ export abstract class BaseLLM implements ILLM {
         completionOptions.model,
         prompt,
         completion,
-        thinking,
         interaction,
         usage,
         e,
@@ -889,22 +751,12 @@ export abstract class BaseLLM implements ILLM {
           completionOptions.model,
           prompt,
           completion,
-          undefined,
           interaction,
           usage,
           "cancel",
         );
       }
     }
-    /*
-    TODO: According to: https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking
-    During tool use, you must pass thinking and redacted_thinking blocks back to the API,
-    and you must include the complete unmodified block back to the API. This is critical
-    for maintaining the model's reasoning flow and conversation integrity.
-
-    On the other hand, adding thinking and redacted_thinking blocks are ignored on subsequent
-    requests when not using tools, so it's the simplest option to always add to history.
-    */
 
     return {
       modelTitle: this.title ?? completionOptions.model,

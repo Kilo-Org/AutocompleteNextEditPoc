@@ -10,18 +10,13 @@ import {
   CompletionCreateParamsNonStreaming,
   CompletionCreateParamsStreaming,
   CompletionUsage,
-  CreateEmbeddingResponse,
-  EmbeddingCreateParams,
   Model,
 } from "openai/resources/index";
 
-import { v4 as uuidv4 } from "uuid";
 import { streamResponse } from "../../../fetch/stream.js";
 import { GeminiConfig } from "../types.js";
 import {
   chatChunk,
-  chatChunkFromDelta,
-  embedding,
   usageChatChunk,
 } from "../util.js";
 import {
@@ -103,72 +98,41 @@ export class GeminiApi implements BaseLlmApi {
 
     const isV1API = overrideIsV1 ?? url.includes("/v1/");
 
-    const toolCallIdToNameMap = new Map<string, string>();
-    oaiBody.messages.forEach((msg) => {
-      if (msg.role === "assistant" && msg.tool_calls) {
-        msg.tool_calls.forEach((call) => {
-          // Type guard for function tool calls
-          if (call.type === "function" && "function" in call) {
-            toolCallIdToNameMap.set(call.id, call.function.name);
-          }
-        });
-      }
-    });
-
     const contents: (GeminiChatContent | null)[] = oaiBody.messages
       .map((msg) => {
         if (msg.role === "system" && !isV1API) {
           return null; // Don't include system message in contents
         }
 
-        if (msg.role === "assistant" && msg.tool_calls?.length) {
-          for (const toolCall of msg.tool_calls) {
-            // Type guard for function tool calls
-            if (toolCall.type === "function" && "function" in toolCall) {
-              toolCallIdToNameMap.set(toolCall.id, toolCall.function.name);
-            }
-          }
-
+        if (msg.role === "assistant") {
           return {
             role: "model" as const,
-            parts: msg.tool_calls.map((toolCall) => {
-              // Type guard for function tool calls
-              if (toolCall.type === "function" && "function" in toolCall) {
-                return {
-                  functionCall: {
-                    id: includeToolCallIds ? toolCall.id : undefined,
-                    name: toolCall.function.name,
-                    args: safeParseArgs(
-                      toolCall.function.arguments,
-                      `Call: ${toolCall.function.name} ${toolCall.id}`,
-                    ),
-                  },
-                };
-              } else {
-                throw new Error(
-                  `Unsupported tool call type in Gemini: ${toolCall.type}`,
-                );
-              }
-            }),
+            parts: [
+              {
+                text:
+                  typeof msg.content === "string"
+                    ? msg.content
+                    : msg.content
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join(""),
+              },
+            ],
           };
         }
 
-        if (msg.role === "tool") {
-          const functionName = toolCallIdToNameMap.get(msg.tool_call_id);
+        if (msg.role === "user") {
           return {
             role: "user" as const,
             parts: [
               {
-                functionResponse: {
-                  id: includeToolCallIds ? msg.tool_call_id : undefined,
-                  name: functionName ?? "unknown",
-                  response: {
-                    content:
-                      typeof msg.content === "string"
-                        ? msg.content
-                        : msg.content.map((part) => part.text).join(""),
-                  },
-                },
+                text:
+                  typeof msg.content === "string"
+                    ? msg.content
+                    : msg.content
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join(""),
               },
             ],
           };
@@ -320,23 +284,6 @@ export class GeminiApi implements BaseLlmApi {
                 content: part.text,
                 model,
               });
-            } else if ("functionCall" in part) {
-              yield chatChunkFromDelta({
-                model,
-                delta: {
-                  tool_calls: [
-                    {
-                      index: 0,
-                      id: part.functionCall.id ?? uuidv4(),
-                      type: "function",
-                      function: {
-                        name: part.functionCall.name,
-                        arguments: JSON.stringify(part.functionCall.args),
-                      },
-                    },
-                  ],
-                },
-              });
             }
           }
         } else {
@@ -392,39 +339,6 @@ export class GeminiApi implements BaseLlmApi {
   }
   async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
-  }
-
-  async embed(body: EmbeddingCreateParams): Promise<CreateEmbeddingResponse> {
-    const inputs = Array.isArray(body.input) ? body.input : [body.input];
-    const response = await fetch(
-      new URL(`${body.model}:batchEmbedContents`, this.apiBase),
-      {
-        method: "POST",
-        body: JSON.stringify({
-          requests: inputs.map((input) => ({
-            model: body.model,
-            content: {
-              role: "user",
-              parts: [{ text: input }],
-            },
-          })),
-        }),
-        headers: {
-          "x-goog-api-key": this.config.apiKey,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    const data = (await response.json()) as any;
-    return embedding({
-      model: body.model,
-      usage: {
-        total_tokens: data.total_tokens,
-        prompt_tokens: data.prompt_tokens,
-      },
-      data: data.batchEmbedContents.map((embedding: any) => embedding.values),
-    });
   }
 
   list(): Promise<Model[]> {

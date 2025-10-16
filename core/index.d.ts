@@ -240,7 +240,6 @@ export interface CompletionOptions extends BaseCompletionOptions {
 export type ChatMessageRole =
   | "user"
   | "assistant"
-  | "thinking"
   | "system"
   | "tool";
 
@@ -249,41 +248,13 @@ export type TextMessagePart = {
   text: string;
 };
 
-export type ImageMessagePart = {
-  type: "imageUrl";
-  imageUrl: { url: string };
-};
-
-export type MessagePart = TextMessagePart | ImageMessagePart;
+export type MessagePart = TextMessagePart;
 
 export type MessageContent = string | MessagePart[];
-
-export interface ToolCallDelta {
-  id?: string;
-  type?: "function";
-  function: {
-    name: string;
-    arguments?: string;
-  };
-}
-
-export interface ToolResultChatMessage {
-  role: "tool";
-  content: string;
-  toolCallId: string;
-}
 
 export interface UserChatMessage {
   role: "user";
   content: MessageContent;
-}
-
-export interface ThinkingChatMessage {
-  role: "thinking";
-  content: MessageContent;
-  signature?: string;
-  redactedThinking?: string;
-  toolCalls?: ToolCallDelta[];
 }
 
 /**
@@ -304,7 +275,6 @@ export interface Usage {
 export interface AssistantChatMessage {
   role: "assistant";
   content: MessageContent;
-  toolCalls?: ToolCallDelta[];
   usage?: Usage;
 }
 
@@ -316,9 +286,7 @@ export interface SystemChatMessage {
 export type ChatMessage =
   | UserChatMessage
   | AssistantChatMessage
-  | ThinkingChatMessage
-  | SystemChatMessage
-  | ToolResultChatMessage;
+  | SystemChatMessage;
 
 export interface ContextItemId {
   providerTitle: string;
@@ -389,7 +357,6 @@ export interface LLMInteractionMessage extends LLMInteractionBase {
 export interface LLMInteractionEnd extends LLMInteractionBase {
   promptTokens: number;
   generatedTokens: number;
-  thinkingTokens: number;
   usage: Usage | undefined;
 }
 
@@ -619,16 +586,6 @@ export interface CacheBehavior {
   cacheConversation?: boolean;
 }
 
-export interface Prediction {
-  type: "content";
-  content:
-    | string
-    | {
-        type: "text";
-        text: string;
-      }[];
-}
-
 export interface BaseCompletionOptions {
   temperature?: number;
   topP?: number;
@@ -638,7 +595,6 @@ export interface BaseCompletionOptions {
   maxTokens?: number;
   raw?: boolean;
   stream?: boolean;
-  prediction?: Prediction;
 }
 
 export interface ModelCapability {

@@ -144,23 +144,6 @@ export class AnthropicApi implements BaseLlmApi {
     return anthropicBody;
   }
 
-  private convertToolCallsToBlocks(
-    toolCall: OpenAI.Chat.Completions.ChatCompletionMessageFunctionToolCall,
-  ): ToolUseBlock | undefined {
-    const toolCallId = toolCall.id;
-    const toolName = toolCall.function?.name;
-    if (toolCallId && toolName) {
-      return {
-        type: "tool_use",
-        id: toolCallId,
-        name: toolName,
-        input: safeParseArgs(
-          toolCall.function.arguments,
-          `${toolName} ${toolCallId}`,
-        ),
-      };
-    }
-  }
 
   // 1. ignores empty content
   // 2. converts string content to text parts
@@ -217,32 +200,12 @@ export class AnthropicApi implements BaseLlmApi {
   ): ContentBlockParam[] {
     switch (message.role) {
       // One tool message = one tool_result block
-      case "tool":
-        return [
-          {
-            type: "tool_result",
-            tool_use_id: message.tool_call_id,
-            content: message.content,
-          },
-        ];
       case "user":
         return this.convertMessageContentToBlocks(message.content);
       case "assistant": {
         const blocks: ContentBlockParam[] = message.content
           ? this.convertMessageContentToBlocks(message.content)
           : [];
-        // If any tool calls are present, always put them last
-        // Loses order vs what was originally sent, but they typically come last
-        for (const toolCall of message.tool_calls ?? []) {
-          if (toolCall.type !== "function") {
-            // TODO support custom tool calls
-            continue;
-          }
-          const block = this.convertToolCallsToBlocks(toolCall);
-          if (block) {
-            blocks.push(block);
-          }
-        }
         return blocks;
       }
       // system, etc.
@@ -379,25 +342,7 @@ export class AnthropicApi implements BaseLlmApi {
               });
               break;
             case "input_json_delta":
-              if (!lastToolUseId || !lastToolUseName) {
-                throw new Error("No tool use found");
-              }
-              yield chatChunkFromDelta({
-                model,
-                delta: {
-                  tool_calls: [
-                    {
-                      id: lastToolUseId,
-                      type: "function",
-                      index: 0,
-                      function: {
-                        name: lastToolUseName,
-                        arguments: blockDeltaEvent.delta.partial_json,
-                      },
-                    },
-                  ],
-                },
-              });
+              // Skip tool use delta
               break;
           }
           break;
@@ -457,11 +402,7 @@ export class AnthropicApi implements BaseLlmApi {
     throw new Error("Method not implemented.");
   }
 
-  async embed(
-    _body: OpenAI.Embeddings.EmbeddingCreateParams,
-  ): Promise<OpenAI.Embeddings.CreateEmbeddingResponse> {
-    throw new Error("Method not implemented.");
-  }
+  
 
   async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");

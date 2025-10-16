@@ -60,8 +60,6 @@ export class OpenAI extends BaseLLM {
 
   protected useOpenAIAdapterFor: (LlmApiRequestType | "*")[] = [
     "chat",
-    "embed",
-    "list",
     "rerank",
     "streamChat",
     "streamFim",
@@ -73,20 +71,6 @@ export class OpenAI extends BaseLLM {
 
   public isOSeriesOrGpt5Model(model?: string): boolean {
     return !!model && (!!model.match(/^o[0-9]+/) || model.includes("gpt-5"));
-  }
-
-  private isFireworksAiModel(model?: string): boolean {
-    return !!model && model.startsWith("accounts/fireworks/models");
-  }
-
-  protected supportsPrediction(model: string): boolean {
-    const SUPPORTED_MODELS = [
-      "gpt-4o-mini",
-      "gpt-4o",
-      "mistral-large",
-      "Fast-Apply",
-    ];
-    return SUPPORTED_MODELS.some((m) => model.includes(m));
   }
 
   protected extraBodyProperties(): Record<string, any> {
@@ -131,22 +115,6 @@ export class OpenAI extends BaseLLM {
 
     if (options.model === "o1") {
       finalOptions.stream = false;
-    }
-
-    if (options.prediction && this.supportsPrediction(options.model)) {
-      if (finalOptions.presence_penalty) {
-        // prediction doesn't support > 0
-        finalOptions.presence_penalty = undefined;
-      }
-      if (finalOptions.frequency_penalty) {
-        // prediction doesn't support > 0
-        finalOptions.frequency_penalty = undefined;
-      }
-      finalOptions.max_completion_tokens = undefined;
-
-      finalOptions.prediction = options.prediction;
-    } else {
-      finalOptions.prediction = undefined;
     }
 
     return finalOptions;
@@ -220,34 +188,6 @@ export class OpenAI extends BaseLLM {
     if (body.model === "o1") {
       // o1 doesn't support streaming
       body.stream = false;
-    }
-
-    if (body.prediction && this.supportsPrediction(body.model)) {
-      if (body.presence_penalty) {
-        // prediction doesn't support > 0
-        body.presence_penalty = undefined;
-      }
-      if (body.frequency_penalty) {
-        // prediction doesn't support > 0
-        body.frequency_penalty = undefined;
-      }
-      body.max_completion_tokens = undefined;
-    }
-
-    if (body.tools?.length) {
-      if (this.isFireworksAiModel(body.model)) {
-        // fireworks.ai does not support parallel tool calls, but their api expects this to be true anyway otherwise they return an error.
-        // tooling works with them as a inference provider once this is set to true.
-        // https://docs.fireworks.ai/guides/function-calling#openai-compatibility
-        body.parallel_tool_calls = true;
-      }
-      // To ensure schema adherence: https://platform.openai.com/docs/guides/function-calling#parallel-function-calling-and-structured-outputs
-      // In practice, setting this to true and asking for multiple tool calls
-      // leads to "arguments" being something like '{"file": "test.ts"}{"file": "test.js"}'
-      // o3 does not support this
-      if (!body.model.startsWith("o3")) {
-        body.parallel_tool_calls = false;
-      }
     }
 
     return body;
@@ -370,35 +310,4 @@ export class OpenAI extends BaseLLM {
     }
   }
 
-  private _getEmbedEndpoint() {
-    if (!this.apiBase) {
-      throw new Error(
-        "No API base URL provided. Please set the 'apiBase' option in config.json",
-      );
-    }
-    return new URL("embeddings", this.apiBase);
-  }
-
-  protected async _embed(chunks: string[]): Promise<number[][]> {
-    const resp = await fetch(this._getEmbedEndpoint(), {
-      method: "POST",
-      body: JSON.stringify({
-        input: chunks,
-        model: this.model,
-        ...this.extraBodyProperties(),
-      }),
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-        "api-key": this.apiKey ?? "", // For Azure
-      },
-    });
-
-    if (!resp.ok) {
-      throw new Error(await resp.text());
-    }
-
-    const data = (await resp.json()) as any;
-    return data.data.map((result: { embedding: number[] }) => result.embedding);
-  }
 }

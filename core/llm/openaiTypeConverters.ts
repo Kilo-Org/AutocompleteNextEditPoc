@@ -1,7 +1,6 @@
 import { FimCreateParamsStreaming } from "./openai-adapters/apis/base";
 import {
   ChatCompletion,
-  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   ChatCompletionCreateParams,
   ChatCompletionMessageParam,
@@ -11,13 +10,6 @@ import {
 import { ChatMessage, CompletionOptions, TextMessagePart } from "..";
 
 function toChatMessage(message: ChatMessage): ChatCompletionMessageParam {
-  if (message.role === "tool") {
-    return {
-      role: "tool",
-      content: message.content,
-      tool_call_id: message.toolCallId,
-    };
-  }
   if (message.role === "system") {
     return {
       role: "system",
@@ -26,7 +18,7 @@ function toChatMessage(message: ChatMessage): ChatCompletionMessageParam {
   }
 
   if (message.role === "assistant") {
-    const msg: ChatCompletionAssistantMessageParam = {
+    return {
       role: "assistant",
       content:
         typeof message.content === "string"
@@ -35,18 +27,6 @@ function toChatMessage(message: ChatMessage): ChatCompletionMessageParam {
               .filter((part) => part.type === "text")
               .map((part) => part as TextMessagePart), // can remove with newer typescript version
     };
-
-    if (message.toolCalls) {
-      msg.tool_calls = message.toolCalls.map((toolCall) => ({
-        id: toolCall.id!,
-        type: toolCall.type!,
-        function: {
-          name: toolCall.function.name,
-          arguments: toolCall.function?.arguments || "{}",
-        },
-      }));
-    }
-    return msg;
   } else {
     if (typeof message.content === "string") {
       return {
@@ -55,27 +35,12 @@ function toChatMessage(message: ChatMessage): ChatCompletionMessageParam {
       };
     }
 
-    // If no multi-media is in the message, just send as text
-    // for compatibility with OpenAI-"compatible" servers
-    // that don't support multi-media format
+    // Extract text from message parts
     return {
       role: "user",
-      content: !message.content.some((item) => item.type !== "text")
-        ? message.content
-            .map((item) => (item as TextMessagePart).text)
-            .join("") || " "
-        : message.content.map((part) => {
-            if (part.type === "imageUrl") {
-              return {
-                type: "image_url" as const,
-                image_url: {
-                  url: part.imageUrl.url,
-                  detail: "auto" as const,
-                },
-              };
-            }
-            return part;
-          }),
+      content: message.content
+        .map((item) => (item as TextMessagePart).text)
+        .join("") || " ",
     };
   }
 }
@@ -94,7 +59,6 @@ export function toChatBody(
     presence_penalty: options.presencePenalty,
     stream: options.stream ?? true,
     stop: options.stop,
-    prediction: options.prediction,
   };
 }
 
@@ -136,23 +100,6 @@ export function toFimBody(
 
 export function fromChatResponse(response: ChatCompletion): ChatMessage {
   const message = response.choices[0].message;
-  const toolCall = message.tool_calls?.[0];
-  if (toolCall) {
-    return {
-      role: "assistant",
-      content: "",
-      toolCalls: message.tool_calls
-        ?.filter((tc) => !tc.type || tc.type === "function")
-        .map((tc) => ({
-          id: tc.id,
-          type: "function" as const,
-          function: {
-            name: (tc as any).function?.name,
-            arguments: (tc as any).function?.arguments,
-          },
-        })),
-    };
-  }
 
   return {
     role: "assistant",
@@ -170,25 +117,6 @@ export function fromChatCompletionChunk(
       role: "assistant",
       content: delta.content,
     };
-  } else if (delta?.tool_calls) {
-    const toolCalls = delta?.tool_calls
-      .filter((tool_call) => !tool_call.type || tool_call.type === "function")
-      .map((tool_call) => ({
-        id: tool_call.id,
-        type: "function" as const,
-        function: {
-          name: (tool_call as any).function?.name,
-          arguments: (tool_call as any).function?.arguments,
-        },
-      }));
-
-    if (toolCalls.length > 0) {
-      return {
-        role: "assistant",
-        content: "",
-        toolCalls,
-      };
-    }
   }
 
   return undefined;
@@ -197,9 +125,6 @@ export function fromChatCompletionChunk(
 export type LlmApiRequestType =
   | "chat"
   | "streamChat"
-  | "complete"
   | "streamComplete"
   | "streamFim"
-  | "embed"
-  | "rerank"
-  | "list";
+  | "rerank";
