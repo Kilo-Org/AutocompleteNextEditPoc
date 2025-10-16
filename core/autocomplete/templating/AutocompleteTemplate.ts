@@ -36,7 +36,9 @@ export interface AutocompleteTemplate {
 
 // https://huggingface.co/stabilityai/stable-code-3b
 const stableCodeFimTemplate: AutocompleteTemplate = {
-  template: "<fim_prefix>{{{prefix}}}<fim_suffix>{{{suffix}}}<fim_middle>",
+  template: (prefix: string, suffix: string): string => {
+    return `<fim_prefix>${prefix}<fim_suffix>${suffix}<fim_middle>`;
+  },
   completionOptions: {
     stop: [
       "<fim_prefix>",
