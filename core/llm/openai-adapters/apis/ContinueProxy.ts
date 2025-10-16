@@ -1,4 +1,3 @@
-import { OpenAI } from "openai/index";
 import {
   ChatCompletionCreateParams,
   CompletionCreateParamsNonStreaming,

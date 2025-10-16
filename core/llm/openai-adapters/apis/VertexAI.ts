@@ -205,9 +205,7 @@ export class VertexAIApi implements BaseLlmApi {
   ): object {
     return this.geminiInstance._convertBody(
       oaiBody,
-      url.toString(),
-      false,
-      false,
+      url.toString()
     );
   }
 

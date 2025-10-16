@@ -15,17 +15,13 @@ import {
 
 import { streamResponse } from "../../../fetch/stream.js";
 import { GeminiConfig } from "../types.js";
-import {
-  chatChunk,
-  usageChatChunk,
-} from "../util.js";
+import { chatChunk, usageChatChunk } from "../util.js";
 import {
   convertOpenAIToolToGeminiFunction,
   GeminiChatContent,
   GeminiChatContentPart,
   GeminiToolFunctionDeclaration,
 } from "../util/gemini-types.js";
-import { safeParseArgs } from "../util/parseArgs.js";
 import {
   BaseLlmApi,
   CreateRerankResponse,
@@ -74,12 +70,7 @@ export class GeminiApi implements BaseLlmApi {
     }
   }
 
-  public _convertBody(
-    oaiBody: ChatCompletionCreateParams,
-    url: string,
-    includeToolCallIds: boolean,
-    overrideIsV1?: boolean,
-  ) {
+  public _convertBody(oaiBody: ChatCompletionCreateParams, url: string) {
     const generationConfig: any = {};
 
     if (oaiBody.top_p) {
@@ -96,7 +87,7 @@ export class GeminiApi implements BaseLlmApi {
       generationConfig.stopSequences = stop.filter((x) => x.trim() !== "");
     }
 
-    const isV1API = overrideIsV1 ?? url.includes("/v1/");
+    const isV1API = url.includes("/v1/");
 
     const contents: (GeminiChatContent | null)[] = oaiBody.messages
       .map((msg) => {
@@ -314,7 +305,7 @@ export class GeminiApi implements BaseLlmApi {
       `models/${body.model}:streamGenerateContent?key=${this.config.apiKey}`,
       this.apiBase,
     ).toString();
-    const convertedBody = this._convertBody(body, apiURL, true);
+    const convertedBody = this._convertBody(body, apiURL);
     const resp = await fetch(apiURL, {
       method: "POST",
       body: JSON.stringify(convertedBody),

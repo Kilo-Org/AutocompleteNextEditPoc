@@ -1,4 +1,3 @@
-import { OpenAI } from "openai/index";
 import {
   ChatCompletion,
   ChatCompletionChunk,

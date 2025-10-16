@@ -3,12 +3,10 @@ import {
   MessageCreateParams,
   MessageParam,
   RawContentBlockDeltaEvent,
-  RawContentBlockStartEvent,
   RawMessageDeltaEvent,
   RawMessageStartEvent,
   RawMessageStreamEvent,
   Tool,
-  ToolUseBlock,
 } from "@anthropic-ai/sdk/resources";
 import { streamSse } from "../../../fetch/stream.js";
 import { OpenAI } from "openai/index";
@@ -26,9 +24,8 @@ import {
 } from "openai/resources/index";
 import { ChatCompletionCreateParams } from "openai/resources/index.js";
 import { AnthropicConfig } from "../types.js";
-import { chatChunk, chatChunkFromDelta, usageChatChunk } from "../util.js";
+import { chatChunk, usageChatChunk } from "../util.js";
 import { EMPTY_CHAT_COMPLETION } from "../util/emptyChatCompletion.js";
-import { safeParseArgs } from "../util/parseArgs.js";
 import {
   CACHING_STRATEGIES,
   CachingStrategyName,
@@ -143,7 +140,6 @@ export class AnthropicApi implements BaseLlmApi {
 
     return anthropicBody;
   }
-
 
   // 1. ignores empty content
   // 2. converts string content to text parts
@@ -297,9 +293,6 @@ export class AnthropicApi implements BaseLlmApi {
 
   // This is split off so e.g. VertexAI can use it
   async *handleStreamResponse(response: any, model: string) {
-    let lastToolUseId: string | undefined;
-    let lastToolUseName: string | undefined;
-
     const usage: CompletionUsage = {
       completion_tokens: 0,
       prompt_tokens: 0,
@@ -309,14 +302,6 @@ export class AnthropicApi implements BaseLlmApi {
       // https://docs.anthropic.com/en/api/messages-streaming#event-types
       const rawEvent = event as RawMessageStreamEvent;
       switch (rawEvent.type) {
-        case "content_block_start": {
-          const blockStartEvent = rawEvent as RawContentBlockStartEvent;
-          if (blockStartEvent.content_block.type === "tool_use") {
-            lastToolUseId = blockStartEvent.content_block.id;
-            lastToolUseName = blockStartEvent.content_block.name;
-          }
-          break;
-        }
         case "message_start": {
           const startEvent = rawEvent as RawMessageStartEvent;
           usage.prompt_tokens = startEvent.message.usage?.input_tokens ?? 0;
@@ -347,10 +332,6 @@ export class AnthropicApi implements BaseLlmApi {
           }
           break;
         }
-        case "content_block_stop":
-          lastToolUseId = undefined;
-          lastToolUseName = undefined;
-          break;
         default:
           break;
       }
@@ -401,8 +382,6 @@ export class AnthropicApi implements BaseLlmApi {
   ): AsyncGenerator<ChatCompletionChunk> {
     throw new Error("Method not implemented.");
   }
-
-  
 
   async rerank(_body: RerankCreateParams): Promise<CreateRerankResponse> {
     throw new Error("Method not implemented.");
