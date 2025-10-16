@@ -50,7 +50,6 @@
     "@types/json-schema": "^7.0.15",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
     "eslint": "^8",
     "myers-diff": "^2.1.0",
     "prettier": "^3.3.3",
