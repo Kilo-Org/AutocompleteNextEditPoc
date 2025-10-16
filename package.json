@@ -48,7 +48,6 @@
     "@types/diff": "^7.0.1",
     "@types/follow-redirects": "^1.14.4",
     "@types/json-schema": "^7.0.15",
-    "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
     "@typescript-eslint/parser": "^8.40.0",
