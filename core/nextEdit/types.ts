@@ -1,7 +1,6 @@
 import { DiffLine, RangeInFile, TabAutocompleteOptions } from "../";
 import { SnippetPayload } from "../autocomplete/snippets";
 import { HelperVars } from "../autocomplete/util/HelperVars";
-import { NextEditTemplateRenderer } from "./providers/InstinctNextEditProvider";
 
 export type RecentlyEditedRange = RangeInFile & {
   timestamp: number;
@@ -63,10 +62,6 @@ interface SystemPrompt {
 interface UserPrompt {
   role: "user";
   content: string;
-}
-
-export interface NextEditTemplate {
-  template: NextEditTemplateRenderer;
 }
 
 export interface TemplateVars {
