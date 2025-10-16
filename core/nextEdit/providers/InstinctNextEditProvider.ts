@@ -6,21 +6,24 @@ import {
   currentFileContentBlock,
   editHistoryBlock,
 } from "../templating/instinct.js";
+import { NEXT_EDIT_MODEL_TEMPLATES } from "../templating/NextEditPromptEngine.js";
 import {
-  NEXT_EDIT_MODEL_TEMPLATES,
-  PromptTemplateRenderer,
-} from "../templating/NextEditPromptEngine.js";
-import { ModelSpecificContext, Prompt, PromptMetadata } from "../types.js";
+  ModelSpecificContext,
+  Prompt,
+  PromptMetadata,
+  TemplateVars,
+} from "../types.js";
 import { BaseNextEditModelProvider } from "./BaseNextEditProvider.js";
+export type NextEditTemplateRenderer = (vars: TemplateVars) => string;
 
 export class InstinctProvider extends BaseNextEditModelProvider {
-  private templateRenderer: PromptTemplateRenderer;
+  private templateRenderer: NextEditTemplateRenderer;
 
   constructor() {
     super(NEXT_EDIT_MODELS.INSTINCT);
 
-    const template = NEXT_EDIT_MODEL_TEMPLATES[NEXT_EDIT_MODELS.INSTINCT];
-    this.templateRenderer = new PromptTemplateRenderer(template.template);
+    this.templateRenderer =
+      NEXT_EDIT_MODEL_TEMPLATES[NEXT_EDIT_MODELS.INSTINCT];
   }
 
   getSystemPrompt(): string {
@@ -39,7 +42,7 @@ export class InstinctProvider extends BaseNextEditModelProvider {
     return message; // Instinct returns the completion directly.
   }
 
-  buildPromptContext(context: ModelSpecificContext): any {
+  buildPromptContext(context: ModelSpecificContext) {
     // Calculate the window around the cursor position (25 lines above and below).
     const windowStart = Math.max(0, context.helper.pos.line - 25);
     const windowEnd = Math.min(
@@ -86,9 +89,9 @@ export class InstinctProvider extends BaseNextEditModelProvider {
       editDiffHistory: editHistoryBlock(promptCtx.editDiffHistory),
       currentFilePath: promptCtx.currentFilePath,
       languageShorthand: promptCtx.languageShorthand,
-    };
+    } satisfies TemplateVars;
 
-    const userPromptContent = this.templateRenderer.render(templateVars);
+    const userPromptContent = this.templateRenderer(templateVars);
 
     return [
       {
@@ -120,7 +123,7 @@ export class InstinctProvider extends BaseNextEditModelProvider {
       languageShorthand: promptCtx.languageShorthand,
     };
 
-    const userPromptContent = this.templateRenderer.render(templateVars);
+    const userPromptContent = this.templateRenderer(templateVars);
 
     return {
       prompt: {

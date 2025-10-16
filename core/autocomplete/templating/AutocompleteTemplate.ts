@@ -11,6 +11,16 @@ import {
   AutocompleteSnippetType,
 } from "../snippets/types.js";
 
+export type TemplateRenderer = (
+  prefix: string,
+  suffix: string,
+  filepath: string,
+  reponame: string,
+  language: string,
+  snippets: AutocompleteSnippet[],
+  workspaceUris: string[],
+) => string;
+
 export interface AutocompleteTemplate {
   compilePrefixSuffix?: (
     prefix: string,
@@ -20,15 +30,7 @@ export interface AutocompleteTemplate {
     snippets: AutocompleteSnippet[],
     workspaceUris: string[],
   ) => [string, string];
-  template: (
-    prefix: string,
-    suffix: string,
-    filepath: string,
-    reponame: string,
-    language: string,
-    snippets: AutocompleteSnippet[],
-    workspaceUris: string[],
-  ) => string;
+  template: TemplateRenderer;
   completionOptions?: Partial<CompletionOptions>;
 }
 

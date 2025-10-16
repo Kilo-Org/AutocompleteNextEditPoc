@@ -1,6 +1,7 @@
 import { DiffLine, RangeInFile, TabAutocompleteOptions } from "../";
 import { SnippetPayload } from "../autocomplete/snippets";
 import { HelperVars } from "../autocomplete/util/HelperVars";
+import { NextEditTemplateRenderer } from "./providers/InstinctNextEditProvider";
 
 export type RecentlyEditedRange = RangeInFile & {
   timestamp: number;
@@ -65,10 +66,17 @@ interface UserPrompt {
 }
 
 export interface NextEditTemplate {
-  template: string;
+  template: NextEditTemplateRenderer;
 }
 
-export interface TemplateVars {}
+export interface TemplateVars {
+  recentlyViewedCodeSnippets?: string;
+  currentFileContent?: string;
+  editDiffHistory?: string;
+  contextSnippets?: string;
+  currentFilePath?: string;
+  languageShorthand: string;
+}
 
 /**
  * Context object containing all necessary information for model-specific operations.
