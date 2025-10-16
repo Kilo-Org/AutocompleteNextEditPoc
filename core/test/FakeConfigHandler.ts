@@ -92,13 +92,4 @@ export class FakeConfigHandler extends MinimalConfigProvider {
   ): void {
     this.configUpdateCallbacks.push(handler);
   }
-
-  /**
-   * Helper method to update config for tests
-   * Note: This directly modifies the internal config state
-   */
-  async updateConfig(newConfig: Partial<MinimalTestConfig>): Promise<void> {
-    const { config } = await this.loadConfig();
-    Object.assign(config, newConfig);
-  }
 }
