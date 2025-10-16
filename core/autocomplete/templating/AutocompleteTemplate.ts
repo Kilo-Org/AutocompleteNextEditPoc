@@ -20,17 +20,15 @@ export interface AutocompleteTemplate {
     snippets: AutocompleteSnippet[],
     workspaceUris: string[],
   ) => [string, string];
-  template:
-    | string
-    | ((
-        prefix: string,
-        suffix: string,
-        filepath: string,
-        reponame: string,
-        language: string,
-        snippets: AutocompleteSnippet[],
-        workspaceUris: string[],
-      ) => string);
+  template: (
+    prefix: string,
+    suffix: string,
+    filepath: string,
+    reponame: string,
+    language: string,
+    snippets: AutocompleteSnippet[],
+    workspaceUris: string[],
+  ) => string;
   completionOptions?: Partial<CompletionOptions>;
 }
 
@@ -225,8 +223,8 @@ const codegemmaFimTemplate: AutocompleteTemplate = {
 
 const codeLlamaFimTemplate: AutocompleteTemplate = {
   template: (prefix: string, suffix: string): string => {
-  return `<PRE> ${prefix} <SUF>${suffix} <MID>`;
-},
+    return `<PRE> ${prefix} <SUF>${suffix} <MID>`;
+  },
   completionOptions: { stop: ["<PRE>", "<SUF>", "<MID>", "<EOT>"] },
 };
 
