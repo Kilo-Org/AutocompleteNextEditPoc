@@ -5,7 +5,7 @@ import {
   type AutocompleteOutcome,
 } from "core/autocomplete/util/types";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import * as URI from "uri-js";
+
 import { randomUUID } from "node:crypto";
 import * as vscode from "vscode";
 import { handleLLMError } from "../util/errorHandling";
@@ -216,7 +216,7 @@ export class ContinueCompletionProvider
           notebook
             .getCells()
             .some((cell) =>
-              URI.equal(cell.document.uri.toString(), document.uri.toString()),
+              cell.document.uri.toString() === document.uri.toString(),
             ),
         );
         if (notebook) {

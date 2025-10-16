@@ -6,7 +6,7 @@ import {
 import { GetLspDefinitionsFunction } from "core/autocomplete/types";
 import { getAst, getTreePathAtCursor } from "core/autocomplete/util/ast";
 import { intersection } from "core/util/ranges";
-import * as URI from "uri-js";
+
 import * as vscode from "vscode";
 
 import type { IDE, Range, RangeInFile, RangeInFileWithContents } from "core";
@@ -188,7 +188,7 @@ async function crawlTypes(
       !definition ||
       results.some(
         (result) =>
-          URI.equal(result.filepath, definition.filepath) &&
+          result.filepath === definition.filepath &&
           intersection(result.range, definition.range) !== null,
       )
     ) {

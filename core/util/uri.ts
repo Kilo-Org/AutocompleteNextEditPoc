@@ -1,5 +1,3 @@
-import * as URI from "uri-js";
-
 /** Converts any OS path to cleaned up URI path segment format with no leading/trailing slashes
    e.g. \path\to\folder\ -> path/to/folder
         \this\is\afile.ts -> this/is/afile.ts
@@ -16,10 +14,9 @@ function pathToUriPathSegment(path: string) {
 }
 
 function getCleanUriPath(uri: string) {
-  const path = URI.parse(uri).path ?? "";
-  let clean = path.replace(/^\//, ""); // remove start slash
-  clean = clean.replace(/\/$/, ""); // remove end slash
-  return clean;
+  const parsed = new URL(uri);
+  let clean = parsed.pathname.replace(/^\//, ""); // remove start slash
+  return clean.replace(/\/$/, ""); // remove end slash
 }
 
 export function findUriInDirs(
@@ -30,20 +27,13 @@ export function findUriInDirs(
   relativePathOrBasename: string;
   foundInDir: string | null;
 } {
-  const uriComps = URI.parse(uri);
-  if (!uriComps.scheme) {
-    throw new Error(`Invalid uri: ${uri}`);
-  }
+  const uriParsed = new URL(uri);
   const uriPathParts = getCleanUriPath(uri).split("/");
 
   for (const dir of dirUriCandidates) {
-    const dirComps = URI.parse(dir);
+    const dirParsed = new URL(dir);
 
-    if (!dirComps.scheme) {
-      throw new Error(`Invalid uri: ${dir}`);
-    }
-
-    if (uriComps.scheme !== dirComps.scheme) {
+    if (uriParsed.protocol !== dirParsed.protocol) {
       continue;
     }
     // Can't just use startsWith because e.g.
@@ -121,7 +111,7 @@ export function joinPathsToUri(uri: string, ...pathSegments: string[]) {
     baseUri += "/";
   }
   const segments = pathSegments.map((segment) => pathToUriPathSegment(segment));
-  return URI.resolve(baseUri, segments.join("/"));
+  return new URL(segments.join("/"), baseUri).toString();
 }
 
 export function getShortestUniqueRelativeUriPaths(
