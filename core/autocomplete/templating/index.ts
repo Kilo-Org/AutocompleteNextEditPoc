@@ -24,13 +24,6 @@ import { formatSnippets } from "./formatting";
 import { getStopTokens } from "./getStopTokens";
 
 function getTemplate(helper: HelperVars): AutocompleteTemplate {
-  if (helper.options.template) {
-    return {
-      template: helper.options.template,
-      completionOptions: {},
-      compilePrefixSuffix: undefined,
-    };
-  }
   return getTemplateForModel(helper.modelName);
 }
 

@@ -12,7 +12,6 @@ import {
   MessageOption,
   ModelCapability,
   PromptLog,
-  PromptTemplate,
   TabAutocompleteOptions,
   Usage,
 } from "../index.js";
@@ -86,7 +85,6 @@ export abstract class BaseLLM implements ILLM {
   _contextLength: number | undefined;
   maxStopWords?: number | undefined;
   completionOptions: CompletionOptions;
-  promptTemplates?: Record<string, PromptTemplate>;
   templateMessages?: (messages: ChatMessage[]) => string;
   logger?: ILLMLogger;
   llmRequestHook?: (model: string, prompt: string) => any;
@@ -136,14 +134,7 @@ export abstract class BaseLLM implements ILLM {
             )
           : DEFAULT_MAX_TOKENS),
     };
-    // Normalize user-specified prompt templates to a concrete record or leave undefined
-    this.promptTemplates = options.promptTemplates
-      ? (Object.fromEntries(
-          Object.entries(options.promptTemplates).filter(
-            ([, v]) => v !== undefined,
-          ),
-        ) as Record<string, PromptTemplate>)
-      : undefined;
+
     this.apiKey = options.apiKey;
     this.apiBase = options.apiBase;
     if (this.apiBase && !this.apiBase.endsWith("/")) {

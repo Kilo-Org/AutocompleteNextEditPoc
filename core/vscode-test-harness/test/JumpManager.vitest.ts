@@ -138,7 +138,6 @@ const createMockNextEditOutcome = (
     maxSuffixPercentage: 0.5,
     prefixPercentage: 0.8,
     transform: true,
-    template: "default",
     multilineCompletions: "auto",
     slidingWindowPrefixPercentage: 0.5,
     slidingWindowSize: 100,

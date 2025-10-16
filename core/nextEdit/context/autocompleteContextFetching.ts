@@ -110,10 +110,6 @@ export const getAutocompleteContext = async (
     ...(maxPromptTokens && { maxPromptTokens }),
   };
 
-  if (finalModel.promptTemplates?.autocomplete) {
-    options.template = finalModel.promptTemplates.autocomplete as string;
-  }
-
   const helper = await HelperVars.create(
     input,
     options,

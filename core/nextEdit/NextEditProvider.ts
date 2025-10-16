@@ -338,10 +338,6 @@ export class NextEditProvider {
       return { token, startTime, helper: undefined };
     }
 
-    if (llm.promptTemplates?.autocomplete) {
-      options.template = llm.promptTemplates.autocomplete as string;
-    }
-
     const helper = await HelperVars.create(input, options, llm.model, this.ide);
 
     if (await shouldPrefilter(helper, await this.ide.getWorkspaceDirs())) {
