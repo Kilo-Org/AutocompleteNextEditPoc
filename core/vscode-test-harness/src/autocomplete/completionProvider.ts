@@ -215,8 +215,9 @@ export class ContinueCompletionProvider
         const notebook = vscode.workspace.notebookDocuments.find((notebook) =>
           notebook
             .getCells()
-            .some((cell) =>
-              cell.document.uri.toString() === document.uri.toString(),
+            .some(
+              (cell) =>
+                cell.document.uri.toString() === document.uri.toString(),
             ),
         );
         if (notebook) {
@@ -232,9 +233,7 @@ export class ContinueCompletionProvider
             })
             .join("\n\n");
           for (const cell of cells) {
-            if (
-              URI.equal(cell.document.uri.toString(), document.uri.toString())
-            ) {
+            if (cell.document.uri.toString() === document.uri.toString()) {
               break;
             } else {
               pos.line += cell.document.getText().split("\n").length + 1;
