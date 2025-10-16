@@ -9,7 +9,6 @@ import * as URI from "uri-js";
 import { v4 as uuidv4 } from "uuid";
 import * as vscode from "vscode";
 import { handleLLMError } from "../util/errorHandling";
-import { VsCodeIde } from "../VsCodeIde";
 import { checkFim } from "core/nextEdit/diff/diff";
 import { NextEditLoggingService } from "core/nextEdit/NextEditLoggingService";
 import { PrefetchQueue } from "core/nextEdit/NextEditPrefetchQueue";
@@ -27,6 +26,7 @@ import {
   setupStatusBar,
   stopStatusBarLoading,
 } from "./statusBar";
+import { IDE } from "core";
 
 export class ContinueCompletionProvider
   implements vscode.InlineCompletionItemProvider
@@ -72,11 +72,11 @@ export class ContinueCompletionProvider
 
   constructor(
     private readonly configHandler: MinimalConfigProvider,
-    private readonly ide: VsCodeIde,
+    private readonly ide: IDE,
     usingFullFileDiff: boolean,
   ) {
     this.usingFullFileDiff = usingFullFileDiff;
-    this.recentlyEditedTracker = new RecentlyEditedTracker(ide.ideUtils);
+    this.recentlyEditedTracker = new RecentlyEditedTracker(ide);
 
     async function getAutocompleteModel() {
       const { config } = await configHandler.loadConfig();

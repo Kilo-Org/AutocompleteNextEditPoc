@@ -2,7 +2,7 @@ import { getSymbolsForSnippet } from "core/autocomplete/context/ranking";
 import { RecentlyEditedRange } from "core/autocomplete/util/types";
 import * as vscode from "vscode";
 
-import { VsCodeIdeUtils } from "../util/ideUtils";
+import { IDE } from "core";
 
 type VsCodeRecentlyEditedRange = {
   uri: vscode.Uri;
@@ -22,7 +22,7 @@ export class RecentlyEditedTracker {
   private recentlyEditedDocuments: VsCodeRecentlyEditedDocument[] = [];
   private static maxRecentlyEditedDocuments = 10;
 
-  constructor(private ideUtils: VsCodeIdeUtils) {
+  constructor(private ide: IDE) {
     vscode.workspace.onDidChangeTextDocument((event) => {
       event.contentChanges.forEach((change) => {
         const editedRange = {
@@ -113,7 +113,7 @@ export class RecentlyEditedTracker {
   private async _getContentsForRange(
     entry: Omit<VsCodeRecentlyEditedRange, "lines" | "symbols">,
   ): Promise<string> {
-    const content = await this.ideUtils.readFile(entry.uri);
+    const content = await this.ide.readFile(entry.uri.toString());
     if (content === null) {
       return "";
     }

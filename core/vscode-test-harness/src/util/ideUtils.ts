@@ -1,50 +1,10 @@
 import * as URI from "uri-js";
 import * as vscode from "vscode";
-import { getUniqueId, openEditorAndRevealRange } from "./vscode";
 
 const NO_FS_PROVIDER_ERROR = "ENOPRO";
 const UNSUPPORTED_SCHEMES: Set<string> = new Set();
 
 export class VsCodeIdeUtils {
-  visibleMessages: Set<string> = new Set();
-
-  async gotoDefinition(
-    uri: vscode.Uri,
-    position: vscode.Position,
-  ): Promise<vscode.Location[]> {
-    const locations: vscode.Location[] = await vscode.commands.executeCommand(
-      "vscode.executeDefinitionProvider",
-      uri,
-      position,
-    );
-    return locations;
-  }
-
-  async documentSymbol(uri: vscode.Uri): Promise<vscode.DocumentSymbol[]> {
-    return await vscode.commands.executeCommand(
-      "vscode.executeDocumentSymbolProvider",
-      uri,
-    );
-  }
-
-  async references(
-    uri: vscode.Uri,
-    position: vscode.Position,
-  ): Promise<vscode.Location[]> {
-    return await vscode.commands.executeCommand(
-      "vscode.executeReferenceProvider",
-      uri,
-      position,
-    );
-  }
-
-  async foldingRanges(uri: vscode.Uri): Promise<vscode.FoldingRange[]> {
-    return await vscode.commands.executeCommand(
-      "vscode.executeFoldingRangeProvider",
-      uri,
-    );
-  }
-
   private _workspaceDirectories: vscode.Uri[] | undefined = undefined;
   getWorkspaceDirectories(): vscode.Uri[] {
     if (this._workspaceDirectories === undefined) {
@@ -53,32 +13,6 @@ export class VsCodeIdeUtils {
     }
 
     return this._workspaceDirectories;
-  }
-
-  setWokspaceDirectories(dirs: vscode.Uri[] | undefined): void {
-    this._workspaceDirectories = dirs;
-  }
-
-  getUniqueId() {
-    return getUniqueId();
-  }
-
-  async openFile(uri: vscode.Uri, range?: vscode.Range) {
-    // vscode has a builtin open/get open files
-    return await openEditorAndRevealRange(
-      uri,
-      range,
-      vscode.ViewColumn.One,
-      false,
-    );
-  }
-
-  async fileExists(uri: vscode.Uri): Promise<boolean> {
-    try {
-      return (await this.stat(uri)) !== null;
-    } catch {
-      return false;
-    }
   }
 
   /**
@@ -134,27 +68,6 @@ export class VsCodeIdeUtils {
       uri,
       async (_u) => {
         return await vscode.workspace.fs.stat(uri);
-      },
-      ignoreMissingProviders,
-    );
-  }
-
-  /**
-   * Retrieve all entries of a directory from the given URI.
-   *
-   * @param uri - The URI of the directory to read.
-   * @param ignoreMissingProviders - Optional. If `true`, missing file system providers will be ignored. Defaults to `true`.
-   * @returns A promise that resolves to an array of tuples, where each tuple contains the name of a directory entry
-   *          and its type (`vscode.FileType`), or `null` if the scheme is unsupported or the provider is missing and `ignoreMissingProviders` is `true`.
-   */
-  async readDirectory(
-    uri: vscode.Uri,
-    ignoreMissingProviders: boolean = true,
-  ): Promise<[string, vscode.FileType][] | null> {
-    return await this.fsOperation(
-      uri,
-      async (_u) => {
-        return await vscode.workspace.fs.readDirectory(uri);
       },
       ignoreMissingProviders,
     );

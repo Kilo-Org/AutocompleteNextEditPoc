@@ -104,8 +104,6 @@ class SqliteDb {
   }
 }
 
-
-
 export class GlobalCacheCodeBaseIndex implements CodebaseIndex {
   relativeExpectedTime: number = 1;
 
