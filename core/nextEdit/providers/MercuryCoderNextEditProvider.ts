@@ -6,21 +6,19 @@ import {
   editHistoryBlock,
   recentlyViewedCodeSnippetsBlock,
 } from "../templating/mercuryCoderNextEdit.js";
-import {
-  NEXT_EDIT_MODEL_TEMPLATES,
-  PromptTemplateRenderer,
-} from "../templating/NextEditPromptEngine.js";
+import { NEXT_EDIT_MODEL_TEMPLATES } from "../templating/NextEditPromptEngine.js";
 import { ModelSpecificContext, Prompt, PromptMetadata } from "../types.js";
 import { BaseNextEditModelProvider } from "./BaseNextEditProvider.js";
+import { NextEditTemplateRenderer } from "./InstinctNextEditProvider.js";
 
 export class MercuryCoderProvider extends BaseNextEditModelProvider {
-  private templateRenderer: PromptTemplateRenderer;
+  private templateRenderer: NextEditTemplateRenderer;
 
   constructor() {
     super(NEXT_EDIT_MODELS.MERCURY_CODER);
 
-    const template = NEXT_EDIT_MODEL_TEMPLATES[NEXT_EDIT_MODELS.MERCURY_CODER];
-    this.templateRenderer = new PromptTemplateRenderer(template.template);
+    this.templateRenderer =
+      NEXT_EDIT_MODEL_TEMPLATES[NEXT_EDIT_MODELS.MERCURY_CODER];
   }
 
   getSystemPrompt(): string {
@@ -47,7 +45,7 @@ export class MercuryCoderProvider extends BaseNextEditModelProvider {
     );
   }
 
-  buildPromptContext(context: ModelSpecificContext): any {
+  buildPromptContext(context: ModelSpecificContext) {
     return {
       recentlyViewedCodeSnippets:
         context.snippetPayload.recentlyVisitedRangesSnippets.map((snip) => ({
@@ -59,6 +57,7 @@ export class MercuryCoderProvider extends BaseNextEditModelProvider {
       editableRegionEndLine: context.editableRegionEndLine,
       editDiffHistory: context.diffContext,
       currentFilePath: context.helper.filepath,
+      languageShorthand: context.helper.lang.name,
     };
   }
 
@@ -77,9 +76,10 @@ export class MercuryCoderProvider extends BaseNextEditModelProvider {
       ),
       editDiffHistory: editHistoryBlock(promptCtx.editDiffHistory),
       currentFilePath: promptCtx.currentFilePath,
+      languageShorthand: promptCtx.languageShorthand,
     };
 
-    const userPromptContent = this.templateRenderer.render(templateVars);
+    const userPromptContent = this.templateRenderer(templateVars);
 
     return [
       {
@@ -108,9 +108,10 @@ export class MercuryCoderProvider extends BaseNextEditModelProvider {
       ),
       editDiffHistory: editHistoryBlock(promptCtx.editDiffHistory),
       currentFilePath: promptCtx.currentFilePath,
+      languageShorthand: promptCtx.languageShorthand,
     };
 
-    const userPromptContent = this.templateRenderer.render(templateVars);
+    const userPromptContent = this.templateRenderer(templateVars);
 
     return {
       prompt: {

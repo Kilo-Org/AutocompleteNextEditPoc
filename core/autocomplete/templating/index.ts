@@ -1,7 +1,4 @@
-import Handlebars from "handlebars";
-
 import { CompletionOptions } from "../..";
-import { AutocompleteLanguageInfo } from "../constants/AutocompleteLanguageInfo";
 import { HelperVars } from "../util/HelperVars";
 
 import { ILLM } from "../../index.js";
@@ -24,34 +21,7 @@ import { formatSnippets } from "./formatting";
 import { getStopTokens } from "./getStopTokens";
 
 function getTemplate(helper: HelperVars): AutocompleteTemplate {
-  if (helper.options.template) {
-    return {
-      template: helper.options.template,
-      completionOptions: {},
-      compilePrefixSuffix: undefined,
-    };
-  }
   return getTemplateForModel(helper.modelName);
-}
-
-function renderStringTemplate(
-  template: string,
-  prefix: string,
-  suffix: string,
-  lang: AutocompleteLanguageInfo,
-  filepath: string,
-  reponame: string,
-) {
-  const filename = getUriPathBasename(filepath);
-  const compiledTemplate = Handlebars.compile(template);
-
-  return compiledTemplate({
-    prefix,
-    suffix,
-    filename,
-    reponame,
-    language: lang.name,
-  });
 }
 
 /** Consolidates shared setup between renderPrompt and renderPromptWithTokenLimit. */
@@ -178,25 +148,15 @@ function buildPrompt(
     const formatted = formatSnippets(helper, snippets, workspaceDirs);
     prefix = [formatted, prefix].join("\n");
   }
-  const prompt =
-    typeof template === "string"
-      ? renderStringTemplate(
-          template,
-          prefix,
-          suffix,
-          helper.lang,
-          helper.filepath,
-          reponame,
-        )
-      : template(
-          prefix,
-          suffix,
-          helper.filepath,
-          reponame,
-          helper.lang.name,
-          snippets,
-          helper.workspaceUris,
-        );
+  const prompt = template(
+    prefix,
+    suffix,
+    helper.filepath,
+    reponame,
+    helper.lang.name,
+    snippets,
+    helper.workspaceUris,
+  );
   return { prompt, prefix, suffix };
 }
 

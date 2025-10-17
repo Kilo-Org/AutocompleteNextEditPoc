@@ -5,8 +5,8 @@ import {
   type AutocompleteOutcome,
 } from "core/autocomplete/util/types";
 import { MinimalConfigProvider } from "core/autocomplete/MinimalConfig";
-import * as URI from "uri-js";
-import { v4 as uuidv4 } from "uuid";
+
+import { randomUUID } from "node:crypto";
 import * as vscode from "vscode";
 import { handleLLMError } from "../util/errorHandling";
 import { checkFim } from "core/nextEdit/diff/diff";
@@ -191,7 +191,7 @@ export class ContinueCompletionProvider
     try {
       const abortController = new AbortController();
       const signal = abortController.signal;
-      const completionId = uuidv4();
+      const completionId = randomUUID();
 
       if (this.isNextEditActive) {
         this.nextEditLoggingService.trackPendingCompletion(completionId);
@@ -215,8 +215,9 @@ export class ContinueCompletionProvider
         const notebook = vscode.workspace.notebookDocuments.find((notebook) =>
           notebook
             .getCells()
-            .some((cell) =>
-              URI.equal(cell.document.uri.toString(), document.uri.toString()),
+            .some(
+              (cell) =>
+                cell.document.uri.toString() === document.uri.toString(),
             ),
         );
         if (notebook) {
@@ -232,9 +233,7 @@ export class ContinueCompletionProvider
             })
             .join("\n\n");
           for (const cell of cells) {
-            if (
-              URI.equal(cell.document.uri.toString(), document.uri.toString())
-            ) {
+            if (cell.document.uri.toString() === document.uri.toString()) {
               break;
             } else {
               pos.line += cell.document.getText().split("\n").length + 1;
@@ -255,7 +254,7 @@ export class ContinueCompletionProvider
       const wasManuallyTriggered =
         context.triggerKind === vscode.InlineCompletionTriggerKind.Invoke;
 
-      // const completionId = uuidv4();
+      // const completionId = randomUUID();
       const filepath = document.uri.toString();
       const recentlyVisitedRanges = this.recentlyVisitedRanges.getSnippets();
       const recentlyEditedRanges =

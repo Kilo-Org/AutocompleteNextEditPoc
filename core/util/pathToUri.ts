@@ -1,7 +1,5 @@
 import { fileURLToPath, pathToFileURL } from "url";
 
-import * as URI from "uri-js";
-
 // CAN ONLY BE USED IN CORE
 
 // Converts a local path to a file:/// URI
@@ -12,7 +10,7 @@ export function localPathToUri(path: string) {
     return path;
   }
   const url = pathToFileURL(path);
-  return URI.normalize(url.toString());
+  return url.toString();
 }
 
 export function localPathOrUriToPath(localPathOrUri: string): string {

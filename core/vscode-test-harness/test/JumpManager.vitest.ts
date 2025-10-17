@@ -99,18 +99,7 @@ vi.mock("vscode", () => {
   };
 });
 
-// Mock svg-builder
-vi.mock("svg-builder", () => {
-  const mockSvgBuilder = {
-    width: vi.fn().mockReturnThis(),
-    height: vi.fn().mockReturnThis(),
-    text: vi.fn().mockReturnThis(),
-    render: vi.fn().mockReturnValue("<svg>mock svg</svg>"),
-  };
-  return {
-    default: mockSvgBuilder,
-  };
-});
+// svg-builder is no longer used - removed mock
 
 // Mock NextEditProvider
 vi.mock("core/nextEdit/NextEditProvider", () => {
@@ -138,7 +127,6 @@ const createMockNextEditOutcome = (
     maxSuffixPercentage: 0.5,
     prefixPercentage: 0.8,
     transform: true,
-    template: "default",
     multilineCompletions: "auto",
     slidingWindowPrefixPercentage: 0.5,
     slidingWindowSize: 100,

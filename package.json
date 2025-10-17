@@ -16,7 +16,7 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "deadcode:knip": "knip",
     "deadcode:exports": "ts-prune",
-    "prepare": "husky"
+    "prepare": "echo skipping husky"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.62.0",
@@ -28,7 +28,6 @@
     "dotenv": "^16.4.5",
     "fastest-levenshtein": "^1.0.16",
     "google-auth-library": "^9.14.2",
-    "handlebars": "^4.7.8",
     "ignore": "^7.0.5",
     "js-tiktoken": "^1.0.8",
     "lru-cache": "^11.0.2",
@@ -36,31 +35,18 @@
     "quick-lru": "^7.0.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "svg-builder": "^2.0.0",
     "tree-sitter-wasms": "^0.1.11",
-    "uri-js": "^4.4.1",
-    "uuid": "^9.0.1",
     "web-tree-sitter": "^0.21.0",
-    "winston": "^3.17.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/diff": "^7.0.1",
-    "@types/follow-redirects": "^1.14.4",
-    "@types/jquery": "^3.5.29",
-    "@types/jsdom": "^27.0.0",
     "@types/json-schema": "^7.0.15",
-    "@types/lodash": "^4.17.20",
-    "@types/mustache": "^4.2.5",
-    "@types/uuid": "^9.0.7",
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
     "eslint": "^8",
-    "husky": "^9.1.7",
     "myers-diff": "^2.1.0",
     "prettier": "^3.3.3",
-    "shiki": "^3.6.0",
     "typescript": "^5.6.3",
     "vitest": "^3.1.4"
   },

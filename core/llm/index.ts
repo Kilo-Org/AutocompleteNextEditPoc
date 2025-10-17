@@ -12,12 +12,10 @@ import {
   MessageOption,
   ModelCapability,
   PromptLog,
-  PromptTemplate,
   TabAutocompleteOptions,
   Usage,
 } from "../index.js";
 import type { ILLMInteractionLog, ILLMLogger } from "../index.js";
-import { Logger } from "../util/Logger.js";
 import { mergeJson } from "../util/merge.js";
 import { renderChatMessage } from "../util/messageContent.js";
 import { TokensBatchingService } from "../util/TokensBatchingService.js";
@@ -87,7 +85,6 @@ export abstract class BaseLLM implements ILLM {
   _contextLength: number | undefined;
   maxStopWords?: number | undefined;
   completionOptions: CompletionOptions;
-  promptTemplates?: Record<string, PromptTemplate>;
   templateMessages?: (messages: ChatMessage[]) => string;
   logger?: ILLMLogger;
   llmRequestHook?: (model: string, prompt: string) => any;
@@ -137,14 +134,7 @@ export abstract class BaseLLM implements ILLM {
             )
           : DEFAULT_MAX_TOKENS),
     };
-    // Normalize user-specified prompt templates to a concrete record or leave undefined
-    this.promptTemplates = options.promptTemplates
-      ? (Object.fromEntries(
-          Object.entries(options.promptTemplates).filter(
-            ([, v]) => v !== undefined,
-          ),
-        ) as Record<string, PromptTemplate>)
-      : undefined;
+
     this.apiKey = options.apiKey;
     this.apiBase = options.apiBase;
     if (this.apiBase && !this.apiBase.endsWith("/")) {
@@ -364,8 +354,7 @@ export abstract class BaseLLM implements ILLM {
         undefined,
       );
     } catch (e) {
-      // Capture FIM (Fill-in-the-Middle) completion failures to Sentry
-      Logger.error(e as Error, {
+      console.error(e as Error, {
         context: "llm_stream_fim",
         model: completionOptions.model,
         provider: this.providerName,
@@ -492,8 +481,7 @@ export abstract class BaseLLM implements ILLM {
         undefined,
       );
     } catch (e) {
-      // Capture streaming completion failures to Sentry
-      Logger.error(e as Error, {
+      console.error(e as Error, {
         context: "llm_stream_complete",
         model: completionOptions.model,
         provider: this.providerName,
@@ -718,8 +706,7 @@ export abstract class BaseLLM implements ILLM {
         usage,
       );
     } catch (e) {
-      // Capture chat streaming failures to Sentry
-      Logger.error(e as Error, {
+      console.error(e as Error, {
         context: "llm_stream_chat",
         model: completionOptions.model,
         provider: this.providerName,

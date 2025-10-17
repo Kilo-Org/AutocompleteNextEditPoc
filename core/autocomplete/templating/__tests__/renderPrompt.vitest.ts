@@ -53,7 +53,7 @@ vi.mock("../getStopTokens", () => ({
 }));
 
 // AutocompleteTemplate – provide overridable template + compiler + completionOptions
-let templateOverride: any = "{{prefix}}|{{suffix}}";
+let templateOverride: any = (prefix: string, suffix: string) => `${prefix}|${suffix}`;
 let compileFnOverride: ((...args: any[]) => [string, string]) | undefined;
 let completionOptionsOverride: Record<string, any> | undefined;
 vi.mock("../AutocompleteTemplate", () => ({
@@ -91,14 +91,13 @@ const emptySnippetPayload: SnippetPayload = {
   staticSnippet: [],
 };
 
-function makeHelper(overrides: any = {}) {
+function makeHelper() {
   return {
     input: {
       filepath: "file:///test.ts",
       pos: { line: 0, character: 0 },
       recentlyEditedRanges: [],
       recentlyVisitedRanges: [],
-      ...overrides.input,
     },
     prunedPrefix: "PRUNED_PREFIX",
     prunedSuffix: "PRUNED_SUFFIX",
@@ -107,8 +106,6 @@ function makeHelper(overrides: any = {}) {
     filepath: "file:///test.ts",
     workspaceUris: [],
     options: {
-      // Default template can be overridden per test
-      template: "{{prefix}}|{{suffix}}",
       maxPromptTokens: 2048,
       prefixPercentage: 0.5,
       maxSuffixPercentage: 0.5,
@@ -118,15 +115,13 @@ function makeHelper(overrides: any = {}) {
       experimental_includeRecentlyEditedRanges: false,
       experimental_includeDiff: false,
       onlyMyCode: false,
-      ...overrides.options,
     },
-    ...overrides,
   } as unknown as HelperVars;
 }
 
 afterEach(() => {
   // reset overridable mocks
-  templateOverride = "{{prefix}}|{{suffix}}";
+  templateOverride = (prefix: string, suffix: string) => `${prefix}|${suffix}`;
   compileFnOverride = undefined;
   completionOptionsOverride = undefined;
   stopTokenReturn = ["<STOP>"];
@@ -137,10 +132,8 @@ afterEach(() => {
 
 describe("renderPrompt prefix/suffix selection", () => {
   it("uses manuallyPassPrefix when provided", () => {
-    const helper = makeHelper({
-      input: { manuallyPassPrefix: "MANUAL" },
-    });
-
+    const helper = makeHelper();
+    helper.input.manuallyPassPrefix = "MANUAL";
     const { prefix, suffix } = renderPrompt({
       snippetPayload: emptySnippetPayload,
       workspaceDirs: ["file:///workspace"],
@@ -152,7 +145,7 @@ describe("renderPrompt prefix/suffix selection", () => {
   });
 
   it("falls back to prunedPrefix when no manual prefix", () => {
-    const helper = makeHelper({});
+    const helper = makeHelper();
 
     const { prefix } = renderPrompt({
       snippetPayload: emptySnippetPayload,
@@ -173,7 +166,7 @@ describe("template rendering paths", () => {
       _reponame: string,
     ) => `FUNC:${p}|${s}`;
 
-    const helper = makeHelper({ options: { template: undefined } });
+    const helper = makeHelper();
 
     const { prompt } = renderPrompt({
       snippetPayload: emptySnippetPayload,
@@ -189,8 +182,8 @@ describe("template rendering paths", () => {
 describe("compilePrefixSuffix vs snippet formatting", () => {
   it("applies compilePrefixSuffix when provided", () => {
     compileFnOverride = (p: string, s: string) => [`COMP_${p}`, `COMP_${s}`];
-    templateOverride = "{{prefix}}|{{suffix}}";
-    const helper = makeHelper({ options: { template: undefined } });
+    templateOverride = (prefix: string, suffix: string) => `${prefix}|${suffix}`;
+    const helper = makeHelper();
 
     const { prefix: compiledPrefix } = renderPrompt({
       snippetPayload: emptySnippetPayload,
@@ -202,7 +195,7 @@ describe("compilePrefixSuffix vs snippet formatting", () => {
   });
 
   it("prepends formatted snippets when no compiler present", () => {
-    const helper = makeHelper({});
+    const helper = makeHelper();
 
     const { prefix: compiledPrefix } = renderPrompt({
       snippetPayload: emptySnippetPayload,
@@ -216,7 +209,7 @@ describe("compilePrefixSuffix vs snippet formatting", () => {
 
 describe("renderPromptWithTokenLimit parity & pruning", () => {
   it("matches renderPrompt when llm is undefined", () => {
-    const helper = makeHelper({});
+    const helper = makeHelper();
 
     const res1 = renderPrompt({
       snippetPayload: emptySnippetPayload,
@@ -237,7 +230,8 @@ describe("renderPromptWithTokenLimit parity & pruning", () => {
   it("prunes prefix/suffix to respect small context length", () => {
     const longPrefix = "A".repeat(300);
 
-    const helper = makeHelper({ prunedPrefix: longPrefix });
+    const helper = makeHelper();
+    (helper as any).prunedPrefix = longPrefix;
 
     const llmStub = {
       contextLength: 120,
@@ -260,9 +254,9 @@ describe("stop-token merging", () => {
   it("returns stop tokens from getStopTokens", () => {
     stopTokenReturn = ["LANG_STOP", "TEMPLATE_STOP"];
     completionOptionsOverride = { stop: ["TEMPLATE_STOP"] };
-    templateOverride = "{{prefix}}|{{suffix}}";
+    templateOverride = (prefix: string, suffix: string) => `${prefix}|${suffix}`;
 
-    const helper = makeHelper({ options: { template: undefined } });
+    const helper = makeHelper();
 
     const { completionOptions } = renderPrompt({
       snippetPayload: emptySnippetPayload,

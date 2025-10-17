@@ -54,7 +54,7 @@ export function isUnsupportedPlatform(): {
   return { isUnsupported: false };
 }
 
-export function getExtensionVersion(): string {
+function getExtensionVersion(): string {
   const extension = vscode.extensions.getExtension("continue.continue");
   return extension?.packageJSON.version || "0.1.0";
 }

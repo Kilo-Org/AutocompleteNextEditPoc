@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import { MinimalConfigProvider } from "../autocomplete/MinimalConfig.js";
 import { ChatMessage, IDE, ILLM, Range, RangeInFile } from "../index.js";
 import { OpenAI } from "../llm/llms/OpenAI.js";
@@ -235,7 +235,7 @@ export class NextEditProvider {
   }
 
   public startChain(id?: string) {
-    this.currentEditChainId = id ?? uuidv4();
+    this.currentEditChainId = id ?? randomUUID();
   }
 
   public getChain() {
@@ -336,10 +336,6 @@ export class NextEditProvider {
     if (!modelSupportsNextEdit(llm.capabilities, llm.model, llm.title)) {
       console.error(`${llm.model} is not capable of next edit.`);
       return { token, startTime, helper: undefined };
-    }
-
-    if (llm.promptTemplates?.autocomplete) {
-      options.template = llm.promptTemplates.autocomplete as string;
     }
 
     const helper = await HelperVars.create(input, options, llm.model, this.ide);

@@ -64,11 +64,14 @@ interface UserPrompt {
   content: string;
 }
 
-export interface NextEditTemplate {
-  template: string;
+export interface TemplateVars {
+  recentlyViewedCodeSnippets?: string;
+  currentFileContent?: string;
+  editDiffHistory?: string;
+  contextSnippets?: string;
+  currentFilePath?: string;
+  languageShorthand: string;
 }
-
-export interface TemplateVars {}
 
 /**
  * Context object containing all necessary information for model-specific operations.

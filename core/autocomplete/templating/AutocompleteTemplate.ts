@@ -11,6 +11,16 @@ import {
   AutocompleteSnippetType,
 } from "../snippets/types.js";
 
+type TemplateRenderer = (
+  prefix: string,
+  suffix: string,
+  filepath: string,
+  reponame: string,
+  language: string,
+  snippets: AutocompleteSnippet[],
+  workspaceUris: string[],
+) => string;
+
 export interface AutocompleteTemplate {
   compilePrefixSuffix?: (
     prefix: string,
@@ -20,23 +30,15 @@ export interface AutocompleteTemplate {
     snippets: AutocompleteSnippet[],
     workspaceUris: string[],
   ) => [string, string];
-  template:
-    | string
-    | ((
-        prefix: string,
-        suffix: string,
-        filepath: string,
-        reponame: string,
-        language: string,
-        snippets: AutocompleteSnippet[],
-        workspaceUris: string[],
-      ) => string);
+  template: TemplateRenderer;
   completionOptions?: Partial<CompletionOptions>;
 }
 
 // https://huggingface.co/stabilityai/stable-code-3b
 const stableCodeFimTemplate: AutocompleteTemplate = {
-  template: "<fim_prefix>{{{prefix}}}<fim_suffix>{{{suffix}}}<fim_middle>",
+  template: (prefix: string, suffix: string): string => {
+    return `<fim_prefix>${prefix}<fim_suffix>${suffix}<fim_middle>`;
+  },
   completionOptions: {
     stop: [
       "<fim_prefix>",
@@ -54,8 +56,9 @@ const stableCodeFimTemplate: AutocompleteTemplate = {
 // This issue asks about the use of <|repo_name|> and <|file_sep|> together with <|fim_prefix|>, <|fim_suffix|> and <|fim_middle|>
 // https://github.com/QwenLM/Qwen2.5-Coder/issues/343
 const qwenCoderFimTemplate: AutocompleteTemplate = {
-  template:
-    "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
+  template: (prefix: string, suffix: string): string => {
+    return `<|fim_prefix|>${prefix}<|fim_suffix|>${suffix}<|fim_middle|>`;
+  },
   completionOptions: {
     stop: [
       "<|endoftext|>",
@@ -72,8 +75,9 @@ const qwenCoderFimTemplate: AutocompleteTemplate = {
 };
 
 const seedCoderFimTemplate: AutocompleteTemplate = {
-  template:
-    "<[fim-prefix]>{{{prefix}}}<[fim-suffix]>{{{suffix}}}<[fim-middle]>",
+  template: (prefix: string, suffix: string): string => {
+    return `<[fim-prefix]>${prefix}<[fim-suffix]>${suffix}<[fim-middle]>`;
+  },
   completionOptions: {
     stop: [
       "<[end▁of▁sentence]>",
@@ -204,8 +208,9 @@ const mercuryMultifileFimTemplate: AutocompleteTemplate = {
 };
 
 const codegemmaFimTemplate: AutocompleteTemplate = {
-  template:
-    "<|fim_prefix|>{{{prefix}}}<|fim_suffix|>{{{suffix}}}<|fim_middle|>",
+  template: (prefix: string, suffix: string): string => {
+    return `<|fim_prefix|>${prefix}<|fim_suffix|>${suffix}<|fim_middle|>`;
+  },
   completionOptions: {
     stop: [
       "<|fim_prefix|>",
@@ -219,14 +224,17 @@ const codegemmaFimTemplate: AutocompleteTemplate = {
 };
 
 const codeLlamaFimTemplate: AutocompleteTemplate = {
-  template: "<PRE> {{{prefix}}} <SUF>{{{suffix}}} <MID>",
+  template: (prefix: string, suffix: string): string => {
+    return `<PRE> ${prefix} <SUF>${suffix} <MID>`;
+  },
   completionOptions: { stop: ["<PRE>", "<SUF>", "<MID>", "<EOT>"] },
 };
 
 // https://huggingface.co/deepseek-ai/deepseek-coder-1.3b-base
 const deepseekFimTemplate: AutocompleteTemplate = {
-  template:
-    "<｜fim▁begin｜>{{{prefix}}}<｜fim▁hole｜>{{{suffix}}}<｜fim▁end｜>",
+  template: (prefix: string, suffix: string): string => {
+    return `<｜fim▁begin｜>${prefix}<｜fim▁hole｜>${suffix}<｜fim▁end｜>`;
+  },
   completionOptions: {
     stop: [
       "<｜fim▁begin｜>",

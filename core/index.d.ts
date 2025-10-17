@@ -237,11 +237,7 @@ export interface CompletionOptions extends BaseCompletionOptions {
   model: string;
 }
 
-export type ChatMessageRole =
-  | "user"
-  | "assistant"
-  | "system"
-  | "tool";
+export type ChatMessageRole = "user" | "assistant" | "system" | "tool";
 
 export type TextMessagePart = {
   type: "text";
@@ -418,7 +414,6 @@ export interface LLMOptions {
   maxStopWords?: number;
   completionOptions?: CompletionOptions;
   chatStreams?: MockMessage[][];
-  promptTemplates?: Partial<Record<keyof PromptTemplates, PromptTemplate>>;
   apiKey?: string;
   apiBase?: string;
   useLegacyCompletionsEndpoint?: boolean;
@@ -632,7 +627,6 @@ export interface TabAutocompleteOptions {
   maxSuffixPercentage: number;
   prefixPercentage: number;
   transform?: boolean;
-  template?: string;
   multilineCompletions: "always" | "never" | "auto";
   slidingWindowPrefixPercentage: number;
   slidingWindowSize: number;

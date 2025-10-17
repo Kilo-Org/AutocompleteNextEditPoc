@@ -1,7 +1,5 @@
 import { NextEditProvider } from "core/nextEdit/NextEditProvider";
 import { NextEditOutcome } from "core/nextEdit/types";
-// @ts-expect-error -- svg-builder has no TypeScript types
-import svgBuilder from "svg-builder";
 import * as vscode from "vscode";
 import {
   HandlerPriority,
@@ -122,31 +120,17 @@ export class JumpManager {
   }
 
   private _createSvgJumpIcon() {
-    const baseTextConfig = {
-      y: SVG_CONFIG.getTextY(),
-      "font-family": SVG_CONFIG.getFontFamily(),
-      "font-size": SVG_CONFIG.getFontSize(),
-    };
-
     try {
-      // NOTE: it's critical to use svgBuilder.newInstance.
-      // svgBuilder holds state of previously created SVGs,
-      // so you end up with SVGs stacking on top of each other and being interleaved.
-      const builder = svgBuilder.newInstance
-        ? svgBuilder.newInstance()
-        : svgBuilder;
-      const svgContent = builder
-        .width(SVG_CONFIG.getTipWidth())
-        .height(SVG_CONFIG.getTipHeight())
-        .text(
-          {
-            ...baseTextConfig,
-            x: 4,
-            fill: SVG_CONFIG.stroke,
-          },
-          SVG_CONFIG.label,
-        )
-        .render();
+      // Create SVG manually without svg-builder dependency
+      const width = SVG_CONFIG.getTipWidth();
+      const height = SVG_CONFIG.getTipHeight();
+      const fontSize = SVG_CONFIG.getFontSize();
+      const fontFamily = SVG_CONFIG.getFontFamily();
+      const textY = SVG_CONFIG.getTextY();
+      
+      const svgContent = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+  <text x="4" y="${textY}" font-family="${fontFamily}" font-size="${fontSize}" fill="${SVG_CONFIG.stroke}">${SVG_CONFIG.label}</text>
+</svg>`;
 
       const dataUri = `data:image/svg+xml;base64,${Buffer.from(
         svgContent,
