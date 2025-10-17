@@ -99,18 +99,7 @@ vi.mock("vscode", () => {
   };
 });
 
-// Mock svg-builder
-vi.mock("svg-builder", () => {
-  const mockSvgBuilder = {
-    width: vi.fn().mockReturnThis(),
-    height: vi.fn().mockReturnThis(),
-    text: vi.fn().mockReturnThis(),
-    render: vi.fn().mockReturnValue("<svg>mock svg</svg>"),
-  };
-  return {
-    default: mockSvgBuilder,
-  };
-});
+// svg-builder is no longer used - removed mock
 
 // Mock NextEditProvider
 vi.mock("core/nextEdit/NextEditProvider", () => {
